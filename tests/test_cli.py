@@ -1,4 +1,4 @@
-from treasury_agent.cli import main
+from agent.cli import main
 import pytest
 
 def test_main(capsys: pytest.CaptureFixture[str]) -> None:
