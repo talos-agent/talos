@@ -1,6 +1,12 @@
 from typing import Dict, List
 from src.disciplines.base import Discipline
-from src.disciplines.implementations import *
+from src.disciplines.implementations import (
+    ProposalsDiscipline,
+    TwitterDiscipline,
+    GitHubDiscipline,
+    OnChainManagementDiscipline,
+    GitBookDiscipline,
+)
 from src.disciplines.proposals.models import Proposal, QueryResponse, RunParams
 from src.tools.base import Tool
 from src.prompts.prompt_manager import PromptManager
