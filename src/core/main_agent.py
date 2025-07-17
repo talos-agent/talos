@@ -1,9 +1,9 @@
 from typing import Dict
 from src.disciplines.base import Discipline
-from src.disciplines.proposals.proposals import ProposalsDiscipline
-from src.disciplines.twitter import TwitterDiscipline
-from src.disciplines.github import GitHubDiscipline
-from src.disciplines.onchain_management import OnChainManagementDiscipline
+from src.disciplines.proposals.implementation.proposals import ProposalsDiscipline
+from src.disciplines.twitter.implementation.twitter import TwitterDiscipline
+from src.disciplines.github.implementation.github import GitHubDiscipline
+from src.disciplines.onchain_management.implementation.onchain_management import OnChainManagementDiscipline
 from src.disciplines.proposals.models import Proposal, QueryResponse, RunParams
 from src.utils.ipfs import IPFSUtils
 

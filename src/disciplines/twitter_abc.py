@@ -33,3 +33,17 @@ class Twitter(ABC):
         Creates a poll on Twitter.
         """
         pass
+
+    @abstractmethod
+    def get_poll_results(self, poll_id: str) -> dict:
+        """
+        Gets the results of a poll.
+        """
+        pass
+
+    @abstractmethod
+    def get_all_replies(self, tweet_id: str) -> list[str]:
+        """
+        Gets all replies to a tweet.
+        """
+        pass

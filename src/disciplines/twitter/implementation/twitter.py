@@ -29,3 +29,15 @@ class TwitterDiscipline(Twitter):
         Creates a poll on Twitter.
         """
         print(f"Creating poll: {question} with options: {options}")
+
+    def get_poll_results(self, poll_id: str) -> dict:
+        """
+        Gets the results of a poll.
+        """
+        return {"poll_id": poll_id, "results": {"option1": 50, "option2": 50}}
+
+    def get_all_replies(self, tweet_id: str) -> list[str]:
+        """
+        Gets all replies to a tweet.
+        """
+        return [f"reply {i}" for i in range(5)]

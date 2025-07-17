@@ -12,11 +12,11 @@ class OnChainManagementDiscipline(OnChainManagement):
         """
         return 1000.0
 
-    def add_to_vault(self, vault_address: str, amount: float) -> None:
+    def add_to_vault(self, vault_address: str, token: str, amount: float) -> None:
         """
         Adds funds to a vault.
         """
-        print(f"Adding {amount} to vault {vault_address}")
+        print(f"Adding {amount} of {token} to vault {vault_address}")
 
     def remove_from_vault(self, vault_address: str, amount: float) -> None:
         """

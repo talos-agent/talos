@@ -14,7 +14,7 @@ class OnChainManagement(ABC):
         pass
 
     @abstractmethod
-    def add_to_vault(self, vault_address: str, amount: float) -> None:
+    def add_to_vault(self, vault_address: str, token: str, amount: float) -> None:
         """
         Adds funds to a vault.
         """
