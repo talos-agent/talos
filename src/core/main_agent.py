@@ -3,6 +3,8 @@ from src.disciplines.base import Discipline
 from src.disciplines.implementations import *
 from src.disciplines.proposals.models import Proposal, QueryResponse, RunParams
 from src.tools.base import Tool
+from src.prompts.prompt_manager import PromptManager
+from src.hypervisor.hypervisor import Hypervisor
 
 
 class MainAgent:
@@ -14,15 +16,38 @@ class MainAgent:
         self,
         openai_api_key: str,
         tools: List[Tool],
+        prompts_dir: str,
+        model: str = "text-davinci-003",
     ):
         self.disciplines: Dict[str, Discipline] = {
-            "proposals": ProposalsDiscipline(openai_api_key=openai_api_key),
+            "proposals": ProposalsDiscipline(openai_api_key=openai_api_key, model_name=model),
             "twitter": TwitterDiscipline(),
             "github": GitHubDiscipline(),
             "onchain": OnChainManagementDiscipline(),
             "gitbook": GitBookDiscipline(),
         }
         self.tools = {tool.name: tool for tool in tools}
+        self.prompt_manager = PromptManager(prompts_dir)
+        self.history: List[Dict[str, str]] = []
+        self.hypervisor = Hypervisor()
+
+    def add_to_history(self, user_message: str, agent_response: str) -> None:
+        """
+        Adds a message to the conversation history.
+        """
+        self.history.append({"user": user_message, "agent": agent_response})
+
+    def pop_from_history(self) -> Dict[str, str]:
+        """
+        Pops the last message from the conversation history.
+        """
+        return self.history.pop()
+
+    def reset_history(self) -> None:
+        """
+        Resets the conversation history.
+        """
+        self.history = []
 
     def run(self, query: str, params: RunParams) -> QueryResponse:
         """
@@ -32,6 +57,8 @@ class MainAgent:
         # A more sophisticated routing mechanism will be needed in the future.
         if params.tool in self.tools:
             return self.run_tool(params.tool, params.tool_args)
+        elif params.prompt in self.prompt_manager.prompts:
+            return self.run_prompt(params.prompt, params.prompt_args)
         elif params.discipline in self.disciplines:
             discipline = self.disciplines[params.discipline]
             # This is a placeholder for actually calling the discipline
@@ -43,12 +70,29 @@ class MainAgent:
         """
         Runs a tool.
         """
-        tool = self.tools.get(tool_name)
-        if tool:
-            result = tool.run(**tool_args)
-            return QueryResponse(answers=[{"answer": result, "score": 1.0}])
+        if self.hypervisor.approve("run_tool", {"tool_name": tool_name, "tool_args": tool_args}):
+            tool = self.tools.get(tool_name)
+            if tool:
+                result = tool.run(**tool_args)
+                return QueryResponse(answers=[{"answer": result, "score": 1.0}])
+            else:
+                return QueryResponse(answers=[{"answer": f"Tool {tool_name} not found", "score": 0.0}])
         else:
-            return QueryResponse(answers=[{"answer": f"Tool {tool_name} not found", "score": 0.0}])
+            return QueryResponse(answers=[{"answer": "Action denied by hypervisor", "score": 0.0}])
+
+    def run_prompt(self, prompt_name: str, prompt_args: dict) -> QueryResponse:
+        """
+        Runs a prompt.
+        """
+        if self.hypervisor.approve("run_prompt", {"prompt_name": prompt_name, "prompt_args": prompt_args}):
+            prompt = self.prompt_manager.get_prompt(prompt_name)
+            if prompt:
+                result = prompt.format(**prompt_args)
+                return QueryResponse(answers=[{"answer": result, "score": 1.0}])
+            else:
+                return QueryResponse(answers=[{"answer": f"Prompt {prompt_name} not found", "score": 0.0}])
+        else:
+            return QueryResponse(answers=[{"answer": "Action denied by hypervisor", "score": 0.0}])
 
     def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
         """

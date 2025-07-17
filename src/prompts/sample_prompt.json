@@ -1,0 +1,5 @@
+{
+    "name": "sample_prompt",
+    "template": "Hello, {name}! How are you today?",
+    "input_variables": ["name"]
+}
