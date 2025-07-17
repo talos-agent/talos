@@ -33,6 +33,25 @@ class QueryResult(BaseModel):
     meta: Optional[Dict[str, Any]]
 
 
+class Feedback(BaseModel):
+    """
+    Feedback on a proposal from a delegate.
+    """
+
+    delegate: str
+    feedback: str
+
+
+class Proposal(BaseModel):
+    """
+    A proposal to be evaluated by the agent.
+    """
+
+    prompt: str
+    proposal_text: str
+    feedback: List[Feedback]
+
+
 class QueryResponse(BaseModel):
     """
     The response from a query.

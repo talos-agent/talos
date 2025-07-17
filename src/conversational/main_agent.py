@@ -1,7 +1,8 @@
 
 from conversational.agent import LangChainConversationalAgent
 from research.agent import LangChainAgent
-from research.models import AddDatasetParams, QueryResponse, RunParams
+from research.models import AddDatasetParams, QueryResponse, RunParams, Proposal
+from research.proposal_agent import LangChainProposalAgent
 
 
 from utils.ipfs import IPFSUtils
@@ -22,6 +23,7 @@ class MainAgent:
             openai_api_key=openai_api_key
         )
         self.research_agent = LangChainAgent(openai_api_key=openai_api_key)
+        self.proposal_agent = LangChainProposalAgent(openai_api_key=openai_api_key)
         self.ipfs_utils = IPFSUtils(
             pinata_api_key=pinata_api_key,
             pinata_secret_api_key=pinata_secret_api_key,
@@ -34,7 +36,9 @@ class MainAgent:
         if "ipfs publish" in query.lower():
             file_path = query.split(" ")[-1]
             ipfs_hash = self.ipfs_utils.publish(file_path)
-            return QueryResponse(answers=[{"answer": f"Published to IPFS with hash: {ipfs_hash}", "score": 1.0}])
+            return QueryResponse(
+                answers=[{"answer": f"Published to IPFS with hash: {ipfs_hash}", "score": 1.0}]
+            )
         elif "ipfs read" in query.lower():
             ipfs_hash = query.split(" ")[-1]
             content = self.ipfs_utils.read(ipfs_hash)
@@ -43,6 +47,12 @@ class MainAgent:
             return self.research_agent.run(query, params)
         else:
             return self.conversational_agent.run(query, params)
+
+    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
+        """
+        Evaluates a proposal.
+        """
+        return self.proposal_agent.evaluate_proposal(proposal)
 
     def add_dataset(self, dataset_path: str, params: AddDatasetParams) -> None:
         """

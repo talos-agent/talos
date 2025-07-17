@@ -1,7 +1,7 @@
 import os
 
 from conversational.main_agent import MainAgent
-from research.models import AddDatasetParams, RunParams
+from research.models import Feedback, Proposal
 
 
 def run_proposal_example():
@@ -15,51 +15,43 @@ def run_proposal_example():
         pinata_secret_api_key=os.environ.get("PINATA_SECRET_API_KEY", ""),
     )
 
-    # Add a relevant dataset
-    agent.add_dataset(
-        "https://en.wikipedia.org/wiki/Decentralized_autonomous_organization",
-        params=AddDatasetParams(),
+    # Define the proposal
+    proposal = Proposal(
+        prompt="""
+        Please evaluate the following proposal and provide a recommendation.
+        Consider the proposal's potential benefits, risks, and the feedback
+        provided by the delegates.
+        """,
+        proposal_text="""
+        **Proposal: Invest in a new DeFi protocol**
+
+        **Description:**
+        This proposal suggests that the treasury invest 10% of its assets in a
+        new DeFi protocol called "SuperYield". The protocol promises high
+        returns through a novel liquidity mining strategy.
+
+        **Justification:**
+        Investing in SuperYield could significantly increase the treasury's
+        returns and diversify its portfolio.
+
+        **Risks:**
+        As a new protocol, SuperYield has a limited track record and may be
+        vulnerable to smart contract exploits.
+        """,
+        feedback=[
+            Feedback(
+                delegate="Alice",
+                feedback="I'm concerned about the security risks. Have there been any independent security audits?",
+            ),
+            Feedback(
+                delegate="Bob",
+                feedback="The potential returns are very attractive. I think it's worth the risk.",
+            ),
+        ],
     )
 
-    # Define the proposal
-    proposal_prompt = """
-    **Proposal: Invest in a new DeFi protocol**
-
-    **Description:**
-    This proposal suggests that the treasury invest 10% of its assets in a new
-    DeFi protocol called "SuperYield". The protocol promises high returns
-    through a novel liquidity mining strategy.
-
-    **Justification:**
-    Investing in SuperYield could significantly increase the treasury's returns
-    and diversify its portfolio.
-
-    **Risks:**
-    As a new protocol, SuperYield has a limited track record and may be
-    vulnerable to smart contract exploits.
-    """
-
-    # Simulate human feedback
-    human_feedback = """
-    I'm concerned about the security risks of investing in such a new
-    protocol. Have there been any independent security audits?
-    """
-
-    # Combine the prompt and feedback for the agent
-    full_prompt = f"""
-    {proposal_prompt}
-
-    **Human Feedback:**
-    {human_feedback}
-
-    **Agent's Task:**
-    Please evaluate this proposal, considering the human feedback.
-    Provide your analysis and a recommendation on whether to pass the
-    proposal.
-    """
-
-    # Run the agent
-    response = agent.run(full_prompt, params=RunParams(web_search=True))
+    # Evaluate the proposal
+    response = agent.evaluate_proposal(proposal)
 
     # Print the agent's recommendation
     print("--- Agent's Recommendation ---")
