@@ -1,4 +1,4 @@
-from agent.cli import main
+from conversational.cli import main
 import pytest
 
 def test_main(capsys: pytest.CaptureFixture[str]) -> None:

@@ -4,10 +4,8 @@ from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.nodes import BM25Retriever, FARMReader
 from haystack.pipelines import ExtractiveQAPipeline
 
-from agent.abc import Agent
-
-
-from agent.web_search import crawl, search
+from research.abc import Agent
+from research.web_search import crawl, search
 
 
 class HaystackAgent(Agent):
@@ -21,7 +19,7 @@ class HaystackAgent(Agent):
         self.reader = FARMReader(model_name_or_path=model_name_or_path, use_gpu=False)
         self.pipeline = ExtractiveQAPipeline(self.reader, self.retriever)
 
-from agent.models import AddDatasetParams, QueryResponse, RunParams
+from research.models import AddDatasetParams, QueryResponse, RunParams
 
 
     def run(self, query: str, params: RunParams) -> QueryResponse:
@@ -36,7 +34,7 @@ from agent.models import AddDatasetParams, QueryResponse, RunParams
         return QueryResponse(**prediction)
 
     def add_dataset(self, dataset_path: str, params: AddDatasetParams) -> None:
-        from agent.processing import process_pdf, process_website
+        from research.processing import process_pdf, process_website
         if dataset_path.startswith("http"):
             documents = process_website(dataset_path)
         elif dataset_path.endswith(".pdf"):

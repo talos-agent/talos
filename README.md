@@ -1,6 +1,20 @@
 # Treasury Agent
 
-An AI agent for managing a cryptocurrency treasury, built with Haystack.
+An AI agent for managing a cryptocurrency treasury, built with Haystack and Letta.
+
+This project combines the strengths of two powerful AI frameworks:
+
+-   **Letta**: For conversational AI and long-term memory.
+-   **Haystack**: For deep research and question answering.
+
+## Architecture
+
+The project is divided into two main modules:
+
+-   `conversational`: Contains the Letta-based agent for managing conversations.
+-   `research`: Contains the Haystack-based agent for performing research tasks.
+
+A top-level `MainAgent` delegates to the appropriate agent based on the user's query.
 
 ## Development
 
@@ -26,28 +40,36 @@ This project uses `uv` for dependency management.
 ## Usage
 
 ```python
-from agent.haystack_agent import HaystackAgent
-from agent.models import AddDatasetParams, RunParams
+import os
+from conversational.main_agent import MainAgent
+from research.models import AddDatasetParams, RunParams
 
-# Initialize the agent
-agent = HaystackAgent()
+# Initialize the main agent
+agent = MainAgent(
+    letta_api_key=os.environ["LETTA_API_KEY"],
+    letta_agent_id=os.environ["LETTA_AGENT_ID"],
+)
 
-# Add data from a PDF
-agent.add_dataset("path/to/your/document.pdf", params=AddDatasetParams())
+# Add a dataset to the research agent
+agent.add_dataset(
+    "https://en.wikipedia.org/wiki/Artificial_intelligence",
+    params=AddDatasetParams(),
+)
 
-# Add data from a website
-agent.add_dataset("https://en.wikipedia.org/wiki/Artificial_intelligence", params=AddDatasetParams())
+# Have a conversation with the Letta agent
+response = agent.run("Hello, how are you?", params=RunParams())
+print(response)
 
-# Run a query
-results = agent.run("What is artificial intelligence?", params=RunParams())
-print(results)
+# Perform a research query with the Haystack agent
+response = agent.run("What is the capital of France?", params=RunParams())
+print(response)
 
-# Run a query with web search
-results = agent.run(
+# Perform a research query with web search
+response = agent.run(
     "Who won the 2023 Nobel Prize in Physics?",
     params=RunParams(web_search=True),
 )
-print(results)
+print(response)
 ```
 
 ## Testing

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from agent.models import AddDatasetParams, QueryResponse, RunParams
+from research.models import AddDatasetParams, QueryResponse, RunParams
 
 
 class Agent(ABC):
