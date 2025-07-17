@@ -37,13 +37,6 @@ class GitHub(ABC):
         pass
 
     @abstractmethod
-    def scan_for_malicious_code(self, user: str, project: str, pr_number: int) -> bool:
-        """
-        Scans a pull request for malicious code.
-        """
-        pass
-
-    @abstractmethod
     def get_open_issues(self, user: str, project: str) -> List[Issue]:
         """
         Gets all open issues in a repository.

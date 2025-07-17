@@ -44,14 +44,6 @@ class PyGithubDiscipline(GitHub):
         pr = repo.get_pull(number=pr_number)
         pr.merge()
 
-    def scan_for_malicious_code(self, user: str, project: str, pr_number: int) -> bool:
-        """
-        Scans a pull request for malicious code.
-        """
-        # This is a placeholder. A real implementation would involve a more
-        # sophisticated scanning mechanism.
-        return False
-
     def get_open_issues(self, user: str, project: str) -> List[Issue]:
         """
         Gets all open issues in a repository.
