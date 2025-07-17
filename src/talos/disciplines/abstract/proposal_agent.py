@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
-from disciplines.base import Discipline
-from research.models import Proposal, QueryResponse
+from talos.disciplines.base import Discipline
+from talos.disciplines.proposals.models import Proposal, QueryResponse
 
 
 class ProposalAgent(Discipline):

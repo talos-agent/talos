@@ -1,4 +1,4 @@
-from src.disciplines.abc import Twitter
+from talos.disciplines.abstract.twitter import Twitter
 
 
 class TwitterDiscipline(Twitter):

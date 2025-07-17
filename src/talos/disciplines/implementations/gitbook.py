@@ -1,4 +1,4 @@
-from src.disciplines.abc import GitBook
+from talos.disciplines.abstract.gitbook import GitBook
 
 
 class GitBookDiscipline(GitBook):

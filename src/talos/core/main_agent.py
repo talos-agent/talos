@@ -1,16 +1,16 @@
 from typing import Dict, List
-from src.disciplines.base import Discipline
-from src.disciplines.implementations import (
+from talos.disciplines.base import Discipline
+from talos.disciplines.implementations import (
     ProposalsDiscipline,
     TwitterDiscipline,
     GitHubDiscipline,
     OnChainManagementDiscipline,
     GitBookDiscipline,
 )
-from src.disciplines.proposals.models import Proposal, QueryResponse, RunParams
-from src.tools.base import Tool
-from src.prompts.prompt_manager import PromptManager
-from src.hypervisor.hypervisor import Hypervisor
+from talos.disciplines.proposals.models import Proposal, QueryResponse, RunParams
+from talos.tools.basetool import Tool
+from talos.prompts.prompt_manager import PromptManager
+from talos.hypervisor.hypervisor import Hypervisor
 
 
 class MainAgent:

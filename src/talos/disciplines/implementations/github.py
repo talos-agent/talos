@@ -1,4 +1,4 @@
-from src.disciplines.abc import GitHub
+from talos.disciplines.abstract.github import GitHub
 
 
 class GitHubDiscipline(GitHub):

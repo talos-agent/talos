@@ -1,7 +1,7 @@
 import os
 import json
 from typing import Dict
-from src.prompts.prompt import Prompt
+from talos.prompts.prompt import Prompt
 
 
 class PromptManager:

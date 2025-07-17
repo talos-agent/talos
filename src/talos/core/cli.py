@@ -1,7 +1,7 @@
 import os
 
-from src.core.main_agent import MainAgent
-from src.disciplines.proposals.models import RunParams
+from talos.core.main_agent import MainAgent
+from talos.disciplines.proposals.models import RunParams
 
 
 def main() -> None:
