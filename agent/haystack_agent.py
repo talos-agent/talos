@@ -41,9 +41,6 @@ class HaystackAgent(Agent):
         prediction = self.pipeline.run(query=query, params=params)
         return prediction["answers"]
 
-from agent.processing import process_pdf, process_website
-
-
     def add_dataset(self, dataset_path: str, params: Optional[Dict[str, Any]] = None) -> None:
         """
         Adds a dataset to the agent's knowledge base.
@@ -51,6 +48,7 @@ from agent.processing import process_pdf, process_website
         :param dataset_path: The path to the dataset.
         :param params: Optional parameters for adding the dataset.
         """
+        from agent.processing import process_pdf, process_website
         if dataset_path.startswith("http"):
             documents = process_website(dataset_path)
         elif dataset_path.endswith(".pdf"):
