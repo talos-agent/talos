@@ -1,7 +1,7 @@
 import os
 
-from conversational.main_agent import MainAgent
-from research.models import RunParams
+from src.core.main_agent import MainAgent
+from src.disciplines.proposals.models import RunParams
 
 
 def main() -> None:
