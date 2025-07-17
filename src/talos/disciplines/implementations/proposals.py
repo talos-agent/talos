@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
@@ -18,9 +18,9 @@ class ProposalsDiscipline(ProposalAgent):
         openai_api_key: str,
         model_name: str = "text-davinci-003",
         rag_dataset: Any = None,
-        tools: List[Any] = None,
+        tools: Optional[List[Any]] = None,
     ):
-        super().__init__(rag_dataset, tools)
+        super().__init__(rag_dataset, tools if tools is not None else [])
         self.llm = OpenAI(model_name=model_name, api_key=openai_api_key)
 
     def evaluate_proposal(
