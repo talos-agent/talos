@@ -1,6 +1,7 @@
 from github import Github
 from talos.disciplines.abstract.github import GitHub
-from typing import List, Dict, Any
+from talos.disciplines.abstract.models import Issue, Comment, PullRequestFile
+from typing import List
 
 
 class PyGithubDiscipline(GitHub):
@@ -51,17 +52,17 @@ class PyGithubDiscipline(GitHub):
         # sophisticated scanning mechanism.
         return False
 
-    def get_open_issues(self, user: str, project: str) -> List[Dict[str, Any]]:
+    def get_open_issues(self, user: str, project: str) -> List[Issue]:
         """
         Gets all open issues in a repository.
         """
         repo = self.github.get_repo(f"{user}/{project}")
         return [
-            {"number": issue.number, "title": issue.title, "url": issue.html_url}
+            Issue(number=issue.number, title=issue.title, url=issue.html_url)
             for issue in repo.get_issues(state="open")
         ]
 
-    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Dict[str, Any]]:
+    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Comment]:
         """
         Gets all comments for an issue.
         """
@@ -70,21 +71,21 @@ class PyGithubDiscipline(GitHub):
         comments = []
         for comment in issue.get_comments():
             comments.append(
-                {
-                    "user": comment.user.login,
-                    "comment": comment.body,
-                    "reply_to": None,  # PyGithub does not support this directly
-                }
+                Comment(
+                    user=comment.user.login,
+                    comment=comment.body,
+                    reply_to=None,  # PyGithub does not support this directly
+                )
             )
         return comments
 
-    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[str]:
+    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[PullRequestFile]:
         """
         Gets all files in a pull request.
         """
         repo = self.github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
-        return [file.filename for file in pr.get_files()]
+        return [PullRequestFile(filename=file.filename) for file in pr.get_files()]
 
     def get_project_structure(self, user: str, project: str, path: str = "") -> List[str]:
         """

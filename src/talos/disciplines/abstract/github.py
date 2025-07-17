@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List
+from .models import Issue, Comment, PullRequestFile
 
 
 class GitHub(ABC):
@@ -43,21 +44,21 @@ class GitHub(ABC):
         pass
 
     @abstractmethod
-    def get_open_issues(self, user: str, project: str) -> List[Dict[str, Any]]:
+    def get_open_issues(self, user: str, project: str) -> List[Issue]:
         """
         Gets all open issues in a repository.
         """
         pass
 
     @abstractmethod
-    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Dict[str, Any]]:
+    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Comment]:
         """
         Gets all comments for an issue.
         """
         pass
 
     @abstractmethod
-    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[str]:
+    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[PullRequestFile]:
         """
         Gets all files in a pull request.
         """
