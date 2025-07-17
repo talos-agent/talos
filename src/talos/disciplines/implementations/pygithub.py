@@ -1,5 +1,6 @@
 from github import Github
 from talos.disciplines.abstract.github import GitHub
+from typing import List, Dict, Any
 
 
 class PyGithubDiscipline(GitHub):
@@ -10,43 +11,39 @@ class PyGithubDiscipline(GitHub):
     def __init__(self, token: str):
         self.github = Github(token)
 
-    def read_issue(self, issue_url: str) -> str:
+    def read_issue(self, user: str, project: str, issue_number: int) -> str:
         """
         Reads a GitHub issue.
         """
-        repo_name, issue_number = self._extract_repo_and_issue_number(issue_url)
-        repo = self.github.get_repo(repo_name)
+        repo = self.github.get_repo(f"{user}/{project}")
         issue = repo.get_issue(number=issue_number)
         return issue.body
 
-    def reply_to_issue(self, issue_url: str, comment: str) -> None:
+    def reply_to_issue(self, user: str, project: str, issue_number: int, comment: str) -> None:
         """
         Replies to a GitHub issue.
         """
-        repo_name, issue_number = self._extract_repo_and_issue_number(issue_url)
-        repo = self.github.get_repo(repo_name)
+        repo = self.github.get_repo(f"{user}/{project}")
         issue = repo.get_issue(number=issue_number)
         issue.create_comment(comment)
 
-    def review_pr(self, pr_url: str, feedback: str) -> None:
+    def review_pr(self, user: str, project: str, pr_number: int, feedback: str) -> None:
         """
         Reviews a pull request.
         """
-        repo_name, pr_number = self._extract_repo_and_pr_number(pr_url)
-        repo = self.github.get_repo(repo_name)
+        repo = self.github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.create_review(body=feedback, event="COMMENT")
 
-    def merge_pr(self, pr_url: str) -> None:
+    def merge_pr(self, user: str, project: str, pr_number: int) -> None:
         """
         Merges a pull request.
         """
-        repo_name, pr_number = self._extract_repo_and_pr_number(pr_url)
-        repo = self.github.get_repo(repo_name)
+        repo = self.github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.merge()
 
-    def scan_for_malicious_code(self, pr_url: str) -> bool:
+    def scan_for_malicious_code(self, user: str, project: str, pr_number: int) -> bool:
         """
         Scans a pull request for malicious code.
         """
@@ -54,10 +51,57 @@ class PyGithubDiscipline(GitHub):
         # sophisticated scanning mechanism.
         return False
 
-    def _extract_repo_and_issue_number(self, url: str) -> tuple[str, int]:
-        parts = url.split("/")
-        return f"{parts[-4]}/{parts[-3]}", int(parts[-1])
+    def get_open_issues(self, user: str, project: str) -> List[Dict[str, Any]]:
+        """
+        Gets all open issues in a repository.
+        """
+        repo = self.github.get_repo(f"{user}/{project}")
+        return [
+            {"number": issue.number, "title": issue.title, "url": issue.html_url}
+            for issue in repo.get_issues(state="open")
+        ]
 
-    def _extract_repo_and_pr_number(self, url: str) -> tuple[str, int]:
-        parts = url.split("/")
-        return f"{parts[-4]}/{parts[-3]}", int(parts[-1])
+    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Dict[str, Any]]:
+        """
+        Gets all comments for an issue.
+        """
+        repo = self.github.get_repo(f"{user}/{project}")
+        issue = repo.get_issue(number=issue_number)
+        comments = []
+        for comment in issue.get_comments():
+            comments.append(
+                {
+                    "user": comment.user.login,
+                    "comment": comment.body,
+                    "reply_to": None,  # PyGithub does not support this directly
+                }
+            )
+        return comments
+
+    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[str]:
+        """
+        Gets all files in a pull request.
+        """
+        repo = self.github.get_repo(f"{user}/{project}")
+        pr = repo.get_pull(number=pr_number)
+        return [file.filename for file in pr.get_files()]
+
+    def get_project_structure(self, user: str, project: str, path: str = "") -> List[str]:
+        """
+        Gets the project structure.
+        """
+        repo = self.github.get_repo(f"{user}/{project}")
+        contents = repo.get_contents(path)
+        if isinstance(contents, list):
+            return [content.path for content in contents]
+        return [contents.path]
+
+    def get_file_content(self, user: str, project: str, filepath: str) -> str:
+        """
+        Gets the content of a file.
+        """
+        repo = self.github.get_repo(f"{user}/{project}")
+        content = repo.get_contents(filepath)
+        if isinstance(content, list):
+            raise ValueError("Path is a directory, not a file.")
+        return content.decoded_content.decode()

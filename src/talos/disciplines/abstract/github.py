@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List, Dict, Any
 
 
 class GitHub(ABC):
@@ -7,36 +8,71 @@ class GitHub(ABC):
     """
 
     @abstractmethod
-    def read_issue(self, issue_url: str) -> str:
+    def read_issue(self, user: str, project: str, issue_number: int) -> str:
         """
         Reads a GitHub issue.
         """
         pass
 
     @abstractmethod
-    def reply_to_issue(self, issue_url: str, comment: str) -> None:
+    def reply_to_issue(self, user: str, project: str, issue_number: int, comment: str) -> None:
         """
         Replies to a GitHub issue.
         """
         pass
 
     @abstractmethod
-    def review_pr(self, pr_url: str, feedback: str) -> None:
+    def review_pr(self, user: str, project: str, pr_number: int, feedback: str) -> None:
         """
         Reviews a pull request.
         """
         pass
 
     @abstractmethod
-    def merge_pr(self, pr_url: str) -> None:
+    def merge_pr(self, user: str, project: str, pr_number: int) -> None:
         """
         Merges a pull request.
         """
         pass
 
     @abstractmethod
-    def scan_for_malicious_code(self, pr_url: str) -> bool:
+    def scan_for_malicious_code(self, user: str, project: str, pr_number: int) -> bool:
         """
         Scans a pull request for malicious code.
+        """
+        pass
+
+    @abstractmethod
+    def get_open_issues(self, user: str, project: str) -> List[Dict[str, Any]]:
+        """
+        Gets all open issues in a repository.
+        """
+        pass
+
+    @abstractmethod
+    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Dict[str, Any]]:
+        """
+        Gets all comments for an issue.
+        """
+        pass
+
+    @abstractmethod
+    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[str]:
+        """
+        Gets all files in a pull request.
+        """
+        pass
+
+    @abstractmethod
+    def get_project_structure(self, user: str, project: str, path: str = "") -> List[str]:
+        """
+        Gets the project structure.
+        """
+        pass
+
+    @abstractmethod
+    def get_file_content(self, user: str, project: str, filepath: str) -> str:
+        """
+        Gets the content of a file.
         """
         pass
