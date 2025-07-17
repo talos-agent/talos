@@ -1,12 +1,8 @@
-from typing import Dict
+from typing import Dict, List
 from src.disciplines.base import Discipline
-from src.disciplines.proposals.implementation.proposals import ProposalsDiscipline
-from src.disciplines.twitter.implementation.twitter import TwitterDiscipline
-from src.disciplines.github.implementation.github import GitHubDiscipline
-from src.disciplines.onchain_management.implementation.onchain_management import OnChainManagementDiscipline
-from src.disciplines.gitbook.implementation.gitbook import GitBookDiscipline
+from src.disciplines.implementations import *
 from src.disciplines.proposals.models import Proposal, QueryResponse, RunParams
-from src.utils.ipfs import IPFSUtils
+from src.tools.base import Tool
 
 
 class MainAgent:
@@ -17,8 +13,7 @@ class MainAgent:
     def __init__(
         self,
         openai_api_key: str,
-        pinata_api_key: str,
-        pinata_secret_api_key: str,
+        tools: List[Tool],
     ):
         self.disciplines: Dict[str, Discipline] = {
             "proposals": ProposalsDiscipline(openai_api_key=openai_api_key),
@@ -27,34 +22,33 @@ class MainAgent:
             "onchain": OnChainManagementDiscipline(),
             "gitbook": GitBookDiscipline(),
         }
-        self.ipfs_utils = IPFSUtils(
-            pinata_api_key=pinata_api_key,
-            pinata_secret_api_key=pinata_secret_api_key,
-        )
+        self.tools = {tool.name: tool for tool in tools}
 
     def run(self, query: str, params: RunParams) -> QueryResponse:
         """
         Runs the appropriate agent based on the query and parameters.
         """
-        if "ipfs publish" in query.lower():
-            file_path = query.split(" ")[-1]
-            ipfs_hash = self.ipfs_utils.publish(file_path)
-            return QueryResponse(
-                answers=[{"answer": f"Published to IPFS with hash: {ipfs_hash}", "score": 1.0}]
-            )
-        elif "ipfs read" in query.lower():
-            ipfs_hash = query.split(" ")[-1]
-            content = self.ipfs_utils.read(ipfs_hash)
-            return QueryResponse(answers=[{"answer": content.decode(), "score": 1.0}])
-
         # This is a temporary way to route to the correct discipline.
         # A more sophisticated routing mechanism will be needed in the future.
-        if params.discipline in self.disciplines:
+        if params.tool in self.tools:
+            return self.run_tool(params.tool, params.tool_args)
+        elif params.discipline in self.disciplines:
             discipline = self.disciplines[params.discipline]
             # This is a placeholder for actually calling the discipline
             return QueryResponse(answers=[{"answer": f"Using {discipline.name} discipline", "score": 1.0}])
         else:
             return QueryResponse(answers=[{"answer": "No discipline specified", "score": 1.0}])
+
+    def run_tool(self, tool_name: str, tool_args: dict) -> QueryResponse:
+        """
+        Runs a tool.
+        """
+        tool = self.tools.get(tool_name)
+        if tool:
+            result = tool.run(**tool_args)
+            return QueryResponse(answers=[{"answer": result, "score": 1.0}])
+        else:
+            return QueryResponse(answers=[{"answer": f"Tool {tool_name} not found", "score": 0.0}])
 
     def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
         """

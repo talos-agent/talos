@@ -1,4 +1,4 @@
-from src.disciplines.twitter.abc.twitter_abc import Twitter
+from src.disciplines.abc import Twitter
 
 
 class TwitterDiscipline(Twitter):

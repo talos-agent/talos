@@ -2,7 +2,7 @@ from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import OpenAI
 
-from src.disciplines.proposals.abc.proposal_agent_abc import ProposalAgent
+from src.disciplines.abc import ProposalAgent
 from src.disciplines.proposals.models import Proposal, QueryResponse
 
 

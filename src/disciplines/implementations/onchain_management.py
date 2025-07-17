@@ -1,4 +1,4 @@
-from src.disciplines.onchain_management.abc.onchain_management_abc import OnChainManagement
+from src.disciplines.abc import OnChainManagement
 
 
 class OnChainManagementDiscipline(OnChainManagement):

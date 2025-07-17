@@ -1,4 +1,4 @@
-from src.disciplines.gitbook.abc.gitbook_abc import GitBook
+from src.disciplines.abc import GitBook
 
 
 class GitBookDiscipline(GitBook):

@@ -1,4 +1,4 @@
-from src.disciplines.github.abc.github_abc import GitHub
+from src.disciplines.abc import GitHub
 
 
 class GitHubDiscipline(GitHub):
