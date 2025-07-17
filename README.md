@@ -39,38 +39,15 @@ This project uses `uv` for dependency management.
 
 ## Usage
 
-```python
-import os
-from conversational.main_agent import MainAgent
-from research.models import AddDatasetParams, RunParams
+To start the interactive CLI, run the following command:
 
-# Initialize the main agent
-agent = MainAgent(
-    letta_api_key=os.environ["LETTA_API_KEY"],
-    letta_agent_id=os.environ["LETTA_AGENT_ID"],
-)
-
-# Add a dataset to the research agent
-agent.add_dataset(
-    "https://en.wikipedia.org/wiki/Artificial_intelligence",
-    params=AddDatasetParams(),
-)
-
-# Have a conversation with the Letta agent
-response = agent.run("Hello, how are you?", params=RunParams())
-print(response)
-
-# Perform a research query with the Haystack agent
-response = agent.run("What is the capital of France?", params=RunParams())
-print(response)
-
-# Perform a research query with web search
-response = agent.run(
-    "Who won the 2023 Nobel Prize in Physics?",
-    params=RunParams(web_search=True),
-)
-print(response)
+```bash
+export LETTA_API_KEY="your-letta-api-key"
+export LETTA_AGENT_ID="your-letta-agent-id"
+treasury-agent
 ```
+
+You can then interact with the agent in a continuous conversation. To exit, type `exit`.
 
 ## Testing
 
