@@ -1,7 +1,6 @@
-from typing import Any, Dict, List, Optional
 
-from langchain.agents import AgentExecutor, create_react_agent
-from langchain.chains import RetrievalQA
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
@@ -37,13 +36,20 @@ class LangChainAgent(Agent):
         if self.vector_store is None:
             raise ValueError("No dataset has been added. Please add a dataset first.")
 
-        qa_chain = RetrievalQA.from_chain_type(
-            llm=self.llm,
-            chain_type="stuff",
-            retriever=self.vector_store.as_retriever(),
+        prompt = PromptTemplate(
+            template="""Answer the question based only on the following context:
+
+{context}
+
+Question: {input}""",
+            input_variables=["context", "input"],
         )
-        result = qa_chain.run(query)
-        return QueryResponse(answers=[{"answer": result, "score": 1.0}])
+        document_chain = create_stuff_documents_chain(self.llm, prompt)
+        retriever = self.vector_store.as_retriever()
+        retrieval_chain = create_retrieval_chain(retriever, document_chain)
+
+        response = retrieval_chain.invoke({"input": query})
+        return QueryResponse(answers=[{"answer": response["answer"], "score": 1.0}])
 
     def add_dataset(self, dataset_path: str, params: AddDatasetParams) -> None:
         """

@@ -9,8 +9,7 @@ def main() -> None:
     The main entry point for the Treasury Agent CLI.
     """
     agent = MainAgent(
-        letta_api_key=os.environ["LETTA_API_KEY"],
-        letta_agent_id=os.environ["LETTA_AGENT_ID"],
+        openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
     )
 
     print("Treasury Agent CLI (type 'exit' to quit)")

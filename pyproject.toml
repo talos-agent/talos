@@ -17,7 +17,7 @@ packages = ["src/conversational", "src/research"]
 treasury-agent = "conversational.cli:main"
 
 [project.optional-dependencies]
-core = ["beautifulsoup4", "requests", "pypdf", "pydantic", "langchain", "langchain-community", "duckduckgo-search", "faiss-cpu", "tiktoken"]
+core = ["beautifulsoup4", "requests", "pypdf", "pydantic", "langchain", "langchain-community", "langchain-openai", "duckduckgo-search", "faiss-cpu", "tiktoken"]
 dev = ["ruff", "ty", "pytest"]
 
 [tool.ruff]
