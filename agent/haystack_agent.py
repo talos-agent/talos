@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from haystack.document_stores import InMemoryDocumentStore
+from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.nodes import BM25Retriever, FARMReader
 from haystack.pipelines import ExtractiveQAPipeline
 
@@ -16,7 +16,7 @@ class HaystackAgent(Agent):
     """
 
     def __init__(self, model_name_or_path: str = "deepset/roberta-base-squad2"):
-        self.document_store = InMemoryDocumentStore(use_bm25=True)
+        self.document_store = InMemoryDocumentStore()
         self.retriever = BM25Retriever(document_store=self.document_store)
         self.reader = FARMReader(model_name_or_path=model_name_or_path, use_gpu=False)
         self.pipeline = ExtractiveQAPipeline(self.reader, self.retriever)
