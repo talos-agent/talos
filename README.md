@@ -42,6 +42,8 @@ To start the interactive CLI, run the following command:
 
 ```bash
 export OPENAI_API_KEY="your-openai-api-key"
+export PINATA_API_KEY="your-pinata-api-key"
+export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
 treasury-agent
 ```
 
@@ -58,6 +60,8 @@ To run the proposal evaluation example, run the following command:
 
 ```bash
 export OPENAI_API_KEY="your-openai-api-key"
+export PINATA_API_KEY="your-pinata-api-key"
+export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
 python proposal_example.py
 ```
 

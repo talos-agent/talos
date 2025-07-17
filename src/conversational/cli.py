@@ -10,6 +10,8 @@ def main() -> None:
     """
     agent = MainAgent(
         openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
+        pinata_api_key=os.environ.get("PINATA_API_KEY", ""),
+        pinata_secret_api_key=os.environ.get("PINATA_SECRET_API_KEY", ""),
     )
 
     print("Treasury Agent CLI (type 'exit' to quit)")

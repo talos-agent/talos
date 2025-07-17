@@ -12,12 +12,20 @@ class MainAgent:
     A top-level agent that delegates to a conversational agent and a research agent.
     """
 
-    def __init__(self, openai_api_key: str):
+    def __init__(
+        self,
+        openai_api_key: str,
+        pinata_api_key: str,
+        pinata_secret_api_key: str,
+    ):
         self.conversational_agent = LangChainConversationalAgent(
             openai_api_key=openai_api_key
         )
         self.research_agent = LangChainAgent(openai_api_key=openai_api_key)
-        self.ipfs_utils = IPFSUtils()
+        self.ipfs_utils = IPFSUtils(
+            pinata_api_key=pinata_api_key,
+            pinata_secret_api_key=pinata_secret_api_key,
+        )
 
     def run(self, query: str, params: RunParams) -> QueryResponse:
         """
