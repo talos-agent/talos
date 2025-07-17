@@ -17,7 +17,7 @@ packages = ["src/agent"]
 treasury-agent = "agent.cli:main"
 
 [project.optional-dependencies]
-core = ["farm-haystack", "haystack-ai", "beautifulsoup4", "requests", "pypdf"]
+core = ["farm-haystack", "haystack-ai", "beautifulsoup4", "requests", "pypdf", "pydantic"]
 dev = ["ruff", "ty", "pytest"]
 
 [tool.ruff]

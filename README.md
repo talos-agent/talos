@@ -27,22 +27,26 @@ This project uses `uv` for dependency management.
 
 ```python
 from agent.haystack_agent import HaystackAgent
+from agent.models import AddDatasetParams, RunParams
 
 # Initialize the agent
 agent = HaystackAgent()
 
 # Add data from a PDF
-agent.add_dataset("path/to/your/document.pdf")
+agent.add_dataset("path/to/your/document.pdf", params=AddDatasetParams())
 
 # Add data from a website
-agent.add_dataset("https://en.wikipedia.org/wiki/Artificial_intelligence")
+agent.add_dataset("https://en.wikipedia.org/wiki/Artificial_intelligence", params=AddDatasetParams())
 
 # Run a query
-results = agent.run("What is artificial intelligence?")
+results = agent.run("What is artificial intelligence?", params=RunParams())
 print(results)
 
 # Run a query with web search
-results = agent.run("Who won the 2023 Nobel Prize in Physics?", params={"web_search": True})
+results = agent.run(
+    "Who won the 2023 Nobel Prize in Physics?",
+    params=RunParams(web_search=True),
+)
 print(results)
 ```
 

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+
+from agent.models import AddDatasetParams, QueryResponse, RunParams
+
 
 class Agent(ABC):
     """
@@ -7,22 +9,22 @@ class Agent(ABC):
     """
 
     @abstractmethod
-    def run(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def run(self, query: str, params: RunParams) -> QueryResponse:
         """
         Runs the agent with a given query and optional parameters.
 
         :param query: The query to process.
-        :param params: Optional parameters for the agent.
-        :return: A list of dictionaries representing the results.
+        :param params: Parameters for the agent.
+        :return: The results of the query.
         """
         pass
 
     @abstractmethod
-    def add_dataset(self, dataset_path: str, params: Optional[Dict[str, Any]] = None) -> None:
+    def add_dataset(self, dataset_path: str, params: AddDatasetParams) -> None:
         """
         Adds a dataset to the agent's knowledge base.
 
         :param dataset_path: The path to the dataset.
-        :param params: Optional parameters for adding the dataset.
+        :param params: Parameters for adding the dataset.
         """
         pass

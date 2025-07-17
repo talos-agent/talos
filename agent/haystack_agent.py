@@ -21,33 +21,21 @@ class HaystackAgent(Agent):
         self.reader = FARMReader(model_name_or_path=model_name_or_path, use_gpu=False)
         self.pipeline = ExtractiveQAPipeline(self.reader, self.retriever)
 
-    def run(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        if params and params.get("web_search"):
+from agent.models import AddDatasetParams, QueryResponse, RunParams
+
+
+    def run(self, query: str, params: RunParams) -> QueryResponse:
+        if params.web_search:
             search_results = search(query)
             documents = []
             for result in search_results:
                 documents.extend(crawl(result["url"]))
             self.document_store.write_documents(documents)
 
-        """
-        Runs the agent with a given query and optional parameters.
+        prediction = self.pipeline.run(query=query, params=params.extra_params)
+        return QueryResponse(**prediction)
 
-        :param query: The query to process.
-        :param params: Optional parameters for the agent.
-        :return: A list of dictionaries representing the results.
-        """
-        if params is None:
-            params = {}
-        prediction = self.pipeline.run(query=query, params=params)
-        return prediction["answers"]
-
-    def add_dataset(self, dataset_path: str, params: Optional[Dict[str, Any]] = None) -> None:
-        """
-        Adds a dataset to the agent's knowledge base.
-
-        :param dataset_path: The path to the dataset.
-        :param params: Optional parameters for adding the dataset.
-        """
+    def add_dataset(self, dataset_path: str, params: AddDatasetParams) -> None:
         from agent.processing import process_pdf, process_website
         if dataset_path.startswith("http"):
             documents = process_website(dataset_path)
