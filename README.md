@@ -39,5 +39,5 @@ pytest
 
 ```bash
 ruff check .
-mypy .
+ty check .
 ```

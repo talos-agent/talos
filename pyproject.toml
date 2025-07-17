@@ -17,10 +17,10 @@ packages = ["src/treasury_agent"]
 treasury-agent = "treasury_agent.cli:main"
 
 [project.optional-dependencies]
-dev = ["ruff", "mypy", "pytest"]
+dev = ["ruff", "ty", "pytest"]
 
 [tool.ruff]
 line-length = 120
 
-[tool.mypy]
+[tool.pyright]
 strict = true

@@ -32,8 +32,8 @@ jobs:
     - name: Lint with ruff
       run: source .venv/bin/activate && ruff check .
 
-    - name: Type check with mypy
-      run: source .venv/bin/activate && mypy .
+    - name: Type check with ty
+      run: source .venv/bin/activate && ty check .
 
     - name: Test with pytest
       run: source .venv/bin/activate && pytest
