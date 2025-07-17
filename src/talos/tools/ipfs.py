@@ -1,7 +1,7 @@
 import requests
 # type: ignore
 from pinata_python.pinata import Pinata
-from src.tools.base import Tool
+from talos.tools.basetool import Tool
 
 
 class IPFSTool(Tool):

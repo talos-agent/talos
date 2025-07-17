@@ -2,8 +2,8 @@ from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import OpenAI
 
-from src.disciplines.abc import ProposalAgent
-from src.disciplines.proposals.models import Proposal, QueryResponse
+from talos.disciplines.abstract import ProposalAgent
+from talos.disciplines.proposals.models import Proposal, QueryResponse
 
 
 class ProposalsDiscipline(ProposalAgent):

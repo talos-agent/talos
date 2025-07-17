@@ -3,8 +3,8 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import OpenAI
 
-from disciplines.base import Discipline
-from disciplines.proposals.models import AddDatasetParams, QueryResponse, RunParams
+from talos.disciplines.base import Discipline
+from talos.disciplines.proposals.models import AddDatasetParams, QueryResponse, RunParams
 
 
 class CoreAgent(Discipline):

@@ -1,4 +1,4 @@
-from src.disciplines.abc import OnChainManagement
+from talos.disciplines.abstract.onchain_management import OnChainManagement
 
 
 class OnChainManagementDiscipline(OnChainManagement):
