@@ -41,6 +41,9 @@ class HaystackAgent(Agent):
         prediction = self.pipeline.run(query=query, params=params)
         return prediction["answers"]
 
+from agent.processing import process_pdf, process_website
+
+
     def add_dataset(self, dataset_path: str, params: Optional[Dict[str, Any]] = None) -> None:
         """
         Adds a dataset to the agent's knowledge base.
@@ -48,12 +51,11 @@ class HaystackAgent(Agent):
         :param dataset_path: The path to the dataset.
         :param params: Optional parameters for adding the dataset.
         """
-        if params is None:
-            params = {}
-
-        if dataset_path == "squad":
-            from agent.datasets import add_squad_dataset
-            add_squad_dataset(self.document_store, **params)
+        if dataset_path.startswith("http"):
+            documents = process_website(dataset_path)
+        elif dataset_path.endswith(".pdf"):
+            documents = process_pdf(dataset_path)
         else:
-            # For now, we only support the SQuAD dataset.
-            raise NotImplementedError("Only the SQuAD dataset is supported at this time.")
+            raise NotImplementedError("Only PDF and website sources are supported at this time.")
+
+        self.document_store.write_documents(documents)

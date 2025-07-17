@@ -31,11 +31,14 @@ from agent.haystack_agent import HaystackAgent
 # Initialize the agent
 agent = HaystackAgent()
 
-# Add a dataset (e.g., SQuAD)
-agent.add_dataset("squad")
+# Add data from a PDF
+agent.add_dataset("path/to/your/document.pdf")
+
+# Add data from a website
+agent.add_dataset("https://en.wikipedia.org/wiki/Artificial_intelligence")
 
 # Run a query
-results = agent.run("What is the capital of France?")
+results = agent.run("What is artificial intelligence?")
 print(results)
 
 # Run a query with web search
