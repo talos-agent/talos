@@ -39,6 +39,8 @@ This project uses `uv` for dependency management.
 
 ## Usage
 
+### Interactive CLI
+
 To start the interactive CLI, run the following command:
 
 ```bash
@@ -48,6 +50,16 @@ treasury-agent
 ```
 
 You can then interact with the agent in a continuous conversation. To exit, type `exit`.
+
+### Proposal Evaluation Example
+
+To run the proposal evaluation example, run the following command:
+
+```bash
+export LETTA_API_KEY="your-letta-api-key"
+export LETTA_AGENT_ID="your-letta-agent-id"
+python proposal_example.py
+```
 
 ## Testing
 
