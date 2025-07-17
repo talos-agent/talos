@@ -41,3 +41,24 @@ class TwitterDiscipline(Twitter):
         Gets all replies to a tweet.
         """
         return [f"reply {i}" for i in range(5)]
+
+    def get_follower_count(self, username: str) -> int:
+        """
+        Gets the follower count of a user.
+        """
+        print(f"Getting follower count for {username}")
+        return 100
+
+    def get_following_count(self, username: str) -> int:
+        """
+        Gets the following count of a user.
+        """
+        print(f"Getting following count for {username}")
+        return 100
+
+    def get_tweet_engagement(self, tweet_id: str) -> dict:
+        """
+        Gets the engagement of a tweet.
+        """
+        print(f"Getting engagement for tweet {tweet_id}")
+        return {"likes": 10, "retweets": 5}

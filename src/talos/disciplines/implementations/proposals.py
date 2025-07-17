@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import OpenAI
@@ -11,10 +13,19 @@ class ProposalsDiscipline(ProposalAgent):
     A LangChain-based agent for evaluating proposals.
     """
 
-    def __init__(self, openai_api_key: str, model_name: str = "text-davinci-003"):
+    def __init__(
+        self,
+        openai_api_key: str,
+        model_name: str = "text-davinci-003",
+        rag_dataset: Any = None,
+        tools: List[Any] = None,
+    ):
+        super().__init__(rag_dataset, tools)
         self.llm = OpenAI(model_name=model_name, api_key=openai_api_key)
 
-    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
+    def evaluate_proposal(
+        self, proposal: Proposal, feedback: List[Dict[str, Any]]
+    ) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.
         """
@@ -26,7 +37,7 @@ class ProposalsDiscipline(ProposalAgent):
         response = chain.run(
             proposal_text=proposal.proposal_text,
             feedback="\n".join(
-                [f"- {f.delegate}: {f.feedback}" for f in proposal.feedback]
+                [f"- {f['delegate']}: {f['feedback']}" for f in feedback]
             ),
         )
         return QueryResponse(answers=[{"answer": response, "score": 1.0}])

@@ -26,3 +26,17 @@ class GitHub(ABC):
         Reviews a pull request.
         """
         pass
+
+    @abstractmethod
+    def merge_pr(self, pr_url: str) -> None:
+        """
+        Merges a pull request.
+        """
+        pass
+
+    @abstractmethod
+    def scan_for_malicious_code(self, pr_url: str) -> bool:
+        """
+        Scans a pull request for malicious code.
+        """
+        pass

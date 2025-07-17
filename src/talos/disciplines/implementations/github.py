@@ -23,3 +23,16 @@ class GitHubDiscipline(GitHub):
         Reviews a pull request.
         """
         print(f"Reviewing PR {pr_url} with feedback: {feedback}")
+
+    def merge_pr(self, pr_url: str) -> None:
+        """
+        Merges a pull request.
+        """
+        print(f"Merging PR: {pr_url}")
+
+    def scan_for_malicious_code(self, pr_url: str) -> bool:
+        """
+        Scans a pull request for malicious code.
+        """
+        print(f"Scanning PR for malicious code: {pr_url}")
+        return False
