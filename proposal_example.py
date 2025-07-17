@@ -10,8 +10,9 @@ def run_proposal_example():
     """
     # Initialize the main agent
     agent = MainAgent(
-        letta_api_key=os.environ.get("LETTA_API_KEY", ""),
-        letta_agent_id=os.environ.get("LETTA_AGENT_ID", ""),
+        openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
+        pinata_api_key=os.environ.get("PINATA_API_KEY", ""),
+        pinata_secret_api_key=os.environ.get("PINATA_SECRET_API_KEY", ""),
     )
 
     # Add a relevant dataset

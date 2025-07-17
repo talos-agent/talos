@@ -1,4 +1,5 @@
 import requests
+# type: ignore
 from pinata_python.pinata import Pinata
 
 

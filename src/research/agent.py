@@ -7,7 +7,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import OpenAI, OpenAIEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
 
-from research.abc import Agent
+from research.base import Agent
 from research.models import AddDatasetParams, QueryResponse, RunParams
 
 
@@ -25,7 +25,7 @@ class LangChainAgent(Agent):
         self.llm = OpenAI(
             model_name=model_name,
             temperature=temperature,
-            openai_api_key=openai_api_key,
+            api_key=openai_api_key,
         )
         self.vector_store = None
 
@@ -65,5 +65,5 @@ Question: {input}""",
         documents = loader.load()
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         texts = text_splitter.split_documents(documents)
-        embeddings = OpenAIEmbeddings(openai_api_key=self.llm.openai_api_key)
+        embeddings = OpenAIEmbeddings(api_key=self.llm.api_key)
         self.vector_store = FAISS.from_documents(texts, embeddings)

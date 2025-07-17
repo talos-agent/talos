@@ -3,7 +3,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import OpenAI
 
-from research.abc import Agent
+from research.base import Agent
 from research.models import AddDatasetParams, QueryResponse, RunParams
 
 
@@ -21,7 +21,7 @@ class LangChainConversationalAgent(Agent):
         self.llm = OpenAI(
             model_name=model_name,
             temperature=temperature,
-            openai_api_key=openai_api_key,
+            api_key=openai_api_key,
         )
         self.conversation = ConversationChain(
             llm=self.llm,

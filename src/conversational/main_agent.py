@@ -1,6 +1,6 @@
 
-from conversational.langchain_agent import LangChainConversationalAgent
-from research.langchain_agent import LangChainAgent
+from conversational.agent import LangChainConversationalAgent
+from research.agent import LangChainAgent
 from research.models import AddDatasetParams, QueryResponse, RunParams
 
 

@@ -18,13 +18,10 @@ treasury-agent = "conversational.cli:main"
 
 [project.optional-dependencies]
 core = ["beautifulsoup4", "requests", "pypdf", "pydantic", "langchain", "langchain-community", "langchain-openai", "duckduckgo-search", "faiss-cpu", "tiktoken", "ipfshttpclient", "pinata-python"]
-dev = ["ruff", "ty", "pytest"]
+dev = ["ruff", "mypy", "pytest"]
 
 [tool.ruff]
 line-length = 120
 
-[tool.pyright]
+[tool.mypy]
 strict = true
-
-[tool.ty.environment]
-python = ".venv/bin/python"
