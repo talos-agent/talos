@@ -2,11 +2,11 @@ from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import OpenAI
 
-from research.models import Proposal, QueryResponse
-from research.proposal_agent_abc import ProposalAgent
+from .proposal_agent_abc import ProposalAgent
+from .models import Proposal, QueryResponse
 
 
-class LangChainProposalAgent(ProposalAgent):
+class ProposalsDiscipline(ProposalAgent):
     """
     A LangChain-based agent for evaluating proposals.
     """

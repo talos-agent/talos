@@ -3,11 +3,11 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import OpenAI
 
-from research.base import Agent
-from research.models import AddDatasetParams, QueryResponse, RunParams
+from disciplines.base import Discipline
+from disciplines.proposals.models import AddDatasetParams, QueryResponse, RunParams
 
 
-class LangChainConversationalAgent(Agent):
+class CoreAgent(Discipline):
     """
     A LangChain-based agent for managing conversational memory.
     """
@@ -35,6 +35,10 @@ class LangChainConversationalAgent(Agent):
         """
         response = self.conversation.predict(input=query)
         return QueryResponse(answers=[{"answer": response, "score": 1.0}])
+
+    @property
+    def name(self) -> str:
+        return "core"
 
     def add_dataset(self, dataset_path: str, params: AddDatasetParams) -> None:
         """
