@@ -4,6 +4,9 @@ from research.langchain_agent import LangChainAgent
 from research.models import AddDatasetParams, QueryResponse, RunParams
 
 
+from utils.ipfs import IPFSUtils
+
+
 class MainAgent:
     """
     A top-level agent that delegates to a conversational agent and a research agent.
@@ -14,12 +17,21 @@ class MainAgent:
             openai_api_key=openai_api_key
         )
         self.research_agent = LangChainAgent(openai_api_key=openai_api_key)
+        self.ipfs_utils = IPFSUtils()
 
     def run(self, query: str, params: RunParams) -> QueryResponse:
         """
         Runs the appropriate agent based on the query and parameters.
         """
-        if params.web_search or "research" in query.lower():
+        if "ipfs publish" in query.lower():
+            file_path = query.split(" ")[-1]
+            ipfs_hash = self.ipfs_utils.publish(file_path)
+            return QueryResponse(answers=[{"answer": f"Published to IPFS with hash: {ipfs_hash}", "score": 1.0}])
+        elif "ipfs read" in query.lower():
+            ipfs_hash = query.split(" ")[-1]
+            content = self.ipfs_utils.read(ipfs_hash)
+            return QueryResponse(answers=[{"answer": content.decode(), "score": 1.0}])
+        elif params.web_search or "research" in query.lower():
             return self.research_agent.run(query, params)
         else:
             return self.conversational_agent.run(query, params)

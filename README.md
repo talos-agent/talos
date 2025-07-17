@@ -47,6 +47,11 @@ treasury-agent
 
 You can then interact with the agent in a continuous conversation. To exit, type `exit`.
 
+You can also use the `ipfs` command to interact with IPFS:
+
+-   `ipfs publish <file_path>`: Publishes a file to IPFS.
+-   `ipfs read <ipfs_hash>`: Reads a file from IPFS.
+
 ### Proposal Evaluation Example
 
 To run the proposal evaluation example, run the following command:
