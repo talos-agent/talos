@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class RunParams(BaseModel):
@@ -20,10 +20,11 @@ class AddDatasetParams(BaseModel):
     extra_params: Optional[Dict[str, Any]] = Field(None, description="Extra parameters for adding the dataset.")
 
 
-classQueryResult(BaseModel):
+class QueryResult(BaseModel):
     """
     A single query result.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     answer: str
     context: Optional[str]

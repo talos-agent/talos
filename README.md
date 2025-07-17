@@ -1,18 +1,15 @@
 # Treasury Agent
 
-An AI agent for managing a cryptocurrency treasury, built with Haystack and Letta.
+An AI agent for managing a cryptocurrency treasury, built with LangChain.
 
-This project combines the strengths of two powerful AI frameworks:
-
--   **Letta**: For conversational AI and long-term memory.
--   **Haystack**: For deep research and question answering.
+This project uses LangChain to create a conversational agent with research capabilities.
 
 ## Architecture
 
 The project is divided into two main modules:
 
--   `conversational`: Contains the Letta-based agent for managing conversations.
--   `research`: Contains the Haystack-based agent for performing research tasks.
+-   `conversational`: Contains the LangChain-based agent for managing conversations.
+-   `research`: Contains the LangChain-based agent for performing research tasks.
 
 A top-level `MainAgent` delegates to the appropriate agent based on the user's query.
 
@@ -44,8 +41,7 @@ This project uses `uv` for dependency management.
 To start the interactive CLI, run the following command:
 
 ```bash
-export LETTA_API_KEY="your-letta-api-key"
-export LETTA_AGENT_ID="your-letta-agent-id"
+export OPENAI_API_KEY="your-openai-api-key"
 treasury-agent
 ```
 
@@ -56,8 +52,7 @@ You can then interact with the agent in a continuous conversation. To exit, type
 To run the proposal evaluation example, run the following command:
 
 ```bash
-export LETTA_API_KEY="your-letta-api-key"
-export LETTA_AGENT_ID="your-letta-agent-id"
+export OPENAI_API_KEY="your-openai-api-key"
 python proposal_example.py
 ```
 

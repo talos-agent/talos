@@ -1,7 +1,6 @@
-from typing import Optional
 
-from conversational.letta_agent import LettaAgent
-from research.haystack_agent import HaystackAgent
+from conversational.langchain_agent import LangChainConversationalAgent
+from research.langchain_agent import LangChainAgent
 from research.models import AddDatasetParams, QueryResponse, RunParams
 
 
@@ -10,11 +9,11 @@ class MainAgent:
     A top-level agent that delegates to a conversational agent and a research agent.
     """
 
-    def __init__(self, letta_api_key: str, letta_agent_id: str):
-        self.conversational_agent = LettaAgent(
-            api_key=letta_api_key, agent_id=letta_agent_id
+    def __init__(self, openai_api_key: str):
+        self.conversational_agent = LangChainConversationalAgent(
+            openai_api_key=openai_api_key
         )
-        self.research_agent = HaystackAgent()
+        self.research_agent = LangChainAgent(openai_api_key=openai_api_key)
 
     def run(self, query: str, params: RunParams) -> QueryResponse:
         """
