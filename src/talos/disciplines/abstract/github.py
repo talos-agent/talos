@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
 from langchain_core.language_models import BaseLanguageModel
-from .models import Issue
 
 
 class GitHub(ABC):
