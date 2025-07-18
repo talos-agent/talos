@@ -22,15 +22,17 @@ def post_question():
         f.write(str(tweet.id))
 
 from src.talos.agent import Agent
+from src.talos.prompts.prompt_manager import PromptManager
 
-def analyze_sentiment(tweets: list[str]) -> str:
+prompt_manager = PromptManager("src/talos/prompts")
+
+def analyze_sentiment(tweets: list[dict]) -> str:
     """
     Analyzes the sentiment of a list of tweets and returns a summary.
     """
-    agent = Agent(model="gpt-4", prompt="{messages}")
-    # TODO: The prompt is super basic and needs to be improved.
-    # We also need to define a schema for the output.
-    response = agent.run(f"Analyze the sentiment of these tweets and provide a summary:\n{tweets}")
+    prompt = prompt_manager.get_prompt("thread_sentiment")
+    agent = Agent(model="gpt-4", prompt=prompt.template)
+    response = agent.run(message="", history=[], tweets=str(tweets))
     return response.content
 
 

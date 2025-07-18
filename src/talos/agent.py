@@ -32,7 +32,7 @@ class Agent(BaseModel):
             self.model = self.model.bind_tools(self.tools)
         self._prompt_template = ChatPromptTemplate.from_template(self.prompt_template)
 
-    def run(self, message: str, history: list[BaseMessage] | None = None) -> BaseModel:
+    def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
         if history:
             self.history.extend(history)
 
@@ -45,7 +45,7 @@ class Agent(BaseModel):
             chain = self._prompt_template | self.model
 
         # Pass the history to the chain
-        result = chain.invoke({"messages": self.history})
+        result = chain.invoke({"messages": self.history, **kwargs})
 
         if isinstance(result, BaseModel):
             self.history.append(AIMessage(content=str(result)))
