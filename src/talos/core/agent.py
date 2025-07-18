@@ -1,7 +1,6 @@
 
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-from langchain_openai import OpenAI
 from langchain_core.language_models import BaseLanguageModel
 
 from talos.disciplines.base import Discipline
