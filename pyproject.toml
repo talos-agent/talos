@@ -17,8 +17,8 @@ packages = ["src/talos"]
 treasury-agent = "talos.core.cli:main"
 
 [project.optional-dependencies]
-core = ["beautifulsoup4", "requests", "pypdf", "pydantic", "langchain", "langchain-community", "langchain-openai", "duckduckgo-search", "faiss-cpu", "tiktoken", "ipfshttpclient", "pinata-python"]
-dev = ["ruff", "mypy", "pytest"]
+core = ["beautifulsoup4", "requests", "pypdf", "pydantic", "langchain", "langchain-community", "langchain-openai", "duckduckgo-search", "faiss-cpu", "tiktoken", "ipfshttpclient", "pinata-python", "tweepy"]
+dev = ["ruff", "mypy", "pytest", "pytest-mock"]
 
 [tool.ruff]
 line-length = 120
