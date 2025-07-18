@@ -3,12 +3,23 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.tools import BaseTool
+
 
 class Agent(BaseModel):
+    """
+    Agent is a class that represents an agent that can interact with the user.
+
+    Args:
+        model_name: The name of the model to use.
+        prompt_template: The prompt template to use.
+        schema_class: The schema class to use for structured output.
+        tools: A list of tools to use.
+    """
     model_name: str = Field(..., alias="model")
     prompt_template: str = Field("You are a helpful assistant.\n{messages}", alias="prompt")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
-    tools: list | None = None
+    tools: list[type[BaseTool]] | None = None
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     model: Any = None
