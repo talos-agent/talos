@@ -21,6 +21,19 @@ def post_question():
     with open("tweet_id.txt", "w") as f:
         f.write(str(tweet.id))
 
+from src.talos.agent import Agent
+
+def analyze_sentiment(tweets: list[str]) -> str:
+    """
+    Analyzes the sentiment of a list of tweets and returns a summary.
+    """
+    agent = Agent(model="gpt-4", prompt="{messages}")
+    # TODO: The prompt is super basic and needs to be improved.
+    # We also need to define a schema for the output.
+    response = agent.run(f"Analyze the sentiment of these tweets and provide a summary:\n{tweets}")
+    return response.content
+
+
 def analyze_and_post_sentiment():
     """
     Analyzes the replies to the tweet posted by post_question() and posts a sentiment analysis summary.
@@ -37,7 +50,7 @@ def analyze_and_post_sentiment():
     with open("tweet_id.txt", "r") as f:
         tweet_id = f.read()
 
-    get_all_replies(api, tweet_id)
+    tweets = get_all_replies(api, tweet_id)
+    sentiment = analyze_sentiment(tweets)
 
-    # TODO: Implement sentiment analysis and post to Twitter
-    pass
+    api.update_status(sentiment)
