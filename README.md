@@ -1,17 +1,17 @@
-# Treasury Agent
+# Talos
 
 An AI agent for managing a cryptocurrency treasury, built with LangChain.
 
 This project uses LangChain to create a conversational agent with research capabilities.
 
-## Architecture
+## Tools
 
-The project is divided into two main modules:
+The project provides a set of tools for interacting with various services:
 
--   `conversational`: Contains the LangChain-based agent for managing conversations.
--   `research`: Contains the LangChain-based agent for performing research tasks.
-
-A top-level `MainAgent` delegates to the appropriate agent based on the user's query.
+-   `gitbook`: A tool for interacting with GitBook.
+-   `github`: A tool for interacting with GitHub.
+-   `ipfs`: A tool for interacting with IPFS.
+-   `twitter`: A tool for interacting with Twitter.
 
 ## Development
 
