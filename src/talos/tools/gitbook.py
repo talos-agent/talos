@@ -34,11 +34,3 @@ class GitBookTool(BaseTool):
             return self.update_page(**kwargs)
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
-
-    def _run(self, tool_name: str, **kwargs):
-        if tool_name == "read_page":
-            return self.read_page(**kwargs)
-        elif tool_name == "update_page":
-            return self.update_page(**kwargs)
-        else:
-            raise ValueError(f"Unknown tool: {tool_name}")

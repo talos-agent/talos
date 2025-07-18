@@ -28,7 +28,7 @@ class PromptManager:
                     )
                     self.prompts[prompt.name] = prompt
 
-    def get_prompt(self, name: str) -> Prompt:
+    def get_prompt(self, name: str) -> Prompt | None:
         """
         Gets a prompt by name.
         """

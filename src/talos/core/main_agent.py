@@ -3,14 +3,12 @@ from talos.disciplines.implementations import (
     ProposalsDiscipline,
     TwitterDiscipline,
     GitHubDiscipline,
-    OnChainManagementDiscipline,
-    GitBookDiscipline,
 )
 from talos.disciplines.proposals.models import Proposal, QueryResponse, RunParams
-from talos.tools.basetool import Tool
 from talos.prompts.prompt_manager import PromptManager
 from talos.hypervisor.hypervisor import Hypervisor
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.tools import BaseTool as Tool
 
 
 class MainAgent:
@@ -28,8 +26,6 @@ class MainAgent:
             "proposals": ProposalsDiscipline(llm=llm),
             "twitter": TwitterDiscipline(),
             "github": GitHubDiscipline(),
-            "onchain": OnChainManagementDiscipline(),
-            "gitbook": GitBookDiscipline(),
         }
         self.tools = {tool.name: tool for tool in tools}
         self.prompt_manager = PromptManager(prompts_dir)
@@ -104,7 +100,7 @@ class MainAgent:
         Evaluates a proposal.
         """
         proposals_discipline = self.disciplines.get("proposals")
-        if proposals_discipline:
-            return proposals_discipline.evaluate_proposal(proposal)
+        if proposals_discipline and isinstance(proposals_discipline, ProposalsDiscipline):
+            return proposals_discipline.evaluate_proposal(proposal, feedback=[])
         else:
             return QueryResponse(answers=[{"answer": "Proposals discipline not loaded", "score": 0.0}])
