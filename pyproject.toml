@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "An AI agent for managing a cryptocurrency treasury."
 authors = [{ name = "Jules", email = "agent@example.com" }]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 
 [build-system]
 requires = ["hatchling"]

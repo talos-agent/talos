@@ -1,7 +1,7 @@
 
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-from langchain_openai import OpenAI
+from langchain_core.language_models import BaseLanguageModel
 
 from talos.disciplines.base import Discipline
 from talos.disciplines.proposals.models import AddDatasetParams, QueryResponse, RunParams
@@ -14,15 +14,9 @@ class CoreAgent(Discipline):
 
     def __init__(
         self,
-        openai_api_key: str,
-        model_name: str = "text-davinci-003",
-        temperature: float = 0.0,
+        model: BaseLanguageModel,
     ):
-        self.llm = OpenAI(
-            model_name=model_name,
-            temperature=temperature,
-            api_key=openai_api_key,
-        )
+        self.llm = model
         self.conversation = ConversationChain(
             llm=self.llm,
             verbose=True,
