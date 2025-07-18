@@ -1,10 +1,22 @@
 import os
 import requests
 from langchain.tools import BaseTool
+from pydantic import BaseModel, Field
+from enum import Enum
+
+class GitBookToolName(str, Enum):
+    READ_PAGE = "read_page"
+    UPDATE_PAGE = "update_page"
+
+class GitBookToolArgs(BaseModel):
+    tool_name: GitBookToolName = Field(..., description="The name of the tool to run")
+    page_url: str = Field(..., description="The URL of the GitBook page")
+    content: str | None = Field(None, description="The content to update the page with")
 
 class GitBookTool(BaseTool):
     name = "gitbook_tool"
     description = "Provides tools for interacting with the GitBook API."
+    args_schema: type[BaseModel] = GitBookToolArgs
 
     def __init__(self):
         super().__init__()

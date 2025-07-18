@@ -1,11 +1,28 @@
 import os
 import tweepy
 from langchain.tools import BaseTool
+from pydantic import BaseModel, Field
+from enum import Enum
 from typing import List
+
+class TwitterToolName(str, Enum):
+    POST_TWEET = "post_tweet"
+    GET_ALL_REPLIES = "get_all_replies"
+    REPLY_TO_TWEET = "reply_to_tweet"
+    GET_FOLLOWER_COUNT = "get_follower_count"
+    GET_FOLLOWING_COUNT = "get_following_count"
+    GET_TWEET_ENGAGEMENT = "get_tweet_engagement"
+
+class TwitterToolArgs(BaseModel):
+    tool_name: TwitterToolName = Field(..., description="The name of the tool to run")
+    tweet: str | None = Field(None, description="The content of the tweet")
+    tweet_id: str | None = Field(None, description="The ID of the tweet")
+    username: str | None = Field(None, description="The username of the user")
 
 class TwitterTool(BaseTool):
     name = "twitter_tool"
     description = "Provides tools for interacting with the Twitter API."
+    args_schema: type[BaseModel] = TwitterToolArgs
 
     def __init__(self):
         super().__init__()

@@ -1,9 +1,21 @@
 import ipfshttpclient
 from langchain.tools import BaseTool
+from pydantic import BaseModel, Field
+from enum import Enum
+
+class IpfsToolName(str, Enum):
+    ADD_CONTENT = "add_content"
+    GET_CONTENT = "get_content"
+
+class IpfsToolArgs(BaseModel):
+    tool_name: IpfsToolName = Field(..., description="The name of the tool to run")
+    content: str | None = Field(None, description="The content to add to IPFS")
+    hash: str | None = Field(None, description="The hash of the content to get from IPFS")
 
 class IpfsTool(BaseTool):
     name = "ipfs_tool"
     description = "Provides tools for interacting with IPFS."
+    args_schema: type[BaseModel] = IpfsToolArgs
 
     def __init__(self):
         super().__init__()
