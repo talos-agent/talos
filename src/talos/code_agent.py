@@ -14,13 +14,6 @@ class CodeAgent(ABC):
         pass
 
     @abstractmethod
-    def commit(self, message: str) -> None:
-        """
-        Commits the current changes.
-        """
-        pass
-
-    @abstractmethod
     def ask_question(self, question: str) -> str:
         """
         Asks the user a question.
@@ -28,8 +21,29 @@ class CodeAgent(ABC):
         pass
 
     @abstractmethod
-    def do_research(self, topic: str) -> str:
+    def interrupt(self, message: str) -> None:
         """
-        Does research on a topic.
+        Interrupts the agent with a message.
+        """
+        pass
+
+    @abstractmethod
+    def halt(self) -> None:
+        """
+        Halts the agent.
+        """
+        pass
+
+    @abstractmethod
+    def resume(self) -> None:
+        """
+        Resumes the agent.
+        """
+        pass
+
+    @abstractmethod
+    def get_current_task(self) -> str | None:
+        """
+        Returns the current task.
         """
         pass
