@@ -1,8 +1,8 @@
 from typing import Any, Dict, List, Optional
 
 from langchain.chains import LLMChain
+from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import OpenAI
 
 from talos.disciplines.abstract import ProposalAgent
 from talos.disciplines.proposals.models import Proposal, QueryResponse
@@ -15,13 +15,12 @@ class ProposalsDiscipline(ProposalAgent):
 
     def __init__(
         self,
-        openai_api_key: str,
-        model_name: str = "text-davinci-003",
+        llm: BaseLanguageModel,
         rag_dataset: Any = None,
         tools: Optional[List[Any]] = None,
     ):
         super().__init__(rag_dataset, tools if tools is not None else [])
-        self.llm = OpenAI(model_name=model_name, api_key=openai_api_key)
+        self.llm = llm
 
     def evaluate_proposal(
         self, proposal: Proposal, feedback: List[Dict[str, Any]]
