@@ -1,7 +1,6 @@
-import json
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.pydantic_v1 import BaseModel
 
 class Agent:
     def __init__(self, model: str, prompt_template: str, schema: BaseModel):
