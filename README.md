@@ -28,6 +28,16 @@ The repository is structured as follows:
 -   `tests/`: Contains the tests for the Talos agent.
 -   `proposal_example.py`: An example of how to use the agent to evaluate a proposal.
 
+## Key Components
+
+Talos is comprised of several key components that allow it to function as a decentralized AI agent. These components are:
+
+-   **Twitter:** Talos can interact with users on Twitter, allowing it to engage with the community and respond to inquiries.
+-   **GitHub:** Talos can interact with GitHub, allowing it to review code, commit code, and manage its own codebase.
+-   **GitBook:** Talos can interact with GitBook, allowing it to update its own documentation.
+-   **Proposals:** Talos can manage its own treasury and key protocol actions through a proposal system.
+-   **Hypervisor and Council:** The hypervisor and the council are responsible for protecting Talos from performing any nefarious actions.
+
 ## Tools
 
 The project provides a set of tools for interacting with various services:
