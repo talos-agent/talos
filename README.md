@@ -85,7 +85,7 @@ To start the interactive CLI, run the following command:
 export OPENAI_API_KEY="your-openai-api-key"
 export PINATA_API_KEY="your-pinata-api-key"
 export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
-python -m src.talos.core.cli
+uv run talos
 ```
 
 You can then interact with the agent in a continuous conversation. To exit, type `exit`.
