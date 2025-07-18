@@ -1,6 +1,10 @@
 import os
 import tweepy
 from .twitter import get_all_replies
+from src.talos.agent import Agent
+from src.talos.prompts.prompt_manager import PromptManager
+
+prompt_manager = PromptManager("src/talos/prompts")
 
 def post_question():
     """
@@ -20,11 +24,6 @@ def post_question():
 
     with open("tweet_id.txt", "w") as f:
         f.write(str(tweet.id))
-
-from src.talos.agent import Agent
-from src.talos.prompts.prompt_manager import PromptManager
-
-prompt_manager = PromptManager("src/talos/prompts")
 
 def analyze_sentiment(tweets: list[dict]) -> str:
     """
