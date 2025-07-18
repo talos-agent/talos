@@ -17,8 +17,8 @@ def main() -> None:
     )
     agent = MainAgent(
         llm=llm,
-        pinata_api_key=os.environ.get("PINATA_API_KEY", ""),
-        pinata_secret_api_key=os.environ.get("PINATA_SECRET_API_KEY", ""),
+        tools=[],
+        prompts_dir="prompts",
     )
 
     print("Treasury Agent CLI (type 'exit' to quit)")
