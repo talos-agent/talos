@@ -47,3 +47,24 @@ class Twitter(ABC):
         Gets all replies to a tweet.
         """
         pass
+
+    @abstractmethod
+    def get_follower_count(self, username: str) -> int:
+        """
+        Gets the follower count of a user.
+        """
+        pass
+
+    @abstractmethod
+    def get_following_count(self, username: str) -> int:
+        """
+        Gets the following count of a user.
+        """
+        pass
+
+    @abstractmethod
+    def get_tweet_engagement(self, tweet_id: str) -> dict:
+        """
+        Gets the engagement of a tweet.
+        """
+        pass
