@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
-from .models import Issue, Comment, PullRequestFile
+from langchain_core.language_models import BaseLanguageModel
+from .models import Issue
 
 
 class GitHub(ABC):
@@ -8,65 +9,41 @@ class GitHub(ABC):
     An abstract base class for a GitHub discipline.
     """
 
+    def __init__(self, llm: BaseLanguageModel, token: str):
+        self.llm = llm
+        self.token = token
+
     @abstractmethod
-    def read_issue(self, user: str, project: str, issue_number: int) -> str:
+    def reply_to_issues(self, user: str, project: str) -> None:
         """
-        Reads a GitHub issue.
+        Replies to issues that are pending Talos feedback.
         """
         pass
 
     @abstractmethod
-    def reply_to_issue(self, user: str, project: str, issue_number: int, comment: str) -> None:
+    def review_pull_requests(self, user: str, project: str) -> None:
         """
-        Replies to a GitHub issue.
-        """
-        pass
-
-    @abstractmethod
-    def review_pr(self, user: str, project: str, pr_number: int, feedback: str) -> None:
-        """
-        Reviews a pull request.
+        Reviews pending pull requests to determine if they're ready for approval or not.
         """
         pass
 
     @abstractmethod
-    def merge_pr(self, user: str, project: str, pr_number: int) -> None:
+    def scan(self, user: str, project: str) -> str:
         """
-        Merges a pull request.
-        """
-        pass
-
-    @abstractmethod
-    def get_open_issues(self, user: str, project: str) -> List[Issue]:
-        """
-        Gets all open issues in a repository.
+        Reviews the code in a repository.
         """
         pass
 
     @abstractmethod
-    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Comment]:
+    def reference_code(self, user: str, project: str, query: str) -> str:
         """
-        Gets all comments for an issue.
-        """
-        pass
-
-    @abstractmethod
-    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[PullRequestFile]:
-        """
-        Gets all files in a pull request.
+        Looks at the directory structure and any files in the repository to answer a query.
         """
         pass
 
     @abstractmethod
-    def get_project_structure(self, user: str, project: str, path: str = "") -> List[str]:
+    def update_summary(self, user: str, project: str) -> None:
         """
-        Gets the project structure.
-        """
-        pass
-
-    @abstractmethod
-    def get_file_content(self, user: str, project: str, filepath: str) -> str:
-        """
-        Gets the content of a file.
+        Updates the SUMMARY.md for a repo to make it easier to review it.
         """
         pass

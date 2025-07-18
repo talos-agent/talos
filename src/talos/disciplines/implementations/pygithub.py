@@ -1,7 +1,8 @@
-from github import Github
 from talos.disciplines.abstract.github import GitHub
-from talos.disciplines.abstract.models import Issue, Comment, PullRequestFile
-from typing import List
+from talos.tools.github import GithubTools
+from langchain_core.language_models import BaseLanguageModel
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
 
 
 class PyGithubDiscipline(GitHub):
@@ -9,92 +10,73 @@ class PyGithubDiscipline(GitHub):
     A discipline for interacting with GitHub using PyGithub.
     """
 
-    def __init__(self, token: str):
-        self.github = Github(token)
+    def __init__(self, llm: BaseLanguageModel, token: str):
+        super().__init__(llm, token)
+        self.tools = GithubTools(token)
 
-    def read_issue(self, user: str, project: str, issue_number: int) -> str:
+    def reply_to_issues(self, user: str, project: str) -> None:
         """
-        Reads a GitHub issue.
+        Replies to issues that are pending Talos feedback.
         """
-        repo = self.github.get_repo(f"{user}/{project}")
-        issue = repo.get_issue(number=issue_number)
-        return issue.body
+        issues = self.tools.get_open_issues(user, project)
+        for issue in issues:
+            # A more sophisticated check would be needed to determine if an issue
+            # is pending Talos feedback.
+            if "talos" in issue["title"].lower():
+                comments = self.tools.get_issue_comments(user, project, issue["number"])
+                prompt = PromptTemplate(
+                    template="""
+                    The following is an issue that needs a response:
+                    {issue}
 
-    def reply_to_issue(self, user: str, project: str, issue_number: int, comment: str) -> None:
-        """
-        Replies to a GitHub issue.
-        """
-        repo = self.github.get_repo(f"{user}/{project}")
-        issue = repo.get_issue(number=issue_number)
-        issue.create_comment(comment)
+                    Here are the comments on the issue:
+                    {comments}
 
-    def review_pr(self, user: str, project: str, pr_number: int, feedback: str) -> None:
-        """
-        Reviews a pull request.
-        """
-        repo = self.github.get_repo(f"{user}/{project}")
-        pr = repo.get_pull(number=pr_number)
-        pr.create_review(body=feedback, event="COMMENT")
-
-    def merge_pr(self, user: str, project: str, pr_number: int) -> None:
-        """
-        Merges a pull request.
-        """
-        repo = self.github.get_repo(f"{user}/{project}")
-        pr = repo.get_pull(number=pr_number)
-        pr.merge()
-
-    def get_open_issues(self, user: str, project: str) -> List[Issue]:
-        """
-        Gets all open issues in a repository.
-        """
-        repo = self.github.get_repo(f"{user}/{project}")
-        return [
-            Issue(number=issue.number, title=issue.title, url=issue.html_url)
-            for issue in repo.get_issues(state="open")
-        ]
-
-    def get_issue_comments(self, user: str, project: str, issue_number: int) -> List[Comment]:
-        """
-        Gets all comments for an issue.
-        """
-        repo = self.github.get_repo(f"{user}/{project}")
-        issue = repo.get_issue(number=issue_number)
-        comments = []
-        for comment in issue.get_comments():
-            comments.append(
-                Comment(
-                    user=comment.user.login,
-                    comment=comment.body,
-                    reply_to=None,  # PyGithub does not support this directly
+                    Please provide a response to the issue.
+                    """,
+                    input_variables=["issue", "comments"],
                 )
-            )
-        return comments
+                chain = LLMChain(llm=self.llm, prompt=prompt)
+                response = chain.run(issue=issue["title"], comments=comments)
+                self.tools.reply_to_issue(user, project, issue["number"], response)
 
-    def get_pr_files(self, user: str, project: str, pr_number: int) -> List[PullRequestFile]:
+    def review_pull_requests(self, user: str, project: str) -> None:
         """
-        Gets all files in a pull request.
+        Reviews pending pull requests to determine if they're ready for approval or not.
         """
-        repo = self.github.get_repo(f"{user}/{project}")
-        pr = repo.get_pull(number=pr_number)
-        return [PullRequestFile(filename=file.filename) for file in pr.get_files()]
+        # This is a placeholder. A real implementation would need to get all open PRs.
+        pass
 
-    def get_project_structure(self, user: str, project: str, path: str = "") -> List[str]:
+    def scan(self, user: str, project: str) -> str:
         """
-        Gets the project structure.
+        Reviews the code in a repository.
         """
-        repo = self.github.get_repo(f"{user}/{project}")
-        contents = repo.get_contents(path)
-        if isinstance(contents, list):
-            return [content.path for content in contents]
-        return [contents.path]
+        # This is a placeholder. A real implementation would need to get all files
+        # and scan them.
+        return "Scan complete."
 
-    def get_file_content(self, user: str, project: str, filepath: str) -> str:
+    def reference_code(self, user: str, project: str, query: str) -> str:
         """
-        Gets the content of a file.
+        Looks at the directory structure and any files in the repository to answer a query.
         """
-        repo = self.github.get_repo(f"{user}/{project}")
-        content = repo.get_contents(filepath)
-        if isinstance(content, list):
-            raise ValueError("Path is a directory, not a file.")
-        return content.decoded_content.decode()
+        structure = self.tools.get_project_structure(user, project)
+        prompt = PromptTemplate(
+            template="""
+            The following is the structure of the project:
+            {structure}
+
+            Please answer the following query about the code:
+            {query}
+            """,
+            input_variables=["structure", "query"],
+        )
+        chain = LLMChain(llm=self.llm, prompt=prompt)
+        return chain.run(structure=structure, query=query)
+
+    def update_summary(self, user: str, project: str) -> None:
+        """
+        Updates the SUMMARY.md for a repo to make it easier to review it.
+        """
+        # This is a placeholder. A real implementation would need to get all files
+        # and generate a summary.
+        pass
