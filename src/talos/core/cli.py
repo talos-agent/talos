@@ -1,4 +1,5 @@
 import os
+from pydantic.types import SecretStr
 
 from talos.core.main_agent import MainAgent
 from talos.disciplines.proposals.models import RunParams
@@ -10,9 +11,9 @@ def main() -> None:
     The main entry point for the Treasury Agent CLI.
     """
     llm = OpenAI(
-        model_name="text-davinci-003",
+        model="text-davinci-003",
         temperature=0.0,
-        openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
+        api_key=SecretStr(os.environ.get("OPENAI_API_KEY", "")),
     )
     agent = MainAgent(
         llm=llm,

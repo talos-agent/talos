@@ -37,7 +37,7 @@ def analyze_and_post_sentiment():
     with open("tweet_id.txt", "r") as f:
         tweet_id = f.read()
 
-    replies = get_all_replies(api, tweet_id)
+    get_all_replies(api, tweet_id)
 
     # TODO: Implement sentiment analysis and post to Twitter
     pass

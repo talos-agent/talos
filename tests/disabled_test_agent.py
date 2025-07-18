@@ -1,10 +1,8 @@
-import sys
 import os
 from unittest.mock import patch
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 os.environ["OPENAI_API_KEY"] = "test"
-sys.path.insert(0, 'src')
 from talos.agent import Agent
 
 class TestSchema(BaseModel):
