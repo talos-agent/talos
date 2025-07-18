@@ -1,4 +1,5 @@
 import os
+from pydantic.types import SecretStr
 
 from talos.core.main_agent import MainAgent
 from talos.disciplines.proposals.models import RunParams
@@ -12,7 +13,7 @@ def main() -> None:
     llm = OpenAI(
         model="text-davinci-003",
         temperature=0.0,
-        api_key=os.environ.get("OPENAI_API_KEY", ""),
+        api_key=SecretStr(os.environ.get("OPENAI_API_KEY", "")),
     )
     agent = MainAgent(
         llm=llm,
