@@ -1,4 +1,3 @@
-from typing import Dict, List
 from talos.disciplines.base import Discipline
 from talos.disciplines.implementations import (
     ProposalsDiscipline,
@@ -22,10 +21,10 @@ class MainAgent:
     def __init__(
         self,
         llm: BaseLanguageModel,
-        tools: List[Tool],
+        tools: "list[Tool]",
         prompts_dir: str,
     ):
-        self.disciplines: Dict[str, Discipline] = {
+        self.disciplines: "dict[str, Discipline]" = {
             "proposals": ProposalsDiscipline(llm=llm),
             "twitter": TwitterDiscipline(),
             "github": GitHubDiscipline(),
@@ -34,7 +33,7 @@ class MainAgent:
         }
         self.tools = {tool.name: tool for tool in tools}
         self.prompt_manager = PromptManager(prompts_dir)
-        self.history: List[Dict[str, str]] = []
+        self.history: "list[dict[str, str]]" = []
         self.hypervisor = Hypervisor()
 
     def add_to_history(self, user_message: str, agent_response: str) -> None:
@@ -43,7 +42,7 @@ class MainAgent:
         """
         self.history.append({"user": user_message, "agent": agent_response})
 
-    def pop_from_history(self) -> Dict[str, str]:
+    def pop_from_history(self) -> "dict[str, str]":
         """
         Pops the last message from the conversation history.
         """
