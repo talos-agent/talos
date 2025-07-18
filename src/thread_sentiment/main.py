@@ -1,8 +1,8 @@
 import os
 import tweepy
 from .twitter import get_all_replies
-from src.talos.agent import Agent
-from src.talos.prompts.prompt_manager import PromptManager
+from talos.agent import Agent, AIMessage
+from talos.prompts.prompt_manager import PromptManager
 
 prompt_manager = PromptManager("src/talos/prompts")
 
@@ -30,9 +30,13 @@ def analyze_sentiment(tweets: list[dict]) -> str:
     Analyzes the sentiment of a list of tweets and returns a summary.
     """
     prompt = prompt_manager.get_prompt("thread_sentiment")
+    if prompt is None:
+        raise ValueError("Prompt not found")
     agent = Agent(model="gpt-4", prompt=prompt.template)
     response = agent.run(message="", history=[], tweets=str(tweets))
-    return response.content
+    if isinstance(response, AIMessage):
+        return str(response.content)
+    return str(response)
 
 
 def analyze_and_post_sentiment():

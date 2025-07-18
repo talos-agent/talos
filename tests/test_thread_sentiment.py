@@ -4,7 +4,7 @@ from thread_sentiment import main
 def test_import():
     assert main is not None
 
-@patch("src.thread_sentiment.main.prompt_manager")
+@patch("thread_sentiment.main.prompt_manager")
 def test_analyze_sentiment(mock_prompt_manager):
     # Mock the Agent class
     main.Agent = Mock()
