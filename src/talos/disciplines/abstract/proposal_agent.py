@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any, Dict, List
+from typing import Any
 
 from talos.disciplines.base import Discipline
 from talos.disciplines.proposals.models import Proposal, QueryResponse
@@ -10,7 +10,7 @@ class ProposalAgent(Discipline):
     An abstract base class for an agent that can evaluate proposals.
     """
 
-    def __init__(self, rag_dataset: Any, tools: List[Any]):
+    def __init__(self, rag_dataset: Any, tools: "list[Any]"):
         self.rag_dataset = rag_dataset
         self.tools = tools
 
@@ -20,7 +20,7 @@ class ProposalAgent(Discipline):
 
     @abstractmethod
     def evaluate_proposal(
-        self, proposal: Proposal, feedback: List[Dict[str, Any]]
+        self, proposal: Proposal, feedback: "list[dict[str, Any]]"
     ) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.

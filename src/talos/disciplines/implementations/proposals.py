@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from langchain.chains import LLMChain
 from langchain_core.language_models import BaseLanguageModel
@@ -17,13 +17,13 @@ class ProposalsDiscipline(ProposalAgent):
         self,
         llm: BaseLanguageModel,
         rag_dataset: Any = None,
-        tools: Optional[List[Any]] = None,
+        tools: Optional["list[Any]"] = None,
     ):
         super().__init__(rag_dataset, tools if tools is not None else [])
         self.llm = llm
 
     def evaluate_proposal(
-        self, proposal: Proposal, feedback: List[Dict[str, Any]]
+        self, proposal: Proposal, feedback: "list[dict[str, Any]]"
     ) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.

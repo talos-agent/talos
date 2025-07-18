@@ -1,12 +1,9 @@
-from typing import List
-
-
 class Prompt:
     """
     A class to represent a prompt.
     """
 
-    def __init__(self, name: str, template: str, input_variables: List[str]):
+    def __init__(self, name: str, template: str, input_variables: "list[str]"):
         self.name = name
         self.template = template
         self.input_variables = input_variables

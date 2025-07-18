@@ -1,18 +1,18 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
-from typing import Type, List, Optional, Any
+from typing import Optional, Any
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
 class Agent(BaseModel):
     model_name: str = Field(..., alias="model")
     prompt_template_str: str = Field(..., alias="prompt_template")
-    schema_class: Optional[Type[BaseModel]] = Field(None, alias="schema")
-    tools: Optional[List] = None
+    schema_class: Optional["type[BaseModel]"] = Field(None, alias="schema")
+    tools: Optional["list"] = None
 
     model: Any = None
     prompt_template: Any = None
-    history: List[BaseMessage] = []
+    history: "list[BaseMessage]" = []
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -21,7 +21,7 @@ class Agent(BaseModel):
             self.model = self.model.bind_tools(self.tools)
         self.prompt_template = ChatPromptTemplate.from_template(self.prompt_template_str)
 
-    def run(self, message: str, history: Optional[List[BaseMessage]] = None) -> BaseModel:
+    def run(self, message: str, history: Optional["list[BaseMessage]"] = None) -> BaseModel:
         if history:
             self.history.extend(history)
 
