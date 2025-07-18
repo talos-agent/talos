@@ -1,16 +1,52 @@
 import tweepy
-from talos.disciplines.abstract.twitter import Twitter
+from talos.tools.basetool import Tool
 
 
-class TweepyDiscipline(Twitter):
+class TweepyTool(Tool):
     """
-    A discipline for interacting with Twitter using Tweepy.
+    A tool for interacting with Twitter using Tweepy.
     """
 
     def __init__(self, consumer_key: str, consumer_secret: str, access_token: str, access_token_secret: str):
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         self.api = tweepy.API(auth)
+
+    @property
+    def name(self) -> str:
+        return "tweepy"
+
+    def run(self, **kwargs) -> str:
+        """
+        Runs the tool.
+        """
+        command = kwargs.get("command")
+        if not command:
+            return "No command specified. Available commands are: read_posts, post_tweet, reply_to_tweet, create_poll, get_poll_results, get_all_replies, get_follower_count, get_following_count, get_tweet_engagement"
+        if command == "read_posts":
+            return self.read_posts(kwargs.get("query"))
+        elif command == "post_tweet":
+            self.post_tweet(kwargs.get("tweet"))
+            return "Tweet posted successfully."
+        elif command == "reply_to_tweet":
+            self.reply_to_tweet(kwargs.get("tweet_id"), kwargs.get("reply"))
+            return "Replied to tweet successfully."
+        elif command == "create_poll":
+            self.create_poll(kwargs.get("question"), kwargs.get("options"))
+            return "Poll created successfully."
+        elif command == "get_poll_results":
+            return self.get_poll_results(kwargs.get("poll_id"))
+        elif command == "get_all_replies":
+            return self.get_all_replies(kwargs.get("tweet_id"))
+        elif command == "get_follower_count":
+            return self.get_follower_count(kwargs.get("username"))
+        elif command == "get_following_count":
+            return self.get_following_count(kwargs.get("username"))
+        elif command == "get_tweet_engagement":
+            return self.get_tweet_engagement(kwargs.get("tweet_id"))
+        else:
+            return "Invalid command."
+
 
     def read_posts(self, query: str) -> str:
         """
