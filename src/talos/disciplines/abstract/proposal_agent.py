@@ -10,7 +10,7 @@ class ProposalAgent(Discipline):
     An abstract base class for an agent that can evaluate proposals.
     """
 
-    def __init__(self, rag_dataset: Any, tools: "list[Any]"):
+    def __init__(self, rag_dataset: Any, tools: list[Any]):
         self.rag_dataset = rag_dataset
         self.tools = tools
 
@@ -20,7 +20,7 @@ class ProposalAgent(Discipline):
 
     @abstractmethod
     def evaluate_proposal(
-        self, proposal: Proposal, feedback: "list[dict[str, Any]]"
+        self, proposal: Proposal, feedback: list[dict[str, Any]]
     ) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.

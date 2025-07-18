@@ -10,7 +10,7 @@ class PromptManager:
 
     def __init__(self, prompts_dir: str):
         self.prompts_dir = prompts_dir
-        self.prompts: "dict[str, Prompt]" = {}
+        self.prompts: dict[str, Prompt] = {}
         self.load_prompts()
 
     def load_prompts(self) -> None:
