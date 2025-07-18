@@ -52,18 +52,25 @@ The project provides a set of tools for interacting with various services:
 This project uses `uv` for dependency management.
 
 1.  Install `uv`:
+
     ```bash
-pip install uv
+    pip install uv
     ```
+
 2.  Create a virtual environment:
+
     ```bash
     uv venv
     ```
+
 3.  Activate the virtual environment:
+
     ```bash
     source .venv/bin/activate
     ```
+
 4.  Install dependencies:
+
     ```bash
     uv pip install -e .[core,dev]
     ```
