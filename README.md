@@ -1,4 +1,4 @@
-# Treasury Agent
+# Talos
 
 An AI agent for managing a cryptocurrency treasury, built with LangChain.
 
