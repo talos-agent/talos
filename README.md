@@ -85,15 +85,10 @@ To start the interactive CLI, run the following command:
 export OPENAI_API_KEY="your-openai-api-key"
 export PINATA_API_KEY="your-pinata-api-key"
 export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
-treasury-agent
+python -m src.talos.core.cli
 ```
 
 You can then interact with the agent in a continuous conversation. To exit, type `exit`.
-
-You can also use the `ipfs` command to interact with IPFS:
-
--   `ipfs publish <file_path>`: Publishes a file to IPFS.
--   `ipfs read <ipfs_hash>`: Reads a file from IPFS.
 
 ### Proposal Evaluation Example
 
