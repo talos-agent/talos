@@ -1,18 +1,30 @@
-from langchain.tools import tool
 import ipfshttpclient
+from langchain.tools import BaseTool
 
-@tool
-def add_content(content: str) -> str:
-    """
-    Adds content to IPFS.
-    """
-    client = ipfshttpclient.connect()
-    return client.add_str(content)
+class IpfsTool(BaseTool):
+    name = "ipfs_tool"
+    description = "Provides tools for interacting with IPFS."
 
-@tool
-def get_content(hash: str) -> str:
-    """
-    Gets content from IPFS.
-    """
-    client = ipfshttpclient.connect()
-    return client.cat(hash).decode()
+    def __init__(self):
+        super().__init__()
+        self.client = ipfshttpclient.connect()
+
+    def add_content(self, content: str) -> str:
+        """
+        Adds content to IPFS.
+        """
+        return self.client.add_str(content)
+
+    def get_content(self, hash: str) -> str:
+        """
+        Gets content from IPFS.
+        """
+        return self.client.cat(hash).decode()
+
+    def _run(self, tool_name: str, **kwargs):
+        if tool_name == "add_content":
+            return self.add_content(**kwargs)
+        elif tool_name == "get_content":
+            return self.get_content(**kwargs)
+        else:
+            raise ValueError(f"Unknown tool: {tool_name}")

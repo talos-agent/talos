@@ -63,16 +63,3 @@ class TwitterTool(BaseTool):
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
 
-    def get_tools(self):
-        return [
-            self.post_tweet,
-            self.get_all_replies,
-            self.reply_to_tweet,
-            self.get_follower_count,
-            self.get_following_count,
-            self.get_tweet_engagement,
-        ]
-
-def get_twitter_tools() -> list[BaseTool]:
-    twitter_tool = TwitterTool()
-    return twitter_tool.get_tools()

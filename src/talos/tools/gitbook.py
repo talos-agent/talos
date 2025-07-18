@@ -1,13 +1,16 @@
-from langchain.tools import tool
 import os
 import requests
+from langchain.tools import BaseTool
 
-class GitBook:
+class GitBookTool(BaseTool):
+    name = "gitbook_tool"
+    description = "Provides tools for interacting with the GitBook API."
+
     def __init__(self):
+        super().__init__()
         self.session = requests.Session()
         self.session.headers.update({"Authorization": f"Bearer {os.environ['GITBOOK_API_KEY']}"})
 
-    @tool
     def read_page(self, page_url: str) -> str:
         """
         Reads a GitBook page.
@@ -16,14 +19,26 @@ class GitBook:
         response.raise_for_status()
         return response.text
 
-    @tool
-    def update_page(self, page_url: str, content: str) -> None:
+    def update_page(self, page_url: str, content: str) -> str:
         """
         Updates a GitBook page.
         """
         response = self.session.put(page_url, json={"content": content})
         response.raise_for_status()
+        return "Page updated successfully."
 
-gitbook_tools = GitBook()
-read_page = gitbook_tools.read_page
-update_page = gitbook_tools.update_page
+    def _run(self, tool_name: str, **kwargs):
+        if tool_name == "read_page":
+            return self.read_page(**kwargs)
+        elif tool_name == "update_page":
+            return self.update_page(**kwargs)
+        else:
+            raise ValueError(f"Unknown tool: {tool_name}")
+
+    def _run(self, tool_name: str, **kwargs):
+        if tool_name == "read_page":
+            return self.read_page(**kwargs)
+        elif tool_name == "update_page":
+            return self.update_page(**kwargs)
+        else:
+            raise ValueError(f"Unknown tool: {tool_name}")
