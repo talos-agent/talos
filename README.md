@@ -19,7 +19,7 @@ This project uses `uv` for dependency management.
 
 1.  Install `uv`:
     ```bash
-    pip install uv
+pip install talos
     ```
 2.  Create a virtual environment:
     ```bash
