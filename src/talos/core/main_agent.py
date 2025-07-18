@@ -11,6 +11,7 @@ from talos.disciplines.proposals.models import Proposal, QueryResponse, RunParam
 from talos.tools.basetool import Tool
 from talos.prompts.prompt_manager import PromptManager
 from talos.hypervisor.hypervisor import Hypervisor
+from langchain_openai import OpenAI
 
 
 class MainAgent:
@@ -25,8 +26,9 @@ class MainAgent:
         prompts_dir: str,
         model: str = "text-davinci-003",
     ):
+        llm = OpenAI(model_name=model, openai_api_key=openai_api_key)
         self.disciplines: Dict[str, Discipline] = {
-            "proposals": ProposalsDiscipline(openai_api_key=openai_api_key, model_name=model),
+            "proposals": ProposalsDiscipline(llm=llm),
             "twitter": TwitterDiscipline(),
             "github": GitHubDiscipline(),
             "onchain": OnChainManagementDiscipline(),
