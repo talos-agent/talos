@@ -71,3 +71,15 @@ class Agent(BaseModel):
              return result
         else:
             raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
+
+    def reset_history(self):
+        """
+        Resets the history of the agent.
+        """
+        self.history = []
+
+    def add_message_to_history(self, message: BaseMessage):
+        """
+        Adds a message to the history of the agent.
+        """
+        self.history.append(message)
