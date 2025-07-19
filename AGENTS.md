@@ -26,3 +26,7 @@ Please adhere to the following code style guidelines:
 *   Break down large changes into smaller, logical commits.
 *   Ensure that all new code is covered by tests.
 *   Update the documentation as needed.
+
+## Commands
+
+- `./run_checks.sh`: Run ruff, mypy, and pytest.
