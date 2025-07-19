@@ -1,4 +1,3 @@
-from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
@@ -20,18 +19,16 @@ class Agent(BaseModel):
         schema_class: The schema class to use for structured output.
         tool_manager: The tool manager to use.
     """
-    model_name: str = Field(..., alias="model")
+    model: Any
     prompt_manager: PromptManager = Field(..., alias="prompt_manager")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
-    model: Any = None
     history: list[BaseMessage] = []
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.model = None
         self.set_prompt()
 
     def set_prompt(self, name: str = "default"):
@@ -59,8 +56,6 @@ class Agent(BaseModel):
         return query
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
-        if not self.model:
-            self.model = ChatOpenAI(model=self.model_name)
         if history:
             self.history.extend(history)
 
