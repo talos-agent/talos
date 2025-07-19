@@ -31,7 +31,7 @@ class Agent(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.model = ChatOpenAI(model=self.model_name)
+        self.model = None
         self.set_prompt()
 
     def set_prompt(self, name: str = "default"):
@@ -59,6 +59,8 @@ class Agent(BaseModel):
         return query
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
+        if not self.model:
+            self.model = ChatOpenAI(model=self.model_name)
         if history:
             self.history.extend(history)
 
