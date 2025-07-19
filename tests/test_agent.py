@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch
 from talos.agent import Agent
 from talos.prompts.prompt_manager import PromptManager
 from langchain_core.messages import HumanMessage, AIMessage
