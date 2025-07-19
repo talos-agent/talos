@@ -1,7 +1,8 @@
 import os
 
-from conversational.main_agent import MainAgent
-from research.models import Feedback, Proposal
+from talos.core.main_agent import MainAgent
+from talos.disciplines.proposals.models import Feedback, Proposal
+from langchain_openai import ChatOpenAI
 
 
 def run_proposal_example():
@@ -10,9 +11,9 @@ def run_proposal_example():
     """
     # Initialize the main agent
     agent = MainAgent(
-        openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
-        pinata_api_key=os.environ.get("PINATA_API_KEY", ""),
-        pinata_secret_api_key=os.environ.get("PINATA_SECRET_API_KEY", ""),
+        llm=ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=os.environ.get("OPENAI_API_KEY", "")),
+        tools=[],
+        prompts_dir="",
     )
 
     # Define the proposal

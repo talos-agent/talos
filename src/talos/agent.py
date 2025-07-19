@@ -1,8 +1,7 @@
-from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
-from typing import Any
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.language_models import BaseChatModel
 from talos.tools.tool_manager import ToolManager
 from talos.prompts.prompt_manager import PromptManager
 
@@ -20,18 +19,16 @@ class Agent(BaseModel):
         schema_class: The schema class to use for structured output.
         tool_manager: The tool manager to use.
     """
-    model_name: str = Field(..., alias="model")
+    model: BaseChatModel
     prompt_manager: PromptManager = Field(..., alias="prompt_manager")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
-    model: Any = None
     history: list[BaseMessage] = []
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.model = None
         self.set_prompt()
 
     def set_prompt(self, name: str = "default"):
@@ -59,8 +56,6 @@ class Agent(BaseModel):
         return query
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
-        if not self.model:
-            self.model = ChatOpenAI(model=self.model_name)
         if history:
             self.history.extend(history)
 
@@ -69,7 +64,7 @@ class Agent(BaseModel):
 
         tools = self.tool_manager.get_all_tools()
         if tools:
-            self.model = self.model.bind_tools(tools)
+            self.model = self.model.bind_tools(tools) # type: ignore
 
         if self.schema_class:
             structured_llm = self.model.with_structured_output(self.schema_class)
