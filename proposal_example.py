@@ -1,7 +1,7 @@
 import os
 
 from talos.core.main_agent import MainAgent
-from talos.disciplines.proposals.models import Feedback, Proposal
+from talos.services.proposals.models import Feedback, Proposal
 from langchain_openai import ChatOpenAI
 
 

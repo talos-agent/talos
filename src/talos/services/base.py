@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 
-class Discipline(ABC):
+class Service(ABC):
     """
-    An abstract base class for a discipline.
+    An abstract base class for a service.
 
-    Disciplines are a way to organize and manage the agent's actions.
+    Services are a way to organize and manage the agent's actions.
     They are LLM driven actions, which means that they are powered by a
     language model. This allows them to be more flexible and powerful
     than traditional tools.
@@ -15,6 +15,6 @@ class Discipline(ABC):
     @abstractmethod
     def name(self) -> str:
         """
-        The name of the discipline.
+        The name of the service.
         """
         pass
