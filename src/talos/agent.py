@@ -3,10 +3,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-from langchain_core.tools import BaseTool
+from talos.tools.tool_manager import ToolManager
 
+
+from pydantic import ConfigDict
 
 class Agent(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     """
     Agent is a class that represents an agent that can interact with the user.
 
@@ -14,12 +17,12 @@ class Agent(BaseModel):
         model_name: The name of the model to use.
         prompt_template: The prompt template to use.
         schema_class: The schema class to use for structured output.
-        tools: A list of tools to use.
+        tool_manager: The tool manager to use.
     """
     model_name: str = Field(..., alias="model")
     prompt_template: str = Field("You are a helpful assistant.\n{messages}", alias="prompt")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
-    tools: list[type[BaseTool]] | None = None
+    tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     model: Any = None
@@ -28,15 +31,24 @@ class Agent(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         self.model = ChatOpenAI(model=self.model_name)
-        if self.tools:
-            self.model = self.model.bind_tools(self.tools)
         self._prompt_template = ChatPromptTemplate.from_template(self.prompt_template)
+
+    def _add_context(self, query: str, **kwargs) -> str:
+        """
+        A base method for adding context to the query.
+        """
+        return query
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
         if history:
             self.history.extend(history)
 
-        self.history.append(HumanMessage(content=message))
+        message_with_context = self._add_context(message, **kwargs)
+        self.history.append(HumanMessage(content=message_with_context))
+
+        tools = self.tool_manager.get_all_tools()
+        if tools:
+            self.model = self.model.bind_tools(tools)
 
         if self.schema_class:
             structured_llm = self.model.with_structured_output(self.schema_class)

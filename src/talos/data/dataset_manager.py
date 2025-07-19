@@ -1,0 +1,64 @@
+from typing import List, Dict, Any
+from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
+
+
+class DatasetManager:
+    """
+    A class for managing datasets for the Talos agent.
+    """
+    def __init__(self):
+        self.datasets: Dict[str, Any] = {}
+        self.vector_store = None
+        self.embeddings = OpenAIEmbeddings()
+
+    def add_dataset(self, name: str, data: List[str]):
+        """
+        Adds a dataset to the DatasetManager.
+        """
+        if name in self.datasets:
+            raise ValueError(f"Dataset with name '{name}' already exists.")
+        self.datasets[name] = data
+        if self.vector_store is None:
+            self.vector_store = FAISS.from_texts(data, self.embeddings)
+        else:
+            self.vector_store.add_texts(data)
+
+    def remove_dataset(self, name: str):
+        """
+        Removes a dataset from the DatasetManager.
+        """
+        if name not in self.datasets:
+            raise ValueError(f"Dataset with name '{name}' not found.")
+        # This is a bit tricky with FAISS. For now, we'll just clear the vector store
+        # and rebuild it without the removed dataset.
+        del self.datasets[name]
+        self.vector_store = None
+        for dataset in self.datasets.values():
+            if self.vector_store is None:
+                self.vector_store = FAISS.from_texts(dataset, self.embeddings)
+            else:
+                self.vector_store.add_texts(dataset)
+
+    def get_dataset(self, name: str) -> Any:
+        """
+        Gets a dataset by name.
+        """
+        if name not in self.datasets:
+            raise ValueError(f"Dataset with name '{name}' not found.")
+        return self.datasets[name]
+
+    def get_all_datasets(self) -> Dict[str, Any]:
+        """
+        Gets all registered datasets.
+        """
+        return self.datasets
+
+    def search(self, query: str, k: int = 5) -> List[str]:
+        """
+        Searches the vector store for similar documents.
+        """
+        if self.vector_store is None:
+            return []
+        results = self.vector_store.similarity_search(query, k=k)
+        return [doc.page_content for doc in results]
