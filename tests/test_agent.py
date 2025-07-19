@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from talos.agent import Agent
 from talos.prompts.prompt_manager import PromptManager
 from langchain_core.messages import HumanMessage, AIMessage
@@ -13,14 +14,16 @@ class MockPromptManager(PromptManager):
 def prompt_manager():
     return MockPromptManager()
 
-def test_reset_history(prompt_manager):
+@patch('openai.OpenAI')
+def test_reset_history(mock_openai, prompt_manager):
     agent = Agent(model="gpt-3.5-turbo", prompt_manager=prompt_manager)
     agent.add_to_history([HumanMessage(content="hello")])
     assert len(agent.history) == 1
     agent.reset_history()
     assert len(agent.history) == 0
 
-def test_add_to_history(prompt_manager):
+@patch('openai.OpenAI')
+def test_add_to_history(mock_openai, prompt_manager):
     agent = Agent(model="gpt-3.5-turbo", prompt_manager=prompt_manager)
     messages = [
         HumanMessage(content="hello"),
