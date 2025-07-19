@@ -3,9 +3,9 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain_core.language_models import BaseLanguageModel
 
-from talos.disciplines.base import Discipline
-from talos.disciplines.proposals.models import AddDatasetParams, QueryResponse, RunParams
-class CoreAgent(Discipline):
+from talos.services.base import Service
+from talos.services.proposals.models import AddDatasetParams, QueryResponse, RunParams
+class CoreAgent(Service):
     """
     A LangChain-based agent for managing conversational memory.
     """

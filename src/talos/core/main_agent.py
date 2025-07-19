@@ -1,10 +1,10 @@
-from talos.disciplines.base import Discipline
-from talos.disciplines.implementations import (
-    ProposalsDiscipline,
-    TwitterDiscipline,
-    GitHubDiscipline,
+from talos.services.base import Service
+from talos.services.implementations import (
+    ProposalsService,
+    TwitterService,
+    GitHubService,
 )
-from talos.disciplines.proposals.models import Proposal, QueryResponse, RunParams
+from talos.services.proposals.models import Proposal, QueryResponse, RunParams
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.hypervisor.hypervisor import Hypervisor
 from langchain_core.language_models import BaseLanguageModel
@@ -22,11 +22,10 @@ class MainAgent:
         tools: "list[Tool]",
         prompts_dir: str,
     ):
-        self.disciplines: "dict[str, Discipline]" = {
-            "proposals": ProposalsDiscipline(llm=llm),
-            "twitter": TwitterDiscipline(),
-            "github": GitHubDiscipline(),
-        }
+        self.services: dict[str, Service] = {}
+        self.services["proposals"] = ProposalsService(llm=llm)
+        self.services["twitter"] = TwitterService()
+        self.services["github"] = GitHubService(llm=llm, token="")
         self.tools = {tool.name: tool for tool in tools}
         self.prompt_manager = FilePromptManager(prompts_dir)
         self.history: "list[dict[str, str]]" = []
@@ -60,12 +59,12 @@ class MainAgent:
             return self.run_tool(params.tool, params.tool_args)
         elif params.prompt in self.prompt_manager.prompts:
             return self.run_prompt(params.prompt, params.prompt_args)
-        elif params.discipline in self.disciplines:
-            discipline = self.disciplines[params.discipline]
+        elif params.discipline in self.services:
+            service = self.services[params.discipline]
             # This is a placeholder for actually calling the discipline
-            return QueryResponse(answers=[{"answer": f"Using {discipline.name} discipline", "score": 1.0}])
+            return QueryResponse(answers=[{"answer": f"Using {service.name} discipline", "score": 1.0}])
         else:
-            return QueryResponse(answers=[{"answer": "No discipline specified", "score": 1.0}])
+            return QueryResponse(answers=[{"answer": "No service specified", "score": 1.0}])
 
     def run_tool(self, tool_name: str, tool_args: dict) -> QueryResponse:
         """
@@ -99,8 +98,8 @@ class MainAgent:
         """
         Evaluates a proposal.
         """
-        proposals_discipline = self.disciplines.get("proposals")
-        if proposals_discipline and isinstance(proposals_discipline, ProposalsDiscipline):
-            return proposals_discipline.evaluate_proposal(proposal, feedback=[])
+        proposals_service = self.services.get("proposals")
+        if proposals_service and isinstance(proposals_service, ProposalsService):
+            return proposals_service.evaluate_proposal(proposal, feedback=[])
         else:
-            return QueryResponse(answers=[{"answer": "Proposals discipline not loaded", "score": 0.0}])
+            return QueryResponse(answers=[{"answer": "Proposals service not loaded", "score": 0.0}])

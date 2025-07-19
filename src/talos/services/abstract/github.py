@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from langchain_core.language_models import BaseLanguageModel
 
+from talos.services.base import Service
 
-class GitHub(ABC):
+
+class GitHub(Service, ABC):
     """
     An abstract base class for a GitHub discipline.
     """

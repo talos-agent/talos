@@ -4,11 +4,11 @@ from langchain.chains import LLMChain
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 
-from talos.disciplines.abstract import ProposalAgent
-from talos.disciplines.proposals.models import Proposal, QueryResponse
+from talos.services.abstract import ProposalAgent
+from talos.services.proposals.models import Proposal, QueryResponse
 
 
-class ProposalsDiscipline(ProposalAgent):
+class ProposalsService(ProposalAgent):
     """
     A LangChain-based agent for evaluating proposals.
     """

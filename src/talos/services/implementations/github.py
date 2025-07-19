@@ -1,11 +1,11 @@
-from talos.disciplines.abstract.github import GitHub
+from talos.services.abstract.github import GitHub
 from talos.tools.github import GithubTools
 from langchain_core.language_models import BaseLanguageModel
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
 
-class PyGithubDiscipline(GitHub):
+class GitHubService(GitHub):
     """
     A discipline for interacting with GitHub using PyGithub.
     """
@@ -13,6 +13,10 @@ class PyGithubDiscipline(GitHub):
     def __init__(self, llm: BaseLanguageModel, token: str):
         super().__init__(llm, token)
         self.tools = GithubTools(token)
+
+    @property
+    def name(self) -> str:
+        return "github"
 
     def reply_to_issues(self, user: str, project: str) -> None:
         """

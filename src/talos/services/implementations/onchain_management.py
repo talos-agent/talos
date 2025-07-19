@@ -1,7 +1,7 @@
-from talos.disciplines.abstract.onchain_management import OnChainManagement
+from talos.services.abstract.onchain_management import OnChainManagement
 
 
-class OnChainManagementDiscipline(OnChainManagement):
+class OnChainManagementService(OnChainManagement):
     """
     A discipline for on-chain management.
     """

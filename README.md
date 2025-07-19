@@ -20,8 +20,8 @@ The repository is structured as follows:
     -   `talos/`: Contains the main source code for the Talos agent.
         -   `agent/`: Contains the core agent logic.
         -   `core/`: Contains the core components of the agent, such as the CLI and the main agent loop.
-        -   `disciplines/`: Contains the different disciplines that the agent can perform, such as research and trading.
-        -   `hypervisor/`: Contains the hypervisor for managing the agent's disciplines. The hypervisor is responsible for monitoring the agent's actions and ensuring that it doesn't do anything wrong. It will also be used to evaluate proposals, which are tracked at [https://github.com/talos-agent/TIPs](https://github.com/talos-agent/TIPs).
+        -   `services/`: Contains the different services that the agent can perform, such as research and trading.
+        -   `hypervisor/`: Contains the hypervisor for managing the agent's services. The hypervisor is responsible for monitoring the agent's actions and ensuring that it doesn't do anything wrong. It will also be used to evaluate proposals, which are tracked at [https://github.com/talos-agent/TIPs](https://github.com/talos-agent/TIPs).
         -   `prompts/`: Contains the prompts used by the agent.
         -   `tools/`: Contains the tools that the agent can use, such as GitBook, GitHub, IPFS, and Twitter.
         -   `utils/`: Contains utility functions.

@@ -1,11 +1,11 @@
 from abc import abstractmethod
 from typing import Any
 
-from talos.disciplines.base import Discipline
-from talos.disciplines.proposals.models import Proposal, QueryResponse
+from talos.services.base import Service
+from talos.services.proposals.models import Proposal, QueryResponse
 
 
-class ProposalAgent(Discipline):
+class ProposalAgent(Service):
     """
     An abstract base class for an agent that can evaluate proposals.
     """
