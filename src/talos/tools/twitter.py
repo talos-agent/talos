@@ -1,10 +1,10 @@
-import os
 import tweepy
 from langchain.tools import BaseTool
-from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from enum import Enum
-from typing import Any
+from .twitter_client import TwitterClient, TweepyClient
+from .twitter_evaluator import TwitterAccountEvaluator, DefaultTwitterAccountEvaluator
+from ..models.evaluation import EvaluationResult
 
 class TwitterToolName(str, Enum):
     POST_TWEET = "post_tweet"
@@ -21,18 +21,16 @@ class TwitterToolArgs(BaseModel):
     tweet_id: str | None = Field(None, description="The ID of the tweet")
     username: str | None = Field(None, description="The username of the user")
 
-from .twitter_client import TwitterClient, TweepyClient
-from .twitter_evaluator import TwitterAccountEvaluator, DefaultTwitterAccountEvaluator
-from ..models.evaluation import EvaluationResult
+from typing import Optional
 
 class TwitterTool(BaseTool):
     name: str = "twitter_tool"
     description: str = "Provides tools for interacting with the Twitter API."
     args_schema: type[BaseModel] = TwitterToolArgs
-    twitter_client: TwitterClient = None
-    account_evaluator: TwitterAccountEvaluator = None
+    twitter_client: Optional[TwitterClient] = None
+    account_evaluator: Optional[TwitterAccountEvaluator] = None
 
-    def __init__(self, twitter_client: TwitterClient = None, account_evaluator: TwitterAccountEvaluator = None):
+    def __init__(self, twitter_client: Optional[TwitterClient] = None, account_evaluator: Optional[TwitterAccountEvaluator] = None):
         super().__init__()
         self.twitter_client = twitter_client or TweepyClient()
         self.account_evaluator = account_evaluator or DefaultTwitterAccountEvaluator()
@@ -54,11 +52,13 @@ class TwitterTool(BaseTool):
 
     def get_follower_count(self, username: str) -> int:
         """Gets the follower count for a user."""
+        assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
         return user.followers_count
 
     def get_following_count(self, username: str) -> int:
         """Gets the following count for a user."""
+        assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
         return user.friends_count
 
@@ -69,6 +69,8 @@ class TwitterTool(BaseTool):
 
     def evaluate_account(self, username: str) -> EvaluationResult:
         """Evaluates a Twitter account and returns a score."""
+        assert self.twitter_client is not None
+        assert self.account_evaluator is not None
         user = self.twitter_client.get_user(username)
         return self.account_evaluator.evaluate(user)
 

@@ -4,14 +4,14 @@ from talos.tools.twitter import TwitterTool
 from talos.tools.twitter_client import TwitterClient
 from talos.tools.twitter_evaluator import TwitterAccountEvaluator
 from talos.models.evaluation import EvaluationResult
-from datetime import datetime, timezone
+from typing import Any
 
 class MockTwitterClient(TwitterClient):
     def get_user(self, username: str):
         return MagicMock()
 
 class MockTwitterAccountEvaluator(TwitterAccountEvaluator):
-    def evaluate(self, user: any) -> EvaluationResult:
+    def evaluate(self, user: Any) -> EvaluationResult:
         return EvaluationResult(
             score=75,
             additional_data={
