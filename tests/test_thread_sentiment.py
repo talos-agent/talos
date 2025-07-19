@@ -10,7 +10,7 @@ def test_analyze_sentiment(mock_prompt_manager):
     main.Agent = Mock()
 
     # Mock the run method
-    main.Agent.return_value.run.return_value.content = "The sentiment is positive."
+    main.Agent.return_value.run.return_value = main.AIMessage(content="The sentiment is positive.")
 
     # Mock the prompt manager
     mock_prompt_manager.get_prompt.return_value.template = "test"
