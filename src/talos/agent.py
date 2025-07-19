@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
-from typing import Any
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.language_models import BaseChatModel
 from talos.tools.tool_manager import ToolManager
 from talos.prompts.prompt_manager import PromptManager
 
@@ -19,7 +19,7 @@ class Agent(BaseModel):
         schema_class: The schema class to use for structured output.
         tool_manager: The tool manager to use.
     """
-    model: Any
+    model: BaseChatModel
     prompt_manager: PromptManager = Field(..., alias="prompt_manager")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
@@ -64,7 +64,7 @@ class Agent(BaseModel):
 
         tools = self.tool_manager.get_all_tools()
         if tools:
-            self.model = self.model.bind_tools(tools)
+            self.model = self.model.bind_tools(tools) # type: ignore
 
         if self.schema_class:
             structured_llm = self.model.with_structured_output(self.schema_class)
