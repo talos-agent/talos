@@ -1,24 +1,29 @@
 from typing import List, Dict, Any
+from pydantic import BaseModel, Field
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 
 
-class DatasetManager:
+class DatasetManager(BaseModel):
     """
     A class for managing datasets for the Talos agent.
     """
-    def __init__(self):
-        self.datasets: Dict[str, Any] = {}
-        self.vector_store = None
-        self.embeddings = OpenAIEmbeddings()
+    datasets: Dict[str, Any] = Field(default_factory=dict)
+    vector_store: Any = Field(default=None)
+    embeddings: Any = Field(default_factory=OpenAIEmbeddings)
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def add_dataset(self, name: str, data: List[str]):
         """
         Adds a dataset to the DatasetManager.
         """
-        if name in self.datasets:
+        if name in self.datasets and self.datasets.get(name):
             raise ValueError(f"Dataset with name '{name}' already exists.")
         self.datasets[name] = data
+        if not data:
+            return
         if self.vector_store is None:
             self.vector_store = FAISS.from_texts(data, self.embeddings)
         else:
@@ -34,7 +39,9 @@ class DatasetManager:
         # and rebuild it without the removed dataset.
         del self.datasets[name]
         self.vector_store = None
-        for dataset in self.datasets.values():
+        for dataset_name, dataset in self.datasets.items():
+            if not dataset:
+                continue
             if self.vector_store is None:
                 self.vector_store = FAISS.from_texts(dataset, self.embeddings)
             else:
