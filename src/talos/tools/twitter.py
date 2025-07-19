@@ -1,9 +1,11 @@
-import os
 import tweepy
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 from enum import Enum
-from typing import List
+from typing import Optional
+from .twitter_client import TwitterClient, TweepyClient
+from .twitter_evaluator import TwitterAccountEvaluator, DefaultTwitterAccountEvaluator
+from ..models.evaluation import EvaluationResult
 
 class TwitterToolName(str, Enum):
     POST_TWEET = "post_tweet"
@@ -12,6 +14,7 @@ class TwitterToolName(str, Enum):
     GET_FOLLOWER_COUNT = "get_follower_count"
     GET_FOLLOWING_COUNT = "get_following_count"
     GET_TWEET_ENGAGEMENT = "get_tweet_engagement"
+    EVALUATE_ACCOUNT = "evaluate_account"
 
 class TwitterToolArgs(BaseModel):
     tool_name: TwitterToolName = Field(..., description="The name of the tool to run")
@@ -20,49 +23,55 @@ class TwitterToolArgs(BaseModel):
     username: str | None = Field(None, description="The username of the user")
 
 class TwitterTool(BaseTool):
-    name = "twitter_tool"
-    description = "Provides tools for interacting with the Twitter API."
+    name: str = "twitter_tool"
+    description: str = "Provides tools for interacting with the Twitter API."
     args_schema: type[BaseModel] = TwitterToolArgs
+    twitter_client: Optional[TwitterClient] = None
+    account_evaluator: Optional[TwitterAccountEvaluator] = None
 
-    def __init__(self):
+    def __init__(self, twitter_client: Optional[TwitterClient] = None, account_evaluator: Optional[TwitterAccountEvaluator] = None):
         super().__init__()
-        auth = tweepy.OAuthHandler(os.environ["TWITTER_API_KEY"], os.environ["TWITTER_API_SECRET"])
-        auth.set_access_token(os.environ["TWITTER_ACCESS_TOKEN"], os.environ["TWITTER_ACCESS_TOKEN_SECRET"])
-        self.api = tweepy.API(auth)
+        self.twitter_client = twitter_client or TweepyClient()
+        self.account_evaluator = account_evaluator or DefaultTwitterAccountEvaluator()
 
     def post_tweet(self, tweet: str) -> str:
         """Posts a tweet."""
-        self.api.update_status(tweet)
-        return "Tweet posted successfully."
+        # This functionality is not yet migrated to the new TwitterClient
+        raise NotImplementedError
 
-    def get_all_replies(self, tweet_id: str) -> List[tweepy.Tweet]:
+    def get_all_replies(self, tweet_id: str) -> list[tweepy.Tweet]:
         """Gets all replies to a tweet."""
-        # This is a simplified implementation. A real implementation would need to handle pagination.
-        replies = tweepy.Cursor(self.api.search_tweets, q=f"to:{tweet_id}", tweet_mode='extended').items()
-        return [reply for reply in replies]
+        # This functionality is not yet migrated to the new TwitterClient
+        raise NotImplementedError
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> str:
         """Replies to a tweet."""
-        self.api.update_status(tweet, in_reply_to_status_id=tweet_id)
-        return "Replied to tweet successfully."
+        # This functionality is not yet migrated to the new TwitterClient
+        raise NotImplementedError
 
     def get_follower_count(self, username: str) -> int:
         """Gets the follower count for a user."""
-        user = self.api.get_user(screen_name=username)
+        assert self.twitter_client is not None
+        user = self.twitter_client.get_user(username)
         return user.followers_count
 
     def get_following_count(self, username: str) -> int:
         """Gets the following count for a user."""
-        user = self.api.get_user(screen_name=username)
+        assert self.twitter_client is not None
+        user = self.twitter_client.get_user(username)
         return user.friends_count
 
     def get_tweet_engagement(self, tweet_id: str) -> dict:
         """Gets the engagement for a tweet."""
-        tweet = self.api.get_status(tweet_id)
-        return {
-            "likes": tweet.favorite_count,
-            "retweets": tweet.retweet_count,
-        }
+        # This functionality is not yet migrated to the new TwitterClient
+        raise NotImplementedError
+
+    def evaluate_account(self, username: str) -> EvaluationResult:
+        """Evaluates a Twitter account and returns a score."""
+        assert self.twitter_client is not None
+        assert self.account_evaluator is not None
+        user = self.twitter_client.get_user(username)
+        return self.account_evaluator.evaluate(user)
 
     def _run(self, tool_name: str, **kwargs):
         if tool_name == "post_tweet":
@@ -77,6 +86,8 @@ class TwitterTool(BaseTool):
             return self.get_following_count(**kwargs)
         elif tool_name == "get_tweet_engagement":
             return self.get_tweet_engagement(**kwargs)
+        elif tool_name == "evaluate_account":
+            return self.evaluate_account(**kwargs)
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
 
