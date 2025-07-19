@@ -31,7 +31,7 @@ class Agent(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.model = ChatOpenAI(model=self.model_name)
+        self.model = None
         self.set_prompt()
 
     def set_prompt(self, name: str = "default"):
@@ -40,6 +40,18 @@ class Agent(BaseModel):
             raise ValueError(f"The prompt '{name}' is not defined.")
         self._prompt_template = ChatPromptTemplate.from_template(prompt.template)
 
+    def add_to_history(self, messages: list[BaseMessage]):
+        """
+        Adds a list of messages to the history.
+        """
+        self.history.extend(messages)
+
+    def reset_history(self):
+        """
+        Resets the history of the agent.
+        """
+        self.history = []
+
     def _add_context(self, query: str, **kwargs) -> str:
         """
         A base method for adding context to the query.
@@ -47,6 +59,8 @@ class Agent(BaseModel):
         return query
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
+        if not self.model:
+            self.model = ChatOpenAI(model=self.model_name)
         if history:
             self.history.extend(history)
 
