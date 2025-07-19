@@ -11,7 +11,7 @@ def agent(monkeypatch, tmp_path):
     monkeypatch.setattr(talos.agent, "ChatOpenAI", mock_chat_open_ai)
     prompts_dir = tmp_path / "prompts"
     prompts_dir.mkdir()
-    return Agent(model="gpt-3.5-turbo", prompt_manager=PromptManager(prompts_dir=str(prompts_dir)))
+    return Agent(model="gpt-3.5-turbo", prompt_manager=PromptManager(str(prompts_dir)))
 
 def test_reset_history(agent: Agent):
     agent.add_message_to_history(HumanMessage(content="Hello"))
