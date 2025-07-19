@@ -1,6 +1,10 @@
 import os
 import tweepy
 from .twitter import get_all_replies
+from talos.agent import Agent, AIMessage
+from talos.prompts.prompt_manager import PromptManager
+
+prompt_manager = PromptManager("src/talos/prompts")
 
 def post_question():
     """
@@ -21,6 +25,20 @@ def post_question():
     with open("tweet_id.txt", "w") as f:
         f.write(str(tweet.id))
 
+def analyze_sentiment(tweets: list[dict]) -> str:
+    """
+    Analyzes the sentiment of a list of tweets and returns a summary.
+    """
+    prompt = prompt_manager.get_prompt("thread_sentiment")
+    if prompt is None:
+        raise ValueError("Prompt not found")
+    agent = Agent(model="gpt-4", prompt=prompt.template)
+    response = agent.run(message="", history=[], tweets=str(tweets))
+    if isinstance(response, AIMessage):
+        return str(response.content)
+    return str(response)
+
+
 def analyze_and_post_sentiment():
     """
     Analyzes the replies to the tweet posted by post_question() and posts a sentiment analysis summary.
@@ -37,7 +55,7 @@ def analyze_and_post_sentiment():
     with open("tweet_id.txt", "r") as f:
         tweet_id = f.read()
 
-    get_all_replies(api, tweet_id)
+    tweets = get_all_replies(api, tweet_id)
+    sentiment = analyze_sentiment(tweets)
 
-    # TODO: Implement sentiment analysis and post to Twitter
-    pass
+    api.update_status(sentiment)

@@ -1,4 +1,4 @@
-name: Crypto Sentiment Analysis
+name: Thread Sentiment Analysis
 
 on:
   schedule:
@@ -24,7 +24,7 @@ jobs:
           TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
           TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
-        run: python -c "from src.crypto_sentiment.main import post_question; post_question()"
+        run: python -c "from src.thread_sentiment.main import post_question; post_question()"
       - name: Upload tweet ID
         uses: actions/upload-artifact@v3
         with:
@@ -55,4 +55,4 @@ jobs:
           TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
           # TODO: Add environment variable for LLM API key
-        run: python -c "from src.crypto_sentiment.main import analyze_and_post_sentiment; analyze_and_post_sentiment()"
+        run: python -c "from src.thread_sentiment.main import analyze_and_post_sentiment; analyze_and_post_sentiment()"

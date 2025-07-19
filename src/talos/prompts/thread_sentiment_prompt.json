@@ -1,0 +1,5 @@
+{
+    "name": "thread_sentiment",
+    "template": "Given a list of tweets from a thread, analyze the general sentiment about web3/crypto. The sentiment score should be between 0 and 100, where 0 is very negative and 100 is very positive.  The score should be weighted by the follower count of the person who replied, so people with more followers are weighted more than people with less.\n\nIn addition to the sentiment score, please highlight anything novel that you noticed from the content. This could include trending topics, recurring themes, or any particularly insightful or unusual comments.\n\nTweets:\n{tweets}",
+    "input_variables": ["tweets"]
+}
