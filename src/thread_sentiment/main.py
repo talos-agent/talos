@@ -2,9 +2,9 @@ import os
 import tweepy
 from .twitter import get_all_replies
 from talos.agent import Agent, AIMessage
-from talos.prompts.prompt_manager import PromptManager
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 
-prompt_manager = PromptManager("src/talos/prompts")
+prompt_manager = FilePromptManager("src/talos/prompts")
 
 def post_question():
     """
