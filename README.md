@@ -2,7 +2,7 @@
 
 This repository contains the code for Talos, an AI agent for managing a cryptocurrency treasury, built with LangChain. The official documentation for the Talos project can be found at [docs.talos.is](https://docs.talos.is/).
 
-This project uses LangChain to create a conversational agent with research capabilities. The agent is designed to be used by a DAO to manage its treasury, and can be used to perform tasks such as:
+Used LangChain to create a conversational agent with both research and onchain transaction execution capabilities. The agent is designed to be used by a DAO to manage its treasury, and can be used to perform tasks such as:
 
 -   Researching and evaluating investment opportunities
 -   Executing trades on decentralized exchanges
