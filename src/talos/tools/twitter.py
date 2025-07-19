@@ -2,6 +2,7 @@ import tweepy
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Optional
 from .twitter_client import TwitterClient, TweepyClient
 from .twitter_evaluator import TwitterAccountEvaluator, DefaultTwitterAccountEvaluator
 from ..models.evaluation import EvaluationResult
@@ -20,8 +21,6 @@ class TwitterToolArgs(BaseModel):
     tweet: str | None = Field(None, description="The content of the tweet")
     tweet_id: str | None = Field(None, description="The ID of the tweet")
     username: str | None = Field(None, description="The username of the user")
-
-from typing import Optional
 
 class TwitterTool(BaseTool):
     name: str = "twitter_tool"
