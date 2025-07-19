@@ -5,7 +5,7 @@ from talos.disciplines.implementations import (
     GitHubDiscipline,
 )
 from talos.disciplines.proposals.models import Proposal, QueryResponse, RunParams
-from talos.prompts.prompt_manager import PromptManager
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.hypervisor.hypervisor import Hypervisor
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool as Tool
@@ -28,7 +28,7 @@ class MainAgent:
             "github": GitHubDiscipline(),
         }
         self.tools = {tool.name: tool for tool in tools}
-        self.prompt_manager = PromptManager(prompts_dir)
+        self.prompt_manager = FilePromptManager(prompts_dir)
         self.history: "list[dict[str, str]]" = []
         self.hypervisor = Hypervisor()
 

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from talos.tools.tool_manager import ToolManager
+from talos.prompts.prompt_manager import PromptManager
 
 
 from pydantic import ConfigDict
@@ -15,12 +16,12 @@ class Agent(BaseModel):
 
     Args:
         model_name: The name of the model to use.
-        prompt_template: The prompt template to use.
+        prompt_manager: The prompt manager to use.
         schema_class: The schema class to use for structured output.
         tool_manager: The tool manager to use.
     """
     model_name: str = Field(..., alias="model")
-    prompt_template: str = Field("You are a helpful assistant.\n{messages}", alias="prompt")
+    prompt_manager: PromptManager = Field(..., alias="prompt_manager")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
 
@@ -31,7 +32,13 @@ class Agent(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         self.model = ChatOpenAI(model=self.model_name)
-        self._prompt_template = ChatPromptTemplate.from_template(self.prompt_template)
+        self.set_prompt()
+
+    def set_prompt(self, name: str = "default"):
+        prompt = self.prompt_manager.get_prompt(name)
+        if not prompt:
+            raise ValueError(f"The prompt '{name}' is not defined.")
+        self._prompt_template = ChatPromptTemplate.from_template(prompt.template)
 
     def _add_context(self, query: str, **kwargs) -> str:
         """
