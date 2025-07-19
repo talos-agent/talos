@@ -4,7 +4,6 @@ from talos.agent import Agent
 from unittest.mock import MagicMock
 import talos.agent
 from talos.prompts.prompt_manager import PromptManager
-import os
 
 @pytest.fixture
 def agent(monkeypatch, tmp_path):
