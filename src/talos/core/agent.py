@@ -5,8 +5,6 @@ from langchain_core.language_models import BaseLanguageModel
 
 from talos.disciplines.base import Discipline
 from talos.disciplines.proposals.models import AddDatasetParams, QueryResponse, RunParams
-
-
 class CoreAgent(Discipline):
     """
     A LangChain-based agent for managing conversational memory.
