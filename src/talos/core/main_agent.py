@@ -13,7 +13,8 @@ from talos.hypervisor.hypervisor import Hypervisor
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.base import Service
-from talos.services.implementations import GitHubService, ProposalsService, TwitterService
+from talos.services.github import GithubService
+from talos.services.implementations import ProposalsService, TwitterService
 from talos.services.models import Ticket
 from talos.tools.tool_manager import ToolManager
 
@@ -34,10 +35,13 @@ class MainAgent(Agent):
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.set_prompt("main_agent_prompt")
+        github_token = os.environ.get("GITHUB_TOKEN")
+        if not github_token:
+            raise ValueError("GITHUB_TOKEN environment variable not set.")
         services: list[Service] = [
             ProposalsService(llm=self.model, prompt_manager=self.prompt_manager),
             TwitterService(),
-            GitHubService(llm=self.model, token=os.environ.get("GITHUB_TOKEN")),
+            GithubService(token=github_token),
         ]
         if not self.router:
             self.router = Router(services)
