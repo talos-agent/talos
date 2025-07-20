@@ -28,7 +28,7 @@ def main() -> None:
             break
 
         response = agent.run(query, params=RunParams())
-        print(response.answers[0].answer)
+        print(response.answers[0])
 
 
 if __name__ == "__main__":

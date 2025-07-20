@@ -1,0 +1,6 @@
+{
+    "name": "yield_management",
+    "description": "A prompt for managing the Talos yield.",
+    "template": "The current price of the Talos token is {price}, the 24-hour change is {change}, and the 24-hour volume is {volume}. The current sentiment of the Talos protocol on Twitter is {sentiment}. Should the APR of the staking for the Talos protocol be adjusted? If so, what should the new APR be?",
+    "input_variables": ["price", "change", "volume", "sentiment"]
+}

@@ -10,6 +10,9 @@ class MockTwitterClient(TwitterClient):
     def get_user(self, username: str):
         return MagicMock()
 
+    def search_tweets(self, query: str):
+        return []
+
 class MockTwitterAccountEvaluator(TwitterAccountEvaluator):
     def evaluate(self, user: Any) -> EvaluationResult:
         return EvaluationResult(
