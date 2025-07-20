@@ -29,6 +29,7 @@ class Agent(BaseModel):
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
     supervisor: Optional[Supervisor] = None
+    is_main_agent: bool = False
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
@@ -47,7 +48,12 @@ class Agent(BaseModel):
         Adds a supervisor to the agent.
         """
         self.supervisor = supervisor
-        supervisor.set_agent(self)
+        # We only want to set the agent on the supervisor if it's the main agent.
+        # This is because the hypervisor needs the conversation history from the main agent,
+        # but it is also passed to the services to be added to their supervised tools.
+        # We don't want any of the services to update the supervisor.
+        if self.is_main_agent:
+            supervisor.set_agent(self)
 
     def add_to_history(self, messages: list[BaseMessage]):
         """
