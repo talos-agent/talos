@@ -46,11 +46,11 @@ class TwitterPersonaService(TwitterPersona):
             "They frequently tweet about technology and current events. "
             "Here are some examples of their tweets:\n\n"
         )
-        for tweet in random.sample(user_timeline, min(len(user_timeline), 3)):
+        for tweet in random.sample(user_timeline, min(len(user_timeline), 20)):
             prompt += f"- '{tweet.text}'\n"
 
         prompt += "\nHere are some examples of how they reply to others:\n\n"
-        for tweet in random.sample(user_mentions, min(len(user_mentions), 2)):
+        for tweet in random.sample(user_mentions, min(len(user_mentions), 5)):
             prompt += f"- Replying to @{tweet.in_reply_to_screen_name}: '{tweet.text}'\n"
 
         prompt += "\nNow, write a tweet in the same voice and style."
