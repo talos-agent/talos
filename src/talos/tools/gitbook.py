@@ -29,9 +29,7 @@ class GitBookTool(SupervisedTool):
 
     def model_post_init(self, __context: Any) -> None:
         self._session = requests.Session()
-        self._session.headers.update(
-            {"Authorization": f"Bearer {os.environ['GITBOOK_API_KEY']}"}
-        )
+        self._session.headers.update({"Authorization": f"Bearer {os.environ['GITBOOK_API_KEY']}"})
 
     def read_page(self, page_url: str) -> str:
         """

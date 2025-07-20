@@ -1,10 +1,8 @@
 from abc import abstractmethod
 from typing import Any
 
-from talos.services.proposals.models import Proposal, QueryResponse
-
-
 from talos.services.base import Service
+from talos.services.proposals.models import Proposal, QueryResponse
 
 
 class ProposalAgent(Service):
@@ -21,9 +19,7 @@ class ProposalAgent(Service):
         return "proposals"
 
     @abstractmethod
-    def evaluate_proposal(
-        self, proposal: Proposal, feedback: list[dict[str, Any]]
-    ) -> QueryResponse:
+    def evaluate_proposal(self, proposal: Proposal, feedback: list[dict[str, Any]]) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.
 

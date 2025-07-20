@@ -9,9 +9,7 @@ from .base import SupervisedTool
 
 
 class DexscreenerToolArgs(BaseModel):
-    token_address: str = Field(
-        ..., description="The address of the token to get the price for"
-    )
+    token_address: str = Field(..., description="The address of the token to get the price for")
 
 
 class DexscreenerTool(SupervisedTool):

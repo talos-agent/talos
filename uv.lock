@@ -508,6 +508,15 @@ wheels = [
 ]
 
 [[distribution]]
+name = "isort"
+version = "5.12.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a9/c4/dc00e42c158fc4dda2afebe57d2e948805c06d5169007f1724f0683010a9/isort-5.12.0.tar.gz", hash = "sha256:8bef7dde241278824a6d83f44a544709b065191b95b6e50894bdc722fcba0504", size = 174643 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0a/63/4036ae70eea279c63e2304b91ee0ac182f467f24f86394ecfe726092340b/isort-5.12.0-py3-none-any.whl", hash = "sha256:f84c2818376e66cf843d497486ea8fed8700b340f308f076c6fb1229dff318b6", size = 91198 },
+]
+
+[[distribution]]
 name = "jiter"
 version = "0.10.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1490,6 +1499,7 @@ dependencies = [
 
 [distribution.optional-dependencies]
 dev = [
+    { name = "isort" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-mock" },

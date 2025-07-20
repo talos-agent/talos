@@ -1,12 +1,15 @@
+from enum import Enum
+from typing import Optional
+
 import tweepy
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
-from enum import Enum
-from typing import Optional
-from .twitter_client import TwitterClient, TweepyClient
-from .twitter_evaluator import TwitterAccountEvaluator, DefaultTwitterAccountEvaluator
-from ..models.evaluation import EvaluationResult
 from textblob import TextBlob
+
+from ..models.evaluation import EvaluationResult
+from .twitter_client import TweepyClient, TwitterClient
+from .twitter_evaluator import DefaultTwitterAccountEvaluator, TwitterAccountEvaluator
+
 
 class TwitterToolName(str, Enum):
     POST_TWEET = "post_tweet"
@@ -18,12 +21,14 @@ class TwitterToolName(str, Enum):
     EVALUATE_ACCOUNT = "evaluate_account"
     GET_TWEET_SENTIMENT = "get_tweet_sentiment"
 
+
 class TwitterToolArgs(BaseModel):
     tool_name: TwitterToolName = Field(..., description="The name of the tool to run")
     tweet: str | None = Field(None, description="The content of the tweet")
     tweet_id: str | None = Field(None, description="The ID of the tweet")
     username: str | None = Field(None, description="The username of the user")
     search_query: str | None = Field(None, description="The search query to use")
+
 
 class TwitterTool(BaseTool):
     name: str = "twitter_tool"
@@ -32,7 +37,11 @@ class TwitterTool(BaseTool):
     twitter_client: Optional[TwitterClient] = None
     account_evaluator: Optional[TwitterAccountEvaluator] = None
 
-    def __init__(self, twitter_client: Optional[TwitterClient] = None, account_evaluator: Optional[TwitterAccountEvaluator] = None):
+    def __init__(
+        self,
+        twitter_client: Optional[TwitterClient] = None,
+        account_evaluator: Optional[TwitterAccountEvaluator] = None,
+    ):
         super().__init__()
         self.twitter_client = twitter_client or TweepyClient()
         self.account_evaluator = account_evaluator or DefaultTwitterAccountEvaluator()
@@ -110,4 +119,3 @@ class TwitterTool(BaseTool):
             return self.get_tweet_sentiment(**kwargs)
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
-

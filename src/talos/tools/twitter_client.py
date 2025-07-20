@@ -1,7 +1,9 @@
 import os
-import tweepy
 from abc import ABC, abstractmethod
 from typing import Any
+
+import tweepy
+
 
 class TwitterClient(ABC):
     @abstractmethod
@@ -11,6 +13,7 @@ class TwitterClient(ABC):
     @abstractmethod
     def search_tweets(self, query: str) -> list[Any]:
         pass
+
 
 class TweepyClient(TwitterClient):
     def __init__(self):

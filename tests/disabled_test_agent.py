@@ -1,15 +1,18 @@
 import os
 from unittest.mock import patch
+
 from pydantic import BaseModel, Field
 
 os.environ["OPENAI_API_KEY"] = "test"
 from talos.agent import Agent
 
+
 class TestSchema(BaseModel):
     name: str = Field(description="The name of the person")
     age: int = Field(description="The age of the person")
 
-@patch('src.talos.agent.ChatOpenAI')
+
+@patch("src.talos.agent.ChatOpenAI")
 class TestAgent:
     def test_agent(self, mock_chat_openai):
         # Configure the mock

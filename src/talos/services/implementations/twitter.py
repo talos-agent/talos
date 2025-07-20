@@ -1,4 +1,5 @@
 from typing import Any
+
 from talos.services.abstract.twitter import Twitter
 from talos.services.proposals.models import QueryResponse
 

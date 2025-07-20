@@ -1,5 +1,7 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from talos.data.dataset_manager import DatasetManager
 
 
@@ -61,9 +63,7 @@ def test_get_all_datasets(dataset_manager):
 def test_search(dataset_manager):
     with patch("talos.data.dataset_manager.FAISS") as mock_faiss:
         mock_vector_store = MagicMock()
-        mock_vector_store.similarity_search.return_value = [
-            MagicMock(page_content="doc1")
-        ]
+        mock_vector_store.similarity_search.return_value = [MagicMock(page_content="doc1")]
         mock_faiss.from_texts.return_value = mock_vector_store
         dataset_manager.add_dataset("test_dataset", ["doc1", "doc2"])
         results = dataset_manager.search("fruit")

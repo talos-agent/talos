@@ -1,8 +1,11 @@
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
 from thread_sentiment import main
+
 
 def test_import():
     assert main is not None
+
 
 @patch("openai.AsyncOpenAI")
 @patch("openai.OpenAI")

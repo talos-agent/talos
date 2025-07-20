@@ -1,5 +1,6 @@
 import requests
 
+
 def get_ohlcv_data(pair_address: str) -> dict:
     """Gets the OHLCV data for a token from dexscreener.com"""
     url = f"https://api.dexscreener.com/latest/dex/pairs/arbitrum/{pair_address}"

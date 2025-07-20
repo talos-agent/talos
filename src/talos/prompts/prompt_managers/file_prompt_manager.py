@@ -1,5 +1,6 @@
-import os
 import json
+import os
+
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_manager import PromptManager
 

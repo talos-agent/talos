@@ -1,19 +1,20 @@
 from __future__ import annotations
-from typing import Optional, Any, TYPE_CHECKING
-from langchain_core.prompts import ChatPromptTemplate
-from pydantic import BaseModel, Field, PrivateAttr
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+
+from typing import Any, Optional
+
 from langchain_core.language_models import BaseChatModel
-from talos.tools.tool_manager import ToolManager
-from talos.prompts.prompt_manager import PromptManager
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
+
 from talos.hypervisor.supervisor import Supervisor
+from talos.prompts.prompt_manager import PromptManager
 from talos.tools.supervised_tool import SupervisedTool
+from talos.tools.tool_manager import ToolManager
 
 if TYPE_CHECKING:
     pass
 
-
-from pydantic import ConfigDict
 
 class Agent(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -109,7 +110,7 @@ class Agent(BaseModel):
             self.history.append(AIMessage(content=str(modelled_result)))
             return modelled_result
         elif isinstance(result, AIMessage):
-             self.history.append(result)
-             return result
+            self.history.append(result)
+            return result
         else:
             raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
