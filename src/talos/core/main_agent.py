@@ -1,15 +1,18 @@
 import os
-from talos.services.base import Service
-from talos.services.implementations import (
-    ProposalsService,
-    TwitterService,
-    GitHubService,
-)
-from talos.services.proposals.models import Proposal, QueryResponse, RunParams
-from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
-from talos.hypervisor.hypervisor import Hypervisor
+
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool as Tool
+
+from talos.core.router import Router
+from talos.hypervisor.hypervisor import Hypervisor
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+from talos.services.base import Service
+from talos.services.implementations import (
+    GitHubService,
+    ProposalsService,
+    TwitterService,
+)
+from talos.services.proposals.models import Proposal, QueryResponse, RunParams
 
 
 class MainAgent:
@@ -26,11 +29,14 @@ class MainAgent:
         self.services: dict[str, Service] = {}
         self.services["proposals"] = ProposalsService(llm=llm)
         self.services["twitter"] = TwitterService()
-        self.services["github"] = GitHubService(llm=llm, token=os.environ.get("GITHUB_TOKEN", ""))
+        self.services["github"] = GitHubService(
+            llm=llm, token=os.environ.get("GITHUB_TOKEN", "")
+        )
         self.tools = {tool.name: tool for tool in tools}
         self.prompt_manager = FilePromptManager(prompts_dir)
         self.history: "list[dict[str, str]]" = []
         self.hypervisor = Hypervisor()
+        self.router = Router(list(self.services.values()))
 
     def add_to_history(self, user_message: str, agent_response: str) -> None:
         """
@@ -60,12 +66,11 @@ class MainAgent:
             return self.run_tool(params.tool, params.tool_args or {})
         elif params.prompt and params.prompt in self.prompt_manager.prompts:
             return self.run_prompt(params.prompt, params.prompt_args or {})
-        elif params.discipline and params.discipline in self.services:
-            service = self.services[params.discipline]
-            # This is a placeholder for actually calling the discipline
-            return QueryResponse(answers=[f"Using {service.name} discipline"])
         else:
-            return QueryResponse(answers=["No service specified"])
+            service = self.router.route(query)
+            if service:
+                return service.run(query, **params.model_dump())
+            return QueryResponse(answers=["No service found for your query"])
 
     def run_tool(self, tool_name: str, tool_args: dict) -> QueryResponse:
         """

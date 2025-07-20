@@ -1,4 +1,5 @@
 from talos.services.abstract.twitter import Twitter
+from talos.services.proposals.models import QueryResponse
 
 
 class TwitterService(Twitter):
@@ -12,3 +13,7 @@ class TwitterService(Twitter):
     @property
     def name(self) -> str:
         return "twitter"
+
+    def run(self, query: str, **kwargs) -> QueryResponse:
+        # Not implemented yet
+        return QueryResponse(answers=["The Twitter service is not implemented yet."])

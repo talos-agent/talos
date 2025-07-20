@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from talos.services.proposals.models import QueryResponse
+
 
 class Service(ABC):
     """
@@ -16,5 +18,12 @@ class Service(ABC):
     def name(self) -> str:
         """
         The name of the service.
+        """
+        pass
+
+    @abstractmethod
+    def run(self, query: str, **kwargs) -> QueryResponse:
+        """
+        Runs the service.
         """
         pass

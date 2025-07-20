@@ -22,6 +22,10 @@ class ProposalsService(ProposalAgent):
         super().__init__(rag_dataset, tools if tools is not None else [])
         self.llm = llm
 
+    def run(self, query: str, **kwargs) -> QueryResponse:
+        # Not implemented yet
+        return QueryResponse(answers=["The Proposals service is not implemented yet."])
+
     def evaluate_proposal(
         self, proposal: Proposal, feedback: list[dict[str, Any]]
     ) -> QueryResponse:
