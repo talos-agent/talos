@@ -125,3 +125,11 @@ class GithubTools(BaseModel):
         repo = self._github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.create_review(body=feedback, event="COMMENT")
+
+    def create_issue(self, user: str, project: str, title: str, body: str) -> dict[str, Any]:
+        """
+        Creates a new issue.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
+        issue = repo.create_issue(title=title, body=body)
+        return {"number": issue.number, "title": issue.title, "url": issue.html_url}
