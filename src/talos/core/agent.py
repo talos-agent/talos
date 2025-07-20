@@ -1,9 +1,12 @@
+from __future__ import annotations
+from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langchain_core.language_models import BaseChatModel
 from talos.tools.tool_manager import ToolManager
 from talos.prompts.prompt_manager import PromptManager
+from talos.hypervisor.supervisor import Supervisor
 
 
 from pydantic import ConfigDict
@@ -23,6 +26,7 @@ class Agent(BaseModel):
     prompt_manager: PromptManager = Field(..., alias="prompt_manager")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
+    supervisor: Optional[Supervisor] = None
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
@@ -36,6 +40,12 @@ class Agent(BaseModel):
         if not prompt:
             raise ValueError(f"The prompt '{name}' is not defined.")
         self._prompt_template = ChatPromptTemplate.from_template(prompt.template)
+
+    def add_supervisor(self, supervisor: Supervisor):
+        """
+        Adds a supervisor to the agent.
+        """
+        self.supervisor = supervisor
 
     def add_to_history(self, messages: list[BaseMessage]):
         """
@@ -65,8 +75,13 @@ class Agent(BaseModel):
         self.history.append(HumanMessage(content=message_with_context))
 
         tools = self.tool_manager.get_all_tools()
+        if self.supervisor:
+            tools = [
+                self.tool_manager.get_tool(tool.name, self.history) for tool in tools
+            ]
+
         if tools:
-            self.model = self.model.bind_tools(tools) # type: ignore
+            self.model = self.model.bind_tools(tools)  # type: ignore
 
         if self.schema_class:
             structured_llm = self.model.with_structured_output(self.schema_class)
