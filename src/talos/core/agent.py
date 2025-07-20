@@ -80,7 +80,6 @@ class Agent(BaseModel):
             self.history.extend(history)
 
         self.prompt_manager.update_prompt_template(self.history)
-        self.set_prompt()
 
         message_with_context = self._add_context(message, **kwargs)
         self.history.append(HumanMessage(content=message_with_context))
