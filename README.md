@@ -34,7 +34,7 @@ The repository is structured as follows:
 Talos is comprised of several key components that allow it to function as a decentralized AI protocol owner:
 
 -   **Hypervisor and Supervisor:** The Hypervisor is the core of Talos's governance capabilities. It monitors all actions and uses a Supervisor to approve or deny them based on a set of rules and the agent's history. This protects the protocol from malicious or erroneous actions.
--   **Proposal Evaluation System:** Talos can systematically evaluate governance proposals, providing a detailed analysis to help stakeholders make informed decisions.
+-   **Proposal Evaluation System:** Talos can systematically evaluate governance proposals, providing a detailed analysis to help stakeholders make informed decisions. [proposal_example folder](proposal_example/)
 -   **Tool-Based Architecture:** Talos uses a variety of tools to interact with external services like Twitter, GitHub, and GitBook, allowing it to perform a wide range of tasks.
 
 ## Services
@@ -94,7 +94,7 @@ To run the proposal evaluation example, run the following command:
 
 ```bash
 export OPENAI_API_key="<OPENAI_API_KEY>"
-python proposal_example.py
+python proposal_example/proposal_example.py
 ```
 
 ## Testing
