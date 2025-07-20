@@ -70,7 +70,7 @@ This project uses `uv` for dependency management.
 4.  Install dependencies:
 
     ```bash
-    uv pip install -e .[core,dev]
+    uv pip install -e ".[dev]"
     ```
 
 ## Usage
