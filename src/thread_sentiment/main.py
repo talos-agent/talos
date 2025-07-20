@@ -1,7 +1,8 @@
 import os
 import tweepy
 from .twitter import get_all_replies
-from talos.agent import Agent, AIMessage
+from talos.core.agent import Agent
+from langchain_core.messages import AIMessage
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 
 prompt_manager = FilePromptManager("src/talos/prompts")

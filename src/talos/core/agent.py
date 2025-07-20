@@ -1,43 +1,89 @@
+from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field, PrivateAttr
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.language_models import BaseChatModel
+from talos.tools.tool_manager import ToolManager
+from talos.prompts.prompt_manager import PromptManager
 
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain_core.language_models import BaseLanguageModel
 
-from talos.services.base import Service
-from talos.services.proposals.models import QueryResponse
-class CoreAgent(Service):
+from pydantic import ConfigDict
+
+class Agent(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     """
-    A LangChain-based agent for managing conversational memory.
+    Agent is a class that represents an agent that can interact with the user.
+
+    Args:
+        model_name: The name of the model to use.
+        prompt_manager: The prompt manager to use.
+        schema_class: The schema class to use for structured output.
+        tool_manager: The tool manager to use.
     """
+    model: BaseChatModel
+    prompt_manager: PromptManager = Field(..., alias="prompt_manager")
+    schema_class: type[BaseModel] | None = Field(None, alias="schema")
+    tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
 
-    def __init__(
-        self,
-        model: BaseLanguageModel,
-    ):
-        self.llm = model
-        self.conversation = ConversationChain(
-            llm=self.llm,
-            verbose=True,
-            memory=ConversationBufferMemory(),
-        )
+    _prompt_template: ChatPromptTemplate = PrivateAttr()
+    history: list[BaseMessage] = []
 
-    def run(self, **kwargs) -> QueryResponse:
-        """
-        Sends a message to the LangChain agent and returns the response.
-        """
-        if "query" not in kwargs:
-            raise ValueError("Missing required argument: query")
-        response = self.conversation.predict(input=kwargs["query"])
-        return QueryResponse(answers=[response])
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.set_prompt()
 
-    @property
-    def name(self) -> str:
-        return "core"
+    def set_prompt(self, name: str = "default"):
+        prompt = self.prompt_manager.get_prompt(name)
+        if not prompt:
+            raise ValueError(f"The prompt '{name}' is not defined.")
+        self._prompt_template = ChatPromptTemplate.from_template(prompt.template)
 
-    def add_dataset(self, dataset_path: str) -> None:
+    def add_to_history(self, messages: list[BaseMessage]):
         """
-        This method is not applicable to the conversational agent.
+        Adds a list of messages to the history.
         """
-        raise NotImplementedError(
-            "The conversational agent does not support adding datasets directly."
-        )
+        self.history.extend(messages)
+
+    def reset_history(self):
+        """
+        Resets the history of the agent.
+        """
+        self.history = []
+
+    def _add_context(self, query: str, **kwargs) -> str:
+        """
+        A base method for adding context to the query.
+        """
+        return query
+
+    def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
+        if history:
+            self.history.extend(history)
+
+        message_with_context = self._add_context(message, **kwargs)
+        self.history.append(HumanMessage(content=message_with_context))
+
+        tools = self.tool_manager.get_all_tools()
+        if tools:
+            self.model = self.model.bind_tools(tools) # type: ignore
+
+        if self.schema_class:
+            structured_llm = self.model.with_structured_output(self.schema_class)
+            chain = self._prompt_template | structured_llm
+        else:
+            chain = self._prompt_template | self.model
+
+        # Pass the history to the chain
+        result = chain.invoke({"messages": self.history, **kwargs})
+
+        if isinstance(result, BaseModel):
+            self.history.append(AIMessage(content=str(result)))
+            return result
+        elif isinstance(result, dict) and self.schema_class:
+            modelled_result = self.schema_class.parse_obj(result)
+            self.history.append(AIMessage(content=str(modelled_result)))
+            return modelled_result
+        elif isinstance(result, AIMessage):
+             self.history.append(result)
+             return result
+        else:
+            raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
