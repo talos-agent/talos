@@ -18,12 +18,12 @@ fi
 
 # Run ruff
 echo "Running ruff..."
-ruff check .
+uv run ruff check .
 
 # Run mypy
 echo "Running mypy..."
-mypy src
+uv run mypy src
 
 # Run pytest
 echo "Running pytest..."
-pytest
+uv run pytest
