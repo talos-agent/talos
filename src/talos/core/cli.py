@@ -4,6 +4,8 @@ from langchain_openai import ChatOpenAI
 from pydantic.types import SecretStr
 
 from talos.core.main_agent import MainAgent
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+from talos.core.router import Router
 
 
 def main() -> None:
@@ -16,8 +18,11 @@ def main() -> None:
         api_key=SecretStr(os.environ.get("OPENAI_API_KEY", "")),
     )
     agent = MainAgent(
-        llm=llm,
+        model=llm,
         prompts_dir="prompts",
+        prompt_manager=FilePromptManager(prompts_dir="prompts"),
+        schema=None,
+        router=Router(services=[]),
     )
 
     print("Treasury Agent CLI (type 'exit' to quit)")

@@ -4,6 +4,7 @@ from .twitter import get_all_replies
 from talos.core.agent import Agent
 from langchain_core.messages import AIMessage
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+from langchain_openai import ChatOpenAI
 
 prompt_manager = FilePromptManager("src/talos/prompts")
 
@@ -30,10 +31,7 @@ def analyze_sentiment(tweets: list[dict]) -> str:
     """
     Analyzes the sentiment of a list of tweets and returns a summary.
     """
-    prompt = prompt_manager.get_prompt("thread_sentiment")
-    if prompt is None:
-        raise ValueError("Prompt not found")
-    agent = Agent(model="gpt-4", prompt=prompt.template)
+    agent = Agent(model=ChatOpenAI(model="gpt-4"), prompt_manager=prompt_manager, schema=None)
     response = agent.run(message="", history=[], tweets=str(tweets))
     if isinstance(response, AIMessage):
         return str(response.content)

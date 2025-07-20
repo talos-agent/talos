@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Any
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
@@ -32,8 +32,7 @@ class Agent(BaseModel):
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
 
-    def __init__(self, **data):
-        super().__init__(**data)
+    def model_post_init(self, __context: Any) -> None:
         self.set_prompt()
 
     def set_prompt(self, name: str = "default"):

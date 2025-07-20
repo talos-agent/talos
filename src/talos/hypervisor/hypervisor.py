@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+from typing import Any
 
-from langchain_core.language_models import BaseChatModel
 
 from talos.core.agent import Agent
 from talos.hypervisor.supervisor import Supervisor
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+
+
+from talos.tools.tool_manager import ToolManager
 
 
 class Hypervisor(Agent, Supervisor):
@@ -14,12 +17,11 @@ class Hypervisor(Agent, Supervisor):
     A class to monitor the agent's actions.
     """
 
-    def __init__(self, llm: BaseChatModel, prompts_dir: str):
-        super().__init__(
-            model=llm,
-            prompt_manager=FilePromptManager(prompts_dir),
-            tool_manager=None,
-        )
+    prompts_dir: str
+
+    def model_post_init(self, __context: Any) -> None:
+        self.prompt_manager = FilePromptManager(self.prompts_dir)
+        self.tool_manager = ToolManager()
 
     def approve(self, messages: list, action: str, args: dict) -> bool:
         """
