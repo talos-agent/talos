@@ -1,8 +1,10 @@
 import random
 from typing import Any
 
-from pydantic import ConfigDict
+from langchain_openai import ChatOpenAI
+from pydantic import ConfigDict, Field
 
+from talos.prompts.prompt_manager import PromptManager
 from talos.services.abstract.twitter import TwitterPersona
 from talos.services.proposals.models import QueryResponse
 from talos.tools.twitter_client import TweepyClient, TwitterClient
@@ -14,52 +16,43 @@ class TwitterPersonaService(TwitterPersona):
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    twitter_client: TwitterClient | None = None
-
-    def __init__(self, twitter_client: TwitterClient | None = None, **data: Any):
-        super().__init__(**data)
-        self.twitter_client = twitter_client or TweepyClient()
+    twitter_client: TwitterClient = Field(default_factory=TweepyClient)
+    prompt_manager: PromptManager = Field(default_factory=PromptManager)
+    llm: Any = Field(default_factory=ChatOpenAI)
 
     @property
     def name(self) -> str:
         return "twitter_persona"
 
     def run(self, **kwargs: Any) -> QueryResponse:
-        if not self.twitter_client:
-            self.twitter_client = TweepyClient()
         username = kwargs.get("username")
         if not username:
             raise ValueError("Username must be provided.")
         user_timeline = self.twitter_client.get_user_timeline(username)
         user_mentions = self.twitter_client.get_user_mentions(username)
 
-        # This is a simplified analysis. A more sophisticated implementation would
-        # use NLP to analyze the user's tone, style, and topics.
         if not user_timeline:
             return QueryResponse(answers=[f"Could not find any tweets for user {username}"])
 
-        # Create a prompt that describes the user's voice and style.
-        prompt = (
-            f"Emulate the voice and style of the Twitter user '{username}'. "
-            "They are known for their witty and sarcastic tweets, often using humor to make a point. "
-            "They frequently tweet about technology and current events. "
-            "Here are some examples of their tweets:\n\n"
-        )
+        tweets = ""
         for tweet in random.sample(user_timeline, min(len(user_timeline), 20)):
-            prompt += f"- '{tweet.text}'\n"
+            tweets += f"- '{tweet.text}'\n"
 
-        prompt += "\nHere are some examples of how they reply to others:\n\n"
+        replies = ""
         for tweet in random.sample(user_mentions, min(len(user_mentions), 5)):
             if tweet.in_reply_to_status_id:
                 try:
                     original_tweet = self.twitter_client.get_tweet(tweet.in_reply_to_status_id)
-                    prompt += f"- In reply to @{original_tweet.user.screen_name}: '{original_tweet.text}'\n"
-                    prompt += f"  - @{username}'s reply: '{tweet.text}'\n\n"
+                    replies += f"- In reply to @{original_tweet.user.screen_name}: '{original_tweet.text}'\n"
+                    replies += f"  - @{username}'s reply: '{tweet.text}'\n\n"
                 except Exception:
-                    # If the original tweet is not found, just show the reply.
-                    prompt += f"- Replying to @{tweet.in_reply_to_screen_name}: '{tweet.text}'\n"
+                    replies += f"- Replying to @{tweet.in_reply_to_screen_name}: '{tweet.text}'\n"
 
-        prompt += "\nNow, write a tweet in the same voice and style."
+        prompt = self.prompt_manager.get_prompt("twitter_persona_prompt")
+        if not prompt:
+            raise ValueError("Could not find prompt 'twitter_persona_prompt'")
+        formatted_prompt = prompt.format(username=username, tweets=tweets, replies=replies)
 
-        return QueryResponse(answers=[prompt])
+        response = self.llm.invoke(formatted_prompt)
+
+        return QueryResponse(answers=[response.content])

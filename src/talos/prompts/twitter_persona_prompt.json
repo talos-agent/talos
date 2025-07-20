@@ -1,0 +1,6 @@
+{
+  "name": "twitter_persona_prompt",
+  "description": "A prompt to generate a Twitter persona.",
+  "template": "Analyze the following tweets from the Twitter user '{username}' and generate a detailed description of their voice, style, and persona. Pay attention to their tone, the topics they discuss, the language they use, and how they interact with others. Provide specific examples from their tweets to support your analysis.\n\nHere are some of their recent tweets:\n\n{tweets}\n\nHere are some of their recent replies:\n\n{replies}\n\nBased on this information, generate a persona description that can be used to create an AI that emulates this user.",
+  "input_variables": ["username", "tweets", "replies"]
+}
