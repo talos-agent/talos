@@ -16,6 +16,7 @@ Please adhere to the following code style guidelines:
 
 *   Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) for all Python code.
 *   Use modern Python type hints (e.g., `list` and `dict` instead of `List` and `Dict`).
+*   Never use quotes around type hints (e.g., `def foo() -> "MyClass": ...`). You can always add `from __future__ import annotations` to the top of the file if you need to delay the evaluation of type hints.
 *   Use type hints for all function signatures.
 *   Write clear and concise docstrings for all modules, classes, and functions.
 *   Keep lines under 88 characters long.
