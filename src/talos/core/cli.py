@@ -13,7 +13,7 @@ def main() -> None:
     The main entry point for the Treasury Agent CLI.
     """
     llm = ChatOpenAI(
-        model="gpt-3.5-turbo-0125",
+        model="gpt-4o",
         temperature=0.0,
         api_key=SecretStr(os.environ.get("OPENAI_API_KEY", "")),
     )
