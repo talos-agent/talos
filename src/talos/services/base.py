@@ -41,25 +41,41 @@ class Service(ABC):
         """
         pass
 
-    def create_ticket(self, request: TicketCreationRequest) -> Ticket:
+    def create_ticket_tool(self):
+        def create_ticket(**kwargs: Any) -> Ticket:
+            """
+            Creates a ticket for a long-running process.
+            This should be non-blocking.
+            """
+            request = TicketCreationRequest(tool=self.name, tool_args=kwargs)
+            ticket_id = str(uuid.uuid4())
+            ticket = Ticket(
+                ticket_id=ticket_id,
+                status=TicketStatus.PENDING,
+                created_at=str(time.time()),
+                updated_at=str(time.time()),
+                request=request,
+            )
+            self.tickets[ticket_id] = ticket
+            thread = threading.Thread(
+                target=self._run_in_background, args=(ticket_id, request.tool_args)
+            )
+            self.threads[ticket_id] = thread
+            thread.start()
+            return ticket
+
+        create_ticket.__name__ = f"create_{self.name}_ticket"
+        create_ticket.__doc__ = f"""
+        Creates a ticket for the {self.name} service.
+
+        Args:
+            **kwargs: The arguments to pass to the {self.name} service.
+
+        Returns:
+            The ticket object.
         """
-        Creates a ticket for a long-running process.
-        This should be non-blocking.
-        """
-        ticket_id = str(uuid.uuid4())
-        ticket = Ticket(
-            ticket_id=ticket_id,
-            status=TicketStatus.PENDING,
-            created_at=str(time.time()),
-            updated_at=str(time.time()),
-        )
-        self.tickets[ticket_id] = ticket
-        thread = threading.Thread(
-            target=self._run_in_background, args=(ticket_id, request.tool_args)
-        )
-        self.threads[ticket_id] = thread
-        thread.start()
-        return ticket
+
+        return create_ticket
 
     def _run_in_background(self, ticket_id: str, tool_args: Dict[str, Any]) -> None:
         """

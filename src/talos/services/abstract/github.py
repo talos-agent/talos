@@ -9,7 +9,7 @@ class GitHub(Service, ABC):
     An abstract base class for a GitHub discipline.
     """
 
-    def __init__(self, llm: BaseLanguageModel, token: str):
+    def __init__(self, llm: BaseLanguageModel, token: str | None):
         self.llm = llm
         self.token = token
 

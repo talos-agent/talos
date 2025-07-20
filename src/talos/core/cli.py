@@ -4,7 +4,6 @@ from langchain_openai import ChatOpenAI
 from pydantic.types import SecretStr
 
 from talos.core.main_agent import MainAgent
-from talos.services.proposals.models import RunParams
 
 
 def main() -> None:
@@ -27,7 +26,7 @@ def main() -> None:
         if query.lower() == "exit":
             break
 
-        response = agent.run(query, **RunParams().model_dump())
+        response = agent.run(query)
         print(response)
 
 
