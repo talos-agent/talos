@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
@@ -33,10 +33,6 @@ class Agent(BaseModel):
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
-
-    def model_post_init(self, __context: Any) -> None:
-        # We don't set a prompt by default. It is up to the agent to set its own prompt.
-        pass
 
     def set_prompt(self, name: str):
         prompt = self.prompt_manager.get_prompt(name)

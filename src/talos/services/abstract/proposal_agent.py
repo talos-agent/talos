@@ -11,6 +11,7 @@ class ProposalAgent(Service):
     """
 
     def __init__(self, rag_dataset: Any, tools: list[Any]):
+        super().__init__()
         self.rag_dataset = rag_dataset
         self.tools = tools
 
