@@ -64,11 +64,11 @@ class Agent(BaseModel):
         """
         self.history = []
 
-    def _add_context(self, query: str, **kwargs) -> str:
+    def _add_context(self, query: str, **kwargs) -> dict:
         """
         A base method for adding context to the query.
         """
-        return query
+        return {}
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
         if history:
@@ -76,8 +76,7 @@ class Agent(BaseModel):
 
         self.prompt_manager.update_prompt_template(self.history)
 
-        message_with_context = self._add_context(message, **kwargs)
-        self.history.append(HumanMessage(content=message_with_context))
+        self.history.append(HumanMessage(content=message))
 
         tools = self.tool_manager.get_all_tools()
         for tool in tools:
@@ -94,7 +93,8 @@ class Agent(BaseModel):
             chain = self._prompt_template | self.model
 
         # Pass the history to the chain
-        result = chain.invoke({"messages": self.history, **kwargs})
+        context = self._add_context(message, **kwargs)
+        result = chain.invoke({"messages": self.history, **context, **kwargs})
 
         if isinstance(result, BaseModel):
             self.history.append(AIMessage(content=str(result)))
