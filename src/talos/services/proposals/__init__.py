@@ -4,11 +4,11 @@ from langchain.chains import LLMChain
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 
-from talos.services.abstract import ProposalAgent
+from talos.services.base import Service
 from talos.services.proposals.models import Proposal, QueryResponse
 
 
-class ProposalsService(ProposalAgent):
+class ProposalsService(Service):
     """
     A LangChain-based agent for evaluating proposals.
     """
@@ -19,15 +19,21 @@ class ProposalsService(ProposalAgent):
         rag_dataset: Any = None,
         tools: list[Any] | None = None,
     ):
-        super().__init__(rag_dataset, tools if tools is not None else [])
         self.llm = llm
+        self.rag_dataset = rag_dataset
+        self.tools = tools if tools is not None else []
+
+    @property
+    def name(self) -> str:
+        return "proposals"
 
     def evaluate_proposal(
-        self, proposal: Proposal, feedback: list[dict[str, Any]]
+        self, proposal: "Proposal", feedback: list[dict[str, Any]]
     ) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.
         """
+        from talos.services.proposals.models import Proposal
         prompt_template = PromptTemplate(
             template=proposal.prompt,
             input_variables=["proposal_text", "feedback"],

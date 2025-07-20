@@ -1,6 +1,6 @@
 from talos.services.base import Service
+from talos.services import ProposalsService
 from talos.services.implementations import (
-    ProposalsService,
     TwitterService,
     GitHubService,
 )
@@ -25,7 +25,7 @@ class MainAgent:
         self.services: dict[str, Service] = {}
         self.services["proposals"] = ProposalsService(llm=llm)
         self.services["twitter"] = TwitterService()
-        self.services["github"] = GitHubService(llm=llm, token="")
+        self.services["github"] = GitHubService(llm=llm, token=None)
         self.tools = {tool.name: tool for tool in tools}
         self.prompt_manager = FilePromptManager(prompts_dir)
         self.history: "list[dict[str, str]]" = []
@@ -66,28 +66,28 @@ class MainAgent:
         else:
             return QueryResponse(answers=[{"answer": "No service specified", "score": 1.0}])
 
-    def run_tool(self, tool_name: str, tool_args: dict) -> QueryResponse:
+    def run_tool(self, tool_name: str, tool_args: dict | None) -> QueryResponse:
         """
         Runs a tool.
         """
         if self.hypervisor.approve("run_tool", {"tool_name": tool_name, "tool_args": tool_args}):
             tool = self.tools.get(tool_name)
             if tool:
-                result = tool.run(**tool_args)
+                result = tool.run(**(tool_args or {}))
                 return QueryResponse(answers=[{"answer": result, "score": 1.0}])
             else:
                 return QueryResponse(answers=[{"answer": f"Tool {tool_name} not found", "score": 0.0}])
         else:
             return QueryResponse(answers=[{"answer": "Action denied by hypervisor", "score": 0.0}])
 
-    def run_prompt(self, prompt_name: str, prompt_args: dict) -> QueryResponse:
+    def run_prompt(self, prompt_name: str, prompt_args: dict | None) -> QueryResponse:
         """
         Runs a prompt.
         """
         if self.hypervisor.approve("run_prompt", {"prompt_name": prompt_name, "prompt_args": prompt_args}):
             prompt = self.prompt_manager.get_prompt(prompt_name)
             if prompt:
-                result = prompt.format(**prompt_args)
+                result = prompt.format(**(prompt_args or {}))
                 return QueryResponse(answers=[{"answer": result, "score": 1.0}])
             else:
                 return QueryResponse(answers=[{"answer": f"Prompt {prompt_name} not found", "score": 0.0}])
