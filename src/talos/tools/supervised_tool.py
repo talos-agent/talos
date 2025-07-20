@@ -26,9 +26,10 @@ class SupervisedTool(BaseTool):
         """
         Runs the tool.
         """
+        tool_input = args[0] if args else {}
         if self.supervisor:
             if self.supervisor.approve(self.messages, self.name, kwargs):
-                return self.tool._run(*args, **kwargs)
+                return self.tool.run(tool_input, **kwargs)
             else:
                 return f"Tool call to '{self.name}' denied by supervisor."
-        return self.tool._run(*args, **kwargs)
+        return self.tool.run(tool_input, **kwargs)
