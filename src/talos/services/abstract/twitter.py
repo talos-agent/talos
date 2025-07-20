@@ -15,3 +15,17 @@ class Twitter(Service, ABC):
         The name of the service.
         """
         pass
+
+
+class TwitterPersona(Service, ABC):
+    """
+    An abstract base class for a Twitter persona service.
+    """
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """
+        The name of the service.
+        """
+        pass

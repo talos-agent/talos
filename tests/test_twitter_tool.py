@@ -15,6 +15,17 @@ class MockTwitterClient(TwitterClient):
     def search_tweets(self, query: str):
         return []
 
+    def get_user_timeline(self, username: str) -> list[Any]:
+        mock_tweet = MagicMock()
+        mock_tweet.text = "This is a test tweet from the timeline."
+        return [mock_tweet]
+
+    def get_user_mentions(self, username: str) -> list[Any]:
+        mock_tweet = MagicMock()
+        mock_tweet.text = "This is a test tweet from the mentions."
+        mock_tweet.in_reply_to_screen_name = "testuser"
+        return [mock_tweet]
+
 
 class MockTwitterAccountEvaluator(TwitterAccountEvaluator):
     def evaluate(self, user: Any) -> EvaluationResult:

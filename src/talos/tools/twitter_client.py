@@ -14,6 +14,14 @@ class TwitterClient(ABC):
     def search_tweets(self, query: str) -> list[Any]:
         pass
 
+    @abstractmethod
+    def get_user_timeline(self, username: str) -> list[Any]:
+        pass
+
+    @abstractmethod
+    def get_user_mentions(self, username: str) -> list[Any]:
+        pass
+
 
 class TweepyClient(TwitterClient):
     def __init__(self):
@@ -26,3 +34,9 @@ class TweepyClient(TwitterClient):
 
     def search_tweets(self, query: str) -> list[Any]:
         return self.api.search_tweets(q=query, count=100)
+
+    def get_user_timeline(self, username: str) -> list[Any]:
+        return self.api.user_timeline(screen_name=username, count=100)
+
+    def get_user_mentions(self, username: str) -> list[Any]:
+        return self.api.mentions_timeline(screen_name=username, count=100)
