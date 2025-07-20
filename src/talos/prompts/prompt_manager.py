@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from talos.prompts.prompt import Prompt
+from langchain_core.messages import BaseMessage
 
 
 class PromptManager(ABC):
@@ -11,5 +12,11 @@ class PromptManager(ABC):
     def get_prompt(self, name: str) -> Prompt | None:
         """
         Gets a prompt by name.
+        """
+        pass
+
+    def update_prompt_template(self, history: list[BaseMessage]):
+        """
+        Updates the prompt template based on the conversation history.
         """
         pass
