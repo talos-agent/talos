@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from langchain.chains import LLMChain
@@ -13,14 +15,12 @@ class ProposalsService(ProposalAgent):
     A LangChain-based agent for evaluating proposals.
     """
 
-    def __init__(
-        self,
-        llm: BaseLanguageModel,
-        rag_dataset: Any = None,
-        tools: list[Any] | None = None,
-    ):
-        super().__init__(rag_dataset, tools if tools is not None else [])
-        self.llm = llm
+    llm: BaseLanguageModel
+    rag_dataset: Any | None = None
+    tools: list[Any] | None = None
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
 
     def run(self, **kwargs: Any) -> QueryResponse:
         if "proposal" in kwargs and "feedback" in kwargs:

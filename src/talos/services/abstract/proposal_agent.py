@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 from typing import Any
 
@@ -10,10 +12,11 @@ class ProposalAgent(Service):
     An abstract base class for an agent that can evaluate proposals.
     """
 
-    def __init__(self, rag_dataset: Any, tools: list[Any]):
-        super().__init__()
-        self.rag_dataset = rag_dataset
-        self.tools = tools
+    rag_dataset: Any | None = None
+    tools: list[Any] | None = None
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
 
     @property
     def name(self) -> str:
