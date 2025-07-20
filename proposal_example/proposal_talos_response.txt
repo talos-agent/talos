@@ -1,4 +1,4 @@
-**talos output from terminal after running - 'python proposal_example.py'**
+**talos output from terminal after running - 'python proposal_example/proposal_example.py'**
 
 --- Agent's Recommendation ---
 Based on the proposal and the delegate feedback, here is an evaluation focusing on key aspects of the proposal:
