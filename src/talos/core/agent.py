@@ -4,7 +4,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.language_models import BaseLanguageModel
 
 from talos.services.base import Service
-from talos.services.proposals.models import QueryResponse, RunParams
+from talos.services.proposals.models import QueryResponse
 class CoreAgent(Service):
     """
     A LangChain-based agent for managing conversational memory.
@@ -21,7 +21,7 @@ class CoreAgent(Service):
             memory=ConversationBufferMemory(),
         )
 
-    def run(self, query: str, params: RunParams) -> QueryResponse:
+    def run(self, query: str, **kwargs) -> QueryResponse:
         """
         Sends a message to the LangChain agent and returns the response.
         """

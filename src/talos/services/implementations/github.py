@@ -1,8 +1,10 @@
-from talos.services.abstract.github import GitHub
-from talos.tools.github import GithubTools
-from langchain_core.language_models import BaseLanguageModel
-from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from langchain_core.language_models import BaseLanguageModel
+
+from talos.services.abstract.github import GitHub
+from talos.services.proposals.models import QueryResponse
+from talos.tools.github import GithubTools
 
 
 class GitHubService(GitHub):
@@ -13,10 +15,15 @@ class GitHubService(GitHub):
     def __init__(self, llm: BaseLanguageModel, token: str):
         super().__init__(llm, token)
         self.tools = GithubTools(token)
+        self.llm = llm
 
     @property
     def name(self) -> str:
         return "github"
+
+    def run(self, query: str, **kwargs) -> QueryResponse:
+        # Not implemented yet
+        return QueryResponse(answers=["The GitHub service is not implemented yet."])
 
     def reply_to_issues(self, user: str, project: str) -> None:
         """
