@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from textblob import TextBlob
 
 from ..models.evaluation import EvaluationResult
+from ..services.implementations.twitter_persona import TwitterPersonaService
 from .twitter_client import TweepyClient, TwitterClient
 from .twitter_evaluator import DefaultTwitterAccountEvaluator, TwitterAccountEvaluator
 
@@ -20,6 +21,7 @@ class TwitterToolName(str, Enum):
     GET_TWEET_ENGAGEMENT = "get_tweet_engagement"
     EVALUATE_ACCOUNT = "evaluate_account"
     GET_TWEET_SENTIMENT = "get_tweet_sentiment"
+    GENERATE_PERSONA_PROMPT = "generate_persona_prompt"
 
 
 class TwitterToolArgs(BaseModel):
@@ -100,6 +102,12 @@ class TwitterTool(BaseTool):
                 sentiment["neutral"] += 1
         return sentiment
 
+    def generate_persona_prompt(self, username: str) -> str:
+        """Generates a prompt to describe the voice and style of a specific twitter user."""
+        assert self.twitter_client is not None
+        persona_service = TwitterPersonaService(twitter_client=self.twitter_client)
+        return persona_service.run(username=username).answers[0]
+
     def _run(self, tool_name: str, **kwargs):
         if tool_name == "post_tweet":
             return self.post_tweet(**kwargs)
@@ -117,5 +125,7 @@ class TwitterTool(BaseTool):
             return self.evaluate_account(**kwargs)
         elif tool_name == "get_tweet_sentiment":
             return self.get_tweet_sentiment(**kwargs)
+        elif tool_name == "generate_persona_prompt":
+            return self.generate_persona_prompt(**kwargs)
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
