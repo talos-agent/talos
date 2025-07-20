@@ -10,7 +10,7 @@ from talos.hypervisor.supervisor import Supervisor
 from talos.tools.supervised_tool import SupervisedTool
 
 if TYPE_CHECKING:
-    from talos.core.main_agent import MainAgent
+    pass
 
 
 from pydantic import ConfigDict
@@ -31,6 +31,7 @@ class Agent(BaseModel):
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
     supervisor: Optional[Supervisor] = None
+    is_main_agent: bool = False
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
@@ -53,7 +54,7 @@ class Agent(BaseModel):
         # This is because the hypervisor needs the conversation history from the main agent,
         # but it is also passed to the services to be added to their supervised tools.
         # We don't want any of the services to update the supervisor.
-        if isinstance(self, MainAgent):
+        if self.is_main_agent:
             supervisor.set_agent(self)
 
     def add_to_history(self, messages: list[BaseMessage]):

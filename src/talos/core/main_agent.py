@@ -29,6 +29,7 @@ class MainAgent(Agent):
     router: Router
     prompts_dir: str
     model: BaseChatModel
+    is_main_agent: bool = True
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
