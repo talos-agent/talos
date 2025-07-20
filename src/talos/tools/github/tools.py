@@ -1,21 +1,41 @@
+import os
 from typing import Any
 
+import requests
 from github import Github
+from pydantic import BaseModel, Field, PrivateAttr
 
 
-class GithubTools:
-    def __init__(self, token: str):
-        self.github = Github(token)
+class GithubTools(BaseModel):
+    """
+    A collection of tools for interacting with the Github API.
+    """
+
+    token: str | None = Field(default_factory=lambda: os.environ.get("GITHUB_API_TOKEN"))
+    _github: Github = PrivateAttr()
+    _headers: dict[str, str] = PrivateAttr()
+
+    def model_post_init(self, __context: Any) -> None:
+        if not self.token:
+            raise ValueError("Github token not provided.")
+        self._github = Github(self.token)
+        self._headers = {"Authorization": f"token {self.token}"}
 
     def get_open_issues(self, user: str, project: str) -> list[dict[str, Any]]:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Gets all open issues for a given repository.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         return [
             {"number": issue.number, "title": issue.title, "url": issue.html_url}
             for issue in repo.get_issues(state="open")
         ]
 
     def get_issue_comments(self, user: str, project: str, issue_number: int) -> list[dict[str, Any]]:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Gets all comments for a given issue.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         issue = repo.get_issue(number=issue_number)
         comments = []
         for comment in issue.get_comments():
@@ -28,36 +48,80 @@ class GithubTools:
             )
         return comments
 
+    def get_pr_comments(self, user: str, project: str, pr_number: int) -> list[dict[str, Any]]:
+        """
+        Gets all comments for a given pull request.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
+        pr = repo.get_pull(pr_number)
+        comments = []
+        for comment in pr.get_issue_comments():
+            comments.append(
+                {
+                    "user": comment.user.login,
+                    "comment": comment.body,
+                }
+            )
+        return comments
+
     def reply_to_issue(self, user: str, project: str, issue_number: int, comment: str) -> None:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Replies to a given issue.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         issue = repo.get_issue(number=issue_number)
         issue.create_comment(comment)
 
     def get_pr_files(self, user: str, project: str, pr_number: int) -> list[str]:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Gets all files for a given pull request.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         return [file.filename for file in pr.get_files()]
 
+    def get_pr_diff(self, user: str, project: str, pr_number: int) -> str:
+        """
+        Gets the diff for a given pull request.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
+        pr = repo.get_pull(number=pr_number)
+        response = requests.get(pr.patch_url, headers=self._headers)
+        response.raise_for_status()
+        return response.text
+
     def get_project_structure(self, user: str, project: str, path: str = "") -> list[str]:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Gets the project structure for a given repository.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         contents = repo.get_contents(path)
         if isinstance(contents, list):
             return [content.path for content in contents]
         return [contents.path]
 
     def get_file_content(self, user: str, project: str, filepath: str) -> str:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Gets the content of a file.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         content = repo.get_contents(filepath)
         if isinstance(content, list):
             raise ValueError("Path is a directory, not a file.")
         return content.decoded_content.decode()
 
     def merge_pr(self, user: str, project: str, pr_number: int) -> None:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Merges a pull request.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.merge()
 
     def review_pr(self, user: str, project: str, pr_number: int, feedback: str) -> None:
-        repo = self.github.get_repo(f"{user}/{project}")
+        """
+        Reviews a pull request.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.create_review(body=feedback, event="COMMENT")

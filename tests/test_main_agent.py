@@ -24,7 +24,13 @@ def test_main_agent_initialization(mock_model: BaseChatModel) -> None:
     with (
         patch("talos.core.main_agent.FilePromptManager") as mock_file_prompt_manager,
         patch("talos.core.main_agent.Hypervisor") as mock_hypervisor,
+        patch("os.environ.get") as mock_os_get,
+        patch("ssl.create_default_context", return_value=MagicMock()),
     ):
+        mock_os_get.side_effect = lambda key, default=None: {
+            "GITHUB_TOKEN": "test_token",
+            "GITHUB_API_TOKEN": "test_token",
+        }.get(key, default)
         mock_prompt_manager = MagicMock(spec=FilePromptManager)
         mock_prompt_manager.get_prompt.return_value = Prompt(
             name="main_agent_prompt",
