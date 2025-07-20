@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from langchain.chains import LLMChain
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from pydantic import ConfigDict
@@ -56,7 +55,7 @@ class ProposalsService(ProposalAgent):
             template=prompt.template,
             input_variables=prompt.input_variables,
         )
-        chain = LLMChain(llm=self.llm, prompt=prompt_template)
+        chain = prompt_template | self.llm
         feedback_str = "\n".join([f"- {f.delegate}: {f.feedback}" for f in proposal.feedback])
         response = chain.invoke({"proposal_text": proposal.proposal_text, "feedback": feedback_str})
-        return QueryResponse(answers=[response["text"]])
+        return QueryResponse(answers=[response.content])
