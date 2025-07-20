@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
@@ -34,10 +34,7 @@ class Agent(BaseModel):
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
 
-    def model_post_init(self, __context: Any) -> None:
-        self.set_prompt()
-
-    def set_prompt(self, name: str = "default"):
+    def set_prompt(self, name: str):
         prompt = self.prompt_manager.get_prompt(name)
         if not prompt:
             raise ValueError(f"The prompt '{name}' is not defined.")

@@ -29,6 +29,7 @@ class MainAgent(Agent):
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
+        self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.set_prompt("main_agent_prompt")
         services: list[Service] = [
             ProposalsService(llm=self.model),
@@ -36,7 +37,6 @@ class MainAgent(Agent):
             GitHubService(llm=self.model, token=os.environ.get("GITHUB_TOKEN")),
         ]
         self.router = Router(services)
-        self.prompt_manager = FilePromptManager(self.prompts_dir)
         hypervisor = Hypervisor(
             model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None
         )
