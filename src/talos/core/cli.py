@@ -1,6 +1,8 @@
 import os
 
+from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel
 from pydantic.types import SecretStr
 
 from talos.core.main_agent import MainAgent
@@ -35,7 +37,12 @@ def main() -> None:
             break
 
         response = agent.run(query)
-        print(response)
+        if isinstance(response, AIMessage):
+            print(response.content)
+        elif isinstance(response, BaseModel) and hasattr(response, "content"):
+            print(response.content)  # type: ignore
+        else:
+            print(response)
 
 
 if __name__ == "__main__":
