@@ -1,0 +1,5 @@
+{
+    "name": "default",
+    "template": "{messages}",
+    "input_variables": ["messages"]
+}

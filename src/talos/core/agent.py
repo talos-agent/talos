@@ -35,9 +35,10 @@ class Agent(BaseModel):
     history: list[BaseMessage] = []
 
     def model_post_init(self, __context: Any) -> None:
-        self.set_prompt()
+        # We don't set a prompt by default. It is up to the agent to set its own prompt.
+        pass
 
-    def set_prompt(self, name: str = "default"):
+    def set_prompt(self, name: str):
         prompt = self.prompt_manager.get_prompt(name)
         if not prompt:
             raise ValueError(f"The prompt '{name}' is not defined.")
