@@ -17,10 +17,13 @@ def main() -> None:
         temperature=0.0,
         api_key=SecretStr(os.environ.get("OPENAI_API_KEY", "")),
     )
+    # Get the absolute path to the prompts directory.
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    prompts_dir = os.path.join(current_dir, "..", "prompts")
     agent = MainAgent(
         model=llm,
-        prompts_dir="prompts",
-        prompt_manager=FilePromptManager(prompts_dir="prompts"),
+        prompts_dir=prompts_dir,
+        prompt_manager=FilePromptManager(prompts_dir=prompts_dir),
         schema=None,
         router=Router(services=[]),
     )
