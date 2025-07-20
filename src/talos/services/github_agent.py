@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from langchain.agents import AgentExecutor, create_openai_tools_agent
@@ -23,11 +24,13 @@ class GithubPRReviewAgent:
             tool(github_tools.get_file_content),
         ]
         self.llm = ChatOpenAI(api_key=SecretStr(token))
+        with open("src/talos/prompts/github_pr_review_prompt.json") as f:
+            prompt_config = json.load(f)
         self.prompt = ChatPromptTemplate.from_messages(
             [
                 (
                     "system",
-                    "You are an expert software engineer reviewing a pull request.",
+                    prompt_config["template"],
                 ),
                 ("user", "{input}"),
                 ("placeholder", "{agent_scratchpad}"),
