@@ -27,8 +27,7 @@ class GitBookTool(SupervisedTool):
     args_schema: type[BaseModel] = GitBookToolArgs
     _session: requests.Session = PrivateAttr()
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
+    def model_post_init(self, __context: Any) -> None:
         self._session = requests.Session()
         self._session.headers.update(
             {"Authorization": f"Bearer {os.environ['GITBOOK_API_KEY']}"}

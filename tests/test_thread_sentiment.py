@@ -1,11 +1,13 @@
-from unittest.mock import Mock, patch
+from unittest.mock import patch, Mock
 from thread_sentiment import main
 
 def test_import():
     assert main is not None
 
+@patch("openai.AsyncOpenAI")
+@patch("openai.OpenAI")
 @patch("thread_sentiment.main.prompt_manager")
-def test_analyze_sentiment(mock_prompt_manager):
+def test_analyze_sentiment(mock_prompt_manager, mock_openai, mock_async_openai):
     # Mock the Agent class
     main.Agent = Mock()
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-
+from typing import Any
 from langchain_core.language_models import BaseChatModel
 
 from talos.core.agent import Agent
@@ -19,34 +19,33 @@ from talos.services.models import Ticket
 from talos.tools.tool_manager import ToolManager
 
 
+
+
 class MainAgent(Agent):
     """
     A top-level agent that delegates to a conversational agent and a research agent.
     """
 
-    def __init__(
-        self,
-        llm: BaseChatModel,
-        prompts_dir: str,
-    ):
+    router: Router
+    prompts_dir: str
+    model: BaseChatModel
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
         services: list[Service] = [
-            ProposalsService(llm=llm),
+            ProposalsService(llm=self.model),
             TwitterService(),
-            GitHubService(llm=llm, token=os.environ.get("GITHUB_TOKEN")),
+            GitHubService(llm=self.model, token=os.environ.get("GITHUB_TOKEN")),
         ]
         self.router = Router(services)
-        self.prompt_manager = FilePromptManager(prompts_dir)
-        hypervisor = Hypervisor(llm=llm, prompts_dir=prompts_dir)
+        self.prompt_manager = FilePromptManager(self.prompts_dir)
+        hypervisor = Hypervisor(model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None)
         tool_manager = ToolManager()
         for service in services:
             tool_manager.register_tool(service.create_ticket_tool())
 
         tool_manager.register_tool(self.get_ticket_status_tool())
-        super().__init__(
-            model=llm,
-            prompt_manager=self.prompt_manager,
-            tool_manager=tool_manager,
-        )
+        self.tool_manager = tool_manager
         self.add_supervisor(hypervisor)
 
     def get_ticket_status_tool(self):

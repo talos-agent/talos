@@ -20,6 +20,7 @@ Please adhere to the following code style guidelines:
 *   Use type hints for all function signatures.
 *   Write clear and concise docstrings for all modules, classes, and functions.
 *   Keep lines under 88 characters long.
+*   When creating Pydantic `BaseModel`s, use `model_post_init` for any post-initialization logic instead of overriding the `__init__` method.
 
 ## General Guidance
 
