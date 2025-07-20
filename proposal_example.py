@@ -2,7 +2,7 @@ import os
 
 from langchain_openai import ChatOpenAI
 
-from talos.core.main_agent import MainAgent
+from talos.services.implementations import ProposalsService
 from talos.services.proposals.models import Feedback, Proposal
 
 
@@ -10,19 +10,13 @@ def run_proposal_example():
     """
     Runs an example of the agent evaluating a proposal.
     """
-    # Initialize the main agent
-    agent = MainAgent(
-        model=ChatOpenAI(model="gpt-4o", openai_api_key=os.environ.get("OPENAI_API_KEY", "")),
-        prompts_dir="src/talos/prompts",
+    # Initialize the proposals service
+    service = ProposalsService(
+        llm=ChatOpenAI(model="gpt-4o", openai_api_key=os.environ.get("OPENAI_API_KEY", "")),
     )
 
     # Define the proposal
     proposal = Proposal(
-        prompt="""
-        Please evaluate the following proposal and provide a recommendation.
-        Consider the proposal's potential benefits, risks, and the feedback
-        provided by the delegates.
-        """,
         proposal_text="""
         **Proposal: Invest in a new DeFi protocol**
 
@@ -52,7 +46,7 @@ def run_proposal_example():
     )
 
     # Evaluate the proposal
-    response = agent.evaluate_proposal(proposal)
+    response = service.evaluate_proposal(proposal)
 
     # Print the agent's recommendation
     print("--- Agent's Recommendation ---")

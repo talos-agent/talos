@@ -35,7 +35,7 @@ class MainAgent(Agent):
             self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.set_prompt("main_agent_prompt")
         services: list[Service] = [
-            ProposalsService(llm=self.model),
+            ProposalsService(llm=self.model, prompt_manager=self.prompt_manager),
             TwitterService(),
             GitHubService(llm=self.model, token=os.environ.get("GITHUB_TOKEN")),
         ]
