@@ -1,10 +1,15 @@
-from langchain_core.tools import BaseTool
+from __future__ import annotations
+
 from typing import List, Dict
+
+from langchain_core.tools import BaseTool
+
 
 class ToolManager:
     """
     A class for managing and discovering tools for the Talos agent.
     """
+
     def __init__(self):
         self.tools: Dict[str, BaseTool] = {}
 

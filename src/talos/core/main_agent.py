@@ -36,7 +36,7 @@ class MainAgent(Agent):
         ]
         self.router = Router(services)
         self.prompt_manager = FilePromptManager(prompts_dir)
-        self.hypervisor = Hypervisor()
+        hypervisor = Hypervisor(llm=llm, prompts_dir=prompts_dir)
         tool_manager = ToolManager()
         for service in services:
             tool_manager.register_tool(service.create_ticket_tool())
@@ -47,6 +47,7 @@ class MainAgent(Agent):
             prompt_manager=self.prompt_manager,
             tool_manager=tool_manager,
         )
+        self.add_supervisor(hypervisor)
 
     def get_ticket_status_tool(self):
         def get_ticket_status(service_name: str, ticket_id: str) -> Ticket:
