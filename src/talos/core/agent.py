@@ -46,8 +46,7 @@ class Agent(BaseModel):
         Adds a supervisor to the agent.
         """
         self.supervisor = supervisor
-        if hasattr(supervisor, "set_agent"):
-            supervisor.set_agent(self)
+        supervisor.set_agent(self)
 
     def add_to_history(self, messages: list[BaseMessage]):
         """
