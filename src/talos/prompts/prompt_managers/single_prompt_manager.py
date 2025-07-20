@@ -14,8 +14,6 @@ class SinglePromptManager(PromptManager):
 
     def get_prompt(self, name: str) -> Prompt | None:
         """
-        Gets the prompt if the name matches.
+        Gets the prompt.
         """
-        if name == self.prompt.name:
-            return self.prompt
-        return None
+        return self.prompt

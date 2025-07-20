@@ -48,7 +48,7 @@ def run_proposal_example():
 
     # Print the agent's recommendation
     print("--- Agent's Recommendation ---")
-    print(response.answers[0].answer)
+    print(response.answers[0])
 
 
 if __name__ == "__main__":
