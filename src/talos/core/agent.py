@@ -12,9 +12,6 @@ from talos.prompts.prompt_manager import PromptManager
 from talos.tools.supervised_tool import SupervisedTool
 from talos.tools.tool_manager import ToolManager
 
-if TYPE_CHECKING:
-    pass
-
 
 class Agent(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
