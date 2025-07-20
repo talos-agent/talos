@@ -1,4 +1,5 @@
 from typing import Any
+
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_core.language_models import BaseLanguageModel

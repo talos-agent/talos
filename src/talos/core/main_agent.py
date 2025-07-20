@@ -3,22 +3,18 @@ from __future__ import annotations
 import os
 from datetime import datetime
 from typing import Any
+
 from langchain_core.language_models import BaseChatModel
+from langchain_core.tools import tool
 
 from talos.core.agent import Agent
 from talos.core.router import Router
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.base import Service
-from talos.services.implementations import (
-    GitHubService,
-    ProposalsService,
-    TwitterService,
-)
+from talos.services.implementations import GitHubService, ProposalsService, TwitterService
 from talos.services.models import Ticket
 from talos.tools.tool_manager import ToolManager
-from langchain_core.tools import tool
-
 
 
 class MainAgent(Agent):
@@ -40,7 +36,9 @@ class MainAgent(Agent):
         ]
         self.router = Router(services)
         self.prompt_manager = FilePromptManager(self.prompts_dir)
-        hypervisor = Hypervisor(model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None)
+        hypervisor = Hypervisor(
+            model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None
+        )
         tool_manager = ToolManager()
         for service in services:
             tool_manager.register_tool(service.create_ticket_tool())
@@ -74,10 +72,7 @@ class MainAgent(Agent):
 
     def _add_context(self, query: str, **kwargs) -> str:
         active_tickets = self.router.get_all_tickets()
-        ticket_info = [
-            f"- {ticket.ticket_id}: last updated at {ticket.updated_at}"
-            for ticket in active_tickets
-        ]
+        ticket_info = [f"- {ticket.ticket_id}: last updated at {ticket.updated_at}" for ticket in active_tickets]
         return (
             f"It is currently {datetime.now().isoformat()}. You have the following services available: "
             f"{', '.join([service.name for service in self.router.services])}. "

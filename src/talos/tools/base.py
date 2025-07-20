@@ -44,9 +44,7 @@ class SupervisedTool(BaseTool):
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
         if self.supervisor:
-            ok, message = self.supervisor.supervise(
-                {"args": args, "kwargs": kwargs}
-            )
+            ok, message = self.supervisor.supervise({"args": args, "kwargs": kwargs})
             if not ok:
                 return message
         return self._run_unsupervised(*args, **kwargs)
@@ -54,9 +52,7 @@ class SupervisedTool(BaseTool):
     async def _arun(self, *args: Any, **kwargs: Any) -> Any:
         if self.supervisor:
             # TODO: Add support for async supervisors.
-            ok, message = self.supervisor.supervise(
-                {"args": args, "kwargs": kwargs}
-            )
+            ok, message = self.supervisor.supervise({"args": args, "kwargs": kwargs})
             if not ok:
                 return message
         return await self._arun_unsupervised(*args, **kwargs)

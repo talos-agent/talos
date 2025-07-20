@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from .base import Supervisor, SupervisedTool
+from .base import SupervisedTool, Supervisor
 
 
 class AlternatingSupervisor(Supervisor[Any]):

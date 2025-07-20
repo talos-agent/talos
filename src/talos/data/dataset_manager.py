@@ -1,13 +1,15 @@
-from typing import List, Dict, Any
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List
+
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
+from pydantic import BaseModel, Field
 
 
 class DatasetManager(BaseModel):
     """
     A class for managing datasets for the Talos agent.
     """
+
     datasets: Dict[str, Any] = Field(default_factory=dict)
     vector_store: Any = Field(default=None)
     embeddings: Any = Field(default_factory=OpenAIEmbeddings)

@@ -1,5 +1,7 @@
+from typing import Any, Dict
+
 from pydantic import BaseModel, Field
-from typing import Dict, Any
+
 
 class EvaluationResult(BaseModel):
     score: int = Field(..., ge=0, le=100, description="The evaluation score, from 0 to 100.")

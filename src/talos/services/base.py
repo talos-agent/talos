@@ -3,13 +3,10 @@ import time
 import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
+
 from langchain_core.tools import tool
-from talos.services.models import (
-    Ticket,
-    TicketCreationRequest,
-    TicketResult,
-    TicketStatus,
-)
+
+from talos.services.models import Ticket, TicketCreationRequest, TicketResult, TicketStatus
 
 
 class Service(ABC):
@@ -63,9 +60,7 @@ class Service(ABC):
                 request=request,
             )
             self.tickets[ticket_id] = ticket
-            thread = threading.Thread(
-                target=self._run_in_background, args=(ticket_id, request.tool_args)
-            )
+            thread = threading.Thread(target=self._run_in_background, args=(ticket_id, request.tool_args))
             self.threads[ticket_id] = thread
             thread.start()
             return ticket

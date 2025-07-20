@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Any
 from datetime import datetime, timezone
+from typing import Any
+
 from ..models.evaluation import EvaluationResult
+
 
 class TwitterAccountEvaluator(ABC):
     @abstractmethod
     def evaluate(self, user: Any) -> EvaluationResult:
         pass
+
 
 class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
     def evaluate(self, user: Any) -> EvaluationResult:
@@ -43,5 +46,5 @@ class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
                 "account_age_days": account_age_days,
                 "is_verified": is_verified,
                 "is_default_profile_image": is_default_profile_image,
-            }
+            },
         )

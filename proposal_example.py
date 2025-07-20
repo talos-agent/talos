@@ -1,8 +1,9 @@
 import os
 
+from langchain_openai import ChatOpenAI
+
 from talos.core.main_agent import MainAgent
 from talos.services.proposals.models import Feedback, Proposal
-from langchain_openai import ChatOpenAI
 
 
 def run_proposal_example():

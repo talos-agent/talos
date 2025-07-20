@@ -1,5 +1,6 @@
-from github import Github
 from typing import Any
+
+from github import Github
 
 
 class GithubTools:
