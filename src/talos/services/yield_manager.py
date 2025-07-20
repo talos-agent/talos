@@ -19,12 +19,12 @@ class YieldManager:
         )
 
     def adjust_apr(self) -> str:
-        price = self.dexscreener_tool._run(token_address="0xdaae914e4bae2aae4f536006c353117b90fb37e3")
+        price_data = self.dexscreener_tool._run(token_address="0xdaae914e4bae2aae4f536006c353117b90fb37e3")
         sentiment = self.twitter_tool._run(tool_name="get_tweet_sentiment", search_query="Talos protocol")
         prompt = self.prompt_manager.get_prompt("yield_management")
         if prompt is None:
             raise ValueError("Yield management prompt not found")
 
-        params = RunParams(prompt="yield_management", prompt_args={"price": price, "sentiment": sentiment})
+        params = RunParams(prompt="yield_management", prompt_args={"price": price_data["price"], "change": price_data["change"], "volume": price_data["volume"], "sentiment": sentiment})
         response = self.agent.run("", params)
         return response.answers[0]

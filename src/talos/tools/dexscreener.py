@@ -11,7 +11,7 @@ class DexscreenerTool(BaseTool):
     description: str = "Gets the price of a token from dexscreener.com"
     args_schema: type[BaseModel] = DexscreenerToolArgs
 
-    def _run(self, token_address: str) -> str:
+    def _run(self, token_address: str) -> dict:
         """Gets the price of a token from dexscreener.com"""
         url = f"https://dexscreener.com/arbitrum/{token_address}"
         headers = {
@@ -19,10 +19,15 @@ class DexscreenerTool(BaseTool):
         }
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
-            return f"Error: Received status code {response.status_code}"
+            return {"error": f"Received status code {response.status_code}"}
         soup = BeautifulSoup(response.content, "html.parser")
         price_element = soup.find("span", class_="ds-dex-table-row-price")
-        if price_element:
-            return price_element.text
-        else:
-            return "Error: Could not find price information"
+        price = price_element.text if price_element else "N/A"
+
+        change_element = soup.find("div", class_="Percentage-sc-1xf18x6-0")
+        change = change_element.text if change_element else "N/A"
+
+        volume_element = soup.find("div", class_="Block-sc-1xf18x6-0")
+        volume = volume_element.text if volume_element else "N/A"
+
+        return {"price": price, "change": change, "volume": volume}

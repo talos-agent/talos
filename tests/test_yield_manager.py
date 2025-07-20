@@ -10,7 +10,7 @@ import os
 def test_yield_manager():
     dexscreener_tool = MagicMock(spec=DexscreenerTool)
     dexscreener_tool.name = "dexscreener_tool"
-    dexscreener_tool._run.return_value = "$1.23"
+    dexscreener_tool._run.return_value = {"price": "$1.23", "change": "1.59%", "volume": "$1.0M"}
     twitter_tool = MagicMock(spec=TwitterTool)
     twitter_tool.name = "twitter_tool"
     twitter_tool._run.return_value = {"positive": 10, "negative": 1, "neutral": 5}
