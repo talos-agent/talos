@@ -4,8 +4,6 @@ import os
 from datetime import datetime
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage
-from pydantic import BaseModel
 
 from talos.core.agent import Agent
 from talos.core.router import Router
@@ -17,8 +15,7 @@ from talos.services.implementations import (
     ProposalsService,
     TwitterService,
 )
-from talos.services.models import TicketCreationRequest
-from talos.services.proposals.models import Proposal, QueryResponse, RunParams
+from talos.services.models import Ticket
 from talos.tools.tool_manager import ToolManager
 
 
@@ -35,16 +32,43 @@ class MainAgent(Agent):
         services: list[Service] = [
             ProposalsService(llm=llm),
             TwitterService(),
-            GitHubService(llm=llm, token=os.environ.get("GITHUB_TOKEN", "")),
+            GitHubService(llm=llm, token=os.environ.get("GITHUB_TOKEN")),
         ]
         self.router = Router(services)
         self.prompt_manager = FilePromptManager(prompts_dir)
         self.hypervisor = Hypervisor()
+        tool_manager = ToolManager()
+        for service in services:
+            tool_manager.register_tool(service.create_ticket_tool())
+
+        tool_manager.register_tool(self.get_ticket_status_tool())
         super().__init__(
             model=llm,
             prompt_manager=self.prompt_manager,
-            tool_manager=ToolManager(),
+            tool_manager=tool_manager,
         )
+
+    def get_ticket_status_tool(self):
+        def get_ticket_status(service_name: str, ticket_id: str) -> Ticket:
+            """
+            Get the status of a ticket.
+
+            Args:
+                service_name: The name of the service that the ticket was created for.
+                ticket_id: The ID of the ticket.
+
+            Returns:
+                The ticket object.
+            """
+            service = self.router.get_service(service_name)
+            if not service:
+                raise ValueError(f"Service '{service_name}' not found.")
+            ticket = service.get_ticket_status(ticket_id)
+            if not ticket:
+                raise ValueError(f"Ticket '{ticket_id}' not found.")
+            return ticket
+
+        return get_ticket_status
 
     def _add_context(self, query: str, **kwargs) -> str:
         active_tickets = self.router.get_all_tickets()
@@ -59,32 +83,3 @@ class MainAgent(Agent):
             f"What would you like to do? Keep in mind that you can only interact with the user and "
             f"the available services. You can also create new tickets to delegate tasks to other agents."
         )
-
-    def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:  # type: ignore
-        params = RunParams.model_validate(kwargs)
-        if params.tool and params.tool in self.tool_manager.get_all_tools():
-            return self.run_tool(params.tool, params.tool_args or {})  # type: ignore
-        elif params.prompt and self.prompt_manager.get_prompt(params.prompt):
-            return self.run_prompt(params.prompt, params.prompt_args or {})  # type: ignore
-        else:
-            service = self.router.route(message)
-            if service:
-                request = TicketCreationRequest(
-                    tool=service.name,
-                    tool_args=params.model_dump(),
-                )
-                ticket = service.create_ticket(request)
-                return QueryResponse(answers=[f"Ticket created: {ticket.ticket_id}"])
-            return super().run(message, history, **kwargs)
-
-
-    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
-        """
-        Evaluates a proposal.
-        """
-        proposals_service = self.router.get_service("proposals")
-        if proposals_service and isinstance(proposals_service, ProposalsService):
-            result = proposals_service.evaluate_proposal(proposal, feedback=[])
-            return QueryResponse(answers=result.answers)
-        else:
-            return QueryResponse(answers=["Proposals service not loaded"])

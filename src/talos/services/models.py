@@ -15,6 +15,15 @@ class TicketStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class TicketCreationRequest(BaseModel):
+    """
+    A request to create a ticket.
+    """
+
+    tool: str
+    tool_args: dict[str, Any]
+
+
 class Ticket(BaseModel):
     """
     A ticket for a long-running process.
@@ -24,15 +33,7 @@ class Ticket(BaseModel):
     status: TicketStatus = Field(..., description="The status of the ticket.")
     created_at: str = Field(..., description="The timestamp when the ticket was created.")
     updated_at: str = Field(..., description="The timestamp when the ticket was last updated.")
-
-
-class TicketCreationRequest(BaseModel):
-    """
-    A request to create a ticket.
-    """
-
-    tool: str
-    tool_args: dict[str, Any]
+    request: TicketCreationRequest = Field(..., description="The request that created the ticket.")
 
 
 class TicketResult(BaseModel):

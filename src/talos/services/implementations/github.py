@@ -13,16 +13,25 @@ class GitHubService(GitHub):
     A discipline for interacting with GitHub using PyGithub.
     """
 
-    def __init__(self, llm: BaseLanguageModel, token: str):
-        super().__init__(llm, token)
-        self.tools = GithubTools(token)
+    def __init__(self, llm: BaseLanguageModel, token: str | None):
+        super().__init__(llm, token or "")
+        self.tools: GithubTools | None
+        if token:
+            self.tools = GithubTools(token)
+        else:
+            self.tools = None
         self.llm = llm
+        self.token: str | None = token
 
     @property
     def name(self) -> str:
         return "github"
 
     def run(self, **kwargs: Any) -> QueryResponse:
+        if not self.token:
+            return QueryResponse(
+                answers=["The GitHub service is not available. Please set the GITHUB_TOKEN environment variable."]
+            )
         # Not implemented yet
         return QueryResponse(answers=["The GitHub service is not implemented yet."])
 
@@ -30,6 +39,8 @@ class GitHubService(GitHub):
         """
         Replies to issues that are pending Talos feedback.
         """
+        if not self.tools:
+            return
         issues = self.tools.get_open_issues(user, project)
         for issue in issues:
             # A more sophisticated check would be needed to determine if an issue
@@ -71,6 +82,8 @@ class GitHubService(GitHub):
         """
         Looks at the directory structure and any files in the repository to answer a query.
         """
+        if not self.tools:
+            return "GitHub tools not available."
         structure = self.tools.get_project_structure(user, project)
         prompt = PromptTemplate(
             template="""
