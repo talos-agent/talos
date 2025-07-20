@@ -9,7 +9,6 @@ class Feedback(BaseModel):
 
 
 class Proposal(BaseModel):
-    prompt: str
     proposal_text: str
     feedback: List[Feedback]
 
