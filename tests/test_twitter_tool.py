@@ -26,6 +26,11 @@ class MockTwitterClient(TwitterClient):
         mock_tweet.in_reply_to_screen_name = "testuser"
         return [mock_tweet]
 
+    def get_tweet(self, tweet_id: str) -> Any:
+        mock_tweet = MagicMock()
+        mock_tweet.text = "This is a test tweet."
+        return mock_tweet
+
 
 class MockTwitterAccountEvaluator(TwitterAccountEvaluator):
     def evaluate(self, user: Any) -> EvaluationResult:

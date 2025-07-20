@@ -51,7 +51,14 @@ class TwitterPersonaService(TwitterPersona):
 
         prompt += "\nHere are some examples of how they reply to others:\n\n"
         for tweet in random.sample(user_mentions, min(len(user_mentions), 5)):
-            prompt += f"- Replying to @{tweet.in_reply_to_screen_name}: '{tweet.text}'\n"
+            if tweet.in_reply_to_status_id:
+                try:
+                    original_tweet = self.twitter_client.get_tweet(tweet.in_reply_to_status_id)
+                    prompt += f"- In reply to @{original_tweet.user.screen_name}: '{original_tweet.text}'\n"
+                    prompt += f"  - @{username}'s reply: '{tweet.text}'\n\n"
+                except Exception:
+                    # If the original tweet is not found, just show the reply.
+                    prompt += f"- Replying to @{tweet.in_reply_to_screen_name}: '{tweet.text}'\n"
 
         prompt += "\nNow, write a tweet in the same voice and style."
 

@@ -22,6 +22,10 @@ class TwitterClient(ABC):
     def get_user_mentions(self, username: str) -> list[Any]:
         pass
 
+    @abstractmethod
+    def get_tweet(self, tweet_id: str) -> Any:
+        pass
+
 
 class TweepyClient(TwitterClient):
     def __init__(self):
@@ -40,3 +44,6 @@ class TweepyClient(TwitterClient):
 
     def get_user_mentions(self, username: str) -> list[Any]:
         return self.api.mentions_timeline(screen_name=username, count=100)
+
+    def get_tweet(self, tweet_id: str) -> Any:
+        return self.api.get_status(tweet_id)
