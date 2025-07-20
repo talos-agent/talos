@@ -1,3 +1,4 @@
+from typing import Any
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_core.language_models import BaseLanguageModel
@@ -21,7 +22,7 @@ class GitHubService(GitHub):
     def name(self) -> str:
         return "github"
 
-    def run(self, query: str, **kwargs) -> QueryResponse:
+    def run(self, **kwargs: Any) -> QueryResponse:
         # Not implemented yet
         return QueryResponse(answers=["The GitHub service is not implemented yet."])
 

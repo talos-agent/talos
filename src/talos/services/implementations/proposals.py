@@ -22,9 +22,10 @@ class ProposalsService(ProposalAgent):
         super().__init__(rag_dataset, tools if tools is not None else [])
         self.llm = llm
 
-    def run(self, query: str, **kwargs) -> QueryResponse:
-        # Not implemented yet
-        return QueryResponse(answers=["The Proposals service is not implemented yet."])
+    def run(self, **kwargs: Any) -> QueryResponse:
+        if "proposal" in kwargs and "feedback" in kwargs:
+            return self.evaluate_proposal(kwargs["proposal"], kwargs["feedback"])
+        raise ValueError("Missing required arguments: proposal, feedback")
 
     def evaluate_proposal(
         self, proposal: Proposal, feedback: list[dict[str, Any]]

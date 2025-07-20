@@ -1,8 +1,10 @@
 from abc import abstractmethod
 from typing import Any
 
-from talos.services.base import Service
 from talos.services.proposals.models import Proposal, QueryResponse
+
+
+from talos.services.base import Service
 
 
 class ProposalAgent(Service):

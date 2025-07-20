@@ -21,11 +21,13 @@ class CoreAgent(Service):
             memory=ConversationBufferMemory(),
         )
 
-    def run(self, query: str, **kwargs) -> QueryResponse:
+    def run(self, **kwargs) -> QueryResponse:
         """
         Sends a message to the LangChain agent and returns the response.
         """
-        response = self.conversation.predict(input=query)
+        if "query" not in kwargs:
+            raise ValueError("Missing required argument: query")
+        response = self.conversation.predict(input=kwargs["query"])
         return QueryResponse(answers=[response])
 
     @property
