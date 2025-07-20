@@ -71,13 +71,11 @@ class MainAgent(Agent):
 
         return get_ticket_status
 
-    def _add_context(self, query: str, **kwargs) -> str:
+    def _build_context(self, query: str, **kwargs) -> dict:
         active_tickets = self.router.get_all_tickets()
         ticket_info = [f"- {ticket.ticket_id}: last updated at {ticket.updated_at}" for ticket in active_tickets]
-        return (
-            f"It is currently {datetime.now().isoformat()}. You have the following services available: "
-            f"{', '.join([service.name for service in self.router.services])}. "
-            f"You have the following active tickets:\n{' '.join(ticket_info)}\n\n"
-            f"What would you like to do? Keep in mind that you can only interact with the user and "
-            f"the available services. You can also create new tickets to delegate tasks to other agents."
-        )
+        return {
+            "time": datetime.now().isoformat(),
+            "available_services": ", ".join([service.name for service in self.router.services]),
+            "active_tickets": " ".join(ticket_info),
+        }
