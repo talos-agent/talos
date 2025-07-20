@@ -1,3 +1,4 @@
+import os
 from talos.services.base import Service
 from talos.services.implementations import (
     ProposalsService,
@@ -25,7 +26,7 @@ class MainAgent:
         self.services: dict[str, Service] = {}
         self.services["proposals"] = ProposalsService(llm=llm)
         self.services["twitter"] = TwitterService()
-        self.services["github"] = GitHubService(llm=llm, token="")
+        self.services["github"] = GitHubService(llm=llm, token=os.environ.get("GITHUB_TOKEN", ""))
         self.tools = {tool.name: tool for tool in tools}
         self.prompt_manager = FilePromptManager(prompts_dir)
         self.history: "list[dict[str, str]]" = []
@@ -55,16 +56,16 @@ class MainAgent:
         """
         # This is a temporary way to route to the correct discipline.
         # A more sophisticated routing mechanism will be needed in the future.
-        if params.tool in self.tools:
-            return self.run_tool(params.tool, params.tool_args)
-        elif params.prompt in self.prompt_manager.prompts:
-            return self.run_prompt(params.prompt, params.prompt_args)
-        elif params.discipline in self.services:
+        if params.tool and params.tool in self.tools:
+            return self.run_tool(params.tool, params.tool_args or {})
+        elif params.prompt and params.prompt in self.prompt_manager.prompts:
+            return self.run_prompt(params.prompt, params.prompt_args or {})
+        elif params.discipline and params.discipline in self.services:
             service = self.services[params.discipline]
             # This is a placeholder for actually calling the discipline
-            return QueryResponse(answers=[{"answer": f"Using {service.name} discipline", "score": 1.0}])
+            return QueryResponse(answers=[f"Using {service.name} discipline"])
         else:
-            return QueryResponse(answers=[{"answer": "No service specified", "score": 1.0}])
+            return QueryResponse(answers=["No service specified"])
 
     def run_tool(self, tool_name: str, tool_args: dict) -> QueryResponse:
         """
@@ -74,11 +75,11 @@ class MainAgent:
             tool = self.tools.get(tool_name)
             if tool:
                 result = tool.run(**tool_args)
-                return QueryResponse(answers=[{"answer": result, "score": 1.0}])
+                return QueryResponse(answers=[result])
             else:
-                return QueryResponse(answers=[{"answer": f"Tool {tool_name} not found", "score": 0.0}])
+                return QueryResponse(answers=[f"Tool {tool_name} not found"])
         else:
-            return QueryResponse(answers=[{"answer": "Action denied by hypervisor", "score": 0.0}])
+            return QueryResponse(answers=["Action denied by hypervisor"])
 
     def run_prompt(self, prompt_name: str, prompt_args: dict) -> QueryResponse:
         """
@@ -88,11 +89,11 @@ class MainAgent:
             prompt = self.prompt_manager.get_prompt(prompt_name)
             if prompt:
                 result = prompt.format(**prompt_args)
-                return QueryResponse(answers=[{"answer": result, "score": 1.0}])
+                return QueryResponse(answers=[result])
             else:
-                return QueryResponse(answers=[{"answer": f"Prompt {prompt_name} not found", "score": 0.0}])
+                return QueryResponse(answers=[f"Prompt {prompt_name} not found"])
         else:
-            return QueryResponse(answers=[{"answer": "Action denied by hypervisor", "score": 0.0}])
+            return QueryResponse(answers=["Action denied by hypervisor"])
 
     def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
         """
@@ -102,4 +103,4 @@ class MainAgent:
         if proposals_service and isinstance(proposals_service, ProposalsService):
             return proposals_service.evaluate_proposal(proposal, feedback=[])
         else:
-            return QueryResponse(answers=[{"answer": "Proposals service not loaded", "score": 0.0}])
+            return QueryResponse(answers=["Proposals service not loaded"])

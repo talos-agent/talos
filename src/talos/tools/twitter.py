@@ -6,6 +6,7 @@ from typing import Optional
 from .twitter_client import TwitterClient, TweepyClient
 from .twitter_evaluator import TwitterAccountEvaluator, DefaultTwitterAccountEvaluator
 from ..models.evaluation import EvaluationResult
+from textblob import TextBlob
 
 class TwitterToolName(str, Enum):
     POST_TWEET = "post_tweet"
@@ -15,12 +16,14 @@ class TwitterToolName(str, Enum):
     GET_FOLLOWING_COUNT = "get_following_count"
     GET_TWEET_ENGAGEMENT = "get_tweet_engagement"
     EVALUATE_ACCOUNT = "evaluate_account"
+    GET_TWEET_SENTIMENT = "get_tweet_sentiment"
 
 class TwitterToolArgs(BaseModel):
     tool_name: TwitterToolName = Field(..., description="The name of the tool to run")
     tweet: str | None = Field(None, description="The content of the tweet")
     tweet_id: str | None = Field(None, description="The ID of the tweet")
     username: str | None = Field(None, description="The username of the user")
+    search_query: str | None = Field(None, description="The search query to use")
 
 class TwitterTool(BaseTool):
     name: str = "twitter_tool"
@@ -73,6 +76,21 @@ class TwitterTool(BaseTool):
         user = self.twitter_client.get_user(username)
         return self.account_evaluator.evaluate(user)
 
+    def get_tweet_sentiment(self, search_query: str) -> dict:
+        """Gets the sentiment of tweets that match a search query."""
+        assert self.twitter_client is not None
+        tweets = self.twitter_client.search_tweets(search_query)
+        sentiment = {"positive": 0, "negative": 0, "neutral": 0}
+        for tweet in tweets:
+            analysis = TextBlob(tweet.text)
+            if analysis.sentiment.polarity > 0:
+                sentiment["positive"] += 1
+            elif analysis.sentiment.polarity < 0:
+                sentiment["negative"] += 1
+            else:
+                sentiment["neutral"] += 1
+        return sentiment
+
     def _run(self, tool_name: str, **kwargs):
         if tool_name == "post_tweet":
             return self.post_tweet(**kwargs)
@@ -88,6 +106,8 @@ class TwitterTool(BaseTool):
             return self.get_tweet_engagement(**kwargs)
         elif tool_name == "evaluate_account":
             return self.evaluate_account(**kwargs)
+        elif tool_name == "get_tweet_sentiment":
+            return self.get_tweet_sentiment(**kwargs)
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
 

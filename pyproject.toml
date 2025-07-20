@@ -5,7 +5,7 @@ description = "An AI agent for managing a cryptocurrency treasury."
 authors = [{ name = "Jules", email = "agent@example.com" }]
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["beautifulsoup4", "requests", "pypdf", "pydantic", "langchain", "langchain-community", "langchain-openai", "duckduckgo-search", "faiss-cpu", "tiktoken", "ipfshttpclient", "pinata-python", "tweepy"]
+dependencies = ["PyGithub", "textblob", "beautifulsoup4", "requests", "pypdf", "pydantic", "langchain", "langchain-community", "langchain-openai", "duckduckgo-search", "faiss-cpu", "tiktoken", "ipfshttpclient", "pinata-python", "tweepy"]
 
 [build-system]
 requires = ["hatchling"]

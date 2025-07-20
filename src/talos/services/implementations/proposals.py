@@ -39,4 +39,4 @@ class ProposalsService(ProposalAgent):
                 [f"- {f['delegate']}: {f['feedback']}" for f in feedback]
             ),
         )
-        return QueryResponse(answers=[{"answer": response, "score": 1.0}])
+        return QueryResponse(answers=[response])

@@ -8,6 +8,10 @@ class TwitterClient(ABC):
     def get_user(self, username: str) -> Any:
         pass
 
+    @abstractmethod
+    def search_tweets(self, query: str) -> list[Any]:
+        pass
+
 class TweepyClient(TwitterClient):
     def __init__(self):
         auth = tweepy.OAuthHandler(os.environ["TWITTER_API_KEY"], os.environ["TWITTER_API_SECRET"])
@@ -16,3 +20,6 @@ class TweepyClient(TwitterClient):
 
     def get_user(self, username: str) -> Any:
         return self.api.get_user(screen_name=username)
+
+    def search_tweets(self, query: str) -> list[Any]:
+        return self.api.search_tweets(q=query, count=100)
