@@ -64,7 +64,7 @@ class Agent(BaseModel):
         """
         self.history = []
 
-    def _add_context(self, query: str, **kwargs) -> dict:
+    def _build_context(self, query: str, **kwargs) -> dict:
         """
         A base method for adding context to the query.
         """
@@ -93,7 +93,7 @@ class Agent(BaseModel):
             chain = self._prompt_template | self.model
 
         # Pass the history to the chain
-        context = self._add_context(message, **kwargs)
+        context = self._build_context(message, **kwargs)
         result = chain.invoke({"messages": self.history, **context, **kwargs})
 
         if isinstance(result, BaseModel):

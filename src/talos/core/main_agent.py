@@ -71,7 +71,7 @@ class MainAgent(Agent):
 
         return get_ticket_status
 
-    def _add_context(self, query: str, **kwargs) -> dict:
+    def _build_context(self, query: str, **kwargs) -> dict:
         active_tickets = self.router.get_all_tickets()
         ticket_info = [f"- {ticket.ticket_id}: last updated at {ticket.updated_at}" for ticket in active_tickets]
         return {
