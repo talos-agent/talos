@@ -13,14 +13,20 @@ class SupervisedTool(BaseTool):
     """
 
     tool: BaseTool
-    supervisor: Supervisor
+    supervisor: Supervisor | None = None
     messages: list
+
+    def set_supervisor(self, supervisor: Supervisor | None):
+        """
+        Sets the supervisor for the tool.
+        """
+        self.supervisor = supervisor
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
         """
         Runs the tool.
         """
-        if self.supervisor.approve(self.messages, self.name, kwargs):
+        if self.supervisor and self.supervisor.approve(self.messages, self.name, kwargs):
             return self.tool._run(*args, **kwargs)
         else:
             raise ValueError(f"Tool call to '{self.name}' denied by supervisor.")

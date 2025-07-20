@@ -7,6 +7,7 @@ from langchain_core.language_models import BaseChatModel
 from talos.tools.tool_manager import ToolManager
 from talos.prompts.prompt_manager import PromptManager
 from talos.hypervisor.supervisor import Supervisor
+from talos.tools.supervised_tool import SupervisedTool
 
 
 from pydantic import ConfigDict
@@ -75,10 +76,9 @@ class Agent(BaseModel):
         self.history.append(HumanMessage(content=message_with_context))
 
         tools = self.tool_manager.get_all_tools()
-        if self.supervisor:
-            tools = [
-                self.tool_manager.get_tool(tool.name, self.history) for tool in tools
-            ]
+        for tool in tools:
+            if isinstance(tool, SupervisedTool):
+                tool.set_supervisor(self.supervisor)
 
         if tools:
             self.model = self.model.bind_tools(tools)  # type: ignore
