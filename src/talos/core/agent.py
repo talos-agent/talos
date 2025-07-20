@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field, PrivateAttr
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
@@ -8,6 +8,9 @@ from talos.tools.tool_manager import ToolManager
 from talos.prompts.prompt_manager import PromptManager
 from talos.hypervisor.supervisor import Supervisor
 from talos.tools.supervised_tool import SupervisedTool
+
+if TYPE_CHECKING:
+    from talos.core.main_agent import MainAgent
 
 
 from pydantic import ConfigDict
@@ -46,6 +49,12 @@ class Agent(BaseModel):
         Adds a supervisor to the agent.
         """
         self.supervisor = supervisor
+        # We only want to set the agent on the supervisor if it's the main agent.
+        # This is because the hypervisor needs the conversation history from the main agent,
+        # but it is also passed to the services to be added to their supervised tools.
+        # We don't want any of the services to update the supervisor.
+        if isinstance(self, MainAgent):
+            supervisor.set_agent(self)
 
     def add_to_history(self, messages: list[BaseMessage]):
         """
