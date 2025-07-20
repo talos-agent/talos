@@ -17,10 +17,12 @@ class GithubService(Service):
     _tools: GithubTools = PrivateAttr()
     _agent: GithubPRReviewAgent = PrivateAttr()
 
-    def __init__(self, token: str, **kwargs: Any):
-        super().__init__(**kwargs)
-        self._tools = GithubTools(token=token)
-        self._agent = GithubPRReviewAgent(token)
+    token: str
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        self._tools = GithubTools(token=self.token)
+        self._agent = GithubPRReviewAgent(token=self.token)
 
     @property
     def name(self) -> str:

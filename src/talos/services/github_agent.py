@@ -7,26 +7,32 @@ from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
+from pydantic import PrivateAttr
 from pydantic.types import SecretStr
 
+from talos.services.base import Service
 from talos.tools.github.tools import GithubTools
 
 
-class GithubPRReviewAgent:
+class GithubPRReviewAgent(Service):
     """
     An agent that reviews a pull request and provides feedback.
     """
 
-    def __init__(self, token: str):
-        github_tools = GithubTools(token=token)
-        self.tools = [
+    token: str
+    _agent_executor: AgentExecutor = PrivateAttr()
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        github_tools = GithubTools(token=self.token)
+        tools = [
             tool(github_tools.get_project_structure),
             tool(github_tools.get_file_content),
         ]
-        self.llm = ChatOpenAI(api_key=SecretStr(token))
+        llm = ChatOpenAI(api_key=SecretStr(self.token))
         with open("src/talos/prompts/github_pr_review_prompt.json") as f:
             prompt_config = json.load(f)
-        self.prompt = ChatPromptTemplate.from_messages(
+        prompt = ChatPromptTemplate.from_messages(
             [
                 (
                     "system",
@@ -36,8 +42,12 @@ class GithubPRReviewAgent:
                 ("placeholder", "{agent_scratchpad}"),
             ]
         )
-        self.agent = create_openai_tools_agent(self.llm, self.tools, self.prompt)
-        self.agent_executor = AgentExecutor(agent=self.agent, tools=self.tools)
+        agent = create_openai_tools_agent(llm, tools, prompt)
+        self._agent_executor = AgentExecutor(agent=agent, tools=tools)
+
+    @property
+    def name(self) -> str:
+        return "github_pr_review_agent"
 
     def run(self, **kwargs: Any) -> Any:
-        return self.agent_executor.invoke(kwargs)
+        return self._agent_executor.invoke(kwargs)
