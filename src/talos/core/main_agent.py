@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import os
+from datetime import datetime
 
-from langchain_core.language_models import BaseLanguageModel
-from langchain_core.tools import BaseTool as Tool
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import BaseMessage
+from pydantic import BaseModel
 
+from talos.core.agent import Agent
 from talos.core.router import Router
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
@@ -14,61 +19,55 @@ from talos.services.implementations import (
 )
 from talos.services.models import TicketCreationRequest
 from talos.services.proposals.models import Proposal, QueryResponse, RunParams
+from talos.tools.tool_manager import ToolManager
 
 
-class MainAgent:
+class MainAgent(Agent):
     """
     A top-level agent that delegates to a conversational agent and a research agent.
     """
 
     def __init__(
         self,
-        llm: BaseLanguageModel,
-        tools: "list[Tool]",
+        llm: BaseChatModel,
         prompts_dir: str,
     ):
-        self.services: dict[str, Service] = {}
-        self.services["proposals"] = ProposalsService(llm=llm)
-        self.services["twitter"] = TwitterService()
-        self.services["github"] = GitHubService(
-            llm=llm, token=os.environ.get("GITHUB_TOKEN", "")
-        )
-        self.tools = {tool.name: tool for tool in tools}
+        services: list[Service] = [
+            ProposalsService(llm=llm),
+            TwitterService(),
+            GitHubService(llm=llm, token=os.environ.get("GITHUB_TOKEN", "")),
+        ]
+        self.router = Router(services)
         self.prompt_manager = FilePromptManager(prompts_dir)
-        self.history: "list[dict[str, str]]" = []
         self.hypervisor = Hypervisor()
-        self.router = Router(list(self.services.values()))
+        super().__init__(
+            model=llm,
+            prompt_manager=self.prompt_manager,
+            tool_manager=ToolManager(),
+        )
 
-    def add_to_history(self, user_message: str, agent_response: str) -> None:
-        """
-        Adds a message to the conversation history.
-        """
-        self.history.append({"user": user_message, "agent": agent_response})
+    def _add_context(self, query: str, **kwargs) -> str:
+        active_tickets = self.router.get_all_tickets()
+        ticket_info = [
+            f"- {ticket.ticket_id}: last updated at {ticket.updated_at}"
+            for ticket in active_tickets
+        ]
+        return (
+            f"It is currently {datetime.now().isoformat()}. You have the following services available: "
+            f"{', '.join([service.name for service in self.router.services])}. "
+            f"You have the following active tickets:\n{' '.join(ticket_info)}\n\n"
+            f"What would you like to do? Keep in mind that you can only interact with the user and "
+            f"the available services. You can also create new tickets to delegate tasks to other agents."
+        )
 
-    def pop_from_history(self) -> "dict[str, str]":
-        """
-        Pops the last message from the conversation history.
-        """
-        return self.history.pop()
-
-    def reset_history(self) -> None:
-        """
-        Resets the conversation history.
-        """
-        self.history = []
-
-    def run(self, query: str, params: RunParams) -> QueryResponse:
-        """
-        Runs the appropriate agent based on the query and parameters.
-        """
-        # This is a temporary way to route to the correct discipline.
-        # A more sophisticated routing mechanism will be needed in the future.
-        if params.tool and params.tool in self.tools:
-            return self.run_tool(params.tool, params.tool_args or {})
-        elif params.prompt and params.prompt in self.prompt_manager.prompts:
-            return self.run_prompt(params.prompt, params.prompt_args or {})
+    def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:  # type: ignore
+        params = RunParams.model_validate(kwargs)
+        if params.tool and params.tool in self.tool_manager.get_all_tools():
+            return self.run_tool(params.tool, params.tool_args or {})  # type: ignore
+        elif params.prompt and self.prompt_manager.get_prompt(params.prompt):
+            return self.run_prompt(params.prompt, params.prompt_args or {})  # type: ignore
         else:
-            service = self.router.route(query)
+            service = self.router.route(message)
             if service:
                 request = TicketCreationRequest(
                     tool=service.name,
@@ -76,41 +75,14 @@ class MainAgent:
                 )
                 ticket = service.create_ticket(request)
                 return QueryResponse(answers=[f"Ticket created: {ticket.ticket_id}"])
-            return QueryResponse(answers=["No service found for your query"])
+            return super().run(message, history, **kwargs)
 
-    def run_tool(self, tool_name: str, tool_args: dict) -> QueryResponse:
-        """
-        Runs a tool.
-        """
-        if self.hypervisor.approve("run_tool", {"tool_name": tool_name, "tool_args": tool_args}):
-            tool = self.tools.get(tool_name)
-            if tool:
-                result = tool.run(**tool_args)
-                return QueryResponse(answers=[result])
-            else:
-                return QueryResponse(answers=[f"Tool {tool_name} not found"])
-        else:
-            return QueryResponse(answers=["Action denied by hypervisor"])
-
-    def run_prompt(self, prompt_name: str, prompt_args: dict) -> QueryResponse:
-        """
-        Runs a prompt.
-        """
-        if self.hypervisor.approve("run_prompt", {"prompt_name": prompt_name, "prompt_args": prompt_args}):
-            prompt = self.prompt_manager.get_prompt(prompt_name)
-            if prompt:
-                result = prompt.format(**prompt_args)
-                return QueryResponse(answers=[result])
-            else:
-                return QueryResponse(answers=[f"Prompt {prompt_name} not found"])
-        else:
-            return QueryResponse(answers=["Action denied by hypervisor"])
 
     def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
         """
         Evaluates a proposal.
         """
-        proposals_service = self.services.get("proposals")
+        proposals_service = self.router.get_service("proposals")
         if proposals_service and isinstance(proposals_service, ProposalsService):
             result = proposals_service.evaluate_proposal(proposal, feedback=[])
             return QueryResponse(answers=result.answers)

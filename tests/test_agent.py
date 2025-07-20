@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 from langchain_core.language_models import BaseChatModel
-from talos.agent import Agent
+from talos.core.agent import Agent
 from talos.prompts.prompt_manager import PromptManager
 from langchain_core.messages import HumanMessage, AIMessage
 

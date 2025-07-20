@@ -117,3 +117,9 @@ class Service(ABC):
         If it is finalized, to get the result of the execution.
         """
         return self.results.get(ticket_id)
+
+    def get_all_tickets(self) -> list[Ticket]:
+        """
+        Returns all tickets for this service.
+        """
+        return list(self.tickets.values())
