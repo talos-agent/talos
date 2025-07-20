@@ -3,7 +3,7 @@ import time
 import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
-
+from langchain_core.tools import tool
 from talos.services.models import (
     Ticket,
     TicketCreationRequest,
@@ -42,10 +42,16 @@ class Service(ABC):
         pass
 
     def create_ticket_tool(self):
+        @tool(f"create_{self.name}_ticket")
         def create_ticket(**kwargs: Any) -> Ticket:
             """
-            Creates a ticket for a long-running process.
-            This should be non-blocking.
+            Creates a ticket for the {self.name} service.
+
+            Args:
+                **kwargs: The arguments to pass to the {self.name} service.
+
+            Returns:
+                The ticket object.
             """
             request = TicketCreationRequest(tool=self.name, tool_args=kwargs)
             ticket_id = str(uuid.uuid4())
@@ -63,17 +69,6 @@ class Service(ABC):
             self.threads[ticket_id] = thread
             thread.start()
             return ticket
-
-        create_ticket.__name__ = f"create_{self.name}_ticket"
-        create_ticket.__doc__ = f"""
-        Creates a ticket for the {self.name} service.
-
-        Args:
-            **kwargs: The arguments to pass to the {self.name} service.
-
-        Returns:
-            The ticket object.
-        """
 
         return create_ticket
 

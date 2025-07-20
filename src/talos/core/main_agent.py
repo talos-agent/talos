@@ -17,7 +17,7 @@ from talos.services.implementations import (
 )
 from talos.services.models import Ticket
 from talos.tools.tool_manager import ToolManager
-
+from langchain_core.tools import tool
 
 
 
@@ -32,6 +32,7 @@ class MainAgent(Agent):
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
+        self.set_prompt("main_agent_prompt")
         services: list[Service] = [
             ProposalsService(llm=self.model),
             TwitterService(),
@@ -49,6 +50,7 @@ class MainAgent(Agent):
         self.add_supervisor(hypervisor)
 
     def get_ticket_status_tool(self):
+        @tool
         def get_ticket_status(service_name: str, ticket_id: str) -> Ticket:
             """
             Get the status of a ticket.
