@@ -58,8 +58,5 @@ class ProposalsService(ProposalAgent):
         )
         chain = LLMChain(llm=self.llm, prompt=prompt_template)
         feedback_str = "\n".join([f"- {f.delegate}: {f.feedback}" for f in proposal.feedback])
-        response = chain.run(
-            proposal_text=proposal.proposal_text,
-            feedback=feedback_str,
-        )
-        return QueryResponse(answers=[response])
+        response = chain.invoke({"proposal_text": proposal.proposal_text, "feedback": feedback_str})
+        return QueryResponse(answers=[response["text"]])
