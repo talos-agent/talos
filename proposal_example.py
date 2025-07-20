@@ -12,9 +12,8 @@ def run_proposal_example():
     """
     # Initialize the main agent
     agent = MainAgent(
-        llm=ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=os.environ.get("OPENAI_API_KEY", "")),
-        tools=[],
-        prompts_dir="",
+        model=ChatOpenAI(model="gpt-4o", openai_api_key=os.environ.get("OPENAI_API_KEY", "")),
+        prompts_dir="src/talos/prompts",
     )
 
     # Define the proposal
