@@ -18,15 +18,23 @@ class Hypervisor(Agent, Supervisor):
     """
 
     prompts_dir: str
+    agent: Agent | None = None
 
     def model_post_init(self, __context: Any) -> None:
         self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.tool_manager = ToolManager()
 
+    def set_agent(self, agent: Agent):
+        """
+        Sets the agent to be supervised.
+        """
+        self.agent = agent
+
     def approve(self, messages: list, action: str, args: dict) -> bool:
         """
         Approves or denies an action.
         """
+        agent_history = self.agent.history if self.agent else []
         prompt = self.prompt_manager.get_prompt("hypervisor")
         if not prompt:
             raise ValueError("Hypervisor prompt not found.")
@@ -35,6 +43,7 @@ class Hypervisor(Agent, Supervisor):
                 messages=messages,
                 action=action,
                 args=args,
+                agent_history=agent_history,
             )
         )
         return json.loads(str(response))["approve"]

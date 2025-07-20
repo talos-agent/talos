@@ -46,6 +46,7 @@ class Agent(BaseModel):
         Adds a supervisor to the agent.
         """
         self.supervisor = supervisor
+        supervisor.set_agent(self)
 
     def add_to_history(self, messages: list[BaseMessage]):
         """
