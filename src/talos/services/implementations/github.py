@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from typing import Any
 
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from langchain_core.language_models import BaseLanguageModel
+from pydantic import ConfigDict
 
 from talos.services.abstract.github import GitHub
 from talos.services.proposals.models import QueryResponse
@@ -14,15 +16,13 @@ class GitHubService(GitHub):
     A discipline for interacting with GitHub using PyGithub.
     """
 
-    def __init__(self, llm: BaseLanguageModel, token: str | None):
-        super().__init__(llm, token or "")
-        self.tools: GithubTools | None
-        if token:
-            self.tools = GithubTools(token)
-        else:
-            self.tools = None
-        self.llm = llm
-        self.token: str | None = token
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    tools: GithubTools | None = None
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        if self.token:
+            self.tools = GithubTools(self.token)
 
     @property
     def name(self) -> str:

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import Any
 
 from langchain_core.language_models import BaseLanguageModel
 
@@ -10,9 +13,11 @@ class GitHub(Service, ABC):
     An abstract base class for a GitHub discipline.
     """
 
-    def __init__(self, llm: BaseLanguageModel, token: str | None):
-        self.llm = llm
-        self.token = token
+    llm: BaseLanguageModel
+    token: str | None = None
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
 
     @abstractmethod
     def reply_to_issues(self, user: str, project: str) -> None:
