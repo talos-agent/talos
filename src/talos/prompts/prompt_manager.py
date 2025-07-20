@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from talos.prompts.prompt import Prompt
+
 from langchain_core.messages import BaseMessage
+
+from talos.prompts.prompt import Prompt
 
 
 class PromptManager(ABC):

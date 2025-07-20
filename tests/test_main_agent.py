@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from langchain_core.language_models import BaseChatModel
+
 from talos.core.main_agent import MainAgent
+from talos.core.router import Router
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
-from talos.core.router import Router
 
 
 @pytest.fixture
@@ -25,15 +27,11 @@ def mock_prompt_manager() -> FilePromptManager:
     return mock
 
 
-def test_main_agent_initialization(
-    mock_model: BaseChatModel, mock_prompt_manager: FilePromptManager
-) -> None:
+def test_main_agent_initialization(mock_model: BaseChatModel, mock_prompt_manager: FilePromptManager) -> None:
     """
     Tests that the MainAgent can be initialized without errors.
     """
-    with patch(
-        "talos.prompts.prompt_managers.file_prompt_manager.FilePromptManager.load_prompts"
-    ) as mock_load_prompts:
+    with patch("talos.prompts.prompt_managers.file_prompt_manager.FilePromptManager.load_prompts") as mock_load_prompts:
         mock_load_prompts.return_value = None
         agent = MainAgent(
             model=mock_model,

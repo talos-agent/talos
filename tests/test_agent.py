@@ -1,19 +1,23 @@
-import pytest
 from unittest.mock import MagicMock
-from langchain_core.language_models import BaseChatModel
-from talos.core.agent import Agent
-from talos.prompts.prompt_manager import PromptManager
-from langchain_core.messages import HumanMessage, AIMessage
 
+import pytest
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import AIMessage, HumanMessage
+
+from talos.core.agent import Agent
 from talos.prompts.prompt import Prompt
+from talos.prompts.prompt_manager import PromptManager
+
 
 class MockPromptManager(PromptManager):
     def get_prompt(self, name: str) -> Prompt | None:
         return Prompt(name="default", template="test template", input_variables=[])
 
+
 @pytest.fixture
 def prompt_manager():
     return MockPromptManager()
+
 
 class MockChatModel(BaseChatModel):
     def _generate(self, messages, stop=None, run_manager=None, **kwargs):
@@ -29,6 +33,7 @@ def test_reset_history(prompt_manager):
     assert len(agent.history) == 1
     agent.reset_history()
     assert len(agent.history) == 0
+
 
 def test_add_to_history(prompt_manager):
     agent = Agent(model=MockChatModel(), prompt_manager=prompt_manager)

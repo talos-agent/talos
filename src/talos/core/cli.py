@@ -4,8 +4,8 @@ from langchain_openai import ChatOpenAI
 from pydantic.types import SecretStr
 
 from talos.core.main_agent import MainAgent
-from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.core.router import Router
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 
 
 def main() -> None:

@@ -16,8 +16,13 @@ else
     source .venv/bin/activate
 fi
 
+# Run isort
+echo "Running isort..."
+uv run isort .
+
 # Run ruff
 echo "Running ruff..."
+uv run ruff format .
 uv run ruff check .
 
 # Run mypy

@@ -27,9 +27,7 @@ class ProposalsService(ProposalAgent):
             return self.evaluate_proposal(kwargs["proposal"], kwargs["feedback"])
         raise ValueError("Missing required arguments: proposal, feedback")
 
-    def evaluate_proposal(
-        self, proposal: Proposal, feedback: list[dict[str, Any]]
-    ) -> QueryResponse:
+    def evaluate_proposal(self, proposal: Proposal, feedback: list[dict[str, Any]]) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.
         """
@@ -40,8 +38,6 @@ class ProposalsService(ProposalAgent):
         chain = LLMChain(llm=self.llm, prompt=prompt_template)
         response = chain.run(
             proposal_text=proposal.proposal_text,
-            feedback="\n".join(
-                [f"- {f['delegate']}: {f['feedback']}" for f in feedback]
-            ),
+            feedback="\n".join([f"- {f['delegate']}: {f['feedback']}" for f in feedback]),
         )
         return QueryResponse(answers=[response])

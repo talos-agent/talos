@@ -1,12 +1,16 @@
 import os
+
 import tweepy
-from .twitter import get_all_replies
-from talos.core.agent import Agent
 from langchain_core.messages import AIMessage
-from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from langchain_openai import ChatOpenAI
 
+from talos.core.agent import Agent
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+
+from .twitter import get_all_replies
+
 prompt_manager = FilePromptManager("src/talos/prompts")
+
 
 def post_question():
     """
@@ -26,6 +30,7 @@ def post_question():
 
     with open("tweet_id.txt", "w") as f:
         f.write(str(tweet.id))
+
 
 def analyze_sentiment(tweets: list[dict]) -> str:
     """

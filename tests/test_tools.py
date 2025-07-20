@@ -1,6 +1,8 @@
 import unittest
-from talos.tools.tool_manager import ToolManager
+
 from langchain_core.tools import BaseTool
+
+from talos.tools.tool_manager import ToolManager
 
 
 class MockTool(BaseTool):
@@ -56,6 +58,7 @@ class TestToolManager(unittest.TestCase):
         self.assertEqual(len(tools), 2)
         self.assertIn(tool1, tools)
         self.assertIn(tool2, tools)
+
 
 if __name__ == "__main__":
     unittest.main()

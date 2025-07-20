@@ -3,12 +3,9 @@ from __future__ import annotations
 import json
 from typing import Any
 
-
 from talos.core.agent import Agent
 from talos.hypervisor.supervisor import Supervisor
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
-
-
 from talos.tools.tool_manager import ToolManager
 
 
