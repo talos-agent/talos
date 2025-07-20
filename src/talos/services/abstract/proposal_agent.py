@@ -1,8 +1,11 @@
 from abc import abstractmethod
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from talos.services.base import Service
 from talos.services.proposals.models import QueryResponse
+
+if TYPE_CHECKING:
+    from talos.services.proposals.models import Proposal
 
 
 class ProposalAgent(Service):
@@ -29,5 +32,4 @@ class ProposalAgent(Service):
         :param feedback: A list of feedback from delegates.
         :return: The agent's recommendation.
         """
-        from talos.services.proposals.models import Proposal
         pass

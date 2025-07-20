@@ -10,7 +10,7 @@ class GitHubService(GitHub):
     A discipline for interacting with GitHub using PyGithub.
     """
 
-    def __init__(self, llm: BaseLanguageModel, token: str):
+    def __init__(self, llm: BaseLanguageModel, token: str | None):
         super().__init__(llm, token)
         self.tools = GithubTools(token)
 

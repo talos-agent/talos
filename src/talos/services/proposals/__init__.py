@@ -1,11 +1,14 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from langchain.chains import LLMChain
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 
 from talos.services.base import Service
-from talos.services.proposals.models import Proposal, QueryResponse
+from talos.services.proposals.models import QueryResponse
+
+if TYPE_CHECKING:
+    from talos.services.proposals.models import Proposal
 
 
 class ProposalsService(Service):
@@ -33,7 +36,6 @@ class ProposalsService(Service):
         """
         Evaluates a proposal and returns a recommendation.
         """
-        from talos.services.proposals.models import Proposal
         prompt_template = PromptTemplate(
             template=proposal.prompt,
             input_variables=["proposal_text", "feedback"],
