@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import Any, List
+from typing import Any
 
 
 class TicketStatus(str, Enum):
@@ -44,15 +44,3 @@ class TicketResult(BaseModel):
     status: TicketStatus = Field(..., description="The status of the ticket.")
     result: Any | None = Field(None, description="The result of the ticket.")
     error: str | None = Field(None, description="The error message if the ticket failed.")
-
-
-class QueryResponse(BaseModel):
-    answers: List[str]
-
-
-class RunParams(BaseModel):
-    tool: str | None = None
-    tool_args: dict | None = None
-    prompt: str | None = None
-    prompt_args: dict | None = None
-    discipline: str | None = None

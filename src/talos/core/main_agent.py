@@ -12,8 +12,8 @@ from talos.services.implementations import (
     ProposalsService,
     TwitterService,
 )
-from talos.services.models import QueryResponse, RunParams, TicketCreationRequest
-from talos.services.proposals.models import Proposal
+from talos.services.models import TicketCreationRequest
+from talos.services.proposals.models import Proposal, QueryResponse, RunParams
 
 
 class MainAgent:
@@ -70,8 +70,6 @@ class MainAgent:
         else:
             service = self.router.route(query)
             if service:
-                # This is a temporary way to create a ticket.
-                # A more sophisticated ticket creation mechanism will be needed in the future.
                 request = TicketCreationRequest(
                     tool=service.name,
                     tool_args=params.model_dump(),
@@ -114,6 +112,7 @@ class MainAgent:
         """
         proposals_service = self.services.get("proposals")
         if proposals_service and isinstance(proposals_service, ProposalsService):
-            return proposals_service.evaluate_proposal(proposal, feedback=[])
+            result = proposals_service.evaluate_proposal(proposal, feedback=[])
+            return QueryResponse(answers=result.answers)
         else:
             return QueryResponse(answers=["Proposals service not loaded"])

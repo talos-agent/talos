@@ -2,7 +2,7 @@ import os
 from pydantic.types import SecretStr
 
 from talos.core.main_agent import MainAgent
-from talos.services.models import RunParams
+from talos.services.proposals.models import RunParams
 from langchain_openai import OpenAI
 
 

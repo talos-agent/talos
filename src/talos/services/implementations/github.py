@@ -1,13 +1,10 @@
+from typing import Any
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_core.language_models import BaseLanguageModel
 
 from talos.services.abstract.github import GitHub
-from talos.services.models import (
-    Ticket,
-    TicketCreationRequest,
-    TicketResult,
-)
+from talos.services.proposals.models import QueryResponse
 from talos.tools.github import GithubTools
 
 
@@ -25,17 +22,9 @@ class GitHubService(GitHub):
     def name(self) -> str:
         return "github"
 
-    def create_ticket(self, request: "TicketCreationRequest") -> "Ticket":
-        raise NotImplementedError
-
-    def get_ticket_status(self, ticket_id: str) -> "Ticket":
-        raise NotImplementedError
-
-    def cancel_ticket(self, ticket_id: str) -> "Ticket":
-        raise NotImplementedError
-
-    def get_ticket_result(self, ticket_id: str) -> "TicketResult":
-        raise NotImplementedError
+    def run(self, **kwargs: Any) -> QueryResponse:
+        # Not implemented yet
+        return QueryResponse(answers=["The GitHub service is not implemented yet."])
 
     def reply_to_issues(self, user: str, project: str) -> None:
         """
