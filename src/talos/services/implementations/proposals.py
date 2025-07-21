@@ -40,11 +40,11 @@ class ProposalsService(ProposalAgent):
         super().model_post_init(__context)
 
     def run(self, **kwargs: Any) -> QueryResponse:
-        if "proposal" in kwargs and "feedback" in kwargs:
-            return self.evaluate_proposal(kwargs["proposal"], kwargs["feedback"])
-        raise ValueError("Missing required arguments: proposal, feedback")
+        if "proposal" in kwargs:
+            return self.evaluate_proposal(kwargs["proposal"])
+        raise ValueError("Missing required arguments: proposal")
 
-    def evaluate_proposal(self, proposal: Proposal, feedback: list[dict[str, Any]] | None = None) -> QueryResponse:
+    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.
         """

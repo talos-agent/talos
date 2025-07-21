@@ -23,12 +23,11 @@ class ProposalAgent(Service):
         return "proposals"
 
     @abstractmethod
-    def evaluate_proposal(self, proposal: Proposal, feedback: list[dict[str, Any]]) -> QueryResponse:
+    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
         """
         Evaluates a proposal and returns a recommendation.
 
         :param proposal: The proposal to evaluate.
-        :param feedback: A list of feedback from delegates.
         :return: The agent's recommendation.
         """
         pass
