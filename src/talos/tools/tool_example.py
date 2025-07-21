@@ -24,8 +24,7 @@ class SimpleSupervisor(Supervisor):
     A simple supervisor that approves every other tool call.
     """
 
-    def __init__(self):
-        self.counter = 0
+    counter: int = 0
 
     def set_agent(self, agent: "Agent"):
         """
@@ -33,9 +32,11 @@ class SimpleSupervisor(Supervisor):
         """
         pass
 
-    def approve(self, messages: list, action: str, args: dict[str, Any]) -> bool:
+    def approve(self, action: str, args: dict[str, Any]) -> tuple[bool, str | None]:
         """
         Approves or denies an action.
         """
         self.counter += 1
-        return self.counter % 2 != 0
+        if self.counter % 2 == 0:
+            return True, None
+        return False, "Denied by SimpleSupervisor"
