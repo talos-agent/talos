@@ -55,6 +55,7 @@ class MainAgent(Agent):
         tool_manager.register_tool(self.get_ticket_status_tool())
         self.tool_manager = tool_manager
         self.add_supervisor(hypervisor)
+        hypervisor.register_agent(self)
 
     def get_ticket_status_tool(self):
         @tool

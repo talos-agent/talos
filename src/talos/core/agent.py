@@ -45,12 +45,6 @@ class Agent(BaseModel):
         Adds a supervisor to the agent.
         """
         self.supervisor = supervisor
-        # We only want to set the agent on the supervisor if it's the main agent.
-        # This is because the hypervisor needs the conversation history from the main agent,
-        # but it is also passed to the services to be added to their supervised tools.
-        # We don't want any of the services to update the supervisor.
-        if self.is_main_agent:
-            supervisor.set_agent(self)
 
     def add_to_history(self, messages: list[BaseMessage]):
         """

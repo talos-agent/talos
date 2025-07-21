@@ -1,16 +1,40 @@
 from __future__ import annotations
 
-from src.talos.tools.example import AlternatingSupervisor, ExampleTool
+from langchain_core.tools import tool
+
+from talos.tools.supervised_tool import SupervisedTool
+from talos.tools.tool_example import SimpleSupervisor
 
 
-def test_example_tool_unsupervised() -> None:
-    tool = ExampleTool()
-    assert tool.run({}) == "Hello, world!"
+@tool
+def dummy_tool(x: int) -> int:
+    """A dummy tool."""
+    return x * 2
 
 
-def test_example_tool_supervised() -> None:
-    tool = ExampleTool(supervisor=AlternatingSupervisor())
-    assert tool.run({}) == "Blocked by AlternatingSupervisor"
-    assert tool.run({}) == "Hello, world!"
-    assert tool.run({}) == "Blocked by AlternatingSupervisor"
-    assert tool.run({}) == "Hello, world!"
+def test_supervised_tool_unsupervised() -> None:
+    supervised_tool = SupervisedTool(
+        tool=dummy_tool,
+        supervisor=None,
+        messages=[],
+        name=dummy_tool.name,
+        description=dummy_tool.description,
+        args_schema=dummy_tool.args_schema,
+    )
+    assert supervised_tool.run({"x": 1}) == 2
+
+
+def test_supervised_tool_supervised() -> None:
+    supervisor = SimpleSupervisor()
+    supervised_tool = SupervisedTool(
+        tool=dummy_tool,
+        supervisor=supervisor,
+        messages=[],
+        name=dummy_tool.name,
+        description=dummy_tool.description,
+        args_schema=dummy_tool.args_schema,
+    )
+    assert supervised_tool.run({"x": 1}) == "Denied by SimpleSupervisor"
+    assert supervised_tool.run({"x": 1}) == 2
+    assert supervised_tool.run({"x": 1}) == "Denied by SimpleSupervisor"
+    assert supervised_tool.run({"x": 1}) == 2

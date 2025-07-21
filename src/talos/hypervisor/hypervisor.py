@@ -21,13 +21,13 @@ class Hypervisor(Agent, Supervisor):
         self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.tool_manager = ToolManager()
 
-    def set_agent(self, agent: Agent):
+    def register_agent(self, agent: Agent):
         """
-        Sets the agent to be supervised.
+        Registers an agent with the hypervisor.
         """
         self.agent = agent
 
-    def approve(self, messages: list, action: str, args: dict) -> bool:
+    def approve(self, action: str, args: dict) -> tuple[bool, str | None]:
         """
         Approves or denies an action.
         """
@@ -37,10 +37,13 @@ class Hypervisor(Agent, Supervisor):
             raise ValueError("Hypervisor prompt not found.")
         response = self.run(
             prompt.format(
-                messages=messages,
+                messages=agent_history,
                 action=action,
                 args=args,
                 agent_history=agent_history,
             )
         )
-        return json.loads(str(response))["approve"]
+        result = json.loads(str(response))
+        if result["approve"]:
+            return True, None
+        return False, result.get("reason")
