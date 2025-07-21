@@ -31,6 +31,15 @@ class GithubTools(BaseModel):
             for issue in repo.get_issues(state="open")
         ]
 
+    def get_all_pull_requests(self, user: str, project: str, state: str = "open") -> list[dict[str, Any]]:
+        """
+        Gets all pull requests for a given repository.
+
+        :param state: Can be one of 'open', 'closed', or 'all'.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
+        return [{"number": pr.number, "title": pr.title, "url": pr.html_url} for pr in repo.get_pulls(state=state)]
+
     def get_issue_comments(self, user: str, project: str, issue_number: int) -> list[dict[str, Any]]:
         """
         Gets all comments for a given issue.
@@ -125,6 +134,22 @@ class GithubTools(BaseModel):
         repo = self._github.get_repo(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.create_review(body=feedback, event="COMMENT")
+
+    def comment_on_pr(self, user: str, project: str, pr_number: int, comment: str) -> None:
+        """
+        Comments on a pull request.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
+        pr = repo.get_pull(number=pr_number)
+        pr.create_issue_comment(comment)
+
+    def approve_pr(self, user: str, project: str, pr_number: int) -> None:
+        """
+        Approves a pull request.
+        """
+        repo = self._github.get_repo(f"{user}/{project}")
+        pr = repo.get_pull(number=pr_number)
+        pr.create_review(event="APPROVE")
 
     def create_issue(self, user: str, project: str, title: str, body: str) -> dict[str, Any]:
         """
