@@ -21,7 +21,8 @@ dependencies = [
     "ipfshttpclient==0.7.0",
     "pinata-python==1.0.0",
     "tweepy==4.16.0",
-    "instructor==1.10.0"
+    "instructor==1.10.0",
+    "google-api-python-client>=2.176.0",
 ]
 
 [build-system]

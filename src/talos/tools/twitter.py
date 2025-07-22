@@ -1,15 +1,18 @@
+import os
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 import tweepy
+from googleapiclient import discovery
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
-from textblob import TextBlob
 
 from ..models.evaluation import EvaluationResult
 from ..services.implementations.twitter_persona import TwitterPersonaService
 from .twitter_client import TweepyClient, TwitterClient
 from .twitter_evaluator import DefaultTwitterAccountEvaluator, TwitterAccountEvaluator
+
+MODERATION_THRESHOLD = 0.7
 
 
 class TwitterToolName(str, Enum):
@@ -20,7 +23,6 @@ class TwitterToolName(str, Enum):
     GET_FOLLOWING_COUNT = "get_following_count"
     GET_TWEET_ENGAGEMENT = "get_tweet_engagement"
     EVALUATE_ACCOUNT = "evaluate_account"
-    GET_TWEET_SENTIMENT = "get_tweet_sentiment"
     GENERATE_PERSONA_PROMPT = "generate_persona_prompt"
 
 
@@ -38,6 +40,10 @@ class TwitterTool(BaseTool):
     args_schema: type[BaseModel] = TwitterToolArgs
     twitter_client: Optional[TwitterClient] = None
     account_evaluator: Optional[TwitterAccountEvaluator] = None
+    perspective_client: Optional[Any] = None
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def __init__(
         self,
@@ -47,11 +53,29 @@ class TwitterTool(BaseTool):
         super().__init__()
         self.twitter_client = twitter_client or TweepyClient()
         self.account_evaluator = account_evaluator or DefaultTwitterAccountEvaluator()
+        self.perspective_client = self._initialize_perspective_client()
+
+    def _initialize_perspective_client(self) -> Optional[Any]:
+        """Initializes the Perspective API client."""
+        api_key = os.environ.get("PERSPECTIVE_API_KEY")
+        if not api_key:
+            return None
+        return discovery.build(
+            "commentanalyzer",
+            "v1alpha1",
+            developerKey=api_key,
+            discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
+            static_discovery=False,
+        )
 
     def post_tweet(self, tweet: str) -> str:
         """Posts a tweet."""
-        # This functionality is not yet migrated to the new TwitterClient
-        raise NotImplementedError
+        if self.perspective_client:
+            if not self.is_content_appropriate(tweet):
+                return "Tweet not sent. Content is inappropriate."
+        assert self.twitter_client is not None
+        self.twitter_client.post_tweet(tweet)
+        return "Tweet posted successfully."
 
     def get_all_replies(self, tweet_id: str) -> list[tweepy.Tweet]:
         """Gets all replies to a tweet."""
@@ -60,8 +84,35 @@ class TwitterTool(BaseTool):
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> str:
         """Replies to a tweet."""
-        # This functionality is not yet migrated to the new TwitterClient
-        raise NotImplementedError
+        if self.perspective_client:
+            if not self.is_content_appropriate(tweet):
+                return "Tweet not sent. Content is inappropriate."
+        assert self.twitter_client is not None
+        self.twitter_client.reply_to_tweet(tweet_id, tweet)
+        return "Tweet posted successfully."
+
+    def is_content_appropriate(self, text: str) -> bool:
+        """
+        Checks if the content is appropriate using the Perspective API.
+
+        Args:
+            text: The text to analyze.
+
+        Returns:
+            True if the content is appropriate, False otherwise.
+        """
+        if not self.perspective_client:
+            return True
+
+        analyze_request = {
+            "comment": {"text": text},
+            "requestedAttributes": {"TOXICITY": {}},
+        }
+
+        response = self.perspective_client.comments().analyze(body=analyze_request).execute()
+        toxicity_score = response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
+
+        return toxicity_score < MODERATION_THRESHOLD
 
     def get_follower_count(self, username: str) -> int:
         """Gets the follower count for a user."""
@@ -87,21 +138,6 @@ class TwitterTool(BaseTool):
         user = self.twitter_client.get_user(username)
         return self.account_evaluator.evaluate(user)
 
-    def get_tweet_sentiment(self, search_query: str) -> dict:
-        """Gets the sentiment of tweets that match a search query."""
-        assert self.twitter_client is not None
-        tweets = self.twitter_client.search_tweets(search_query)
-        sentiment = {"positive": 0, "negative": 0, "neutral": 0}
-        for tweet in tweets:
-            analysis = TextBlob(tweet.text)
-            if analysis.sentiment.polarity > 0:
-                sentiment["positive"] += 1
-            elif analysis.sentiment.polarity < 0:
-                sentiment["negative"] += 1
-            else:
-                sentiment["neutral"] += 1
-        return sentiment
-
     def generate_persona_prompt(self, username: str) -> str:
         """Generates a prompt to describe the voice and style of a specific twitter user."""
         assert self.twitter_client is not None
@@ -123,8 +159,6 @@ class TwitterTool(BaseTool):
             return self.get_tweet_engagement(**kwargs)
         elif tool_name == "evaluate_account":
             return self.evaluate_account(**kwargs)
-        elif tool_name == "get_tweet_sentiment":
-            return self.get_tweet_sentiment(**kwargs)
         elif tool_name == "generate_persona_prompt":
             return self.generate_persona_prompt(**kwargs)
         else:

@@ -28,6 +28,12 @@ class MockTwitterClient(TwitterClient):
     def get_sentiment(self, search_query: str = "talos") -> float:
         return 0.5
 
+    def post_tweet(self, tweet: str) -> Any:
+        pass
+
+    def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
+        pass
+
 
 class MockPromptManager(PromptManager):
     def get_prompt(self, name: str) -> Prompt | None:
