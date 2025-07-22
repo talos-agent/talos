@@ -1,0 +1,5 @@
+{
+    "name": "talos_sentiment_single",
+    "template": "Analyze the sentiment of the following tweets and provide a single aggregate sentiment score from 0 to 100 (0 being very negative, 100 being very positive). Also, provide a report explaining your reasoning for the score. The report should be a few sentences long and should capture the general feeling of the tweets. Return your response as a JSON object with a 'score' key and a 'report' key.\n\nTweets:\n{tweets}",
+    "input_variables": ["tweets"]
+}

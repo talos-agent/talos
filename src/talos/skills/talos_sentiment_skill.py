@@ -19,13 +19,4 @@ class TalosSentimentSkill:
             - "report": A detailed report of the sentiment analysis.
         """
         response = self.sentiment_service.run(search_query=search_query)
-        report = response.answers[0]
-
-        # Extract the score from the report
-        try:
-            score_line = next(line for line in report.split("\\n") if "average sentiment score" in line)
-            score = float(score_line.split("is ")[1].split(" ")[0])
-        except (StopIteration, IndexError, ValueError):
-            score = -1
-
-        return {"score": score, "report": report}
+        return {"score": response.score, "report": response.answers[0]}
