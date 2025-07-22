@@ -1,6 +1,6 @@
-from typing import List
+from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class OHLCV(BaseModel):
@@ -13,7 +13,5 @@ class OHLCV(BaseModel):
 
 
 class GeckoTerminalOHLCVData(BaseModel):
-    ohlcv_list: List[OHLCV] = Field(..., alias="ohlcv_list")
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+    ohlcv_list: list[OHLCV] = Field(..., alias="ohlcv_list")

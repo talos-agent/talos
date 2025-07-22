@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, List
-
 from langchain_core.tools import BaseTool
 
 
@@ -10,10 +8,10 @@ class ToolManager:
     A class for managing and discovering tools for the Talos agent.
     """
 
-    def __init__(self):
-        self.tools: Dict[str, BaseTool] = {}
+    def __init__(self) -> None:
+        self.tools: dict[str, BaseTool] = {}
 
-    def register_tool(self, tool: BaseTool):
+    def register_tool(self, tool: BaseTool) -> None:
         """
         Registers a tool with the ToolManager.
         """
@@ -21,7 +19,7 @@ class ToolManager:
             raise ValueError(f"Tool with name '{tool.name}' already registered.")
         self.tools[tool.name] = tool
 
-    def unregister_tool(self, tool_name: str):
+    def unregister_tool(self, tool_name: str) -> None:
         """
         Unregisters a tool from the ToolManager.
         """
@@ -37,7 +35,7 @@ class ToolManager:
             raise ValueError(f"Tool with name '{tool_name}' not found.")
         return self.tools[tool_name]
 
-    def get_all_tools(self) -> List[BaseTool]:
+    def get_all_tools(self) -> list[BaseTool]:
         """
         Gets all registered tools.
         """
