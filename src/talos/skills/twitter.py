@@ -1,12 +1,12 @@
 from typing import Any
 
-from talos.services.abstract.twitter import Twitter
 from talos.services.proposals.models import QueryResponse
+from talos.skills.base import Skill
 
 
-class TwitterService(Twitter):
+class TwitterSkill(Skill):
     """
-    A service for interacting with Twitter.
+    A skill for interacting with Twitter.
     """
 
     def __init__(self):
@@ -14,8 +14,8 @@ class TwitterService(Twitter):
 
     @property
     def name(self) -> str:
-        return "twitter"
+        return "twitter_skill"
 
     def run(self, **kwargs: Any) -> QueryResponse:
         # Not implemented yet
-        return QueryResponse(answers=["The Twitter service is not implemented yet."])
+        return QueryResponse(answers=["The Twitter skill is not implemented yet."])

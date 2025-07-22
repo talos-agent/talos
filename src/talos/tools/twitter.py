@@ -8,7 +8,7 @@ from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 
 from ..models.evaluation import EvaluationResult
-from ..services.implementations.twitter_persona import TwitterPersonaService
+from ..skills.twitter_persona import TwitterPersonaSkill
 from .twitter_client import TweepyClient, TwitterClient
 from .twitter_evaluator import DefaultTwitterAccountEvaluator, TwitterAccountEvaluator
 
@@ -141,8 +141,8 @@ class TwitterTool(BaseTool):
     def generate_persona_prompt(self, username: str) -> str:
         """Generates a prompt to describe the voice and style of a specific twitter user."""
         assert self.twitter_client is not None
-        persona_service = TwitterPersonaService(twitter_client=self.twitter_client)
-        return persona_service.run(username=username).answers[0]
+        persona_skill = TwitterPersonaSkill(twitter_client=self.twitter_client)
+        return persona_skill.run(username=username).answers[0]
 
     def _run(self, tool_name: str, **kwargs):
         if tool_name == "post_tweet":

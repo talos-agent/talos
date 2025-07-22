@@ -1,9 +1,7 @@
 from .onchain_management import OnChainManagementService
-from .proposals import ProposalsService
-from .twitter import TwitterService
+from .yield_manager import YieldManagerService
 
 __all__ = [
     "OnChainManagementService",
-    "ProposalsService",
-    "TwitterService",
+    "YieldManagerService",
 ]

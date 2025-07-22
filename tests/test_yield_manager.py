@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from talos.models.dexscreener import DexscreenerData
 from talos.models.gecko_terminal import OHLCV, GeckoTerminalOHLCVData
-from talos.services.implementations.yield_manager import YieldManagerService
+from talos.services.yield_manager import YieldManagerService
 
 
 class TestYieldManagerService(unittest.TestCase):
@@ -37,9 +37,7 @@ class TestYieldManagerService(unittest.TestCase):
         mock_sentiment_skill = MagicMock()
         mock_sentiment_skill.get_sentiment.return_value = {"score": 75.0, "report": "A report"}
 
-        with patch(
-            "talos.services.implementations.yield_manager.TalosSentimentSkill", return_value=mock_sentiment_skill
-        ):
+        with patch("talos.services.yield_manager.TalosSentimentSkill", return_value=mock_sentiment_skill):
             yield_manager = YieldManagerService(dexscreener_client, gecko_terminal_client, llm_client)
             yield_manager.get_staked_supply_percentage = MagicMock(return_value=0.6)
 
