@@ -1,6 +1,6 @@
 from typing import Any
 
-from talos.services.implementations.proposals.models import QueryResponse
+from talos.models.proposals import QueryResponse
 from talos.skills.base import Skill
 
 
