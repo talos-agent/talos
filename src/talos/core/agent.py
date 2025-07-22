@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from talos.core.memory import Memory
 from talos.hypervisor.supervisor import Supervisor
 from talos.prompts.prompt_manager import PromptManager
+from talos.tools.memory_tool import AddMemoryTool
 from talos.tools.supervised_tool import SupervisedTool
 from talos.tools.tool_manager import ToolManager
 
@@ -41,6 +42,7 @@ class Agent(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         if self.memory:
             self.history = self.memory.load_history()
+            self.tool_manager.register_tool(AddMemoryTool(agent=self))
 
     def set_prompt(self, name: str):
         if not self.prompt_manager:
