@@ -12,7 +12,7 @@ from ..services.implementations.twitter_persona import TwitterPersonaService
 from .twitter_client import TweepyClient, TwitterClient
 from .twitter_evaluator import DefaultTwitterAccountEvaluator, TwitterAccountEvaluator
 
-MODERATION_THRESHOLD = -0.5
+MODERATION_THRESHOLD = 0.7
 
 
 class TwitterToolName(str, Enum):
