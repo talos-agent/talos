@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timezone
-from typing import Any, ClassVar
+from typing import Any
 
 from pydantic import ConfigDict
 
@@ -18,17 +18,18 @@ class TalosSentimentService(TalosSentiment):
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    prompt_manager: ClassVar[FilePromptManager] = FilePromptManager("src/talos/prompts")
-    sentiment_prompt_obj: ClassVar[Prompt | None] = prompt_manager.get_prompt("talos_sentiment_single_prompt")
-    sentiment_prompt: ClassVar[str] = sentiment_prompt_obj.template if sentiment_prompt_obj else ""
 
     @property
     def name(self) -> str:
         return "talos_sentiment"
 
     def run(self, **kwargs: Any) -> TwitterSentimentResponse:
-        if self.sentiment_prompt is None:
+        prompt_manager = FilePromptManager("src/talos/prompts")
+        sentiment_prompt_obj: Prompt | None = prompt_manager.get_prompt("talos_sentiment_single_prompt")
+        if sentiment_prompt_obj is None:
             raise ValueError("Sentiment prompt not found")
+        sentiment_prompt = sentiment_prompt_obj.template
+
         twitter_client = TweepyClient()
         llm_client = LLMClient(api_key="dummy")
         search_query = kwargs.get("search_query", "talos")
@@ -47,7 +48,7 @@ class TalosSentimentService(TalosSentiment):
             }
             for tweet in tweets
         ]
-        prompt = self.sentiment_prompt.format(tweets=json.dumps(tweet_data))
+        prompt = sentiment_prompt.format(tweets=json.dumps(tweet_data))
         response = llm_client.reasoning(prompt)
         try:
             response_data = json.loads(response)

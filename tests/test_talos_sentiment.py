@@ -10,7 +10,14 @@ def test_talos_sentiment_service_run():
     with (
         patch("talos.services.implementations.talos_sentiment.TweepyClient") as mock_tweepy_client_class,
         patch("talos.services.implementations.talos_sentiment.LLMClient") as mock_llm_client_class,
+        patch("talos.services.implementations.talos_sentiment.FilePromptManager") as mock_prompt_manager_class,
     ):
+        # Mock the PromptManager
+        mock_prompt = MagicMock()
+        mock_prompt.template = "This is a test prompt."
+        mock_prompt_manager = mock_prompt_manager_class.return_value
+        mock_prompt_manager.get_prompt.return_value = mock_prompt
+
         # Mock the TweepyClient
         mock_tweet = MagicMock()
         mock_tweet.text = "This is a test tweet about Talos."
@@ -39,7 +46,7 @@ def test_talos_sentiment_service_run():
                 "age_in_days": 0,
             }
         ]
-        expected_sentiment_prompt = service.sentiment_prompt.format(tweets=json.dumps(tweet_data))
+        expected_sentiment_prompt = mock_prompt.template.format(tweets=json.dumps(tweet_data))
         mock_llm_client.reasoning.assert_called_once_with(expected_sentiment_prompt)
 
         # Assert that the response is correct
