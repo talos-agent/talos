@@ -1,10 +1,14 @@
 from talos.services.abstract.onchain_management import OnChainManagement
+from talos.services.implementations.yield_manager import YieldManagerService
 
 
 class OnChainManagementService(OnChainManagement):
     """
     A discipline for on-chain management.
     """
+
+    def __init__(self, yield_manager: YieldManagerService):
+        self.yield_manager = yield_manager
 
     def get_treasury_balance(self) -> float:
         """
@@ -29,3 +33,10 @@ class OnChainManagementService(OnChainManagement):
         Deploys a new vault contract.
         """
         return "0x1234567890"
+
+    def set_staking_apr(self) -> None:
+        """
+        Sets the staking APR.
+        """
+        new_apr = self.yield_manager.update_staking_apr()
+        print(f"Setting staking APR to {new_apr}")
