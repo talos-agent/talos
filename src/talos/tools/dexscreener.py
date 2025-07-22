@@ -4,6 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from ..models.dexscreener import DexscreenerData
 from ..utils.dexscreener import get_ohlcv_data
 from .base import SupervisedTool
 
@@ -17,7 +18,7 @@ class DexscreenerTool(SupervisedTool):
     description: str = "Gets the price of a token from dexscreener.com"
     args_schema: type[BaseModel] = DexscreenerToolArgs
 
-    def _run_unsupervised(self, token_address: str, **kwargs: Any) -> dict:
+    def _run_unsupervised(self, token_address: str, **kwargs: Any) -> DexscreenerData:
         """Gets the price of a token from dexscreener.com"""
         pair_address = "0xdaae914e4bae2aae4f536006c353117b90fb37e3"
         return get_ohlcv_data(pair_address)
