@@ -40,11 +40,11 @@ class OnChainManagementService(OnChainManagement):
         """
         return "0x1234567890"
 
-    def set_staking_apr(self, search_query: str) -> None:
+    def set_staking_apr(self) -> None:
         """
         Sets the staking APR.
         """
-        sentiment = self.sentiment_service.analyze_sentiment(search_query=search_query)
+        sentiment = self.sentiment_service.analyze_sentiment(search_query="talos")
         if sentiment.score is not None:
             new_apr = self.yield_manager.update_staking_apr(sentiment.score, "\n".join(sentiment.answers))
             print(f"Setting staking APR to {new_apr}")
