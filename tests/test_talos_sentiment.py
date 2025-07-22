@@ -33,8 +33,12 @@ def test_talos_sentiment_service_run():
         mock_llm_client = mock_llm_client_class.return_value
         mock_llm_client.reasoning.return_value = json.dumps({"score": 75, "report": "This is a test report."})
 
-        service = TalosSentimentService()
-        response = service.run(search_query="talos")
+        service = TalosSentimentService(
+            prompt_manager=mock_prompt_manager,
+            twitter_client=mock_twitter_client,
+            llm_client=mock_llm_client,
+        )
+        response = service.analyze_sentiment(search_query="talos")
 
         # Assert that the llm was called with the correct arguments
         tweet_data = [
@@ -61,11 +65,11 @@ def test_talos_sentiment_skill_get_sentiment():
     ):
         with patch("talos.skills.talos_sentiment_skill.TalosSentimentService") as mock_service_class:
             mock_service_instance = mock_service_class.return_value
-            mock_service_instance.run.return_value.score = 75
-            mock_service_instance.run.return_value.answers = ["This is a test report."]
+            mock_service_instance.analyze_sentiment.return_value.score = 75
+            mock_service_instance.analyze_sentiment.return_value.answers = ["This is a test report."]
 
-            skill = TalosSentimentSkill()
-            result = skill.get_sentiment(search_query="talos")
+            skill = TalosSentimentSkill(sentiment_service=mock_service_instance)
+            result = skill.run(search_query="talos")
 
             # Assert that the result is correct
             assert result["score"] == 75

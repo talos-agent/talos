@@ -9,9 +9,7 @@ class TalosSentimentSkill(Skill):
     A skill for analyzing the sentiment of tweets about Talos.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.sentiment_service = TalosSentimentService()
+    sentiment_service: TalosSentimentService
 
     @property
     def name(self) -> str:

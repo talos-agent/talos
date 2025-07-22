@@ -18,11 +18,9 @@ class TalosSentimentService(Service):
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    def __init__(self):
-        self.prompt_manager = FilePromptManager("src/talos/prompts")
-        self.twitter_client = TweepyClient()
-        self.llm_client = LLMClient(api_key="dummy")
+    prompt_manager: FilePromptManager
+    twitter_client: TweepyClient
+    llm_client: LLMClient
 
     @property
     def name(self) -> str:

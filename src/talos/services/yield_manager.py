@@ -3,7 +3,7 @@ import logging
 
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.yield_manager import YieldManager
-from talos.skills.talos_sentiment_skill import TalosSentimentSkill
+from talos.tools.twitter_client import TweepyClient
 from talos.utils.dexscreener import DexscreenerClient
 from talos.utils.geckoterminal import GeckoTerminalClient
 from talos.utils.llm import LLMClient
@@ -20,19 +20,17 @@ class YieldManagerService(YieldManager):
         self.dexscreener_client = dexscreener_client
         self.gecko_terminal_client = gecko_terminal_client
         self.llm_client = llm_client
-        self.sentiment_skill = TalosSentimentSkill()
+        self.twitter_client = TweepyClient()
         self.prompt_manager = FilePromptManager("src/talos/prompts")
         self.prompt = self.prompt_manager.get_prompt(prompt_name)
 
-    def update_staking_apr(self) -> float:
+    def update_staking_apr(self, sentiment: float, sentiment_report: str) -> float:
         logging.info("Updating staking APR...")
         dexscreener_data = self.dexscreener_client.get_talos_data()
         logging.info(f"Dexscreener data: {dexscreener_data}")
 
-        sentiment_data = self.sentiment_skill.run()
-        sentiment = sentiment_data["score"]
         logging.info(f"Social media sentiment: {sentiment}")
-        logging.info(f"Sentiment report: {sentiment_data['report']}")
+        logging.info(f"Sentiment report: {sentiment_report}")
 
         staked_supply_percentage = self.get_staked_supply_percentage()
         logging.info(f"Staked supply percentage: {staked_supply_percentage}")
