@@ -28,7 +28,6 @@ class GithubService(BaseModel):
         return "github_pr_review"
 
     def review_pr(self, user: str, repo: str, pr_number: int) -> str:
-
         diff = self._tools.get_pr_diff(user, repo, pr_number)
         comments = self._tools.get_pr_comments(user, repo, pr_number)
         files = self._tools.get_pr_files(user, repo, pr_number)

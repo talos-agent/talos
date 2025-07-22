@@ -29,9 +29,7 @@ class TalosSentimentService(Service):
         return "talos_sentiment"
 
     def analyze_sentiment(self, **kwargs: Any) -> TwitterSentimentResponse:
-        sentiment_prompt_obj: Prompt | None = self.prompt_manager.get_prompt(
-            "talos_sentiment_single_prompt"
-        )
+        sentiment_prompt_obj: Prompt | None = self.prompt_manager.get_prompt("talos_sentiment_single_prompt")
         if sentiment_prompt_obj is None:
             raise ValueError("Sentiment prompt not found")
         sentiment_prompt = sentiment_prompt_obj.template
@@ -39,9 +37,7 @@ class TalosSentimentService(Service):
         tweets = self.twitter_client.search_tweets(search_query)
 
         if not tweets:
-            return TwitterSentimentResponse(
-                answers=["No tweets found for the given query."], score=None
-            )
+            return TwitterSentimentResponse(answers=["No tweets found for the given query."], score=None)
 
         tweet_data = [
             {
@@ -60,8 +56,6 @@ class TalosSentimentService(Service):
             score = response_data["score"]
             report = response_data["report"]
         except (json.JSONDecodeError, KeyError):
-            return TwitterSentimentResponse(
-                answers=["Could not analyze the sentiment of any tweets."], score=None
-            )
+            return TwitterSentimentResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
 
         return TwitterSentimentResponse(answers=[report], score=score)

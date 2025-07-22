@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 from talos.services.base import Service
-from talos.skills.base import Skill
 from talos.services.models import Ticket
+from talos.skills.base import Skill
 
 
 class Router:
@@ -46,11 +47,9 @@ class Router:
 
     def get_all_tickets(self) -> list[Ticket]:
         """
-        Returns all tickets from all services and skills.
+        Returns all tickets from all skills.
         """
         tickets: list[Ticket] = []
-        for service in self.services:
-            tickets.extend(service.get_all_tickets())
         for skill in self.skills:
             tickets.extend(skill.get_all_tickets())
         return tickets

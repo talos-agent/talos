@@ -29,7 +29,7 @@ class YieldManagerService(YieldManager):
         dexscreener_data = self.dexscreener_client.get_talos_data()
         logging.info(f"Dexscreener data: {dexscreener_data}")
 
-        sentiment_data = self.sentiment_skill.get_sentiment()
+        sentiment_data = self.sentiment_skill.run()
         sentiment = sentiment_data["score"]
         logging.info(f"Social media sentiment: {sentiment}")
         logging.info(f"Sentiment report: {sentiment_data['report']}")

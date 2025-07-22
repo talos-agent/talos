@@ -13,11 +13,10 @@ from talos.hypervisor.hypervisor import Hypervisor
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.base import Service
-from talos.services.github import GithubService
+from talos.services.models import Ticket
 from talos.skills.base import Skill
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter import TwitterSkill
-from talos.services.models import Ticket
 from talos.tools.tool_manager import ToolManager
 
 
@@ -50,9 +49,7 @@ class MainAgent(Agent):
             raise ValueError("GITHUB_TOKEN environment variable not set.")
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
-        services: list[Service] = [
-            GithubService(token=github_token),
-        ]
+        services: list[Service] = []
         skills: list[Skill] = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
             TwitterSkill(),
@@ -72,8 +69,6 @@ class MainAgent(Agent):
     def _setup_tool_manager(self) -> None:
         assert self.router is not None
         tool_manager = ToolManager()
-        for service in self.router.services:
-            tool_manager.register_tool(service.create_ticket_tool())
         for skill in self.router.skills:
             tool_manager.register_tool(skill.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
@@ -114,16 +109,10 @@ class MainAgent(Agent):
                 The ticket object.
             """
             assert self.router is not None
-            service = self.router.get_service(service_name)
-            if not service:
-                skill = self.router.get_skill(service_name)
-                if not skill:
-                    raise ValueError(f"Service or skill '{service_name}' not found.")
-                ticket = skill.get_ticket_status(ticket_id)
-                if not ticket:
-                    raise ValueError(f"Ticket '{ticket_id}' not found.")
-                return ticket
-            ticket = service.get_ticket_status(ticket_id)
+            skill = self.router.get_skill(service_name)
+            if not skill:
+                raise ValueError(f"Skill '{service_name}' not found.")
+            ticket = skill.get_ticket_status(ticket_id)
             if not ticket:
                 raise ValueError(f"Ticket '{ticket_id}' not found.")
             return ticket

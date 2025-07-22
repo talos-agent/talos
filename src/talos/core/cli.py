@@ -1,59 +1,43 @@
-import os
-from pathlib import Path
+from __future__ import annotations
 
-from langchain_core.messages import AIMessage
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from pydantic import BaseModel
-from pydantic.types import SecretStr
+import os
+
+import typer
+from langchain_openai import ChatOpenAI
 
 from talos.core.main_agent import MainAgent
-from talos.core.memory import Memory
 from talos.core.router import Router
-from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 
 
-def main() -> None:
+def main(
+    query: str,
+    prompts_dir: str = "src/talos/prompts",
+    model_name: str = "gpt-4",
+    temperature: float = 0.0,
+) -> None:
     """
-    The main entry point for the Treasury Agent CLI.
+    The main entry point for the Talos agent.
     """
-    llm = ChatOpenAI(
-        model="gpt-4o",
-        temperature=0.0,
-        api_key=SecretStr(os.environ.get("OPENAI_API_KEY", "")),
-    )
-    embeddings = OpenAIEmbeddings(api_key=SecretStr(os.environ.get("OPENAI_API_KEY", "")))
-    # Get the absolute path to the prompts directory.
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    prompts_dir = os.path.join(current_dir, "..", "prompts")
-    # Get the absolute path to the memory file.
-    memory_path = Path(current_dir) / ".." / "memory"
-    agent = MainAgent(
-        model=llm,
+    if not os.path.exists(prompts_dir):
+        raise FileNotFoundError(f"Prompts directory not found at {prompts_dir}")
+
+    if "OPENAI_API_KEY" not in os.environ:
+        raise ValueError("OPENAI_API_KEY environment variable not set.")
+
+    # Create the main agent
+    model = ChatOpenAI(model=model_name, temperature=temperature)
+    router = Router([], [])
+    main_agent = MainAgent(
         prompts_dir=prompts_dir,
-        prompt_manager=FilePromptManager(prompts_dir=prompts_dir),
+        model=model,
+        router=router,
         schema=None,
-        router=Router(services=[]),
-        memory=Memory(
-            file_path=memory_path / "memories.json",
-            history_file_path=memory_path / "history.json",
-            embeddings_model=embeddings,
-        ),
     )
 
-    print("Treasury Agent CLI (type 'exit' to quit)")
-    while True:
-        query = input("> ")
-        if query.lower() == "exit":
-            break
-
-        response = agent.run(query)
-        if isinstance(response, AIMessage):
-            print(response.content)
-        elif isinstance(response, BaseModel) and hasattr(response, "content"):
-            print(response.content)  # type: ignore
-        else:
-            print(response)
+    # Run the agent
+    result = main_agent.run(query)
+    print(result)
 
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
