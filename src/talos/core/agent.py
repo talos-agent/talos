@@ -8,6 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
+from talos.core.memory import Memory
 from talos.hypervisor.supervisor import Supervisor
 from talos.prompts.prompt_manager import PromptManager
 from talos.tools.supervised_tool import SupervisedTool
@@ -25,15 +26,21 @@ class Agent(BaseModel):
         schema_class: The schema class to use for structured output.
         tool_manager: The tool manager to use.
     """
+
     model: BaseChatModel | Runnable
     prompt_manager: PromptManager | None = Field(None, alias="prompt_manager")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
     supervisor: Optional[Supervisor] = None
     is_main_agent: bool = False
+    memory: Optional[Memory] = None
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.memory:
+            self.history = self.memory.load_history()
 
     def set_prompt(self, name: str):
         if not self.prompt_manager:
@@ -68,11 +75,21 @@ class Agent(BaseModel):
         return {}
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
+        if self.memory:
+            relevant_memories = self.memory.search(message)
+            kwargs["relevant_memories"] = relevant_memories
         self._prepare_run(message, history)
         chain = self._create_chain()
         context = self._build_context(message, **kwargs)
         result = chain.invoke({"messages": self.history, **context, **kwargs})
-        return self._process_result(result)
+        processed_result = self._process_result(result)
+        if self.memory:
+            self.memory.save_history(self.history)
+        return processed_result
+
+    def add_memory(self, description: str, metadata: Optional[dict] = None):
+        if self.memory:
+            self.memory.add_memory(description, metadata)
 
     def _prepare_run(self, message: str, history: list[BaseMessage] | None = None) -> None:
         if history:
