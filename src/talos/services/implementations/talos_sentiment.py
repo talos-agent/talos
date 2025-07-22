@@ -29,6 +29,7 @@ class TalosSentimentService(TalosSentiment):
         if sentiment_prompt_obj is None:
             raise ValueError("Sentiment prompt not found")
         sentiment_prompt = sentiment_prompt_obj.template
+
         twitter_client = TweepyClient()
         llm_client = LLMClient(api_key="dummy")
         search_query = kwargs.get("search_query", "talos")
