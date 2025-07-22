@@ -31,6 +31,14 @@ class TwitterClient(ABC):
     def get_sentiment(self, search_query: str = "talos") -> float:
         pass
 
+    @abstractmethod
+    def post_tweet(self, tweet: str) -> Any:
+        pass
+
+    @abstractmethod
+    def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
+        pass
+
 
 class TweepyClient(TwitterClient):
     def __init__(self):
@@ -63,3 +71,9 @@ class TweepyClient(TwitterClient):
             analysis = TextBlob(tweet.text)
             sentiment += analysis.sentiment.polarity
         return sentiment / len(tweets) if tweets else 0
+
+    def post_tweet(self, tweet: str) -> Any:
+        return self.api.update_status(tweet)
+
+    def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
+        return self.api.update_status(tweet, in_reply_to_status_id=tweet_id)
