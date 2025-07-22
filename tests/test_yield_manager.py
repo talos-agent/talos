@@ -1,6 +1,9 @@
+import json
 import unittest
 from unittest.mock import MagicMock
 
+from talos.models.dexscreener import DexscreenerData
+from talos.models.gecko_terminal import OHLCV, GeckoTerminalOHLCVData
 from talos.services.implementations.yield_manager import YieldManagerService
 
 
@@ -8,8 +11,8 @@ class TestYieldManagerService(unittest.TestCase):
     def test_update_staking_apr(self):
         dexscreener_client = MagicMock()
         twitter_client = MagicMock()
-
-        from talos.models.dexscreener import DexscreenerData
+        gecko_terminal_client = MagicMock()
+        llm_client = MagicMock()
 
         dexscreener_client.get_talos_data.return_value = DexscreenerData(
             priceUsd=1.0,
@@ -17,10 +20,6 @@ class TestYieldManagerService(unittest.TestCase):
             volume=1000000,
         )
         twitter_client.get_sentiment.return_value = 1.0
-
-        gecko_terminal_client = MagicMock()
-        from talos.models.gecko_terminal import OHLCV, GeckoTerminalOHLCVData
-
         gecko_terminal_client.get_ohlcv_data.return_value = GeckoTerminalOHLCVData(
             ohlcv_list=[
                 OHLCV(
@@ -33,14 +32,17 @@ class TestYieldManagerService(unittest.TestCase):
                 )
             ]
         )
-        yield_manager = YieldManagerService(dexscreener_client, twitter_client, gecko_terminal_client)
+        llm_client.reasoning.return_value = json.dumps(
+            {"apr": 0.15, "explanation": "The APR has been updated based on market conditions."}
+        )
+
+        yield_manager = YieldManagerService(dexscreener_client, twitter_client, gecko_terminal_client, llm_client)
         yield_manager.get_staked_supply_percentage = MagicMock(return_value=0.6)
 
         new_apr = yield_manager.update_staking_apr()
 
         self.assertIsInstance(new_apr, float)
-        self.assertGreaterEqual(new_apr, 0.01)
-        self.assertLessEqual(new_apr, 0.2)
+        self.assertEqual(new_apr, 0.15)
 
 
 if __name__ == "__main__":
