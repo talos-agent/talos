@@ -10,10 +10,10 @@ from langchain_core.tools import BaseTool, tool
 from talos.core.agent import Agent
 from talos.core.router import Router
 from talos.hypervisor.hypervisor import Hypervisor
+from talos.models.services import Ticket
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
-from talos.services.base import Service
-from talos.services.models import Ticket
+from talos.services.abstract.service import Service
 from talos.skills.base import Skill
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter import TwitterSkill

@@ -3,7 +3,7 @@ import os
 from langchain_openai import ChatOpenAI
 
 from talos.services.implementations import ProposalsService
-from talos.services.proposals.models import Feedback, Proposal
+from talos.services.implementations.proposals.models import Feedback, Proposal
 
 
 def run_proposal_example():

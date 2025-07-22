@@ -1,4 +1,5 @@
 from talos.services.abstract.onchain_management import OnChainManagement
+from talos.services.implementations.talos_sentiment import TalosSentimentService
 from talos.services.implementations.yield_manager import YieldManagerService
 
 
@@ -7,8 +8,13 @@ class OnChainManagementService(OnChainManagement):
     A discipline for on-chain management.
     """
 
-    def __init__(self, yield_manager: YieldManagerService):
+    def __init__(
+        self,
+        yield_manager: YieldManagerService,
+        sentiment_service: "TalosSentimentService",
+    ):
         self.yield_manager = yield_manager
+        self.sentiment_service = sentiment_service
 
     def get_treasury_balance(self) -> float:
         """
@@ -38,5 +44,7 @@ class OnChainManagementService(OnChainManagement):
         """
         Sets the staking APR.
         """
-        new_apr = self.yield_manager.update_staking_apr()
-        print(f"Setting staking APR to {new_apr}")
+        sentiment = self.sentiment_service.analyze_sentiment(search_query="talos")
+        if sentiment.score is not None:
+            new_apr = self.yield_manager.update_staking_apr(sentiment.score, "\n".join(sentiment.answers))
+            print(f"Setting staking APR to {new_apr}")

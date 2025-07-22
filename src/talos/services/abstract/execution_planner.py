@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from talos.services.base import Service
-from talos.services.proposals.models import Plan, Question
+from talos.services.abstract.service import Service
+from talos.services.implementations.proposals.models import Plan, Question
 
 
 class ExecutionPlanner(Service):

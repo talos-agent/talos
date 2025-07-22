@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from talos.services.base import Service
-from talos.services.models import Ticket
+from talos.models.services import Ticket
+from talos.services.abstract.service import Service
 from talos.skills.base import Skill
 
 

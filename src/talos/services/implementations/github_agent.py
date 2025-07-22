@@ -10,7 +10,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import PrivateAttr
 from pydantic.types import SecretStr
 
-from talos.services.base import Service
+from talos.services.abstract.service import Service
 from talos.tools.github.tools import GithubTools
 
 
