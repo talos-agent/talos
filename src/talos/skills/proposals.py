@@ -10,7 +10,7 @@ from pydantic import ConfigDict
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.single_prompt_manager import SinglePromptManager
-from talos.models.proposals.models import Proposal, QueryResponse
+from talos.models.proposals import Proposal, QueryResponse
 from talos.skills.base import Skill
 
 

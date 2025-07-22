@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import ConfigDict, Field
 
 from talos.prompts.prompt_manager import PromptManager
-from talos.models.proposals.models import QueryResponse
+from talos.models.proposals import QueryResponse
 from talos.skills.base import Skill
 from talos.tools.twitter_client import TweepyClient, TwitterClient
 
