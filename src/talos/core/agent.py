@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 from talos.hypervisor.supervisor import Supervisor
@@ -24,8 +25,8 @@ class Agent(BaseModel):
         schema_class: The schema class to use for structured output.
         tool_manager: The tool manager to use.
     """
-    model: BaseChatModel
-    prompt_manager: PromptManager = Field(..., alias="prompt_manager")
+    model: BaseChatModel | Runnable
+    prompt_manager: PromptManager | None = Field(None, alias="prompt_manager")
     schema_class: type[BaseModel] | None = Field(None, alias="schema")
     tool_manager: ToolManager = Field(default_factory=ToolManager, alias="tool_manager")
     supervisor: Optional[Supervisor] = None
@@ -35,6 +36,8 @@ class Agent(BaseModel):
     history: list[BaseMessage] = []
 
     def set_prompt(self, name: str):
+        if not self.prompt_manager:
+            raise ValueError("Prompt manager not initialized.")
         prompt = self.prompt_manager.get_prompt(name)
         if not prompt:
             raise ValueError(f"The prompt '{name}' is not defined.")
@@ -65,40 +68,40 @@ class Agent(BaseModel):
         return {}
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
+        self._prepare_run(message, history)
+        chain = self._create_chain()
+        context = self._build_context(message, **kwargs)
+        result = chain.invoke({"messages": self.history, **context, **kwargs})
+        return self._process_result(result)
+
+    def _prepare_run(self, message: str, history: list[BaseMessage] | None = None) -> None:
         if history:
             self.history.extend(history)
-
-        self.prompt_manager.update_prompt_template(self.history)
-
+        if self.prompt_manager:
+            self.prompt_manager.update_prompt_template(self.history)
         self.history.append(HumanMessage(content=message))
-
         tools = self.tool_manager.get_all_tools()
         for tool in tools:
             if isinstance(tool, SupervisedTool):
                 tool.set_supervisor(self.supervisor)
+        if tools and isinstance(self.model, BaseChatModel):
+            self.model = self.model.bind_tools(tools)
 
-        if tools:
-            self.model = self.model.bind_tools(tools)  # type: ignore
-
-        if self.schema_class:
+    def _create_chain(self) -> Runnable:
+        if self.schema_class and isinstance(self.model, BaseChatModel):
             structured_llm = self.model.with_structured_output(self.schema_class)
-            chain = self._prompt_template | structured_llm
-        else:
-            chain = self._prompt_template | self.model
+            return self._prompt_template | structured_llm
+        return self._prompt_template | self.model
 
-        # Pass the history to the chain
-        context = self._build_context(message, **kwargs)
-        result = chain.invoke({"messages": self.history, **context, **kwargs})
-
+    def _process_result(self, result: Any) -> BaseModel:
         if isinstance(result, BaseModel):
             self.history.append(AIMessage(content=str(result)))
             return result
-        elif isinstance(result, dict) and self.schema_class:
+        if isinstance(result, dict) and self.schema_class:
             modelled_result = self.schema_class.parse_obj(result)
             self.history.append(AIMessage(content=str(modelled_result)))
             return modelled_result
-        elif isinstance(result, AIMessage):
+        if isinstance(result, AIMessage):
             self.history.append(result)
             return result
-        else:
-            raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
+        raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")

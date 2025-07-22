@@ -1,8 +1,10 @@
-from typing import Any, Dict, List
+from __future__ import annotations
+
+from typing import Any
 
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DatasetManager(BaseModel):
@@ -10,14 +12,13 @@ class DatasetManager(BaseModel):
     A class for managing datasets for the Talos agent.
     """
 
-    datasets: Dict[str, Any] = Field(default_factory=dict)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    datasets: dict[str, Any] = Field(default_factory=dict)
     vector_store: Any = Field(default=None)
     embeddings: Any = Field(default_factory=OpenAIEmbeddings)
 
-    class Config:
-        arbitrary_types_allowed = True
-
-    def add_dataset(self, name: str, data: List[str]):
+    def add_dataset(self, name: str, data: list[str]) -> None:
         """
         Adds a dataset to the DatasetManager.
         """
@@ -31,7 +32,7 @@ class DatasetManager(BaseModel):
         else:
             self.vector_store.add_texts(data)
 
-    def remove_dataset(self, name: str):
+    def remove_dataset(self, name: str) -> None:
         """
         Removes a dataset from the DatasetManager.
         """
@@ -57,13 +58,13 @@ class DatasetManager(BaseModel):
             raise ValueError(f"Dataset with name '{name}' not found.")
         return self.datasets[name]
 
-    def get_all_datasets(self) -> Dict[str, Any]:
+    def get_all_datasets(self) -> dict[str, Any]:
         """
         Gets all registered datasets.
         """
         return self.datasets
 
-    def search(self, query: str, k: int = 5) -> List[str]:
+    def search(self, query: str, k: int = 5) -> list[str]:
         """
         Searches the vector store for similar documents.
         """

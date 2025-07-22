@@ -2,7 +2,7 @@ import os
 from typing import Any
 
 import requests
-from github import Github
+from github import Auth, Github
 from pydantic import BaseModel, Field, PrivateAttr
 
 
@@ -18,7 +18,7 @@ class GithubTools(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         if not self.token:
             raise ValueError("Github token not provided.")
-        self._github = Github(self.token)
+        self._github = Github(auth=Auth.Token(self.token))
         self._headers = {"Authorization": f"token {self.token}"}
 
     def get_open_issues(self, user: str, project: str) -> list[dict[str, Any]]:

@@ -31,6 +31,8 @@ class Hypervisor(Agent, Supervisor):
         """
         Approves or denies an action.
         """
+        if not self.prompt_manager:
+            raise ValueError("Prompt manager not initialized.")
         agent_history = self.agent.history if self.agent else []
         prompt = self.prompt_manager.get_prompt("hypervisor")
         if not prompt:

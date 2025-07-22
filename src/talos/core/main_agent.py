@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.tools import tool
+from langchain_core.tools import BaseTool, tool
 
 from talos.core.agent import Agent
 from talos.core.router import Router
@@ -28,16 +28,26 @@ class MainAgent(Agent):
     prompts_dir: str
     model: BaseChatModel
     is_main_agent: bool = True
-    prompt_manager: Optional[PromptManager] = None  # type: ignore
+    prompt_manager: Optional[PromptManager] = None
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
+        self._setup_prompt_manager()
+        self._setup_router()
+        self._setup_hypervisor()
+        self._setup_tool_manager()
+
+    def _setup_prompt_manager(self) -> None:
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.set_prompt("main_agent_prompt")
+
+    def _setup_router(self) -> None:
         github_token = os.environ.get("GITHUB_TOKEN")
         if not github_token:
             raise ValueError("GITHUB_TOKEN environment variable not set.")
+        if not self.prompt_manager:
+            raise ValueError("Prompt manager not initialized.")
         services: list[Service] = [
             ProposalsService(llm=self.model, prompt_manager=self.prompt_manager),
             TwitterService(),
@@ -45,19 +55,25 @@ class MainAgent(Agent):
         ]
         if not self.router:
             self.router = Router(services)
+
+    def _setup_hypervisor(self) -> None:
+        if not self.prompt_manager:
+            raise ValueError("Prompt manager not initialized.")
         hypervisor = Hypervisor(
             model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None
         )
-        tool_manager = ToolManager()
-        for service in services:
-            tool_manager.register_tool(service.create_ticket_tool())
-
-        tool_manager.register_tool(self.get_ticket_status_tool())
-        self.tool_manager = tool_manager
         self.add_supervisor(hypervisor)
         hypervisor.register_agent(self)
 
-    def get_ticket_status_tool(self):
+    def _setup_tool_manager(self) -> None:
+        assert self.router is not None
+        tool_manager = ToolManager()
+        for service in self.router.services:
+            tool_manager.register_tool(service.create_ticket_tool())
+        tool_manager.register_tool(self._get_ticket_status_tool())
+        self.tool_manager = tool_manager
+
+    def _get_ticket_status_tool(self) -> BaseTool:
         @tool
         def get_ticket_status(service_name: str, ticket_id: str) -> Ticket:
             """
