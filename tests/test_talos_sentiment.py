@@ -10,7 +10,14 @@ def test_talos_sentiment_service_run():
     with (
         patch("talos.services.implementations.talos_sentiment.TweepyClient") as mock_tweepy_client_class,
         patch("talos.services.implementations.talos_sentiment.LLMClient") as mock_llm_client_class,
+        patch("talos.services.implementations.talos_sentiment.FilePromptManager") as mock_prompt_manager_class,
     ):
+        # Mock the PromptManager
+        mock_prompt = MagicMock()
+        mock_prompt.template = "This is a test prompt."
+        mock_prompt_manager = mock_prompt_manager_class.return_value
+        mock_prompt_manager.get_prompt.return_value = mock_prompt
+
         # Mock the TweepyClient
         mock_tweet = MagicMock()
         mock_tweet.text = "This is a test tweet about Talos."
@@ -24,10 +31,7 @@ def test_talos_sentiment_service_run():
 
         # Mock the LLMClient
         mock_llm_client = mock_llm_client_class.return_value
-        mock_llm_client.reasoning.side_effect = [
-            json.dumps({"sentiments": [{"score": 75, "explanation": "This is a test explanation."}]}),
-            "This is a test summary.",
-        ]
+        mock_llm_client.reasoning.return_value = json.dumps({"score": 75, "report": "This is a test report."})
 
         service = TalosSentimentService()
         response = service.run(search_query="talos")
@@ -42,18 +46,12 @@ def test_talos_sentiment_service_run():
                 "age_in_days": 0,
             }
         ]
-        expected_sentiment_prompt = service.sentiment_prompt.format(tweets=json.dumps(tweet_data))
-        expected_summary_prompt = service.summary_prompt.format(
-            results=json.dumps([{"score": 75, "explanation": "This is a test explanation."}])
-        )
-        mock_llm_client.reasoning.assert_any_call(expected_sentiment_prompt)
-        mock_llm_client.reasoning.assert_any_call(expected_summary_prompt)
+        expected_sentiment_prompt = mock_prompt.template.format(tweets=json.dumps(tweet_data))
+        mock_llm_client.reasoning.assert_called_once_with(expected_sentiment_prompt)
 
         # Assert that the response is correct
-        assert response.score == 75.00
-        assert "The weighted average sentiment score is 75.00 out of 100." in response.answers[0]
-        assert "This is a test summary." in response.answers[0]
-        assert "This is a test explanation." in response.answers[0]
+        assert response.score == 75
+        assert response.answers[0] == "This is a test report."
 
 
 def test_talos_sentiment_skill_get_sentiment():
@@ -63,18 +61,12 @@ def test_talos_sentiment_skill_get_sentiment():
     ):
         with patch("talos.skills.talos_sentiment_skill.TalosSentimentService") as mock_service_class:
             mock_service_instance = mock_service_class.return_value
-            mock_service_instance.run.return_value.score = 75.00
-            mock_service_instance.run.return_value.answers = [
-                "Searched for 'talos' and analyzed 1 tweets.\\n"
-                "The weighted average sentiment score is 75.00 out of 100.\\n\\n"
-                "**Summary:** This is a test summary.\\n\\n"
-                "Here are some of the tweets that were analyzed:\\n"
-                "- **@test_user** (100 followers, 30 engagement, 0 days old): This is a test explanation.\\n"
-            ]
+            mock_service_instance.run.return_value.score = 75
+            mock_service_instance.run.return_value.answers = ["This is a test report."]
 
             skill = TalosSentimentSkill()
             result = skill.get_sentiment(search_query="talos")
 
             # Assert that the result is correct
-            assert result["score"] == 75.00
-            assert "The weighted average sentiment score is 75.00 out of 100." in result["report"]
+            assert result["score"] == 75
+            assert result["report"] == "This is a test report."

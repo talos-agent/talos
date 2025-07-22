@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timezone
-from typing import Any, ClassVar
+from typing import Any
 
 from pydantic import ConfigDict
 
@@ -18,21 +18,17 @@ class TalosSentimentService(TalosSentiment):
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    prompt_manager: ClassVar[FilePromptManager] = FilePromptManager("src/talos/prompts")
-    sentiment_prompt_obj: ClassVar[Prompt | None] = prompt_manager.get_prompt("talos_sentiment_prompt")
-    summary_prompt_obj: ClassVar[Prompt | None] = prompt_manager.get_prompt("talos_sentiment_summary_prompt")
-    sentiment_prompt: ClassVar[str] = sentiment_prompt_obj.template if sentiment_prompt_obj else ""
-    summary_prompt: ClassVar[str] = summary_prompt_obj.template if summary_prompt_obj else ""
 
     @property
     def name(self) -> str:
         return "talos_sentiment"
 
     def run(self, **kwargs: Any) -> TwitterSentimentResponse:
-        if self.sentiment_prompt is None:
+        prompt_manager = FilePromptManager("src/talos/prompts")
+        sentiment_prompt_obj: Prompt | None = prompt_manager.get_prompt("talos_sentiment_single_prompt")
+        if sentiment_prompt_obj is None:
             raise ValueError("Sentiment prompt not found")
-        if self.summary_prompt is None:
-            raise ValueError("Summary prompt not found")
+        sentiment_prompt = sentiment_prompt_obj.template
         twitter_client = TweepyClient()
         llm_client = LLMClient(api_key="dummy")
         search_query = kwargs.get("search_query", "talos")
@@ -51,36 +47,13 @@ class TalosSentimentService(TalosSentiment):
             }
             for tweet in tweets
         ]
-        prompt = self.sentiment_prompt.format(tweets=json.dumps(tweet_data))
+        prompt = sentiment_prompt.format(tweets=json.dumps(tweet_data))
         response = llm_client.reasoning(prompt)
         try:
-            sentiments = json.loads(response)["sentiments"]
+            response_data = json.loads(response)
+            score = response_data["score"]
+            report = response_data["report"]
         except (json.JSONDecodeError, KeyError):
             return TwitterSentimentResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
 
-        if not sentiments:
-            return TwitterSentimentResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
-
-        total_weight = 0
-        weighted_score = 0
-        for i, sentiment in enumerate(sentiments):
-            tweet = tweet_data[i]
-            # Simple weighting scheme, can be adjusted
-            weight = (1 / (tweet["age_in_days"] + 1)) * (tweet["followers"] + 1) * (tweet["engagement"] + 1)
-            weighted_score += sentiment["score"] * weight
-            total_weight += weight
-
-        average_score = weighted_score / total_weight if total_weight > 0 else 0
-
-        summary_prompt = self.summary_prompt.format(results=json.dumps(sentiments))
-        summary = llm_client.reasoning(summary_prompt)
-
-        report = f"Searched for '{search_query}' and analyzed {len(sentiments)} tweets.\\n"
-        report += f"The weighted average sentiment score is {average_score:.2f} out of 100.\\n\\n"
-        report += f"**Summary:** {summary}\\n\\n"
-        report += "Here are some of the tweets that were analyzed:\\n"
-        for i, sentiment in enumerate(sentiments[:5]):
-            tweet = tweet_data[i]
-            report += f"- **@{tweet['author']}** ({tweet['followers']} followers, {tweet['engagement']} engagement, {tweet['age_in_days']} days old): {sentiment['explanation']}\\n"
-
-        return TwitterSentimentResponse(answers=[report], score=average_score)
+        return TwitterSentimentResponse(answers=[report], score=score)
