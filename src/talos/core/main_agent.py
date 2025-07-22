@@ -71,7 +71,28 @@ class MainAgent(Agent):
         for service in self.router.services:
             tool_manager.register_tool(service.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
+        tool_manager.register_tool(self._add_memory_tool())
         self.tool_manager = tool_manager
+
+    def _add_memory_tool(self) -> BaseTool:
+        @tool
+        def add_memory(description: str, metadata: Optional[dict] = None) -> str:
+            """
+            Adds a memory to the agent's long-term memory.
+
+            Args:
+                description: A description of the memory to add.
+                metadata: Optional metadata to associate with the memory.
+
+            Returns:
+                A confirmation message.
+            """
+            if self.memory:
+                self.memory.add_memory(description, metadata)
+                return "Memory added successfully."
+            return "Memory not configured for this agent."
+
+        return add_memory
 
     def _get_ticket_status_tool(self) -> BaseTool:
         @tool
