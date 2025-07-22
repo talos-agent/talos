@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, PrivateAttr
 
-from talos.services.github_agent import GithubPRReviewAgent
+from talos.services.implementations.github_agent import GithubPRReviewAgent
 from talos.tools.github.tools import GithubTools
 
 

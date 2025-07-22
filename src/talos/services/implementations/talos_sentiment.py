@@ -1,13 +1,12 @@
 import json
 from datetime import datetime, timezone
-from typing import Any
 
 from pydantic import ConfigDict
 
+from talos.models.services import TwitterSentimentResponse
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
-from talos.services.base import Service
-from talos.services.models import TwitterSentimentResponse
+from talos.services.abstract.service import Service
 from talos.tools.twitter_client import TweepyClient
 from talos.utils.llm import LLMClient
 
@@ -26,12 +25,11 @@ class TalosSentimentService(Service):
     def name(self) -> str:
         return "talos_sentiment"
 
-    def analyze_sentiment(self, **kwargs: Any) -> TwitterSentimentResponse:
+    def analyze_sentiment(self, search_query: str = "talos") -> TwitterSentimentResponse:
         sentiment_prompt_obj: Prompt | None = self.prompt_manager.get_prompt("talos_sentiment_single_prompt")
         if sentiment_prompt_obj is None:
             raise ValueError("Sentiment prompt not found")
         sentiment_prompt = sentiment_prompt_obj.template
-        search_query = kwargs.get("search_query", "talos")
         tweets = self.twitter_client.search_tweets(search_query)
 
         if not tweets:

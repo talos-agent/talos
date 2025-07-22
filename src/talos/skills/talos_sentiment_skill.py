@@ -1,6 +1,6 @@
 from typing import Any
 
-from talos.services.talos_sentiment import TalosSentimentService
+from talos.services.implementations.talos_sentiment import TalosSentimentService
 from talos.skills.base import Skill
 
 

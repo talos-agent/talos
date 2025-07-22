@@ -2,15 +2,18 @@ import json
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-from talos.services.talos_sentiment import TalosSentimentService
+from talos.services.implementations.talos_sentiment import TalosSentimentService
 from talos.skills.talos_sentiment_skill import TalosSentimentSkill
 
 
 def test_talos_sentiment_service_run():
     with (
-        patch("talos.services.talos_sentiment.TweepyClient") as mock_tweepy_client_class,
-        patch("talos.services.talos_sentiment.LLMClient") as mock_llm_client_class,
-        patch("talos.services.talos_sentiment.FilePromptManager") as mock_prompt_manager_class,
+        patch("talos.services.implementations.talos_sentiment.TweepyClient", autospec=True) as mock_tweepy_client_class,
+        patch("talos.services.implementations.talos_sentiment.LLMClient", autospec=True) as mock_llm_client_class,
+        patch(
+            "talos.services.implementations.talos_sentiment.FilePromptManager",
+            autospec=True,
+        ) as mock_prompt_manager_class,
     ):
         # Mock the PromptManager
         mock_prompt = MagicMock()
@@ -60,10 +63,10 @@ def test_talos_sentiment_service_run():
 
 def test_talos_sentiment_skill_get_sentiment():
     with (
-        patch("talos.services.talos_sentiment.TweepyClient"),
-        patch("talos.services.talos_sentiment.LLMClient"),
+        patch("talos.services.implementations.talos_sentiment.TweepyClient", autospec=True),
+        patch("talos.services.implementations.talos_sentiment.LLMClient", autospec=True),
     ):
-        with patch("talos.skills.talos_sentiment_skill.TalosSentimentService") as mock_service_class:
+        with patch("talos.skills.talos_sentiment_skill.TalosSentimentService", autospec=True) as mock_service_class:
             mock_service_instance = mock_service_class.return_value
             mock_service_instance.analyze_sentiment.return_value.score = 75
             mock_service_instance.analyze_sentiment.return_value.answers = ["This is a test report."]

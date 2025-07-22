@@ -9,7 +9,7 @@ from typing import Any, Dict
 from langchain_core.tools import tool
 from pydantic import BaseModel, PrivateAttr
 
-from talos.services.models import Ticket, TicketCreationRequest, TicketResult, TicketStatus
+from talos.models.services import Ticket, TicketCreationRequest, TicketResult, TicketStatus
 
 
 class Skill(BaseModel, ABC):

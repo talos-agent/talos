@@ -7,7 +7,7 @@ from talos.core.main_agent import MainAgent
 from talos.core.router import Router
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.prompts.prompt import Prompt
-from talos.prompts.prompt_manager import FilePromptManager
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 
 
 @pytest.fixture
@@ -51,6 +51,6 @@ def test_main_agent_initialization(mock_model: BaseChatModel) -> None:
         assert agent.model == mock_model
         assert agent.prompt_manager == mock_prompt_manager
         assert agent.router is not None
-        assert len(agent.supervisors) == 1
+        assert agent.supervisor is not None
         assert agent.tool_manager is not None
         assert len(agent.tool_manager.tools) > 0

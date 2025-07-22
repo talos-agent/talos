@@ -4,10 +4,19 @@ from unittest.mock import MagicMock, patch
 
 from talos.models.dexscreener import DexscreenerData
 from talos.models.gecko_terminal import OHLCV, GeckoTerminalOHLCVData
-from talos.services.yield_manager import YieldManagerService
+from talos.services.implementations.yield_manager import YieldManagerService
 
 
 class TestYieldManagerService(unittest.TestCase):
+    @patch.dict(
+        "os.environ",
+        {
+            "TWITTER_API_KEY": "test",
+            "TWITTER_API_SECRET": "test",
+            "TWITTER_ACCESS_TOKEN": "test",
+            "TWITTER_ACCESS_TOKEN_SECRET": "test",
+        },
+    )
     def test_update_staking_apr(self):
         dexscreener_client = MagicMock()
         gecko_terminal_client = MagicMock()

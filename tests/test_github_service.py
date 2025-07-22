@@ -3,12 +3,12 @@ from __future__ import annotations
 import unittest
 from unittest.mock import MagicMock, patch
 
-from talos.services.github import GithubService
+from talos.services.implementations.github import GithubService
 
 
 class TestGithubService(unittest.TestCase):
-    @patch("talos.services.github.GithubTools")
-    @patch("talos.services.github.GithubPRReviewAgent")
+    @patch("talos.services.implementations.github.GithubTools")
+    @patch("talos.services.implementations.github.GithubPRReviewAgent")
     def test_review_pr(
         self,
         mock_github_pr_review_agent: MagicMock,

@@ -5,7 +5,7 @@ from typing import Any
 
 from langchain_core.language_models import BaseLanguageModel
 
-from talos.services.base import Service
+from talos.services.abstract.service import Service
 
 
 class GitHub(Service, ABC):
