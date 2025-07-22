@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class Feedback(BaseModel):
@@ -15,7 +15,6 @@ class Proposal(BaseModel):
 
 class QueryResponse(BaseModel):
     answers: list[str]
-    score: float | None = Field(None, description="The score of the response.")
 
 
 class Question(BaseModel):

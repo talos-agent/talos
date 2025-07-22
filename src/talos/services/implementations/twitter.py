@@ -18,4 +18,4 @@ class TwitterService(Twitter):
 
     def run(self, **kwargs: Any) -> QueryResponse:
         # Not implemented yet
-        return QueryResponse(answers=["The Twitter service is not implemented yet."], score=None)
+        return QueryResponse(answers=["The Twitter service is not implemented yet."])

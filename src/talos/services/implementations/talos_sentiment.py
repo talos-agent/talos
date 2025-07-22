@@ -1,12 +1,13 @@
 import json
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import ConfigDict
 
+from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.talos_sentiment import TalosSentiment
-from talos.services.proposals.models import QueryResponse
+from talos.services.models import TwitterSentimentResponse
 from talos.tools.twitter_client import TweepyClient
 from talos.utils.llm import LLMClient
 
@@ -17,15 +18,17 @@ class TalosSentimentService(TalosSentiment):
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    prompt_manager = FilePromptManager("src/talos/prompts")
-    sentiment_prompt = prompt_manager.get_prompt("talos_sentiment_prompt")
-    summary_prompt = prompt_manager.get_prompt("talos_sentiment_summary_prompt")
+    prompt_manager: ClassVar[FilePromptManager] = FilePromptManager("src/talos/prompts")
+    sentiment_prompt_obj: ClassVar[Prompt | None] = prompt_manager.get_prompt("talos_sentiment_prompt")
+    summary_prompt_obj: ClassVar[Prompt | None] = prompt_manager.get_prompt("talos_sentiment_summary_prompt")
+    sentiment_prompt: ClassVar[str] = sentiment_prompt_obj.template if sentiment_prompt_obj else ""
+    summary_prompt: ClassVar[str] = summary_prompt_obj.template if summary_prompt_obj else ""
 
     @property
     def name(self) -> str:
         return "talos_sentiment"
 
-    def run(self, **kwargs: Any) -> QueryResponse:
+    def run(self, **kwargs: Any) -> TwitterSentimentResponse:
         if self.sentiment_prompt is None:
             raise ValueError("Sentiment prompt not found")
         if self.summary_prompt is None:
@@ -36,7 +39,7 @@ class TalosSentimentService(TalosSentiment):
         tweets = twitter_client.search_tweets(search_query)
 
         if not tweets:
-            return QueryResponse(answers=["No tweets found for the given query."], score=None)
+            return TwitterSentimentResponse(answers=["No tweets found for the given query."], score=None)
 
         tweet_data = [
             {
@@ -53,13 +56,10 @@ class TalosSentimentService(TalosSentiment):
         try:
             sentiments = json.loads(response)["sentiments"]
         except (json.JSONDecodeError, KeyError):
-            return QueryResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
+            return TwitterSentimentResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
 
         if not sentiments:
-            return QueryResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
-
-        if not sentiments:
-            return QueryResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
+            return TwitterSentimentResponse(answers=["Could not analyze the sentiment of any tweets."], score=None)
 
         total_weight = 0
         weighted_score = 0
@@ -83,4 +83,4 @@ class TalosSentimentService(TalosSentiment):
             tweet = tweet_data[i]
             report += f"- **@{tweet['author']}** ({tweet['followers']} followers, {tweet['engagement']} engagement, {tweet['age_in_days']} days old): {sentiment['explanation']}\\n"
 
-        return QueryResponse(answers=[report], score=average_score)
+        return TwitterSentimentResponse(answers=[report], score=average_score)

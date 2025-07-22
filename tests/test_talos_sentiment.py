@@ -50,6 +50,7 @@ def test_talos_sentiment_service_run():
         mock_llm_client.reasoning.assert_any_call(expected_summary_prompt)
 
         # Assert that the response is correct
+        assert response.score == 75.00
         assert "The weighted average sentiment score is 75.00 out of 100." in response.answers[0]
         assert "This is a test summary." in response.answers[0]
         assert "This is a test explanation." in response.answers[0]
@@ -62,11 +63,13 @@ def test_talos_sentiment_skill_get_sentiment():
     ):
         with patch("talos.skills.talos_sentiment_skill.TalosSentimentService") as mock_service_class:
             mock_service_instance = mock_service_class.return_value
+            mock_service_instance.run.return_value.score = 75.00
             mock_service_instance.run.return_value.answers = [
                 "Searched for 'talos' and analyzed 1 tweets.\\n"
-                "The average sentiment score is 75.00 out of 100.\\n\\n"
-                "Here are some of the explanations:\\n"
-                "- This is a test explanation.\\n"
+                "The weighted average sentiment score is 75.00 out of 100.\\n\\n"
+                "**Summary:** This is a test summary.\\n\\n"
+                "Here are some of the tweets that were analyzed:\\n"
+                "- **@test_user** (100 followers, 30 engagement, 0 days old): This is a test explanation.\\n"
             ]
 
             skill = TalosSentimentSkill()
@@ -74,4 +77,4 @@ def test_talos_sentiment_skill_get_sentiment():
 
             # Assert that the result is correct
             assert result["score"] == 75.00
-            assert "The average sentiment score is 75.00 out of 100." in result["report"]
+            assert "The weighted average sentiment score is 75.00 out of 100." in result["report"]

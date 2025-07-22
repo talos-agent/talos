@@ -46,3 +46,8 @@ class TicketResult(BaseModel):
     status: TicketStatus = Field(..., description="The status of the ticket.")
     result: Any | None = Field(None, description="The result of the ticket.")
     error: str | None = Field(None, description="The error message if the ticket failed.")
+
+
+class TwitterSentimentResponse(BaseModel):
+    answers: list[str]
+    score: float | None = Field(default=None, description="The score of the response.")

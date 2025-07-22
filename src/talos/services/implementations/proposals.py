@@ -58,4 +58,4 @@ class ProposalsService(ProposalAgent):
         chain = prompt_template | self.llm
         feedback_str = "\n".join([f"- {f.delegate}: {f.feedback}" for f in proposal.feedback])
         response = chain.invoke({"proposal_text": proposal.proposal_text, "feedback": feedback_str})
-        return QueryResponse(answers=[response.content], score=None)
+        return QueryResponse(answers=[response.content])

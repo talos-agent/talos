@@ -55,4 +55,4 @@ class TwitterPersonaService(TwitterPersona):
 
         response = self.llm.invoke(formatted_prompt)
 
-        return QueryResponse(answers=[response.content], score=None)
+        return QueryResponse(answers=[response.content])
