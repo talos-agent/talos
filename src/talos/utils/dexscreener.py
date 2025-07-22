@@ -1,6 +1,5 @@
 import requests
 
-
 from talos.models.dexscreener import DexscreenerData
 
 
@@ -17,7 +16,7 @@ class DexscreenerClient:
         return DexscreenerData.model_validate(data.get("pair", {}))
 
 
-def get_ohlcv_data(pair_address: str) -> dict:
+def get_ohlcv_data(pair_address: str) -> DexscreenerData:
     """Gets the OHLCV data for a token from dexscreener.com"""
     client = DexscreenerClient(pair_address)
     return client.get_talos_data()

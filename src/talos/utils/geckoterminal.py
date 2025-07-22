@@ -1,5 +1,6 @@
 import requests
-from talos.models.gecko_terminal import GeckoTerminalOHLCVData, OHLCV
+
+from talos.models.gecko_terminal import OHLCV, GeckoTerminalOHLCVData
 
 
 class GeckoTerminalClient:
@@ -9,7 +10,9 @@ class GeckoTerminalClient:
 
     def get_ohlcv_data(self, timeframe: str = "hour") -> GeckoTerminalOHLCVData:
         """Gets the OHLCV data for a token from geckoterminal.com"""
-        url = f"https://api.geckoterminal.com/api/v2/networks/{self.network}/pools/{self.pool_address}/ohlcv/{timeframe}"
+        url = (
+            f"https://api.geckoterminal.com/api/v2/networks/{self.network}/pools/{self.pool_address}/ohlcv/{timeframe}"
+        )
         response = requests.get(url, headers={"accept": "application/json"})
         response.raise_for_status()
         data = response.json()

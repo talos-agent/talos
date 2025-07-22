@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import tweepy
+from textblob import TextBlob
 
 
 class TwitterClient(ABC):
@@ -26,6 +27,10 @@ class TwitterClient(ABC):
     def get_tweet(self, tweet_id: str) -> Any:
         pass
 
+    @abstractmethod
+    def get_sentiment(self, search_query: str = "talos") -> float:
+        pass
+
 
 class TweepyClient(TwitterClient):
     def __init__(self):
@@ -47,3 +52,14 @@ class TweepyClient(TwitterClient):
 
     def get_tweet(self, tweet_id: str) -> Any:
         return self.api.get_status(tweet_id)
+
+    def get_sentiment(self, search_query: str = "talos") -> float:
+        """
+        Gets the sentiment of tweets that match a search query.
+        """
+        tweets = self.search_tweets(search_query)
+        sentiment = 0
+        for tweet in tweets:
+            analysis = TextBlob(tweet.text)
+            sentiment += analysis.sentiment.polarity
+        return sentiment / len(tweets) if tweets else 0

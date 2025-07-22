@@ -1,8 +1,10 @@
 import logging
 
+from talos.models.dexscreener import DexscreenerData
+from talos.models.gecko_terminal import GeckoTerminalOHLCVData
 from talos.services.abstract.yield_manager import YieldManager
-from talos.utils.dexscreener import DexscreenerClient
 from talos.tools.twitter import TwitterClient
+from talos.utils.dexscreener import DexscreenerClient
 from talos.utils.geckoterminal import GeckoTerminalClient
 
 
@@ -36,9 +38,7 @@ class YieldManagerService(YieldManager):
         logging.info(f"GeckoTerminal OHLCV data: {ohlcv_data}")
 
         # Placeholder for APR calculation logic
-        new_apr = self.calculate_new_apr(
-            dexscreener_data, sentiment, staked_supply_percentage, ohlcv_data
-        )
+        new_apr = self.calculate_new_apr(dexscreener_data, sentiment, staked_supply_percentage, ohlcv_data)
         logging.info(f"New APR: {new_apr}")
 
         return new_apr
@@ -73,13 +73,7 @@ class YieldManagerService(YieldManager):
         # Volume bonus
         volume_bonus = 0.01 * (ohlcv_data.ohlcv_list[-1].volume / 1000000)
 
-        new_apr = (
-            base_apr
-            + sentiment_bonus
-            - staked_supply_penalty
-            + price_change_bonus
-            + volume_bonus
-        )
+        new_apr = base_apr + sentiment_bonus - staked_supply_penalty + price_change_bonus + volume_bonus
 
         # Ensure APR is within reasonable bounds
         return max(0.01, min(new_apr, 0.2))  # Clamp APR between 1% and 20%

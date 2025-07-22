@@ -31,6 +31,9 @@ class MockTwitterClient(TwitterClient):
         mock_tweet.text = "This is a test tweet."
         return mock_tweet
 
+    def get_sentiment(self, search_query: str = "talos") -> float:
+        return 0.5
+
 
 class MockTwitterAccountEvaluator(TwitterAccountEvaluator):
     def evaluate(self, user: Any) -> EvaluationResult:

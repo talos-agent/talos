@@ -19,7 +19,7 @@ class TestYieldManagerService(unittest.TestCase):
         twitter_client.get_sentiment.return_value = 1.0
 
         gecko_terminal_client = MagicMock()
-        from talos.models.gecko_terminal import GeckoTerminalOHLCVData, OHLCV
+        from talos.models.gecko_terminal import OHLCV, GeckoTerminalOHLCVData
 
         gecko_terminal_client.get_ohlcv_data.return_value = GeckoTerminalOHLCVData(
             ohlcv_list=[
@@ -33,9 +33,7 @@ class TestYieldManagerService(unittest.TestCase):
                 )
             ]
         )
-        yield_manager = YieldManagerService(
-            dexscreener_client, twitter_client, gecko_terminal_client
-        )
+        yield_manager = YieldManagerService(dexscreener_client, twitter_client, gecko_terminal_client)
         yield_manager.get_staked_supply_percentage = MagicMock(return_value=0.6)
 
         new_apr = yield_manager.update_staking_apr()
