@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,6 +12,9 @@ from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 
 @pytest.fixture
 def mock_model() -> BaseChatModel:
+    """
+    Returns a mock of the BaseChatModel.
+    """
     return MagicMock(spec=BaseChatModel)
 
 
@@ -44,7 +45,12 @@ def test_main_agent_initialization(mock_model: BaseChatModel) -> None:
             prompts_dir="",
             prompt_manager=mock_prompt_manager,
             schema=None,
-            router=Router(services=[]),
+            router=Router(services=[], skills=[]),
         )
         assert agent is not None
-        mock_prompt_manager.get_prompt.assert_called_with("main_agent_prompt")
+        assert agent.model == mock_model
+        assert agent.prompt_manager == mock_prompt_manager
+        assert agent.router is not None
+        assert agent.supervisor is not None
+        assert agent.tool_manager is not None
+        assert len(agent.tool_manager.tools) > 0

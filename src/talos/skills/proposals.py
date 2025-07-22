@@ -10,8 +10,8 @@ from pydantic import ConfigDict
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.single_prompt_manager import SinglePromptManager
-from talos.services.abstract import ProposalAgent
-from talos.services.proposals.models import Proposal, QueryResponse
+from talos.services.implementations.proposals.models import Proposal, QueryResponse
+from talos.skills.base import Skill
 
 
 def get_default_proposal_prompt() -> Prompt:
@@ -24,9 +24,14 @@ def get_default_proposal_prompt() -> Prompt:
     )
 
 
-class ProposalsService(ProposalAgent):
+class ProposalsSkill(Skill):
     """
-    A LangChain-based agent for evaluating proposals.
+    A skill for evaluating proposals.
+
+    This skill takes a `Proposal` object as input, which contains the text of the
+    proposal and any feedback from previous evaluations. It uses a large language
+    model (LLM) to evaluate the proposal and returns a `QueryResponse` object
+    containing the recommendation.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -36,8 +41,9 @@ class ProposalsService(ProposalAgent):
     rag_dataset: Any | None = None
     tools: list[Any] | None = None
 
-    def model_post_init(self, __context: Any) -> None:
-        super().model_post_init(__context)
+    @property
+    def name(self) -> str:
+        return "proposals_skill"
 
     def run(self, **kwargs: Any) -> QueryResponse:
         if "proposal" in kwargs:

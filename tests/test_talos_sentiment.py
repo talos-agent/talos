@@ -8,9 +8,12 @@ from talos.skills.talos_sentiment_skill import TalosSentimentSkill
 
 def test_talos_sentiment_service_run():
     with (
-        patch("talos.services.implementations.talos_sentiment.TweepyClient") as mock_tweepy_client_class,
-        patch("talos.services.implementations.talos_sentiment.LLMClient") as mock_llm_client_class,
-        patch("talos.services.implementations.talos_sentiment.FilePromptManager") as mock_prompt_manager_class,
+        patch("talos.services.implementations.talos_sentiment.TweepyClient", autospec=True) as mock_tweepy_client_class,
+        patch("talos.services.implementations.talos_sentiment.LLMClient", autospec=True) as mock_llm_client_class,
+        patch(
+            "talos.services.implementations.talos_sentiment.FilePromptManager",
+            autospec=True,
+        ) as mock_prompt_manager_class,
     ):
         # Mock the PromptManager
         mock_prompt = MagicMock()
@@ -33,8 +36,12 @@ def test_talos_sentiment_service_run():
         mock_llm_client = mock_llm_client_class.return_value
         mock_llm_client.reasoning.return_value = json.dumps({"score": 75, "report": "This is a test report."})
 
-        service = TalosSentimentService()
-        response = service.run(search_query="talos")
+        service = TalosSentimentService(
+            prompt_manager=mock_prompt_manager,
+            twitter_client=mock_twitter_client,
+            llm_client=mock_llm_client,
+        )
+        response = service.analyze_sentiment(search_query="talos")
 
         # Assert that the llm was called with the correct arguments
         tweet_data = [
@@ -56,16 +63,16 @@ def test_talos_sentiment_service_run():
 
 def test_talos_sentiment_skill_get_sentiment():
     with (
-        patch("talos.services.implementations.talos_sentiment.TweepyClient"),
-        patch("talos.services.implementations.talos_sentiment.LLMClient"),
+        patch("talos.services.implementations.talos_sentiment.TweepyClient", autospec=True),
+        patch("talos.services.implementations.talos_sentiment.LLMClient", autospec=True),
     ):
-        with patch("talos.skills.talos_sentiment_skill.TalosSentimentService") as mock_service_class:
+        with patch("talos.skills.talos_sentiment_skill.TalosSentimentService", autospec=True) as mock_service_class:
             mock_service_instance = mock_service_class.return_value
-            mock_service_instance.run.return_value.score = 75
-            mock_service_instance.run.return_value.answers = ["This is a test report."]
+            mock_service_instance.analyze_sentiment.return_value.score = 75
+            mock_service_instance.analyze_sentiment.return_value.answers = ["This is a test report."]
 
-            skill = TalosSentimentSkill()
-            result = skill.get_sentiment(search_query="talos")
+            skill = TalosSentimentSkill(sentiment_service=mock_service_instance)
+            result = skill.run(search_query="talos")
 
             # Assert that the result is correct
             assert result["score"] == 75

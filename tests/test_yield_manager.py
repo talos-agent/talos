@@ -8,6 +8,15 @@ from talos.services.implementations.yield_manager import YieldManagerService
 
 
 class TestYieldManagerService(unittest.TestCase):
+    @patch.dict(
+        "os.environ",
+        {
+            "TWITTER_API_KEY": "test",
+            "TWITTER_API_SECRET": "test",
+            "TWITTER_ACCESS_TOKEN": "test",
+            "TWITTER_ACCESS_TOKEN_SECRET": "test",
+        },
+    )
     def test_update_staking_apr(self):
         dexscreener_client = MagicMock()
         gecko_terminal_client = MagicMock()
@@ -34,19 +43,13 @@ class TestYieldManagerService(unittest.TestCase):
             {"apr": 0.15, "explanation": "The APR has been updated based on market conditions."}
         )
 
-        mock_sentiment_skill = MagicMock()
-        mock_sentiment_skill.get_sentiment.return_value = {"score": 75.0, "report": "A report"}
+        yield_manager = YieldManagerService(dexscreener_client, gecko_terminal_client, llm_client)
+        yield_manager.get_staked_supply_percentage = MagicMock(return_value=0.6)
 
-        with patch(
-            "talos.services.implementations.yield_manager.TalosSentimentSkill", return_value=mock_sentiment_skill
-        ):
-            yield_manager = YieldManagerService(dexscreener_client, gecko_terminal_client, llm_client)
-            yield_manager.get_staked_supply_percentage = MagicMock(return_value=0.6)
+        new_apr = yield_manager.update_staking_apr(75.0, "A report")
 
-            new_apr = yield_manager.update_staking_apr()
-
-            self.assertIsInstance(new_apr, float)
-            self.assertEqual(new_apr, 0.15)
+        self.assertIsInstance(new_apr, float)
+        self.assertEqual(new_apr, 0.15)
 
 
 if __name__ == "__main__":

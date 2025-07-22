@@ -5,14 +5,18 @@ from langchain_openai import ChatOpenAI
 from pydantic import ConfigDict, Field
 
 from talos.prompts.prompt_manager import PromptManager
-from talos.services.abstract.twitter import TwitterPersona
-from talos.services.proposals.models import QueryResponse
+from talos.services.implementations.proposals.models import QueryResponse
+from talos.skills.base import Skill
 from talos.tools.twitter_client import TweepyClient, TwitterClient
 
 
-class TwitterPersonaService(TwitterPersona):
+class TwitterPersonaSkill(Skill):
     """
-    A service for generating a persona prompt for a Twitter user.
+    A skill for generating a persona prompt for a Twitter user.
+
+    This skill takes a Twitter username as input and generates a persona prompt
+    based on the user's recent tweets and replies. It uses a large language
+    model (LLM) to generate the persona.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -22,7 +26,7 @@ class TwitterPersonaService(TwitterPersona):
 
     @property
     def name(self) -> str:
-        return "twitter_persona"
+        return "twitter_persona_skill"
 
     def run(self, **kwargs: Any) -> QueryResponse:
         username = kwargs.get("username")

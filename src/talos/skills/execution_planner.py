@@ -10,8 +10,8 @@ from pydantic import ConfigDict
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.single_prompt_manager import SinglePromptManager
-from talos.services.abstract.execution_planner import ExecutionPlanner
-from talos.services.proposals.models import Plan, Question
+from talos.services.implementations.proposals.models import Plan, Question
+from talos.skills.base import Skill
 
 
 def get_default_execution_planner_prompt() -> Prompt:
@@ -24,9 +24,14 @@ def get_default_execution_planner_prompt() -> Prompt:
     )
 
 
-class ExecutionPlannerService(ExecutionPlanner):
+class ExecutionPlannerSkill(Skill):
     """
-    A LangChain-based agent for generating execution plans.
+    A skill for generating a plan of execution for a given task.
+
+    This skill takes a `Question` object as input, which contains the text of the task
+    and any feedback from previous attempts. It uses a large language model (LLM)
+    to generate a `Plan` object, which outlines the steps to be taken to complete
+    the task.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -36,8 +41,9 @@ class ExecutionPlannerService(ExecutionPlanner):
     rag_dataset: Any | None = None
     tools: list[Any] | None = None
 
-    def model_post_init(self, __context: Any) -> None:
-        super().model_post_init(__context)
+    @property
+    def name(self) -> str:
+        return "execution_planner_skill"
 
     def run(self, **kwargs: Any) -> Plan:
         if "question" in kwargs:

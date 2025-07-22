@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import PrivateAttr
+from pydantic import BaseModel, PrivateAttr
 
-from talos.services.base import Service
-from talos.services.github_agent import GithubPRReviewAgent
+from talos.services.implementations.github_agent import GithubPRReviewAgent
 from talos.tools.github.tools import GithubTools
 
 
-class GithubService(Service):
+class GithubService(BaseModel):
     """
     A service for reviewing Github pull requests.
     """
@@ -28,13 +27,7 @@ class GithubService(Service):
     def name(self) -> str:
         return "github_pr_review"
 
-    def run(self, **kwargs: Any) -> str:
-        user = kwargs.get("user")
-        repo = kwargs.get("repo")
-        pr_number = kwargs.get("pr_number")
-        if not user or not repo or not pr_number:
-            raise ValueError("user, repo, and pr_number are required")
-
+    def review_pr(self, user: str, repo: str, pr_number: int) -> str:
         diff = self._tools.get_pr_diff(user, repo, pr_number)
         comments = self._tools.get_pr_comments(user, repo, pr_number)
         files = self._tools.get_pr_files(user, repo, pr_number)

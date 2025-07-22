@@ -9,13 +9,13 @@ from typing import Any, Dict
 from langchain_core.tools import tool
 from pydantic import BaseModel, PrivateAttr
 
-from talos.services.models import Ticket, TicketCreationRequest, TicketResult, TicketStatus
+from talos.models.services import Ticket, TicketCreationRequest, TicketResult, TicketStatus
 
 
-class Service(BaseModel, ABC):
+class Skill(BaseModel, ABC):
     """
-    An abstract base class for a service.
-    Services are a way to organize and manage the agent's actions.
+    An abstract base class for a skill.
+    Skills are a way to organize and manage the agent's actions.
     They are LLM driven actions, which means that they are powered by a
     language model. This allows them to be more flexible and powerful
     than traditional tools.
@@ -32,14 +32,14 @@ class Service(BaseModel, ABC):
     @abstractmethod
     def name(self) -> str:
         """
-        The name of the service.
+        The name of the skill.
         """
         pass
 
     @abstractmethod
     def run(self, **kwargs: Any) -> Any:
         """
-        Runs the service.
+        Runs the skill.
         """
         pass
 
@@ -47,10 +47,10 @@ class Service(BaseModel, ABC):
         @tool(f"create_{self.name}_ticket")
         def create_ticket(**kwargs: Any) -> Ticket:
             """
-            Creates a ticket for the {self.name} service.
+            Creates a ticket for the {self.name} skill.
 
             Args:
-                **kwargs: The arguments to pass to the {self.name} service.
+                **kwargs: The arguments to pass to the {self.name} skill.
 
             Returns:
                 The ticket object.
@@ -74,7 +74,7 @@ class Service(BaseModel, ABC):
 
     def _run_in_background(self, ticket_id: str, tool_args: Dict[str, Any]) -> None:
         """
-        Runs the service in the background.
+        Runs the skill in the background.
         """
         self._tickets[ticket_id].status = TicketStatus.RUNNING
         self._tickets[ticket_id].updated_at = str(time.time())
@@ -100,7 +100,7 @@ class Service(BaseModel, ABC):
 
     def get_ticket_status(self, ticket_id: str) -> Ticket | None:
         """
-        Checks on the status of a ticket number with the service.
+        Checks on the status of a ticket number with the skill.
         """
         return self._tickets.get(ticket_id)
 
@@ -131,6 +131,6 @@ class Service(BaseModel, ABC):
 
     def get_all_tickets(self) -> list[Ticket]:
         """
-        Returns all tickets for this service.
+        Returns all tickets for this skill.
         """
         return list(self._tickets.values())

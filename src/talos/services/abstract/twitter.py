@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from talos.services.base import Service
+from talos.services.abstract.service import Service
 
 
 class Twitter(Service, ABC):
