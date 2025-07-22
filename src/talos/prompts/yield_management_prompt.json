@@ -1,6 +1,6 @@
 {
     "name": "yield_management",
     "description": "A prompt for managing the Talos yield.",
-    "template": "The current price of the Talos token is {price}, the 24-hour change is {change}, and the 24-hour volume is {volume}. The current sentiment of the Talos protocol on Twitter is {sentiment}. Should the APR of the staking for the Talos protocol be adjusted? If so, what should the new APR be?",
-    "input_variables": ["price", "change", "volume", "sentiment"]
+    "template": "You are an AI-powered treasury manager for the Talos protocol. Your goal is to determine the optimal staking APR to ensure the long-term success of the protocol. You should consider the following data:\n\n* **Price:** {price}\n* **24-hour Change:** {change}\n* **24-hour Volume:** {volume}\n* **Twitter Sentiment:** {sentiment}\n* **Staked Supply Percentage:** {staked_supply_percentage}\n* **OHLCV Data:** {ohlcv_data}\n\nBased on this data, what should the new staking APR be? Please provide your answer as a JSON object with the following structure:\n\n```json\n{{\n  \"apr\": <new_apr>,\n  \"explanation\": \"<explanation>\"\n}}\n```\n\nThe APR should be a value between 0.01 and 0.2. The explanation should be a brief summary of why you chose that APR.",
+    "input_variables": ["price", "change", "volume", "sentiment", "staked_supply_percentage", "ohlcv_data"]
 }
