@@ -15,6 +15,7 @@ from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.service import Service
 from talos.skills.base import Skill
+from talos.skills.cryptography import CryptographySkill
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter import TwitterSkill
 from talos.tools.tool_manager import ToolManager
@@ -53,6 +54,7 @@ class MainAgent(Agent):
         skills: list[Skill] = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
             TwitterSkill(),
+            CryptographySkill(),
         ]
         if not self.router:
             self.router = Router(services=services, skills=skills)

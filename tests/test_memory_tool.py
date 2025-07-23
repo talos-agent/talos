@@ -14,6 +14,7 @@ from talos.tools.memory_tool import AddMemoryTool
 class TestAddMemoryTool(unittest.TestCase):
     def test_run(self):
         from talos.core.agent import Agent
+
         # Create a mock agent
         agent = MagicMock(spec=Agent)
         # Create the tool

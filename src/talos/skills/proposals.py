@@ -7,10 +7,10 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from pydantic import ConfigDict
 
+from talos.models.proposals import Proposal, QueryResponse
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.single_prompt_manager import SinglePromptManager
-from talos.models.proposals import Proposal, QueryResponse
 from talos.skills.base import Skill
 
 
@@ -41,9 +41,7 @@ class ProposalsSkill(Skill):
     rag_dataset: Any | None = None
     tools: list[Any] | None = None
 
-    @property
-    def name(self) -> str:
-        return "proposals_skill"
+    name: str = "proposals_skill"
 
     def run(self, **kwargs: Any) -> QueryResponse:
         if "proposal" in kwargs:
