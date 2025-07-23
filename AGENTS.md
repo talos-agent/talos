@@ -32,4 +32,4 @@ Please adhere to the following code style guidelines:
 
 ## Commands
 
-- `./run_checks.sh`: Run ruff, mypy, and pytest.
+- `scripts/run_checks.sh`: Run ruff, mypy, and pytest.
