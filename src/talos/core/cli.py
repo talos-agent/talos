@@ -56,7 +56,10 @@ def main(
         if verbose:
             print(result)
         else:
-            print(result.content)
+            if isinstance(result, AIMessage):
+                print(result.content)
+            else:
+                print(result)
         return
 
     # Interactive mode
@@ -69,11 +72,17 @@ def main(
                 break
             result = main_agent.run(user_input, history=history)
             history.append(HumanMessage(content=user_input))
-            history.append(AIMessage(content=result.content))
+            if isinstance(result, AIMessage):
+                history.append(AIMessage(content=result.content))
+            else:
+                history.append(AIMessage(content=str(result)))
             if verbose:
                 print(result)
             else:
-                print(result.content)
+                if isinstance(result, AIMessage):
+                    print(result.content)
+                else:
+                    print(result)
         except KeyboardInterrupt:
             break
 

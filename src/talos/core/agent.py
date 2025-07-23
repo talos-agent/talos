@@ -55,10 +55,12 @@ class Agent(BaseModel):
         # This allows the user input and prior history to be provided to the
         # model at runtime so that responses can be contextual and not ignore
         # the latest message.
-        self._prompt_template = ChatPromptTemplate.from_messages([
-            ("system", prompt.template),
-            MessagesPlaceholder(variable_name="messages"),
-        ])
+        self._prompt_template = ChatPromptTemplate.from_messages(
+            [
+                ("system", prompt.template),
+                MessagesPlaceholder(variable_name="messages"),
+            ]
+        )
 
     def add_supervisor(self, supervisor: Supervisor):
         """
