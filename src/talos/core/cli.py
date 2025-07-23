@@ -11,19 +11,16 @@ from talos.core.main_agent import MainAgent
 from talos.core.router import Router
 from talos.services.key_management import KeyManagement
 
-app = typer.Typer()
-
-
 app = typer.Typer(invoke_without_command=True)
 
 
 @app.callback()
-def callback(ctx: typer.Context):
+def callback(ctx: typer.Context, verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output.")):
     """
     The main entry point for the Talos agent.
     """
     if ctx.invoked_subcommand is None:
-        main(query=None)
+        main(query=None, verbose=verbose)
 
 
 @app.command()
