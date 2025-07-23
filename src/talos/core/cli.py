@@ -32,6 +32,7 @@ def main(
     prompts_dir: str = "src/talos/prompts",
     model_name: str = "gpt-4",
     temperature: float = 0.0,
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
 ) -> None:
     """
     The main entry point for the Talos agent.
@@ -55,7 +56,10 @@ def main(
     if query:
         # Run the agent
         result = main_agent.run(query)
-        print(result)
+        if verbose:
+            print(result)
+        else:
+            print(result.content)
         return
 
     # Interactive mode
@@ -69,7 +73,10 @@ def main(
             result = main_agent.run(user_input, history=history)
             history.append(HumanMessage(content=user_input))
             history.append(AIMessage(content=str(result)))
-            print(result)
+            if verbose:
+                print(result)
+            else:
+                print(result.content)
         except KeyboardInterrupt:
             break
 
