@@ -49,28 +49,22 @@ Talos provides a set of services for interacting with various platforms:
 
 This project uses `uv` for dependency management.
 
-1.  Install `uv`:
-
-    ```bash
-    pip install uv
-    ```
-
-2.  Create a virtual environment:
+1.  Create a virtual environment:
 
     ```bash
     uv venv
     ```
 
-3.  Activate the virtual environment:
+2.  Activate the virtual environment:
 
     ```bash
     source .venv/bin/activate
     ```
 
-4.  Install dependencies:
+3.  Install dependencies:
 
     ```bash
-    uv pip install -e .[core,dev]
+    ./scripts/install_deps.sh
     ```
 
 ## Usage
@@ -97,19 +91,10 @@ export OPENAI_API_key="<OPENAI_API_KEY>"
 python proposal_example.py
 ```
 
-## Testing
+## Testing, Linting and Type Checking
 
-To run the test suite, use the following command:
-
-```bash
-pytest
-```
-
-## Linting and Type Checking
-
-To lint and type-check the code, run the following commands:
+To run the test suite, lint, and type-check the code, run the following command:
 
 ```bash
-ruff check .
-mypy .
+./scripts/run_checks.sh
 ```
