@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
@@ -50,7 +50,15 @@ class Agent(BaseModel):
         prompt = self.prompt_manager.get_prompt(name)
         if not prompt:
             raise ValueError(f"The prompt '{name}' is not defined.")
-        self._prompt_template = ChatPromptTemplate.from_template(prompt.template)
+        # Build a chat prompt that contains the system template and leaves a
+        # placeholder for the ongoing conversation (`messages`).
+        # This allows the user input and prior history to be provided to the
+        # model at runtime so that responses can be contextual and not ignore
+        # the latest message.
+        self._prompt_template = ChatPromptTemplate.from_messages([
+            ("system", prompt.template),
+            MessagesPlaceholder(variable_name="messages"),
+        ])
 
     def add_supervisor(self, supervisor: Supervisor):
         """
@@ -95,7 +103,8 @@ class Agent(BaseModel):
 
     def _prepare_run(self, message: str, history: list[BaseMessage] | None = None) -> None:
         if history:
-            self.history = history
+            self.history.clear()
+            self.history.extend(history)
         if self.prompt_manager:
             self.prompt_manager.update_prompt_template(self.history)
         self.history.append(HumanMessage(content=message))
