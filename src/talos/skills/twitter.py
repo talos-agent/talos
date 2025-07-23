@@ -12,7 +12,9 @@ class TwitterSkill(Skill):
     def __init__(self):
         super().__init__()
 
-    name: str = "twitter_skill"
+    @property
+    def name(self) -> str:
+        return "twitter_skill"
 
     def run(self, **kwargs: Any) -> QueryResponse:
         # Not implemented yet

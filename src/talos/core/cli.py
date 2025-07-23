@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+from typing import List, Optional
 
 import typer
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 
 from talos.core.main_agent import MainAgent
@@ -12,9 +14,21 @@ from talos.services.key_management import KeyManagement
 app = typer.Typer()
 
 
+app = typer.Typer(invoke_without_command=True)
+
+
+@app.callback()
+def callback(ctx: typer.Context):
+    """
+    The main entry point for the Talos agent.
+    """
+    if ctx.invoked_subcommand is None:
+        main(query=None)
+
+
 @app.command()
 def main(
-    query: str,
+    query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
     prompts_dir: str = "src/talos/prompts",
     model_name: str = "gpt-4",
     temperature: float = 0.0,
@@ -38,9 +52,26 @@ def main(
         schema=None,
     )
 
-    # Run the agent
-    result = main_agent.run(query)
-    print(result)
+    if query:
+        # Run the agent
+        result = main_agent.run(query)
+        print(result)
+        return
+
+    # Interactive mode
+    print("Entering interactive mode. Type 'exit' to quit.")
+    history: List[BaseMessage] = []
+    while True:
+        try:
+            user_input = input(">> ")
+            if user_input.lower() == "exit":
+                break
+            result = main_agent.run(user_input, history=history)
+            history.append(HumanMessage(content=user_input))
+            history.append(AIMessage(content=str(result)))
+            print(result)
+        except KeyboardInterrupt:
+            break
 
 
 @app.command()
