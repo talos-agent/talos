@@ -5,7 +5,7 @@ from typing import Any, Optional
 import tweepy
 from googleapiclient import discovery
 from langchain.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..models.evaluation import EvaluationResult
 from ..skills.twitter_persona import TwitterPersonaSkill
@@ -42,8 +42,7 @@ class TwitterTool(BaseTool):
     account_evaluator: Optional[TwitterAccountEvaluator] = None
     perspective_client: Optional[Any] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(
         self,
