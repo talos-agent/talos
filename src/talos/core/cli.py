@@ -11,19 +11,16 @@ from talos.core.main_agent import MainAgent
 from talos.core.router import Router
 from talos.services.key_management import KeyManagement
 
-app = typer.Typer()
-
-
 app = typer.Typer(invoke_without_command=True)
 
 
 @app.callback()
-def callback(ctx: typer.Context):
+def callback(ctx: typer.Context, verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output.")):
     """
     The main entry point for the Talos agent.
     """
     if ctx.invoked_subcommand is None:
-        main(query=None)
+        main(query=None, verbose=verbose)
 
 
 @app.command()
@@ -32,6 +29,7 @@ def main(
     prompts_dir: str = "src/talos/prompts",
     model_name: str = "gpt-4",
     temperature: float = 0.0,
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
 ) -> None:
     """
     The main entry point for the Talos agent.
@@ -55,7 +53,13 @@ def main(
     if query:
         # Run the agent
         result = main_agent.run(query)
-        print(result)
+        if verbose:
+            print(result)
+        else:
+            if isinstance(result, AIMessage):
+                print(result.content)
+            else:
+                print(result)
         return
 
     # Interactive mode
@@ -68,8 +72,17 @@ def main(
                 break
             result = main_agent.run(user_input, history=history)
             history.append(HumanMessage(content=user_input))
-            history.append(AIMessage(content=str(result)))
-            print(result)
+            if isinstance(result, AIMessage):
+                history.append(AIMessage(content=result.content))
+            else:
+                history.append(AIMessage(content=str(result)))
+            if verbose:
+                print(result)
+            else:
+                if isinstance(result, AIMessage):
+                    print(result.content)
+                else:
+                    print(result)
         except KeyboardInterrupt:
             break
 
