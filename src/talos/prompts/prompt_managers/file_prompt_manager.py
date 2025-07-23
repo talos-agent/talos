@@ -36,13 +36,13 @@ class FilePromptManager(PromptManager):
         """
         if isinstance(name, list):
             prompts_to_concat = [self.prompts.get(n) for n in name]
-            prompts_to_concat = [p for p in prompts_to_concat if p]
-            if not prompts_to_concat:
+            valid_prompts = [p for p in prompts_to_concat if p]
+            if not valid_prompts:
                 return None
 
-            concatenated_template = "".join([p.template for p in prompts_to_concat])
-            all_input_variables = []
-            for p in prompts_to_concat:
+            concatenated_template = "".join([p.template for p in valid_prompts])
+            all_input_variables: list[str] = []
+            for p in valid_prompts:
                 all_input_variables.extend(p.input_variables)
 
             return Prompt(

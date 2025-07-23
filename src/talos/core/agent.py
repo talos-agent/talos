@@ -44,7 +44,7 @@ class Agent(BaseModel):
             self.history = self.memory.load_history()
             self.tool_manager.register_tool(AddMemoryTool(agent=self))
 
-    def set_prompt(self, name: str):
+    def set_prompt(self, name: str | list[str]):
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
         prompt = self.prompt_manager.get_prompt(name)

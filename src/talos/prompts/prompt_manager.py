@@ -11,7 +11,7 @@ class PromptManager(ABC):
     """
 
     @abstractmethod
-    def get_prompt(self, name: str) -> Prompt | None:
+    def get_prompt(self, name: str | list[str]) -> Prompt | None:
         """
         Gets a prompt by name.
         """

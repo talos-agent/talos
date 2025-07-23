@@ -34,7 +34,8 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         }.get(key, default)
 
         # Create a mock FilePromptManager
-        mock_prompt_manager = FilePromptManager(prompts_dir="")
+        with patch("os.listdir", return_value=[]):
+            mock_prompt_manager = FilePromptManager(prompts_dir="dummy_dir")
 
         # Add mock prompts
         mock_prompt_manager.prompts = {
@@ -53,7 +54,7 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         mock_file_prompt_manager.return_value = mock_prompt_manager
         mock_hypervisor.return_value = MagicMock(spec=Hypervisor)
 
-        agent = MainAgent(
+        MainAgent(
             model=mock_model,
             prompts_dir="",
             prompt_manager=mock_prompt_manager,
@@ -61,5 +62,6 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
             router=Router(services=[], skills=[]),
         )
 
-        assert agent.prompt.template == "This is the main prompt.This is the general prompt."
-        assert "time" in agent.prompt.input_variables
+        prompt = mock_prompt_manager.get_prompt(["main_agent_prompt", "general_agent_prompt"])
+        assert prompt.template == "This is the main prompt.This is the general prompt."
+        assert "time" in prompt.input_variables
