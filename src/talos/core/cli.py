@@ -63,14 +63,28 @@ def get_public_key(key_dir: str = ".keys"):
 
 
 @app.command()
+def encrypt(data: str, public_key_file: str):
+    """
+    Encrypts a message.
+    """
+    with open(public_key_file, "rb") as f:
+        public_key = f.read()
+
+    import base64
+
+    from nacl.public import PublicKey, SealedBox
+
+    sealed_box = SealedBox(PublicKey(public_key))
+    encrypted = sealed_box.encrypt(data.encode())
+    print(base64.b64encode(encrypted).decode())
+
+
+@app.command()
 def decrypt(encrypted_data: str, key_dir: str = ".keys"):
     """
     Decrypts a message.
     """
     km = KeyManagement(key_dir=key_dir)
-    # The `CryptographySkill` is expecting a base64 encoded string,
-    # but the KeyManagement service does the decoding.
-    # We need to pass the raw encrypted data to the service.
     import base64
 
     decoded_data = base64.b64decode(encrypted_data)

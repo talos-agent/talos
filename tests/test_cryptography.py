@@ -1,15 +1,16 @@
+import base64
 import os
 import unittest
 
-import nacl.public
-
 from talos.services.key_management import KeyManagement
+from talos.skills.cryptography import CryptographySkill
 
 
 class CryptographyTest(unittest.TestCase):
     def setUp(self):
         self.key_dir = ".test_keys"
         self.km = KeyManagement(key_dir=self.key_dir)
+        self.crypto_skill = CryptographySkill(key_management=self.km)
 
     def tearDown(self):
         if os.path.exists(self.key_dir):
@@ -24,14 +25,11 @@ class CryptographyTest(unittest.TestCase):
 
     def test_encryption_decryption(self):
         message = "This is a secret message."
+        public_key = self.km.get_public_key()
 
-        # Delegate side: encrypt the message with the public key
-        public_key = nacl.public.PublicKey(self.km.get_public_key())
-        sealed_box = nacl.public.SealedBox(public_key)
-        encrypted = sealed_box.encrypt(message.encode())
+        encrypted = self.crypto_skill.run(data=message, public_key=base64.b64encode(public_key).decode())
 
-        # Talos side: decrypt the message with the private key
-        decrypted = self.km.decrypt(encrypted)
+        decrypted = self.crypto_skill.run(data=encrypted, decrypt=True)
 
         self.assertEqual(message, decrypted)
 

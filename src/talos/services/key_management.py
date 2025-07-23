@@ -1,8 +1,6 @@
 import os
 
-import nacl.secret
-import nacl.utils
-from nacl.public import Box, PrivateKey
+from nacl.public import PrivateKey, PublicKey, SealedBox
 
 
 class KeyManagement:
@@ -44,23 +42,18 @@ class KeyManagement:
         with open(self.private_key_path, "rb") as f:
             return f.read()
 
-    def encrypt(self, data: str, public_key: bytes) -> bytes:
+    def encrypt(self, data: str, public_key_bytes: bytes) -> bytes:
         """
         Encrypts data using the public key.
         """
-        private_key = PrivateKey(self.get_private_key())
-        box = Box(private_key, nacl.public.PublicKey(public_key))
-        return box.encrypt(data.encode())
+        public_key = PublicKey(public_key_bytes)
+        sealed_box = SealedBox(public_key)
+        return sealed_box.encrypt(data.encode())
 
     def decrypt(self, encrypted_data: bytes) -> str:
         """
         Decrypts data using the private key.
         """
         private_key = PrivateKey(self.get_private_key())
-        # This is not correct, we need the public key of the sender.
-        # For this use case, we will use a sealed box, where the sender
-        # uses an ephemeral key pair.
-
-        # The correct way to do this is to use a SealedBox
-        unseal_box = nacl.public.SealedBox(private_key)
+        unseal_box = SealedBox(private_key)
         return unseal_box.decrypt(encrypted_data).decode()
