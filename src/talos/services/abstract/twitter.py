@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from talos.services.abstract.service import Service
 
@@ -14,6 +15,22 @@ class Twitter(Service, ABC):
         """
         The name of the service.
         """
+        pass
+
+    @abstractmethod
+    def get_user_timeline(self, username: str, **kwargs: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def get_user_mentions(self, username: str, **kwargs: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def get_tweet(self, tweet_id: str, **kwargs: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def search(self, query: str, **kwargs: Any) -> Any:
         pass
 
 

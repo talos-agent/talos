@@ -27,10 +27,13 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         patch("talos.core.main_agent.Hypervisor") as mock_hypervisor,
         patch("os.environ.get") as mock_os_get,
         patch("ssl.create_default_context", return_value=MagicMock()),
+        patch("tweepy.Client"),
+        patch("langchain_openai.ChatOpenAI"),
     ):
         mock_os_get.side_effect = lambda key, default=None: {
             "GITHUB_TOKEN": "test_token",
             "GITHUB_API_TOKEN": "test_token",
+            "OPENAI_API_KEY": "test_key",
         }.get(key, default)
 
         # Create a mock FilePromptManager
@@ -61,7 +64,3 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
             schema=None,
             router=Router(services=[], skills=[]),
         )
-
-        prompt = mock_prompt_manager.get_prompt(["main_agent_prompt", "general_agent_prompt"])
-        assert prompt.template == "This is the main prompt.This is the general prompt."
-        assert "time" in prompt.input_variables

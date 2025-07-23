@@ -17,7 +17,7 @@ from talos.services.abstract.service import Service
 from talos.skills.base import Skill
 from talos.skills.cryptography import CryptographySkill
 from talos.skills.proposals import ProposalsSkill
-from talos.skills.twitter import TwitterSkill
+from talos.skills.twitter_sentiment import TwitterSentimentSkill
 from talos.tools.tool_manager import ToolManager
 
 
@@ -53,7 +53,7 @@ class MainAgent(Agent):
         services: list[Service] = []
         skills: list[Skill] = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
-            TwitterSkill(),
+            TwitterSentimentSkill(prompt_manager=self.prompt_manager),
             CryptographySkill(),
         ]
         if not self.router:

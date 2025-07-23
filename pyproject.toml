@@ -36,7 +36,7 @@ packages = ["src/talos", "src/crypto_sentiment"]
 allow-direct-references = true
 
 [project.scripts]
-talos = "talos.core.cli:app"
+talos = "talos.cli.main:app"
 
 [project.optional-dependencies]
 dev = [
