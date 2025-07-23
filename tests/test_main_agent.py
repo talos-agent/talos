@@ -27,10 +27,13 @@ def test_main_agent_initialization(mock_model: BaseChatModel) -> None:
         patch("talos.core.main_agent.Hypervisor") as mock_hypervisor,
         patch("os.environ.get") as mock_os_get,
         patch("ssl.create_default_context", return_value=MagicMock()),
+        patch("tweepy.Client"),
+        patch("langchain_openai.ChatOpenAI"),
     ):
         mock_os_get.side_effect = lambda key, default=None: {
             "GITHUB_TOKEN": "test_token",
             "GITHUB_API_TOKEN": "test_token",
+            "OPENAI_API_KEY": "test_key",
         }.get(key, default)
         mock_prompt_manager = MagicMock(spec=FilePromptManager)
         mock_prompt_manager.get_prompt.return_value = Prompt(

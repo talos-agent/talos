@@ -10,8 +10,32 @@ from langchain_openai import ChatOpenAI
 from talos.core.main_agent import MainAgent
 from talos.core.router import Router
 from talos.services.key_management import KeyManagement
+from talos.skills.twitter_persona import TwitterPersonaSkill
+from talos.skills.twitter_sentiment import TwitterSentimentSkill
 
 app = typer.Typer(invoke_without_command=True)
+twitter_app = typer.Typer()
+app.add_typer(twitter_app, name="twitter")
+
+
+@twitter_app.command()
+def get_user_prompt(username: str):
+    """
+    Gets the general voice of a user as a prompt.
+    """
+    skill = TwitterPersonaSkill()
+    response = skill.run(username=username)
+    print(response.answers[0])
+
+
+@twitter_app.command()
+def get_query_sentiment(query: str):
+    """
+    Gets the general sentiment/report on a specific query.
+    """
+    skill = TwitterSentimentSkill()
+    response = skill.run(query=query)
+    print(response.answers[0])
 
 
 @app.callback()
