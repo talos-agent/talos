@@ -73,6 +73,7 @@ proto-plus==1.26.1
 protobuf==6.31.1
 pyasn1==0.6.1
 pyasn1-modules==0.4.2
+pynacl==1.5.0
 pycparser==2.22
 pydantic==2.11.7
 pydantic-core==2.33.2
@@ -112,6 +113,7 @@ typing-inspection==0.4.1
 uritemplate==4.2.0
 urllib3==2.5.0
 uv==0.2.22
+pycryptodome==3.20.0
 varint==1.0.2
 wrapt==1.17.2
 yarl==1.20.1

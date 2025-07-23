@@ -3,8 +3,8 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Any
 
-from talos.services.abstract.service import Service
 from talos.models.proposals import Proposal, QueryResponse
+from talos.services.abstract.service import Service
 
 
 class ProposalAgent(Service):
