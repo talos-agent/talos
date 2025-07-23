@@ -3,7 +3,7 @@ from __future__ import annotations
 from langchain_core.tools import tool
 
 from talos.tools.supervised_tool import SupervisedTool
-from talos.tools.tool_example import SimpleSupervisor
+from tests.simple_supervisor import SimpleSupervisor
 
 
 @tool
