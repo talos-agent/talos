@@ -69,7 +69,7 @@ def main(
                 break
             result = main_agent.run(user_input, history=history)
             history.append(HumanMessage(content=user_input))
-            history.append(AIMessage(content=str(result)))
+            history.append(AIMessage(content=result.content))
             if verbose:
                 print(result)
             else:

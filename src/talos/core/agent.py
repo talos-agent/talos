@@ -95,7 +95,7 @@ class Agent(BaseModel):
 
     def _prepare_run(self, message: str, history: list[BaseMessage] | None = None) -> None:
         if history:
-            self.history.extend(history)
+            self.history = history
         if self.prompt_manager:
             self.prompt_manager.update_prompt_template(self.history)
         self.history.append(HumanMessage(content=message))
