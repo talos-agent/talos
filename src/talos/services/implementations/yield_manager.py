@@ -29,6 +29,11 @@ class YieldManagerService(YieldManager):
         dexscreener_data = self.dexscreener_client.get_talos_data()
         logging.info(f"Dexscreener data: {dexscreener_data}")
 
+        arb_data = self.dexscreener_client.get_arb_data()
+        logging.info(f"ARB data: {arb_data}")
+        relative_t_arb_change = round(dexscreener_data.price_change_h24 - arb_data.price_change_h24, 2)
+        logging.info(f"Relative TALOS to ARB change: {relative_t_arb_change}")
+
         logging.info(f"Social media sentiment: {sentiment}")
         logging.info(f"Sentiment report: {sentiment_report}")
 
@@ -45,6 +50,7 @@ class YieldManagerService(YieldManager):
             price=dexscreener_data.price_usd,
             change=dexscreener_data.price_change_h24,
             volume=dexscreener_data.volume_h24,
+            relative_performance=relative_t_arb_change,
             sentiment=sentiment,
             staked_supply_percentage=staked_supply_percentage,
             ohlcv_data=ohlcv_data.model_dump_json(),
