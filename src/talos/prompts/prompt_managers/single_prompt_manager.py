@@ -12,8 +12,10 @@ class SinglePromptManager(PromptManager):
     def __init__(self, prompt: Prompt):
         self.prompt = prompt
 
-    def get_prompt(self, name: str) -> Prompt | None:
+    def get_prompt(self, name: str | list[str]) -> Prompt | None:
         """
         Gets the prompt.
         """
+        if isinstance(name, list):
+            raise ValueError("SinglePromptManager does not support prompt concatenation.")
         return self.prompt

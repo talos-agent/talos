@@ -1,0 +1,6 @@
+{
+    "name": "general_agent_prompt",
+    "description": "The general prompt for all agents.",
+    "template": "\n\nIt is currently {time}. You have the following services available: {available_services}. You have the following active tickets:\n{active_tickets}\n\nWhat would you like to do? Keep in mind that you can only interact with the user and the available services. You can also create new tickets to delegate tasks to other agents.",
+    "input_variables": ["time", "available_services", "active_tickets"]
+}

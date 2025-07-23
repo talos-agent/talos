@@ -10,10 +10,12 @@ class DynamicPromptManager(PromptManager):
     def __init__(self, initial_prompt: Prompt):
         self.prompts: dict[str, Prompt] = {"default": initial_prompt}
 
-    def get_prompt(self, name: str) -> Prompt | None:
+    def get_prompt(self, name: str | list[str]) -> Prompt | None:
         """
         Gets a prompt by name.
         """
+        if isinstance(name, list):
+            raise ValueError("DynamicPromptManager does not support prompt concatenation.")
         return self.prompts.get(name)
 
     def update_prompt(self, name: str, template: str, input_variables: list[str]) -> None:

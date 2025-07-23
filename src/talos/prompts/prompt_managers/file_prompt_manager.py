@@ -30,8 +30,25 @@ class FilePromptManager(PromptManager):
                     )
                     self.prompts[prompt.name] = prompt
 
-    def get_prompt(self, name: str) -> Prompt | None:
+    def get_prompt(self, name: str | list[str]) -> Prompt | None:
         """
-        Gets a prompt by name.
+        Gets a prompt by name. If a list of names is provided, the prompts are concatenated.
         """
+        if isinstance(name, list):
+            prompts_to_concat = [self.prompts.get(n) for n in name]
+            valid_prompts = [p for p in prompts_to_concat if p]
+            if not valid_prompts:
+                return None
+
+            concatenated_template = "".join([p.template for p in valid_prompts])
+            all_input_variables: list[str] = []
+            for p in valid_prompts:
+                all_input_variables.extend(p.input_variables)
+
+            return Prompt(
+                name="concatenated_prompt",
+                template=concatenated_template,
+                input_variables=list(set(all_input_variables)),
+            )
+
         return self.prompts.get(name)
