@@ -42,7 +42,7 @@ class MainAgent(Agent):
     def _setup_prompt_manager(self) -> None:
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
-        self.set_prompt("main_agent_prompt")
+        self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
 
     def _setup_router(self) -> None:
         github_token = os.environ.get("GITHUB_TOKEN")
