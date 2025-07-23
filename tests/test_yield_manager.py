@@ -8,16 +8,8 @@ from talos.services.implementations.yield_manager import YieldManagerService
 
 
 class TestYieldManagerService(unittest.TestCase):
-    @patch.dict(
-        "os.environ",
-        {
-            "TWITTER_API_KEY": "test",
-            "TWITTER_API_SECRET": "test",
-            "TWITTER_ACCESS_TOKEN": "test",
-            "TWITTER_ACCESS_TOKEN_SECRET": "test",
-        },
-    )
-    def test_update_staking_apr(self):
+    @patch("talos.services.implementations.yield_manager.TweepyClient")
+    def test_update_staking_apr(self, mock_tweepy_client):
         dexscreener_client = MagicMock()
         gecko_terminal_client = MagicMock()
         llm_client = MagicMock()

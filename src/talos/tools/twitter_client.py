@@ -42,24 +42,24 @@ class TwitterClient(ABC):
 
 class TweepyClient(TwitterClient):
     def __init__(self):
-        auth = tweepy.OAuthHandler(os.environ["TWITTER_API_KEY"], os.environ["TWITTER_API_SECRET"])
-        auth.set_access_token(os.environ["TWITTER_ACCESS_TOKEN"], os.environ["TWITTER_ACCESS_TOKEN_SECRET"])
-        self.api = tweepy.API(auth)
+        self.client = tweepy.Client(bearer_token=os.environ["TWITTER_BEARER_TOKEN"])
 
     def get_user(self, username: str) -> Any:
-        return self.api.get_user(screen_name=username)
+        return self.client.get_user(username=username).data
 
     def search_tweets(self, query: str) -> list[Any]:
-        return self.api.search_tweets(q=query, count=100)
+        return self.client.search_recent_tweets(query=query).data
 
     def get_user_timeline(self, username: str) -> list[Any]:
-        return self.api.user_timeline(screen_name=username, count=100)
+        user = self.get_user(username)
+        return self.client.get_users_tweets(id=user.id).data
 
     def get_user_mentions(self, username: str) -> list[Any]:
-        return self.api.mentions_timeline(screen_name=username, count=100)
+        user = self.get_user(username)
+        return self.client.get_users_mentions(id=user.id).data
 
     def get_tweet(self, tweet_id: str) -> Any:
-        return self.api.get_status(tweet_id)
+        return self.client.get_tweet(tweet_id).data
 
     def get_sentiment(self, search_query: str = "talos") -> float:
         """
@@ -67,13 +67,15 @@ class TweepyClient(TwitterClient):
         """
         tweets = self.search_tweets(search_query)
         sentiment = 0
-        for tweet in tweets:
-            analysis = TextBlob(tweet.text)
-            sentiment += analysis.sentiment.polarity
-        return sentiment / len(tweets) if tweets else 0
+        if tweets:
+            for tweet in tweets:
+                analysis = TextBlob(tweet.text)
+                sentiment += analysis.sentiment.polarity
+            return sentiment / len(tweets)
+        return 0
 
     def post_tweet(self, tweet: str) -> Any:
-        return self.api.update_status(tweet)
+        return self.client.create_tweet(text=tweet)
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
-        return self.api.update_status(tweet, in_reply_to_status_id=tweet_id)
+        return self.client.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
