@@ -41,7 +41,9 @@ class ProposalsSkill(Skill):
     rag_dataset: Any | None = None
     tools: list[Any] | None = None
 
-    name: str = "proposals_skill"
+    @property
+    def name(self) -> str:
+        return "proposals_skill"
 
     def run(self, **kwargs: Any) -> QueryResponse:
         if "proposal" in kwargs:
