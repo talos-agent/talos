@@ -3,15 +3,13 @@ from __future__ import annotations
 from langchain_core.tools import tool
 
 from talos.tools.supervised_tool import SupervisedTool
+from tests.simple_supervisor import SimpleSupervisor
 
 
 @tool
 def dummy_tool(x: int) -> int:
     """A dummy tool."""
     return x * 2
-
-
-from .simple_supervisor import SimpleSupervisor
 
 
 def test_supervised_tool_unsupervised() -> None:
