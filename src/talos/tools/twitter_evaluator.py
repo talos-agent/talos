@@ -27,8 +27,8 @@ class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
         # Verified Status
         is_verified = user.verified
 
-        # Default Profile Image
-        is_default_profile_image = user.default_profile_image
+        # Profile Image
+        has_custom_profile_image = bool(user.profile_image_url)
 
         # Calculate score
         score = 0
@@ -38,7 +38,7 @@ class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
             score += 25
         if is_verified:
             score += 25
-        if not is_default_profile_image:
+        if has_custom_profile_image:
             score += 25
 
         return EvaluationResult(
@@ -47,6 +47,6 @@ class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
                 "follower_following_ratio": follower_following_ratio,
                 "account_age_days": account_age_days,
                 "is_verified": is_verified,
-                "is_default_profile_image": is_default_profile_image,
+                "has_custom_profile_image": has_custom_profile_image,
             },
         )

@@ -59,7 +59,7 @@ class TweepyClient(TwitterClient):
         self.client = tweepy.Client(bearer_token=config.TWITTER_BEARER_TOKEN)
 
     def get_user(self, username: str) -> Any:
-        return self.client.get_user(username=username, user_fields='public_metrics').data
+        return self.client.get_user(username=username, user_fields=['created_at', 'public_metrics', 'profile_image_url', 'verified', 'description', 'location', 'url']).data
 
     def search_tweets(self, query: str) -> Any:
         return self.client.search_recent_tweets(

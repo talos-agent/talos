@@ -36,7 +36,7 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
         follower_following_ratio = followers_count / following_count if following_count > 0 else followers_count
         account_age_days = (datetime.now(timezone.utc) - user.created_at).days
         is_verified = user.verified
-        is_default_profile_image = user.default_profile_image
+        has_custom_profile_image = bool(user.profile_image_url)
         
         base_score = 0
         if follower_following_ratio > 1:
@@ -45,14 +45,14 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
             base_score += 25
         if is_verified:
             base_score += 25
-        if not is_default_profile_image:
+        if has_custom_profile_image:
             base_score += 25
         
         base_data = {
             "follower_following_ratio": follower_following_ratio,
             "account_age_days": account_age_days,
             "is_verified": is_verified,
-            "is_default_profile_image": is_default_profile_image,
+            "has_custom_profile_image": has_custom_profile_image,
         }
         
         try:
@@ -190,7 +190,7 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
         if user.verified:
             score += 25
         
-        if not user.default_profile_image:
+        if user.profile_image_url:
             score += 15
         if user.description and len(user.description) > 20:
             score += 15
