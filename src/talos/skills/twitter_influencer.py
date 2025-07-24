@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from pydantic import ConfigDict, Field
 
 from talos.models.proposals import QueryResponse
-from talos.prompts.prompt_manager import PromptManager
+from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.skills.base import Skill
 from talos.tools.twitter_client import TweepyClient, TwitterClient
 from talos.tools.crypto_influencer_evaluator import CryptoInfluencerEvaluator
@@ -19,7 +19,7 @@ class TwitterInfluencerSkill(Skill):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     twitter_client: TwitterClient = Field(default_factory=TweepyClient)
-    prompt_manager: PromptManager = Field(default_factory=PromptManager)
+    prompt_manager: FilePromptManager = Field(default_factory=lambda: FilePromptManager("src/talos/prompts"))
     llm: Any = Field(default_factory=ChatOpenAI)
     memory: Memory | None = Field(default=None)
     evaluator: CryptoInfluencerEvaluator | None = Field(default=None)
