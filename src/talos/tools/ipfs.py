@@ -17,8 +17,8 @@ class IpfsToolArgs(BaseModel):
 
 
 class IpfsTool(BaseTool):
-    name = "ipfs_tool"
-    description = "Provides tools for interacting with IPFS."
+    name: str = "ipfs_tool"
+    description: str = "Provides tools for interacting with IPFS."
     args_schema: type[BaseModel] = IpfsToolArgs
 
     def __init__(self):
