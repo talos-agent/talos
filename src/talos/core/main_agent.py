@@ -19,6 +19,8 @@ from talos.skills.cryptography import CryptographySkill
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
 from talos.tools.tool_manager import ToolManager
+from talos.tools.document_loader import DocumentLoaderTool, DatasetSearchTool
+from talos.data.dataset_manager import DatasetManager
 
 
 class MainAgent(Agent):
@@ -31,12 +33,14 @@ class MainAgent(Agent):
     model: BaseChatModel
     is_main_agent: bool = True
     prompt_manager: Optional[PromptManager] = None
+    dataset_manager: Optional[DatasetManager] = None
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
         self._setup_prompt_manager()
         self._setup_router()
         self._setup_hypervisor()
+        self._setup_dataset_manager()
         self._setup_tool_manager()
 
     def _setup_prompt_manager(self) -> None:
@@ -68,6 +72,10 @@ class MainAgent(Agent):
         self.add_supervisor(hypervisor)
         hypervisor.register_agent(self)
 
+    def _setup_dataset_manager(self) -> None:
+        if not self.dataset_manager:
+            self.dataset_manager = DatasetManager()
+
     def _setup_tool_manager(self) -> None:
         assert self.router is not None
         tool_manager = ToolManager()
@@ -75,6 +83,11 @@ class MainAgent(Agent):
             tool_manager.register_tool(skill.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
         tool_manager.register_tool(self._add_memory_tool())
+        
+        if self.dataset_manager:
+            tool_manager.register_tool(DocumentLoaderTool(self.dataset_manager))
+            tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
+        
         self.tool_manager = tool_manager
 
     def _add_memory_tool(self) -> BaseTool:
