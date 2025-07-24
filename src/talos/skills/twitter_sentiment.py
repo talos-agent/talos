@@ -25,9 +25,10 @@ class TwitterSentimentSkill(Skill):
 
     def run(self, **kwargs: Any) -> QueryResponse:
         query = kwargs.get("query")
+        start_time = kwargs.get("start_time")
         if not query:
             raise ValueError("Query must be provided.")
-        response = self.twitter_client.search_tweets(query)
+        response = self.twitter_client.search_tweets(query, start_time=start_time)
         if not response or not response.data:
             return QueryResponse(answers=[f"Could not find any tweets for query {query}"])
 
@@ -41,10 +42,14 @@ class TwitterSentimentSkill(Skill):
                 tweet_text += f"- Tweet by @{author.username} (Followers: {author.public_metrics['followers_count']}): '{tweet.text}'\n"
                 tweet_text += f"  - Retweets: {tweet.public_metrics['retweet_count']}\n"
                 tweet_text += f"  - Likes: {tweet.public_metrics['like_count']}\n"
+                tweet_text += f"  - Replies: {tweet.public_metrics['reply_count']}\n"
+                tweet_text += f"  - Quotes: {tweet.public_metrics['quote_count']}\n"
             else:
                 tweet_text += f"- Tweet: '{tweet.text}'\n"
                 tweet_text += f"  - Retweets: {tweet.public_metrics['retweet_count']}\n"
                 tweet_text += f"  - Likes: {tweet.public_metrics['like_count']}\n"
+                tweet_text += f"  - Replies: {tweet.public_metrics['reply_count']}\n"
+                tweet_text += f"  - Quotes: {tweet.public_metrics['quote_count']}\n"
 
         prompt = self.prompt_manager.get_prompt("talos_sentiment_summary_prompt")
         if not prompt:

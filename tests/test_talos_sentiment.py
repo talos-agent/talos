@@ -21,16 +21,30 @@ def test_talos_sentiment_service_run():
         mock_prompt_manager = mock_prompt_manager_class.return_value
         mock_prompt_manager.get_prompt.return_value = mock_prompt
 
-        # Mock the TweepyClient
+        # Mock the TweepyClient with v2 API format
         mock_tweet = MagicMock()
         mock_tweet.text = "This is a test tweet about Talos."
-        mock_tweet.author.screen_name = "test_user"
-        mock_tweet.author.followers_count = 100
-        mock_tweet.retweet_count = 10
-        mock_tweet.favorite_count = 20
-        mock_tweet.created_at = datetime.now(timezone.utc)
+        mock_tweet.author_id = "user123"
+        mock_tweet.public_metrics = {
+            "like_count": 20,
+            "retweet_count": 10,
+            "reply_count": 5,
+            "quote_count": 3
+        }
+        mock_tweet.created_at = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        
+        mock_user = {
+            "id": "user123",
+            "username": "test_user",
+            "public_metrics": {"followers_count": 100}
+        }
+        
+        mock_response = MagicMock()
+        mock_response.data = [mock_tweet]
+        mock_response.includes = {"users": [mock_user]}
+        
         mock_twitter_client = mock_tweepy_client_class.return_value
-        mock_twitter_client.search_tweets.return_value = [mock_tweet]
+        mock_twitter_client.search_tweets.return_value = mock_response
 
         # Mock the LLMClient
         mock_llm_client = mock_llm_client_class.return_value
@@ -44,16 +58,21 @@ def test_talos_sentiment_service_run():
         response = service.analyze_sentiment(search_query="talos")
 
         # Assert that the llm was called with the correct arguments
-        tweet_data = [
+        expected_tweet_data = [
             {
                 "text": "This is a test tweet about Talos.",
                 "author": "test_user",
                 "followers": 100,
-                "engagement": 30,
+                "likes": 20,
+                "retweets": 10,
+                "replies": 5,
+                "quotes": 3,
+                "total_engagement": 38,
+                "engagement_rate": 38.0,
                 "age_in_days": 0,
             }
         ]
-        expected_sentiment_prompt = mock_prompt.template.format(tweets=json.dumps(tweet_data))
+        expected_sentiment_prompt = mock_prompt.template.format(tweets=json.dumps(expected_tweet_data))
         mock_llm_client.reasoning.assert_called_once_with(expected_sentiment_prompt)
 
         # Assert that the response is correct

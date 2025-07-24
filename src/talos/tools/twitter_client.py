@@ -23,7 +23,7 @@ class TwitterClient(ABC):
         pass
 
     @abstractmethod
-    def search_tweets(self, query: str) -> Any:
+    def search_tweets(self, query: str, start_time: Optional[str] = None) -> Any:
         pass
 
     @abstractmethod
@@ -61,13 +61,16 @@ class TweepyClient(TwitterClient):
     def get_user(self, username: str) -> Any:
         return self.client.get_user(username=username).data
 
-    def search_tweets(self, query: str) -> Any:
-        return self.client.search_recent_tweets(
-            query=query,
-            tweet_fields=["public_metrics"],
-            expansions=["author_id"],
-            user_fields=["public_metrics"],
-        )
+    def search_tweets(self, query: str, start_time: Optional[str] = None) -> Any:
+        params = {
+            "query": query,
+            "tweet_fields": ["public_metrics", "created_at"],
+            "expansions": ["author_id"],
+            "user_fields": ["public_metrics"],
+        }
+        if start_time:
+            params["start_time"] = start_time
+        return self.client.search_recent_tweets(**params)
 
     def get_user_timeline(self, username: str) -> list[Any]:
         user = self.get_user(username)
