@@ -6,6 +6,8 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings
 from textblob import TextBlob
 
+from talos.models.twitter import TwitterUser
+
 
 class PaginatedTwitterResponse:
     """
@@ -38,7 +40,7 @@ class TwitterConfig(BaseSettings):
 
 class TwitterClient(ABC):
     @abstractmethod
-    def get_user(self, username: str) -> Any:
+    def get_user(self, username: str) -> TwitterUser:
         pass
 
     @abstractmethod
@@ -77,8 +79,12 @@ class TweepyClient(TwitterClient):
         config = TwitterConfig()
         self.client = tweepy.Client(bearer_token=config.TWITTER_BEARER_TOKEN)
 
-    def get_user(self, username: str) -> Any:
-        return self.client.get_user(username=username, user_fields=['created_at', 'public_metrics', 'profile_image_url', 'verified', 'description', 'location', 'url']).data
+    def get_user(self, username: str) -> TwitterUser:
+        response = self.client.get_user(
+            username=username,
+            user_fields=["created_at", "public_metrics", "profile_image_url", "verified", "description", "location", "url"],
+        )
+        return TwitterUser(**response.data)
 
     def search_tweets(self, query: str, start_time: Optional[str] = None, max_tweets: int = 500) -> PaginatedTwitterResponse:
         all_tweets: list[Any] = []

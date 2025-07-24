@@ -1,8 +1,10 @@
 import unittest
+from datetime import datetime
 from typing import Any
 from unittest.mock import MagicMock
 
 from talos.models.evaluation import EvaluationResult
+from talos.models.twitter import TwitterUser, TwitterPublicMetrics
 from talos.tools.twitter import TwitterTool
 from talos.tools.twitter_client import TwitterClient
 from talos.tools.twitter_evaluator import TwitterAccountEvaluator
@@ -10,7 +12,20 @@ from talos.tools.twitter_evaluator import TwitterAccountEvaluator
 
 class MockTwitterClient(TwitterClient):
     def get_user(self, username: str):
-        return MagicMock()
+        return TwitterUser(
+            id="12345",
+            username="testuser",
+            name="Test User",
+            created_at=datetime.now(),
+            profile_image_url="http://example.com/image.jpg",
+            public_metrics=TwitterPublicMetrics(
+                followers_count=100,
+                following_count=10,
+                tweet_count=50,
+                listed_count=5,
+                like_count=200,
+            ),
+        )
 
     def search_tweets(self, query: str):
         return []
@@ -41,8 +56,11 @@ class MockTwitterClient(TwitterClient):
         pass
 
 
+from talos.models.twitter import TwitterUser
+
+
 class MockTwitterAccountEvaluator(TwitterAccountEvaluator):
-    def evaluate(self, user: Any) -> EvaluationResult:
+    def evaluate(self, user: TwitterUser) -> EvaluationResult:
         return EvaluationResult(
             score=75,
             additional_data={

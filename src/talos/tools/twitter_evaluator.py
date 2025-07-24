@@ -1,21 +1,22 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Any
+
+from talos.models.twitter import TwitterUser
 
 from ..models.evaluation import EvaluationResult
 
 
 class TwitterAccountEvaluator(ABC):
     @abstractmethod
-    def evaluate(self, user: Any) -> EvaluationResult:
+    def evaluate(self, user: TwitterUser) -> EvaluationResult:
         pass
 
 
 class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
-    def evaluate(self, user: Any) -> EvaluationResult:
+    def evaluate(self, user: TwitterUser) -> EvaluationResult:
         # Follower/Following Ratio
-        followers_count = user.public_metrics.get('followers_count', 0)
-        following_count = user.public_metrics.get('following_count', 0)
+        followers_count = user.public_metrics.followers_count
+        following_count = user.public_metrics.following_count
         if following_count > 0:
             follower_following_ratio = followers_count / following_count
         else:
@@ -25,7 +26,7 @@ class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
         account_age_days = (datetime.now(timezone.utc) - user.created_at).days
 
         # Verified Status
-        is_verified = user.verified
+        is_verified = getattr(user, "verified", False)
 
         # Profile Image
         has_custom_profile_image = bool(user.profile_image_url)
