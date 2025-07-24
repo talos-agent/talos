@@ -27,11 +27,11 @@ class TwitterUser(BaseModel):
 
 class ReferencedTweet(BaseModel):
     type: str
-    id: str
+    id: int
 
 
 class Tweet(BaseModel):
-    id: str
+    id: int
     text: str
     author_id: str
     created_at: Optional[str] = None
@@ -50,7 +50,7 @@ class Tweet(BaseModel):
             for ref in self.referenced_tweets
         )
     
-    def get_replied_to_id(self) -> Optional[str]:
+    def get_replied_to_id(self) -> Optional[int]:
         """Get the ID of the tweet this is replying to, if any."""
         if not self.referenced_tweets:
             return None

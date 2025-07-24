@@ -54,7 +54,7 @@ class TwitterClient(ABC):
         pass
 
     @abstractmethod
-    def get_tweet(self, tweet_id: str) -> Tweet:
+    def get_tweet(self, tweet_id: int) -> Tweet:
         pass
 
     @abstractmethod
@@ -180,9 +180,9 @@ class TweepyClient(TwitterClient):
         )
         return [self._convert_to_tweet_model(tweet) for tweet in (response.data or [])]
 
-    def get_tweet(self, tweet_id: str) -> Tweet:
+    def get_tweet(self, tweet_id: int) -> Tweet:
         response = self.client.get_tweet(
-            tweet_id,
+            str(tweet_id),
             tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"]
         )
         return self._convert_to_tweet_model(response.data)
@@ -214,16 +214,16 @@ class TweepyClient(TwitterClient):
                 if isinstance(ref, dict):
                     referenced_tweets.append(ReferencedTweet(
                         type=ref.get('type', ''),
-                        id=ref.get('id', '')
+                        id=ref.get('id', 0)
                     ))
                 else:
                     referenced_tweets.append(ReferencedTweet(
                         type=getattr(ref, 'type', ''),
-                        id=getattr(ref, 'id', '')
+                        id=getattr(ref, 'id', 0)
                     ))
         
         return Tweet(
-            id=str(tweet_data.id),
+            id=int(tweet_data.id),
             text=tweet_data.text,
             author_id=str(tweet_data.author_id),
             created_at=str(tweet_data.created_at) if hasattr(tweet_data, 'created_at') and tweet_data.created_at else None,
