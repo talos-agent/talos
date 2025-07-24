@@ -71,11 +71,11 @@ class Memory:
         self.memories.append(memory)
         if self.index is None:
             self.index = IndexFlatL2(len(embedding))
-        
+
         assert self.index is not None
         self.index.add(np.array([embedding], dtype=np.float32))
         self._unsaved_count += 1
-        
+
         if self.auto_save and self._unsaved_count >= self.batch_size:
             self.flush()
 
