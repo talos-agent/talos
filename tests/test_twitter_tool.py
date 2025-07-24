@@ -13,7 +13,7 @@ from talos.tools.twitter_evaluator import TwitterAccountEvaluator
 class MockTwitterClient(TwitterClient):
     def get_user(self, username: str):
         return TwitterUser(
-            id="12345",
+            id=12345,
             username="testuser",
             name="Test User",
             created_at=datetime.now(),
@@ -24,7 +24,11 @@ class MockTwitterClient(TwitterClient):
                 tweet_count=50,
                 listed_count=5,
                 like_count=200,
+                media_count=10,
             ),
+            description="This is a test user.",
+            url="http://example.com",
+            verified=True,
         )
 
     def search_tweets(self, query: str):
