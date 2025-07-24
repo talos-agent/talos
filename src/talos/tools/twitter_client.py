@@ -134,13 +134,37 @@ class TweepyClient(TwitterClient):
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_tweets(id=user.id).data
+        return self.client.get_users_tweets(
+            id=user.id,
+            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics"],
+            user_fields=[
+                "created_at",
+                "public_metrics",
+                "profile_image_url",
+                "verified",
+                "description",
+                "location",
+                "url",
+            ],
+        ).data
 
     def get_user_mentions(self, username: str) -> list[Any]:
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_mentions(id=user.id).data
+        return self.client.get_users_mentions(
+            id=user.id,
+            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics"],
+            user_fields=[
+                "created_at",
+                "public_metrics",
+                "profile_image_url",
+                "verified",
+                "description",
+                "location",
+                "url",
+            ],
+        ).data
 
     def get_tweet(self, tweet_id: str) -> Any:
         return self.client.get_tweet(tweet_id).data
