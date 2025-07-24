@@ -25,6 +25,15 @@ class Router:
                 "crypto twitter",
                 "influencer evaluation",
             ],
+            "twitter_influence_skill": [
+                "twitter influence",
+                "influence evaluation",
+                "account influence",
+                "twitter perception",
+                "influence analysis",
+                "social influence",
+                "twitter credibility",
+            ],
         }
 
     def route(self, query: str) -> Service | Skill | None:
