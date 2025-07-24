@@ -149,3 +149,6 @@ cython_debug/
 # Test memory files
 test_memory.index
 test_memory.json
+
+# uv lock file
+uv.lock
