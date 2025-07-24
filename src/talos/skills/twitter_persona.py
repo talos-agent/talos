@@ -45,13 +45,14 @@ class TwitterPersonaSkill(Skill):
 
         replies = ""
         for tweet in random.sample(user_mentions, min(len(user_mentions), 5)):
-            if tweet.in_reply_to_status_id:
+            replied_to_id = tweet.get_replied_to_id()
+            if replied_to_id:
                 try:
-                    original_tweet = self.twitter_client.get_tweet(tweet.in_reply_to_status_id)
-                    replies += f"- In reply to @{original_tweet.user.screen_name}: '{original_tweet.text}'\n"
+                    original_tweet = self.twitter_client.get_tweet(replied_to_id)
+                    replies += f"- In reply to someone: '{original_tweet.text}'\n"
                     replies += f"  - @{username}'s reply: '{tweet.text}'\n\n"
                 except Exception:
-                    replies += f"- Replying to @{tweet.in_reply_to_screen_name}: '{tweet.text}'\n"
+                    replies += f"- Replying to someone: '{tweet.text}'\n"
 
         prompt = self.prompt_manager.get_prompt("twitter_persona_prompt")
         if not prompt:

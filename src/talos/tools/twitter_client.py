@@ -6,7 +6,7 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings
 from textblob import TextBlob
 
-from talos.models.twitter import TwitterUser
+from talos.models.twitter import TwitterUser, Tweet, ReferencedTweet
 
 
 class PaginatedTwitterResponse:
@@ -46,15 +46,15 @@ class TwitterClient(ABC):
         pass
 
     @abstractmethod
-    def get_user_timeline(self, username: str) -> list[Any]:
+    def get_user_timeline(self, username: str) -> list[Tweet]:
         pass
 
     @abstractmethod
-    def get_user_mentions(self, username: str) -> list[Any]:
+    def get_user_mentions(self, username: str) -> list[Tweet]:
         pass
 
     @abstractmethod
-    def get_tweet(self, tweet_id: str) -> Any:
+    def get_tweet(self, tweet_id: str) -> Tweet:
         pass
 
     @abstractmethod
@@ -90,7 +90,19 @@ class TweepyClient(TwitterClient):
                 "url",
             ],
         )
-        return TwitterUser(**response.data)
+        from talos.models.twitter import TwitterPublicMetrics
+        user_data = response.data
+        return TwitterUser(
+            id=int(user_data.id),
+            username=user_data.username,
+            name=user_data.name,
+            created_at=user_data.created_at,
+            profile_image_url=user_data.profile_image_url or "",
+            public_metrics=TwitterPublicMetrics(**user_data.public_metrics),
+            description=user_data.description,
+            url=user_data.url,
+            verified=getattr(user_data, 'verified', False)
+        )
 
     def search_tweets(
         self, query: str, start_time: Optional[str] = None, max_tweets: int = 500
@@ -130,13 +142,13 @@ class TweepyClient(TwitterClient):
 
         return PaginatedTwitterResponse(all_tweets, all_users, request_count)
 
-    def get_user_timeline(self, username: str) -> list[Any]:
+    def get_user_timeline(self, username: str) -> list[Tweet]:
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_tweets(
+        response = self.client.get_users_tweets(
             id=user.id,
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics"],
+            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"],
             user_fields=[
                 "created_at",
                 "public_metrics",
@@ -146,15 +158,16 @@ class TweepyClient(TwitterClient):
                 "location",
                 "url",
             ],
-        ).data
+        )
+        return [self._convert_to_tweet_model(tweet) for tweet in (response.data or [])]
 
-    def get_user_mentions(self, username: str) -> list[Any]:
+    def get_user_mentions(self, username: str) -> list[Tweet]:
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_mentions(
+        response = self.client.get_users_mentions(
             id=user.id,
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics"],
+            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"],
             user_fields=[
                 "created_at",
                 "public_metrics",
@@ -164,10 +177,15 @@ class TweepyClient(TwitterClient):
                 "location",
                 "url",
             ],
-        ).data
+        )
+        return [self._convert_to_tweet_model(tweet) for tweet in (response.data or [])]
 
-    def get_tweet(self, tweet_id: str) -> Any:
-        return self.client.get_tweet(tweet_id).data
+    def get_tweet(self, tweet_id: str) -> Tweet:
+        response = self.client.get_tweet(
+            tweet_id,
+            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"]
+        )
+        return self._convert_to_tweet_model(response.data)
 
     def get_sentiment(self, search_query: str = "talos") -> float:
         """
@@ -187,3 +205,31 @@ class TweepyClient(TwitterClient):
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
         return self.client.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
+
+    def _convert_to_tweet_model(self, tweet_data: Any) -> Tweet:
+        """Convert raw tweepy tweet data to Tweet BaseModel"""
+        referenced_tweets = []
+        if hasattr(tweet_data, 'referenced_tweets') and tweet_data.referenced_tweets:
+            for ref in tweet_data.referenced_tweets:
+                if isinstance(ref, dict):
+                    referenced_tweets.append(ReferencedTweet(
+                        type=ref.get('type', ''),
+                        id=ref.get('id', '')
+                    ))
+                else:
+                    referenced_tweets.append(ReferencedTweet(
+                        type=getattr(ref, 'type', ''),
+                        id=getattr(ref, 'id', '')
+                    ))
+        
+        return Tweet(
+            id=str(tweet_data.id),
+            text=tweet_data.text,
+            author_id=str(tweet_data.author_id),
+            created_at=str(tweet_data.created_at) if hasattr(tweet_data, 'created_at') and tweet_data.created_at else None,
+            conversation_id=str(tweet_data.conversation_id) if hasattr(tweet_data, 'conversation_id') and tweet_data.conversation_id else None,
+            public_metrics=dict(tweet_data.public_metrics) if hasattr(tweet_data, 'public_metrics') and tweet_data.public_metrics else {},
+            referenced_tweets=referenced_tweets if referenced_tweets else None,
+            in_reply_to_user_id=str(tweet_data.in_reply_to_user_id) if hasattr(tweet_data, 'in_reply_to_user_id') and tweet_data.in_reply_to_user_id else None,
+            edit_history_tweet_ids=[str(id) for id in tweet_data.edit_history_tweet_ids] if hasattr(tweet_data, 'edit_history_tweet_ids') and tweet_data.edit_history_tweet_ids else None
+        )
