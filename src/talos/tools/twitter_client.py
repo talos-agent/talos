@@ -53,14 +53,10 @@ class TweepyClient(TwitterClient):
             self.client = None
 
     def get_user(self, username: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.get_user(username=username).data
+        return self.client.get_user(username=username).data  # type: ignore
 
     def search_tweets(self, query: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.search_recent_tweets(
+        return self.client.search_recent_tweets(  # type: ignore
             query=query,
             tweet_fields=["public_metrics"],
             expansions=["author_id"],
@@ -68,32 +64,24 @@ class TweepyClient(TwitterClient):
         )
 
     def get_user_timeline(self, username: str) -> list[Any]:
-        if not self.client:
-            return []
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_tweets(id=user.id).data
+        return self.client.get_users_tweets(id=user.id).data  # type: ignore
 
     def get_user_mentions(self, username: str) -> list[Any]:
-        if not self.client:
-            return []
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_mentions(id=user.id).data
+        return self.client.get_users_mentions(id=user.id).data  # type: ignore
 
     def get_tweet(self, tweet_id: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.get_tweet(tweet_id).data
+        return self.client.get_tweet(tweet_id).data  # type: ignore
 
     def get_sentiment(self, search_query: str = "talos") -> float:
         """
         Gets the sentiment of tweets that match a search query.
         """
-        if not self.client:
-            return 0.0
         tweets = self.search_tweets(search_query)
         sentiment = 0
         if tweets:
@@ -104,11 +92,7 @@ class TweepyClient(TwitterClient):
         return 0
 
     def post_tweet(self, tweet: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.create_tweet(text=tweet)
+        return self.client.create_tweet(text=tweet)  # type: ignore
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
+        return self.client.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)  # type: ignore
