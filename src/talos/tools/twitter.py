@@ -118,13 +118,13 @@ class TwitterTool(BaseTool):
         """Gets the follower count for a user."""
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
-        return user.followers_count
+        return user.public_metrics.get('followers_count', 0)
 
     def get_following_count(self, username: str) -> int:
         """Gets the following count for a user."""
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
-        return user.friends_count
+        return user.public_metrics.get('following_count', 0)
 
     def get_tweet_engagement(self, tweet_id: str) -> dict:
         """Gets the engagement for a tweet."""

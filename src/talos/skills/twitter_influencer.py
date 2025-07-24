@@ -60,7 +60,7 @@ class TwitterInfluencerSkill(Skill):
                 "evaluation_score": evaluation_result.score,
                 "evaluation_data": evaluation_result.additional_data,
                 "user_id": user.id,
-                "followers_count": user.followers_count,
+                "followers_count": user.public_metrics.get('followers_count', 0),
                 "evaluation_type": "crypto_influencer"
             }
             
@@ -75,7 +75,7 @@ class TwitterInfluencerSkill(Skill):
                     username=username,
                     score=evaluation_result.score,
                     evaluation_data=evaluation_result.additional_data,
-                    followers_count=user.followers_count
+                    followers_count=user.public_metrics.get('followers_count', 0)
                 )
                 response = self.llm.invoke(formatted_prompt)
                 analysis = response.content

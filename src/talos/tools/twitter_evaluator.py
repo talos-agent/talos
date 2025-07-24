@@ -14,10 +14,12 @@ class TwitterAccountEvaluator(ABC):
 class DefaultTwitterAccountEvaluator(TwitterAccountEvaluator):
     def evaluate(self, user: Any) -> EvaluationResult:
         # Follower/Following Ratio
-        if user.friends_count > 0:
-            follower_following_ratio = user.followers_count / user.friends_count
+        followers_count = user.public_metrics.get('followers_count', 0)
+        following_count = user.public_metrics.get('following_count', 0)
+        if following_count > 0:
+            follower_following_ratio = followers_count / following_count
         else:
-            follower_following_ratio = user.followers_count
+            follower_following_ratio = followers_count
 
         # Account Age
         account_age_days = (datetime.now(timezone.utc) - user.created_at).days

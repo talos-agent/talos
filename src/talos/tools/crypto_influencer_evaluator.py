@@ -31,7 +31,9 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
         ]
     
     def evaluate(self, user: Any) -> EvaluationResult:
-        follower_following_ratio = user.followers_count / user.friends_count if user.friends_count > 0 else user.followers_count
+        followers_count = user.public_metrics.get('followers_count', 0)
+        following_count = user.public_metrics.get('following_count', 0)
+        follower_following_ratio = followers_count / following_count if following_count > 0 else followers_count
         account_age_days = (datetime.now(timezone.utc) - user.created_at).days
         is_verified = user.verified
         is_default_profile_image = user.default_profile_image
@@ -146,7 +148,8 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
     
     def _calculate_engagement_score(self, user: Any, tweets: List[Any]) -> int:
         """Calculate engagement quality score (0-100)"""
-        if not tweets or user.followers_count == 0:
+        followers_count = user.public_metrics.get('followers_count', 0)
+        if not tweets or followers_count == 0:
             return 0
         
         total_engagement = 0
@@ -159,7 +162,7 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
             total_engagement += engagement
         
         avg_engagement = total_engagement / len(tweets)
-        engagement_rate = (avg_engagement / user.followers_count) * 100
+        engagement_rate = (avg_engagement / followers_count) * 100
         
         if engagement_rate >= 5:
             return 100
@@ -200,7 +203,7 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
     
     def _calculate_influence_score(self, user: Any) -> int:
         """Calculate influence score based on follower metrics (0-100)"""
-        followers = user.followers_count
+        followers = user.public_metrics.get('followers_count', 0)
         
         if followers >= 100000:
             return 100
