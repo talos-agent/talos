@@ -23,6 +23,7 @@ class TwitterToolName(str, Enum):
     GET_FOLLOWING_COUNT = "get_following_count"
     GET_TWEET_ENGAGEMENT = "get_tweet_engagement"
     EVALUATE_ACCOUNT = "evaluate_account"
+    EVALUATE_CRYPTO_INFLUENCER = "evaluate_crypto_influencer"
     GENERATE_PERSONA_PROMPT = "generate_persona_prompt"
 
 
@@ -137,6 +138,21 @@ class TwitterTool(BaseTool):
         user = self.twitter_client.get_user(username)
         return self.account_evaluator.evaluate(user)
 
+    def evaluate_crypto_influencer(self, username: str) -> dict:
+        """Evaluates a Twitter account as a crypto influencer."""
+        from .crypto_influencer_evaluator import CryptoInfluencerEvaluator
+        
+        assert self.twitter_client is not None
+        evaluator = CryptoInfluencerEvaluator(self.twitter_client)
+        user = self.twitter_client.get_user(username)
+        result = evaluator.evaluate(user)
+        
+        return {
+            "username": username,
+            "score": result.score,
+            "evaluation_data": result.additional_data
+        }
+
     def generate_persona_prompt(self, username: str) -> str:
         """Generates a prompt to describe the voice and style of a specific twitter user."""
         assert self.twitter_client is not None
@@ -158,6 +174,8 @@ class TwitterTool(BaseTool):
             return self.get_tweet_engagement(**kwargs)
         elif tool_name == "evaluate_account":
             return self.evaluate_account(**kwargs)
+        elif tool_name == "evaluate_crypto_influencer":
+            return self.evaluate_crypto_influencer(**kwargs)
         elif tool_name == "generate_persona_prompt":
             return self.generate_persona_prompt(**kwargs)
         else:
