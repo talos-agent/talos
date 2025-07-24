@@ -78,7 +78,7 @@ class TweepyClient(TwitterClient):
         self.client = tweepy.Client(bearer_token=config.TWITTER_BEARER_TOKEN)
 
     def get_user(self, username: str) -> Any:
-        return self.client.get_user(username=username).data
+        return self.client.get_user(username=username, user_fields=['created_at', 'public_metrics', 'profile_image_url', 'verified', 'description', 'location', 'url']).data
 
     def search_tweets(self, query: str, start_time: Optional[str] = None, max_tweets: int = 500) -> PaginatedTwitterResponse:
         all_tweets: list[Any] = []

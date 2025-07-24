@@ -1,0 +1,6 @@
+{
+  "name": "crypto_influencer_analysis_prompt",
+  "description": "A prompt to analyze a crypto Twitter influencer's relevance and influence.",
+  "template": "Analyze the crypto Twitter influencer @{username} based on the following evaluation data:\n\nInfluencer Score: {score}/100\nFollowers: {followers_count:,}\n\nDetailed Metrics:\n- Crypto Relevance Score: {evaluation_data[crypto_relevance_score]}/100\n- Engagement Score: {evaluation_data[engagement_score]}/100\n- Authenticity Score: {evaluation_data[authenticity_score]}/100\n- Influence Score: {evaluation_data[influence_score]}/100\n- Crypto Content Percentage: {evaluation_data[crypto_content_percentage]:.1f}%\n\nProvide a comprehensive analysis of this user's relevance as a crypto influencer, including:\n1. Overall assessment of their influence in the crypto space\n2. Strengths and weaknesses as an influencer\n3. Content quality and engagement patterns\n4. Recommendations for protocol teams considering partnerships\n5. Risk factors or concerns to be aware of\n\nBe specific and actionable in your analysis.",
+  "input_variables": ["username", "score", "evaluation_data", "followers_count"]
+}

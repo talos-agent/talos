@@ -1,0 +1,6 @@
+{
+  "name": "crypto_relevance_evaluation_prompt",
+  "description": "A prompt to evaluate how focused on crypto and how meaningful a user's tweets are.",
+  "template": "Analyze the following tweets from a Twitter user to evaluate their crypto focus and meaningfulness:\n\nTweets:\n{tweets_text}\n\nPlease evaluate this user on two dimensions:\n\n1. **Crypto Focus (0-100)**: How much of their content is genuinely focused on cryptocurrency, blockchain, DeFi, NFTs, or related topics? Consider:\n   - Percentage of tweets that discuss crypto topics\n   - Depth of crypto knowledge demonstrated\n   - Whether they're just mentioning crypto casually vs. having substantive discussions\n\n2. **Meaningfulness (0-100)**: How valuable and insightful is their crypto-related content? Consider:\n   - Quality of analysis and insights\n   - Educational value for followers\n   - Original thoughts vs. just resharing/reacting\n   - Technical depth and accuracy\n   - Influence on crypto discourse\n\nRespond with ONLY a JSON object in this exact format:\n{\n  \"crypto_focus_score\": <number 0-100>,\n  \"meaningfulness_score\": <number 0-100>,\n  \"reasoning\": \"<brief explanation of the scores>\"\n}",
+  "input_variables": ["tweets_text"]
+}
