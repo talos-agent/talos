@@ -63,6 +63,7 @@ class SupervisedTool(BaseTool):
     """
 
     supervisor: Supervisor[Any] | None = Field(default=None)
+    async_supervisor: AsyncSupervisor[Any] | None = Field(default=None)
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
         if self.supervisor:
@@ -72,8 +73,12 @@ class SupervisedTool(BaseTool):
         return self._run_unsupervised(*args, **kwargs)
 
     async def _arun(self, *args: Any, **kwargs: Any) -> Any:
-        if self.supervisor:
-            # TODO: Add support for async supervisors.
+        if self.async_supervisor:
+            ok, message = await self.async_supervisor.supervise_async({"args": args, "kwargs": kwargs})
+            if not ok:
+                return message
+        elif self.supervisor:
+            # Fallback to sync supervisor for backward compatibility
             ok, message = self.supervisor.supervise({"args": args, "kwargs": kwargs})
             if not ok:
                 return message

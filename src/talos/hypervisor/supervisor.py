@@ -68,3 +68,58 @@ class RuleBasedSupervisor(Supervisor):
                         if not approved:
                             return False, error_message
         return True, None
+
+
+class AsyncRuleBasedSupervisor(AsyncSupervisor):
+    """
+    An async supervisor that uses a set of rules to approve or deny actions.
+    """
+
+    rules: list[Rule]
+
+    async def approve_async(self, action: str, args: dict[str, Any]) -> tuple[bool, str | None]:
+        """
+        Approves or denies an action based on the rules asynchronously.
+        """
+        for rule in self.rules:
+            if rule.tool_name == action:
+                for arg_name, validation_fn in rule.validations.items():
+                    if arg_name in args:
+                        approved, error_message = validation_fn(args[arg_name])
+                        if not approved:
+                            return False, error_message
+        return True, None
+
+
+class SimpleSupervisor(Supervisor):
+    """
+    A simple supervisor that approves every other tool call.
+    """
+
+    counter: int = 0
+
+    def approve(self, action: str, args: dict[str, Any]) -> tuple[bool, str | None]:
+        """
+        Approves or denies an action.
+        """
+        self.counter += 1
+        if self.counter % 2 == 0:
+            return True, None
+        return False, "Denied by SimpleSupervisor"
+
+
+class AsyncSimpleSupervisor(AsyncSupervisor):
+    """
+    A simple async supervisor that approves every other tool call.
+    """
+
+    counter: int = 0
+
+    async def approve_async(self, action: str, args: dict[str, Any]) -> tuple[bool, str | None]:
+        """
+        Approves or denies an action asynchronously.
+        """
+        self.counter += 1
+        if self.counter % 2 == 0:
+            return True, None
+        return False, "Denied by AsyncSimpleSupervisor"
