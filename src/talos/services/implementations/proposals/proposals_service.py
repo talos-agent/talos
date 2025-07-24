@@ -5,7 +5,7 @@ from typing import Any
 from langchain_core.language_models import BaseLanguageModel
 from pydantic import ConfigDict
 
-from talos.models.proposals import Proposal, QueryResponse
+from talos.models.proposals import Proposal, ProposalResponse
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.proposal_agent import ProposalAgent
@@ -39,7 +39,7 @@ class ProposalsService(ProposalAgent):
             tools=self.tools
         )
     
-    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
+    def evaluate_proposal(self, proposal: Proposal) -> ProposalResponse:
         """
         Evaluates a proposal and returns a recommendation.
         

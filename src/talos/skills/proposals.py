@@ -9,7 +9,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from pydantic import ConfigDict
 
-from talos.models.proposals import Proposal, QueryResponse
+from talos.models.proposals import Proposal, ProposalResponse
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.single_prompt_manager import SinglePromptManager
@@ -32,7 +32,7 @@ class ProposalsSkill(Skill):
 
     This skill takes a `Proposal` object as input, which contains the text of the
     proposal and any feedback from previous evaluations. It uses a large language
-    model (LLM) to evaluate the proposal and returns a `QueryResponse` object
+    model (LLM) to evaluate the proposal and returns a `ProposalResponse` object
     containing the recommendation.
     """
 
@@ -47,7 +47,7 @@ class ProposalsSkill(Skill):
     def name(self) -> str:
         return "proposals_skill"
 
-    def run(self, **kwargs: Any) -> QueryResponse:
+    def run(self, **kwargs: Any) -> ProposalResponse:
         if "proposal" not in kwargs:
             raise ValueError("Missing required argument: proposal")
         
@@ -57,7 +57,7 @@ class ProposalsSkill(Skill):
         
         return self.evaluate_proposal(proposal)
 
-    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
+    def evaluate_proposal(self, proposal: Proposal) -> ProposalResponse:
         """
         Evaluates a proposal and returns a recommendation with confidence and reasoning.
         """
@@ -92,7 +92,7 @@ class ProposalsSkill(Skill):
             
             logger.info(f"Proposal evaluation completed with confidence: {confidence_score}")
             
-            return QueryResponse(
+            return ProposalResponse(
                 answers=[content],
                 confidence_score=confidence_score,
                 reasoning=reasoning
