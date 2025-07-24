@@ -1,8 +1,9 @@
-import os
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 
 import tweepy
+from pydantic import Field, PrivateAttr, SecretStr
+from pydantic_settings import BaseSettings
 from textblob import TextBlob
 
 
@@ -40,22 +41,21 @@ class TwitterClient(ABC):
         pass
 
 
-class TweepyClient(TwitterClient):
-    def __init__(self):
-        if "TWITTER_BEARER_TOKEN" in os.environ:
-            self.client = tweepy.Client(bearer_token=os.environ["TWITTER_BEARER_TOKEN"])
-        else:
-            self.client = None
+class TweepyClient(BaseSettings, TwitterClient):
+    TWITTER_BEARER_TOKEN: Optional[SecretStr] = Field(None, env="TWITTER_BEARER_TOKEN")
+
+    _client: tweepy.Client = PrivateAttr()
+
+    def model_post_init(self, __context: Any) -> None:
+        if not self.TWITTER_BEARER_TOKEN:
+            raise ValueError("TWITTER_BEARER_TOKEN is not set")
+        self._client = tweepy.Client(bearer_token=self.TWITTER_BEARER_TOKEN.get_secret_value())
 
     def get_user(self, username: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.get_user(username=username).data
+        return self._client.get_user(username=username).data
 
     def search_tweets(self, query: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.search_recent_tweets(
+        return self._client.search_recent_tweets(
             query=query,
             tweet_fields=["public_metrics"],
             expansions=["author_id"],
@@ -63,32 +63,24 @@ class TweepyClient(TwitterClient):
         )
 
     def get_user_timeline(self, username: str) -> list[Any]:
-        if not self.client:
-            return []
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_tweets(id=user.id).data
+        return self._client.get_users_tweets(id=user.id).data
 
     def get_user_mentions(self, username: str) -> list[Any]:
-        if not self.client:
-            return []
         user = self.get_user(username)
         if not user:
             return []
-        return self.client.get_users_mentions(id=user.id).data
+        return self._client.get_users_mentions(id=user.id).data
 
     def get_tweet(self, tweet_id: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.get_tweet(tweet_id).data
+        return self._client.get_tweet(tweet_id).data
 
     def get_sentiment(self, search_query: str = "talos") -> float:
         """
         Gets the sentiment of tweets that match a search query.
         """
-        if not self.client:
-            return 0.0
         tweets = self.search_tweets(search_query)
         sentiment = 0
         if tweets:
@@ -99,11 +91,7 @@ class TweepyClient(TwitterClient):
         return 0
 
     def post_tweet(self, tweet: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.create_tweet(text=tweet)
+        return self._client.create_tweet(text=tweet)
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
-        if not self.client:
-            return None
-        return self.client.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
+        return self._client.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)

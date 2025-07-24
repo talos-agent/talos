@@ -50,7 +50,9 @@ class TwitterTool(BaseTool):
         account_evaluator: Optional[TwitterAccountEvaluator] = None,
     ):
         super().__init__()
-        self.twitter_client = twitter_client or TweepyClient()
+        self.twitter_client = twitter_client
+        if self.twitter_client is None:
+            self.twitter_client = TweepyClient()
         self.account_evaluator = account_evaluator or DefaultTwitterAccountEvaluator()
         self.perspective_client = self._initialize_perspective_client()
 

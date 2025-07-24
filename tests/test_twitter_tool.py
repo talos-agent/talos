@@ -4,11 +4,20 @@ from unittest.mock import MagicMock
 
 from talos.models.evaluation import EvaluationResult
 from talos.tools.twitter import TwitterTool
-from talos.tools.twitter_client import TwitterClient
+from talos.tools.twitter_client import TwitterClient, TweepyClient
 from talos.tools.twitter_evaluator import TwitterAccountEvaluator
 
 
+from pydantic import SecretStr
+
+
 class MockTwitterClient(TwitterClient):
+    def __init__(self, bearer_token: str | None = "fake-token"):
+        if bearer_token:
+            self.TWITTER_BEARER_TOKEN = SecretStr(bearer_token)
+        else:
+            self.TWITTER_BEARER_TOKEN = None
+
     def get_user(self, username: str):
         return MagicMock()
 
@@ -72,6 +81,10 @@ class TestTwitterTool(unittest.TestCase):
         self.assertGreater(result.additional_data["account_age_days"], 365)
         self.assertTrue(result.additional_data["is_verified"])
         self.assertFalse(result.additional_data["is_default_profile_image"])
+
+    def test_missing_bearer_token(self):
+        with self.assertRaises(ValueError):
+            TwitterTool(twitter_client=TweepyClient(TWITTER_BEARER_TOKEN=None))
 
 
 if __name__ == "__main__":
