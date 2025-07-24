@@ -1,9 +1,14 @@
 import os
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 
 import tweepy
+from pydantic_settings import BaseSettings
 from textblob import TextBlob
+
+
+class TwitterConfig(BaseSettings):
+    TWITTER_BEARER_TOKEN: Optional[str] = None
 
 
 class TwitterClient(ABC):
@@ -42,8 +47,9 @@ class TwitterClient(ABC):
 
 class TweepyClient(TwitterClient):
     def __init__(self):
-        if "TWITTER_BEARER_TOKEN" in os.environ:
-            self.client = tweepy.Client(bearer_token=os.environ["TWITTER_BEARER_TOKEN"])
+        config = TwitterConfig()
+        if config.TWITTER_BEARER_TOKEN:
+            self.client = tweepy.Client(bearer_token=config.TWITTER_BEARER_TOKEN)
         else:
             self.client = None
 
