@@ -1,0 +1,6 @@
+[PROPOSAL]
+This is a test proposal. It is a good proposal.
+
+[FEEDBACK]
+vitalik: I like it
+hayden: I also like it

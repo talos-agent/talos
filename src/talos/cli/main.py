@@ -10,12 +10,32 @@ from langchain_openai import ChatOpenAI
 from talos.core.main_agent import MainAgent
 from talos.core.router import Router
 from talos.services.key_management import KeyManagement
+from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter_persona import TwitterPersonaSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
 
 app = typer.Typer(invoke_without_command=True)
 twitter_app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
+proposals_app = typer.Typer()
+app.add_typer(proposals_app, name="proposals")
+
+
+@proposals_app.command("eval")
+def eval_proposal(
+    filepath: str = typer.Option(..., "--file", "-f", help="Path to the proposal file."),
+    model_name: str = "gpt-4",
+    temperature: float = 0.0,
+):
+    """
+    Evaluates a proposal from a file.
+    """
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"File not found at {filepath}")
+    model = ChatOpenAI(model=model_name, temperature=temperature)
+    skill = ProposalsSkill(llm=model)
+    response = skill.run(filepath=filepath)
+    print(response.answers[0])
 
 
 @twitter_app.command()

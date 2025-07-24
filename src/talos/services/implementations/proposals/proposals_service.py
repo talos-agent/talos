@@ -15,38 +15,35 @@ from talos.skills.proposals import ProposalsSkill
 class ProposalsService(ProposalAgent):
     """
     A service for evaluating proposals using the ProposalsSkill.
-    
+
     This service acts as a bridge between the abstract ProposalAgent interface
     and the concrete ProposalsSkill implementation.
     """
-    
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     llm: BaseLanguageModel
     prompt_manager: PromptManager | None = None
     _skill: ProposalsSkill | None = None
-    
+
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
-        
+
         if self.prompt_manager is None:
             self.prompt_manager = FilePromptManager("src/talos/prompts")
-        
+
         self._skill = ProposalsSkill(
-            llm=self.llm,
-            prompt_manager=self.prompt_manager,
-            rag_dataset=self.rag_dataset,
-            tools=self.tools
+            llm=self.llm, prompt_manager=self.prompt_manager, rag_dataset=self.rag_dataset, tools=self.tools
         )
-    
+
     def evaluate_proposal(self, proposal: Proposal) -> ProposalResponse:
         """
         Evaluates a proposal and returns a recommendation.
-        
+
         :param proposal: The proposal to evaluate.
         :return: The agent's recommendation with confidence and reasoning.
         """
         if self._skill is None:
             raise RuntimeError("ProposalsSkill not initialized")
-        
+
         return self._skill.evaluate_proposal(proposal)

@@ -67,10 +67,15 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         mock_file_prompt_manager.return_value = mock_prompt_manager
         mock_hypervisor.return_value = MagicMock(spec=Hypervisor)
 
+        from talos.skills.proposals import ProposalsSkill
+
         MainAgent(
             model=mock_model,
             prompts_dir="",
             prompt_manager=mock_prompt_manager,
             schema=None,
-            router=Router(services=[], skills=[]),
+            router=Router(
+                services=[],
+                skills=[ProposalsSkill(llm=mock_model)],
+            ),
         )
