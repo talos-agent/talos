@@ -55,7 +55,7 @@ class TwitterSentimentSkill(Skill):
         prompt = self.prompt_manager.get_prompt("talos_sentiment_summary")
         if not prompt:
             raise ValueError("Could not find prompt 'talos_sentiment_summary'")
-        formatted_prompt = prompt.format(tweets=tweet_text)
+        formatted_prompt = prompt.format(results=tweet_text)
 
         response = self.llm.invoke(formatted_prompt)
 
