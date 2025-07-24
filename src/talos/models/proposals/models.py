@@ -17,6 +17,13 @@ class QueryResponse(BaseModel):
     answers: list[str]
 
 
+class ProposalResponse(BaseModel):
+    answers: list[str]
+    confidence_score: float | None = None
+    reasoning: str | None = None
+    decision: str | None = None
+
+
 class Question(BaseModel):
     text: str
     feedback: list[Feedback]

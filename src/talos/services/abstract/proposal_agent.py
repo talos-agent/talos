@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Any
 
-from talos.models.proposals import Proposal, QueryResponse
+from talos.models.proposals import Proposal, ProposalResponse
 from talos.services.abstract.service import Service
 
 
@@ -23,7 +23,7 @@ class ProposalAgent(Service):
         return "proposals"
 
     @abstractmethod
-    def evaluate_proposal(self, proposal: Proposal) -> QueryResponse:
+    def evaluate_proposal(self, proposal: Proposal) -> ProposalResponse:
         """
         Evaluates a proposal and returns a recommendation.
 
