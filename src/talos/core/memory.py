@@ -28,12 +28,17 @@ class Memory:
         file_path: Path,
         embeddings_model: Embeddings,
         history_file_path: Optional[Path] = None,
+        batch_size: int = 10,
+        auto_save: bool = True,
     ):
         self.file_path = file_path
         self.history_file_path = history_file_path
         self.embeddings_model = embeddings_model
+        self.batch_size = batch_size
+        self.auto_save = auto_save
         self.memories: List[MemoryRecord] = []
         self.index: Optional[IndexFlatL2] = None
+        self._unsaved_count = 0
         self._load()
 
     def _load(self):
@@ -67,7 +72,10 @@ class Memory:
         if self.index is None:
             self.index = IndexFlatL2(len(embedding))
         self.index.add(np.array([embedding], dtype=np.float32))
-        self._save()
+        self._unsaved_count += 1
+        
+        if self.auto_save and self._unsaved_count >= self.batch_size:
+            self.flush()
 
     def search(self, query: str, k: int = 5) -> List[MemoryRecord]:
         if not self.index or not self.memories:
@@ -92,3 +100,14 @@ class Memory:
         dicts = messages_to_dict(messages)
         with open(self.history_file_path, "w") as f:
             json.dump(dicts, f, indent=4)
+
+    def flush(self):
+        """Manually save all unsaved memories to disk."""
+        if self._unsaved_count > 0:
+            self._save()
+            self._unsaved_count = 0
+
+    def __del__(self):
+        """Ensure data is saved when object is destroyed."""
+        if hasattr(self, '_unsaved_count') and self._unsaved_count > 0:
+            self.flush()
