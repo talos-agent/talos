@@ -23,7 +23,7 @@ class TwitterClient(ABC):
         pass
 
     @abstractmethod
-    def search_tweets(self, query: str, start_time: Optional[str] = None) -> Any:
+    def search_tweets(self, query: str, start_time: Optional[str] = None, max_tweets: int = 500) -> Any:
         pass
 
     @abstractmethod
@@ -61,11 +61,10 @@ class TweepyClient(TwitterClient):
     def get_user(self, username: str) -> Any:
         return self.client.get_user(username=username).data
 
-    def search_tweets(self, query: str, start_time: Optional[str] = None) -> Any:
+    def search_tweets(self, query: str, start_time: Optional[str] = None, max_tweets: int = 500) -> Any:
         all_tweets: list[Any] = []
         all_users: list[Any] = []
         next_token = None
-        max_tweets = 500
         
         while len(all_tweets) < max_tweets:
             params = {
