@@ -23,7 +23,7 @@ class TwitterPersonaSkill(Skill):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     twitter_client: TwitterClient = Field(default_factory=TweepyClient)
     prompt_manager: PromptManager = Field(default_factory=lambda: FilePromptManager("src/talos/prompts"))
-    llm: Any = Field(default_factory=ChatOpenAI)
+    llm: Any = Field(default_factory=lambda: ChatOpenAI(model="gpt-4o"))
 
     @property
     def name(self) -> str:
