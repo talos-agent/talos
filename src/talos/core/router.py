@@ -19,7 +19,12 @@ class Router:
             "github": ["github", "issue", "pull request", "pr", "code"],
             "proposals": ["proposal", "vote", "snapshot"],
             "twitter": ["twitter", "tweet", "x"],
-            "twitter_influencer": ["crypto influencer", "influencer analysis", "crypto twitter", "influencer evaluation"],
+            "twitter_influencer": [
+                "crypto influencer",
+                "influencer analysis",
+                "crypto twitter",
+                "influencer evaluation",
+            ],
         }
 
     def route(self, query: str) -> Service | Skill | None:

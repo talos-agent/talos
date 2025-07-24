@@ -12,19 +12,15 @@ from talos.models.twitter import TwitterUser
 class PaginatedTwitterResponse:
     """
     Response object for paginated Twitter API calls.
-    
+
     Aggregates data from multiple Twitter API responses into a single response-like object
     that maintains compatibility with the expected interface while providing pagination metadata.
     """
-    
+
     def __init__(self, tweets: list[Any], users: list[Any], total_requests: int = 1):
         self.data = tweets
         self.includes = {"users": users}
-        self.meta = {
-            "result_count": len(tweets),
-            "paginated": total_requests > 1,
-            "total_requests": total_requests
-        }
+        self.meta = {"result_count": len(tweets), "paginated": total_requests > 1, "total_requests": total_requests}
         self.errors: list[Any] = []
 
 
@@ -44,7 +40,9 @@ class TwitterClient(ABC):
         pass
 
     @abstractmethod
-    def search_tweets(self, query: str, start_time: Optional[str] = None, max_tweets: int = 500) -> PaginatedTwitterResponse:
+    def search_tweets(
+        self, query: str, start_time: Optional[str] = None, max_tweets: int = 500
+    ) -> PaginatedTwitterResponse:
         pass
 
     @abstractmethod
@@ -82,16 +80,26 @@ class TweepyClient(TwitterClient):
     def get_user(self, username: str) -> TwitterUser:
         response = self.client.get_user(
             username=username,
-            user_fields=["created_at", "public_metrics", "profile_image_url", "verified", "description", "location", "url"],
+            user_fields=[
+                "created_at",
+                "public_metrics",
+                "profile_image_url",
+                "verified",
+                "description",
+                "location",
+                "url",
+            ],
         )
         return TwitterUser(**response.data)
 
-    def search_tweets(self, query: str, start_time: Optional[str] = None, max_tweets: int = 500) -> PaginatedTwitterResponse:
+    def search_tweets(
+        self, query: str, start_time: Optional[str] = None, max_tweets: int = 500
+    ) -> PaginatedTwitterResponse:
         all_tweets: list[Any] = []
         all_users: list[Any] = []
         next_token = None
         request_count = 0
-        
+
         while len(all_tweets) < max_tweets:
             params = {
                 "query": query,
@@ -104,22 +112,22 @@ class TweepyClient(TwitterClient):
                 params["start_time"] = start_time
             if next_token:
                 params["next_token"] = next_token
-                
+
             response = self.client.search_recent_tweets(**params)
             request_count += 1
-            
+
             if not response or not response.data:
                 break
-                
+
             all_tweets.extend(response.data)
             if response.includes and response.includes.get("users"):
                 all_users.extend(response.includes["users"])
-                
-            if hasattr(response, 'meta') and response.meta and response.meta.get('next_token'):
-                next_token = response.meta['next_token']
+
+            if hasattr(response, "meta") and response.meta and response.meta.get("next_token"):
+                next_token = response.meta["next_token"]
             else:
                 break
-        
+
         return PaginatedTwitterResponse(all_tweets, all_users, request_count)
 
     def get_user_timeline(self, username: str) -> list[Any]:

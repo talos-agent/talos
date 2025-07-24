@@ -4,7 +4,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 from talos.models.evaluation import EvaluationResult
-from talos.models.twitter import TwitterUser, TwitterPublicMetrics
+from talos.models.twitter import TwitterPublicMetrics, TwitterUser
 from talos.tools.twitter import TwitterTool
 from talos.tools.twitter_client import TwitterClient
 from talos.tools.twitter_evaluator import TwitterAccountEvaluator
@@ -58,9 +58,6 @@ class MockTwitterClient(TwitterClient):
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
         pass
-
-
-from talos.models.twitter import TwitterUser
 
 
 class MockTwitterAccountEvaluator(TwitterAccountEvaluator):

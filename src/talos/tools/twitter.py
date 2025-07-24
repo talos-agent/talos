@@ -118,13 +118,13 @@ class TwitterTool(BaseTool):
         """Gets the follower count for a user."""
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
-        return user.public_metrics.get('followers_count', 0)
+        return user.public_metrics.followers_count
 
     def get_following_count(self, username: str) -> int:
         """Gets the following count for a user."""
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
-        return user.public_metrics.get('following_count', 0)
+        return user.public_metrics.following_count
 
     def get_tweet_engagement(self, tweet_id: str) -> dict:
         """Gets the engagement for a tweet."""
@@ -141,17 +141,13 @@ class TwitterTool(BaseTool):
     def evaluate_crypto_influencer(self, username: str) -> dict:
         """Evaluates a Twitter account as a crypto influencer."""
         from .crypto_influencer_evaluator import CryptoInfluencerEvaluator
-        
+
         assert self.twitter_client is not None
         evaluator = CryptoInfluencerEvaluator(self.twitter_client)
         user = self.twitter_client.get_user(username)
         result = evaluator.evaluate(user)
-        
-        return {
-            "username": username,
-            "score": result.score,
-            "evaluation_data": result.additional_data
-        }
+
+        return {"username": username, "score": result.score, "evaluation_data": result.additional_data}
 
     def generate_persona_prompt(self, username: str) -> str:
         """Generates a prompt to describe the voice and style of a specific twitter user."""
