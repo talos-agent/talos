@@ -1,3 +1,5 @@
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, create_autospec
@@ -42,21 +44,22 @@ class TestAddMemoryToolIntegration(unittest.TestCase):
         mock_model = create_autospec(BaseChatModel)
         mock_model.with_structured_output.return_value = create_autospec(Runnable)
 
+        # Create a temporary directory
+        self.temp_dir = tempfile.mkdtemp()
+
         # Create a mock agent
         self.agent = Agent(
             model=mock_model,
             memory=Memory(
-                file_path=Path("test_memory.json"),
+                file_path=Path(self.temp_dir) / "test_memory.json",
                 embeddings_model=MockEmbeddings(),
             ),
         )
         AddMemoryTool.model_rebuild()
 
     def tearDown(self) -> None:
-        if Path("test_memory.json").exists():
-            Path("test_memory.json").unlink()
-        if Path("test_memory.index").exists():
-            Path("test_memory.index").unlink()
+        # Remove the temporary directory
+        shutil.rmtree(self.temp_dir)
 
     def test_run_integration(self):
         # Get the tool from the agent's tool manager
