@@ -25,24 +25,15 @@ def test_talos_sentiment_service_run():
         mock_tweet = MagicMock()
         mock_tweet.text = "This is a test tweet about Talos."
         mock_tweet.author_id = "user123"
-        mock_tweet.public_metrics = {
-            "like_count": 20,
-            "retweet_count": 10,
-            "reply_count": 5,
-            "quote_count": 3
-        }
-        mock_tweet.created_at = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-        
-        mock_user = {
-            "id": "user123",
-            "username": "test_user",
-            "public_metrics": {"followers_count": 100}
-        }
-        
+        mock_tweet.public_metrics = {"like_count": 20, "retweet_count": 10, "reply_count": 5, "quote_count": 3}
+        mock_tweet.created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+        mock_user = {"id": "user123", "username": "test_user", "public_metrics": {"followers_count": 100}}
+
         mock_response = MagicMock()
         mock_response.data = [mock_tweet]
         mock_response.includes = {"users": [mock_user]}
-        
+
         mock_twitter_client = mock_tweepy_client_class.return_value
         mock_twitter_client.search_tweets.return_value = mock_response
 
