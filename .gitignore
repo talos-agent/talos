@@ -145,3 +145,7 @@ cython_debug/
 
 # Talos keys
 .keys/
+
+# Test memory files
+test_memory.index
+test_memory.json
