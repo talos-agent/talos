@@ -29,9 +29,22 @@ class Supervisor(BaseModel, ABC):
     """
 
     @abstractmethod
-    def approve(self, action: str, args: dict) -> tuple[bool, str | None]:
+    def approve(self, action: str, args: dict[str, Any]) -> tuple[bool, str | None]:
         """
         Approves or denies an action.
+        """
+        pass
+
+
+class AsyncSupervisor(BaseModel, ABC):
+    """
+    An abstract base class for async supervisors.
+    """
+
+    @abstractmethod
+    async def approve_async(self, action: str, args: dict[str, Any]) -> tuple[bool, str | None]:
+        """
+        Approves or denies an action asynchronously.
         """
         pass
 
@@ -43,7 +56,7 @@ class RuleBasedSupervisor(Supervisor):
 
     rules: list[Rule]
 
-    def approve(self, action: str, args: dict) -> tuple[bool, str | None]:
+    def approve(self, action: str, args: dict[str, Any]) -> tuple[bool, str | None]:
         """
         Approves or denies an action based on the rules.
         """
