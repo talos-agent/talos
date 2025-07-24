@@ -9,6 +9,7 @@ from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 from talos.core.memory import Memory
+from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.supervisor import Supervisor
 from talos.prompts.prompt_manager import PromptManager
 from talos.tools.memory_tool import AddMemoryTool
@@ -35,6 +36,7 @@ class Agent(BaseModel):
     supervisor: Optional[Supervisor] = None
     is_main_agent: bool = False
     memory: Optional[Memory] = None
+    dataset_manager: Optional[DatasetManager] = None
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
@@ -84,7 +86,13 @@ class Agent(BaseModel):
         """
         A base method for adding context to the query.
         """
-        return {}
+        context = {}
+        
+        if self.dataset_manager:
+            relevant_documents = self.dataset_manager.search(query, k=5)
+            context["relevant_documents"] = relevant_documents
+            
+        return context
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
         if self.memory:

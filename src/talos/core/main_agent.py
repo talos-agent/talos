@@ -136,10 +136,16 @@ class MainAgent(Agent):
 
     def _build_context(self, query: str, **kwargs) -> dict:
         assert self.router is not None
+        
+        base_context = super()._build_context(query, **kwargs)
+        
         active_tickets = self.router.get_all_tickets()
         ticket_info = [f"- {ticket.ticket_id}: last updated at {ticket.updated_at}" for ticket in active_tickets]
-        return {
+        
+        main_agent_context = {
             "time": datetime.now().isoformat(),
             "available_services": ", ".join([service.name for service in self.router.services]),
             "active_tickets": " ".join(ticket_info),
         }
+        
+        return {**base_context, **main_agent_context}
