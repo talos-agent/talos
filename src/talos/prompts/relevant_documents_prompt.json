@@ -1,0 +1,6 @@
+{
+    "name": "relevant_documents_prompt",
+    "description": "Prompt template for injecting relevant documents from dataset search.",
+    "template": "\n\n## Relevant Documents\n\nThe following documents from your knowledge base are relevant to this query:\n\n{relevant_documents}\n\nUse this information to provide more accurate and informed responses.",
+    "input_variables": ["relevant_documents"]
+}
