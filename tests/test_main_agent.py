@@ -25,12 +25,15 @@ def test_main_agent_initialization(mock_model: BaseChatModel) -> None:
     with (
         patch("talos.core.main_agent.FilePromptManager") as mock_file_prompt_manager,
         patch("talos.core.main_agent.Hypervisor") as mock_hypervisor,
-        patch.dict("os.environ", {
-            "GITHUB_TOKEN": "test_token",
-            "GITHUB_API_TOKEN": "test_token", 
-            "OPENAI_API_KEY": "test_key",
-            "TWITTER_BEARER_TOKEN": "test_twitter_token",
-        }),
+        patch.dict(
+            "os.environ",
+            {
+                "GITHUB_TOKEN": "test_token",
+                "GITHUB_API_TOKEN": "test_token",
+                "OPENAI_API_KEY": "test_key",
+                "TWITTER_BEARER_TOKEN": "test_twitter_token",
+            },
+        ),
         patch("os.environ.get") as mock_os_get,
         patch("ssl.create_default_context", return_value=MagicMock()),
         patch("tweepy.Client"),

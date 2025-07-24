@@ -9,8 +9,8 @@ from textblob import TextBlob
 
 class TwitterConfig(BaseSettings):
     TWITTER_BEARER_TOKEN: Optional[str] = None
-    
-    @model_validator(mode='after')
+
+    @model_validator(mode="after")
     def validate_bearer_token(self):
         if not self.TWITTER_BEARER_TOKEN:
             raise ValueError("TWITTER_BEARER_TOKEN environment variable is required but not set")
@@ -53,7 +53,7 @@ class TwitterClient(ABC):
 
 class TweepyClient(TwitterClient):
     client: tweepy.Client
-    
+
     def __init__(self):
         config = TwitterConfig()
         self.client = tweepy.Client(bearer_token=config.TWITTER_BEARER_TOKEN)
