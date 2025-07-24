@@ -71,6 +71,8 @@ class Memory:
         self.memories.append(memory)
         if self.index is None:
             self.index = IndexFlatL2(len(embedding))
+        
+        assert self.index is not None
         self.index.add(np.array([embedding], dtype=np.float32))
         self._unsaved_count += 1
         
@@ -109,5 +111,5 @@ class Memory:
 
     def __del__(self):
         """Ensure data is saved when object is destroyed."""
-        if hasattr(self, '_unsaved_count') and self._unsaved_count > 0:
+        if hasattr(self, "_unsaved_count") and self._unsaved_count > 0:
             self.flush()
