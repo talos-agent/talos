@@ -62,15 +62,44 @@ class TweepyClient(TwitterClient):
         return self.client.get_user(username=username).data
 
     def search_tweets(self, query: str, start_time: Optional[str] = None) -> Any:
-        params = {
-            "query": query,
-            "tweet_fields": ["public_metrics", "created_at"],
-            "expansions": ["author_id"],
-            "user_fields": ["public_metrics"],
-        }
-        if start_time:
-            params["start_time"] = start_time
-        return self.client.search_recent_tweets(**params)
+        all_tweets: list[Any] = []
+        all_users: list[Any] = []
+        next_token = None
+        max_tweets = 500
+        
+        while len(all_tweets) < max_tweets:
+            params = {
+                "query": query,
+                "tweet_fields": ["public_metrics", "created_at"],
+                "expansions": ["author_id"],
+                "user_fields": ["public_metrics"],
+                "max_results": min(100, max_tweets - len(all_tweets)),
+            }
+            if start_time:
+                params["start_time"] = start_time
+            if next_token:
+                params["next_token"] = next_token
+                
+            response = self.client.search_recent_tweets(**params)
+            
+            if not response or not response.data:
+                break
+                
+            all_tweets.extend(response.data)
+            if response.includes and response.includes.get("users"):
+                all_users.extend(response.includes["users"])
+                
+            if hasattr(response, 'meta') and response.meta and response.meta.get('next_token'):
+                next_token = response.meta['next_token']
+            else:
+                break
+        
+        class MockResponse:
+            def __init__(self, data, includes):
+                self.data = data
+                self.includes = includes
+        
+        return MockResponse(all_tweets, {"users": all_users})
 
     def get_user_timeline(self, username: str) -> list[Any]:
         user = self.get_user(username)

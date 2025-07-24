@@ -1,5 +1,5 @@
 {
     "name": "talos_sentiment_summary",
-    "template": "Based on the following sentiment analysis results, please provide a summary of the overall sentiment. The summary should be a few sentences long and should capture the general feeling of the tweets.\n\nSentiment Analysis Results:\n{results}",
+    "template": "Analyze the sentiment of the following Twitter data and provide a comprehensive summary. Focus on the overall sentiment, key themes, influential voices, and engagement patterns. Consider both the content sentiment and the level of engagement as indicators of community interest and reaction.\n\nTwitter Analysis Data:\n{results}\n\nProvide a detailed analysis that captures:\n1. Overall sentiment (positive, negative, neutral)\n2. Key themes and topics discussed\n3. Notable high-engagement tweets and their sentiment\n4. Community reaction patterns\n5. Any emerging trends or shifts in sentiment\n\nBe specific and reference actual examples from the data where relevant.",
     "input_variables": ["results"]
 }

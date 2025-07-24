@@ -39,6 +39,9 @@ def get_query_sentiment(query: str, start_time: Optional[str] = None):
     """
     skill = TwitterSentimentSkill()
     response = skill.run(query=query, start_time=start_time)
+    if response.score is not None:
+        print(f"Sentiment Score: {response.score}/100")
+        print("=" * 50)
     print(response.answers[0])
 
 

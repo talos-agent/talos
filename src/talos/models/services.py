@@ -50,4 +50,4 @@ class TicketResult(BaseModel):
 
 class TwitterSentimentResponse(BaseModel):
     answers: list[str]
-    score: float | None = Field(default=None, description="The score of the response.")
+    score: float | None = Field(default=None, description="The sentiment score between 0-100.")
