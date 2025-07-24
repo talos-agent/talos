@@ -1,9 +1,12 @@
 from datetime import datetime, timezone
 from typing import Any, List
+import json
 
+from langchain_openai import ChatOpenAI
 from ..models.evaluation import EvaluationResult
 from .twitter_evaluator import TwitterAccountEvaluator
 from .twitter_client import TwitterClient
+from ..prompts.prompt_managers.file_prompt_manager import FilePromptManager
 
 
 class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
@@ -12,8 +15,15 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
     Extends the base TwitterAccountEvaluator with crypto-specific metrics.
     """
     
-    def __init__(self, twitter_client: TwitterClient):
+    def __init__(self, twitter_client: TwitterClient, llm: Any = None, prompt_manager: FilePromptManager | None = None):
         self.twitter_client = twitter_client
+        self.llm = llm or ChatOpenAI()
+        if prompt_manager is None:
+            import os
+            prompts_dir = os.path.join(os.path.dirname(__file__), "..", "prompts")
+            self.prompt_manager = FilePromptManager(prompts_dir)
+        else:
+            self.prompt_manager = prompt_manager
         self.crypto_keywords = [
             'bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'cryptocurrency', 
             'blockchain', 'defi', 'nft', 'web3', 'dao', 'degen', 'hodl',
@@ -78,7 +88,38 @@ class CryptoInfluencerEvaluator(TwitterAccountEvaluator):
         )
     
     def _calculate_crypto_relevance(self, tweets: List[Any]) -> int:
-        """Calculate how relevant the user's content is to crypto (0-100)"""
+        """Calculate how relevant the user's content is to crypto using LLM analysis (0-100)"""
+        if not tweets:
+            return 0
+        
+        tweets_text = "\n".join([f"- {tweet.text}" for tweet in tweets[:20]])
+        
+        try:
+            prompt = self.prompt_manager.get_prompt("crypto_relevance_evaluation_prompt")
+            if not prompt:
+                return self._fallback_keyword_analysis(tweets)
+            
+            formatted_prompt = prompt.format(tweets_text=tweets_text)
+            
+            response = self.llm.invoke(formatted_prompt)
+            
+            try:
+                content = response.content if isinstance(response.content, str) else str(response.content)
+                result = json.loads(content.strip())
+                crypto_focus = result.get("crypto_focus_score", 0)
+                meaningfulness = result.get("meaningfulness_score", 0)
+                
+                combined_score = int(crypto_focus * 0.7 + meaningfulness * 0.3)
+                return min(100, max(0, combined_score))
+                
+            except (json.JSONDecodeError, KeyError):
+                return self._fallback_keyword_analysis(tweets)
+                
+        except Exception:
+            return self._fallback_keyword_analysis(tweets)
+    
+    def _fallback_keyword_analysis(self, tweets: List[Any]) -> int:
+        """Fallback keyword-based crypto relevance analysis"""
         if not tweets:
             return 0
             
