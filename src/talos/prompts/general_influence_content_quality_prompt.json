@@ -1,0 +1,6 @@
+{
+  "name": "general_influence_content_quality_prompt",
+  "description": "A prompt to evaluate the content quality and originality of tweets for general influence assessment.",
+  "template": "Analyze the following tweets for content quality and originality. Provide scores from 0-100 for each metric.\n\nTweets to analyze:\n{tweets_text}\n\nEvaluate based on:\n1. Content Quality (0-100): Assess the thoughtfulness, coherence, and value of the content. Consider factors like:\n   - Depth of insights or information shared\n   - Clarity and articulation of ideas\n   - Educational or entertainment value\n   - Professional tone and language use\n\n2. Originality Score (0-100): Assess how original and unique the content is. Consider:\n   - Original thoughts vs. just sharing/retweeting others\n   - Unique perspectives or insights\n   - Creative or innovative content\n   - Personal voice and authenticity\n\nRespond with a JSON object containing:\n{\n  \"content_quality_score\": <0-100>,\n  \"originality_score\": <0-100>,\n  \"reasoning\": \"Brief explanation of the scores\"\n}",
+  "input_variables": ["tweets_text"]
+}

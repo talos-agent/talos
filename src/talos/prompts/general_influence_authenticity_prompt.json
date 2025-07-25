@@ -1,0 +1,6 @@
+{
+  "name": "general_influence_authenticity_prompt",
+  "description": "A prompt to analyze Twitter account authenticity and detect bot followers or artificial engagement.",
+  "template": "Analyze the following Twitter account data for authenticity indicators:\n\nAccount Details:\n- Username: {username}\n- Account Age: {account_age_days} days\n- Followers: {followers_count}\n- Following: {following_count}\n- Verified: {is_verified}\n\nRecent Tweets:\n{tweets_text}\n\nEngagement Patterns:\n{engagement_summary}\n\nBased on this data, assess the likelihood that this account uses artificial engagement, bot followers, or other inauthentic tactics. Consider:\n1. Posting frequency and timing patterns\n2. Content originality and diversity\n3. Engagement rate consistency\n4. Follower-to-following ratios\n5. Account completeness vs. age\n\nProvide your assessment as JSON:\n{\n  \"authenticity_score\": <0-100>,\n  \"bot_likelihood\": <\"low\"|\"medium\"|\"high\">,\n  \"suspicious_indicators\": [\"list of concerns\"],\n  \"authentic_indicators\": [\"list of positive signs\"]\n}",
+  "input_variables": ["username", "account_age_days", "followers_count", "following_count", "is_verified", "tweets_text", "engagement_summary"]
+}
