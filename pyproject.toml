@@ -23,6 +23,7 @@ dependencies = [
     "tweepy==4.16.0",
     "instructor==1.10.0",
     "google-api-python-client>=2.176.0",
+    "apscheduler==3.10.4",
 ]
 
 [build-system]
