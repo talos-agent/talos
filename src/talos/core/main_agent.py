@@ -99,7 +99,7 @@ class MainAgent(Agent):
     def _setup_job_scheduler(self) -> None:
         """Initialize the job scheduler and register any predefined scheduled jobs."""
         if not self.job_scheduler:
-            self.job_scheduler = JobScheduler(supervisor=self.supervisor)
+            self.job_scheduler = JobScheduler(supervisor=self.supervisor, timezone="UTC")
         
         for job in self.scheduled_jobs:
             self.job_scheduler.register_job(job)
