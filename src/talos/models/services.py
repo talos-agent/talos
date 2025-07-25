@@ -51,3 +51,11 @@ class TicketResult(BaseModel):
 class TwitterSentimentResponse(BaseModel):
     answers: list[str]
     score: float | None = Field(default=None, description="The sentiment score between 0-100.")
+
+
+class PRReviewResponse(BaseModel):
+    answers: list[str]
+    security_score: float | None = Field(default=None, description="Security assessment score 0-100")
+    quality_score: float | None = Field(default=None, description="Code quality score 0-100")
+    recommendation: str | None = Field(default=None, description="APPROVE, COMMENT, or REQUEST_CHANGES")
+    reasoning: str | None = Field(default=None, description="Detailed reasoning for the recommendation")

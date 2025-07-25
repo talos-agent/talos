@@ -17,6 +17,7 @@ class Router:
         self.skill_map = {skill.name: skill for skill in skills}
         self.keywords = {
             "github": ["github", "issue", "pull request", "pr", "code"],
+            "pr_review_skill": ["pr review", "pull request review", "code review", "review pr"],
             "proposals": ["proposal", "vote", "snapshot"],
             "twitter": ["twitter", "tweet", "x"],
             "twitter_influencer": [
