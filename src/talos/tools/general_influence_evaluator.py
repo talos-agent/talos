@@ -1,5 +1,4 @@
 import json
-import statistics
 from datetime import datetime, timezone
 from typing import Any, List
 
@@ -186,7 +185,7 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
         else:
             return 20
 
-    def _calculate_authenticity_score(self, user: Any, tweets: List[Any] = None) -> int:
+    def _calculate_authenticity_score(self, user: Any, tweets: List[Any] | None = None) -> int:
         """Calculate enhanced authenticity score with advanced bot detection (0-100)"""
         if tweets is None:
             tweets = []
@@ -238,7 +237,6 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
         if user.url:
             score += 5
         
-        followers = user.public_metrics.get("followers_count", 0)
         following = user.public_metrics.get("following_count", 0)
         
         if following > 50000:
@@ -318,7 +316,6 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
             elif uniqueness_ratio < 0.5:  # Low uniqueness (suspicious)
                 score -= 20
         
-        retweets = [t for t in tweets if t.text.startswith("RT @")]
         original_tweets = [t for t in tweets if not t.text.startswith("RT @")]
         
         if len(tweets) > 0:
@@ -369,7 +366,7 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
                 else:
                     timestamp = tweet.created_at
                 timestamps.append(timestamp)
-            except:
+            except (ValueError, AttributeError, TypeError):
                 continue
         
         if len(timestamps) < 2:
