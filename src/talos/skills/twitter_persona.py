@@ -4,7 +4,7 @@ from typing import Any
 from langchain_openai import ChatOpenAI
 from pydantic import ConfigDict, Field
 
-from talos.models.proposals import QueryResponse
+from talos.models.twitter import TwitterPersonaResponse
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.skills.base import Skill
@@ -23,13 +23,13 @@ class TwitterPersonaSkill(Skill):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     twitter_client: TwitterClient = Field(default_factory=TweepyClient)
     prompt_manager: PromptManager = Field(default_factory=lambda: FilePromptManager("src/talos/prompts"))
-    llm: Any = Field(default_factory=ChatOpenAI)
+    llm: Any = Field(default_factory=lambda: ChatOpenAI(model="gpt-4o"))
 
     @property
     def name(self) -> str:
         return "twitter_persona_skill"
 
-    def run(self, **kwargs: Any) -> QueryResponse:
+    def run(self, **kwargs: Any) -> TwitterPersonaResponse:
         username = kwargs.get("username")
         if not username:
             raise ValueError("Username must be provided.")
@@ -37,7 +37,11 @@ class TwitterPersonaSkill(Skill):
         user_mentions = self.twitter_client.get_user_mentions(username)
 
         if not user_timeline:
-            return QueryResponse(answers=[f"Could not find any tweets for user {username}"])
+            return TwitterPersonaResponse(
+                report=f"Could not find any tweets for user {username}",
+                topics=[],
+                style=[]
+            )
 
         tweets = ""
         for tweet in random.sample(user_timeline, min(len(user_timeline), 20)):
@@ -59,6 +63,7 @@ class TwitterPersonaSkill(Skill):
             raise ValueError("Could not find prompt 'twitter_persona_prompt'")
         formatted_prompt = prompt.format(username=username, tweets=tweets, replies=replies)
 
-        response = self.llm.invoke(formatted_prompt)
+        structured_llm = self.llm.with_structured_output(TwitterPersonaResponse)
+        response = structured_llm.invoke(formatted_prompt)
 
-        return QueryResponse(answers=[response.content])
+        return response

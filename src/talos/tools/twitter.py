@@ -153,7 +153,8 @@ class TwitterTool(BaseTool):
         """Generates a prompt to describe the voice and style of a specific twitter user."""
         assert self.twitter_client is not None
         persona_skill = TwitterPersonaSkill(twitter_client=self.twitter_client)
-        return persona_skill.run(username=username).answers[0]
+        response = persona_skill.run(username=username)
+        return response.report
 
     def _run(self, tool_name: str, **kwargs):
         if tool_name == "post_tweet":

@@ -41,11 +41,15 @@ def eval_proposal(
 @twitter_app.command()
 def get_user_prompt(username: str):
     """
-    Gets the general voice of a user as a prompt.
+    Gets the general voice of a user as a structured persona analysis.
     """
     skill = TwitterPersonaSkill()
     response = skill.run(username=username)
-    print(response.answers[0])
+    
+    print(f"=== Twitter Persona Analysis for @{username} ===\n")
+    print(f"Report:\n{response.report}\n")
+    print(f"Topics: {', '.join(response.topics)}\n")
+    print(f"Style: {', '.join(response.style)}")
 
 
 @twitter_app.command()
