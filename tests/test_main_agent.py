@@ -28,7 +28,6 @@ def test_main_agent_initialization(mock_model: BaseChatModel) -> None:
         patch.dict(
             "os.environ",
             {
-                "GITHUB_TOKEN": "test_token",
                 "GITHUB_API_TOKEN": "test_token",
                 "OPENAI_API_KEY": "test_key",
                 "TWITTER_BEARER_TOKEN": "test_twitter_token",
@@ -40,7 +39,6 @@ def test_main_agent_initialization(mock_model: BaseChatModel) -> None:
         patch("langchain_openai.ChatOpenAI"),
     ):
         mock_os_get.side_effect = lambda key, default=None: {
-            "GITHUB_TOKEN": "test_token",
             "GITHUB_API_TOKEN": "test_token",
             "OPENAI_API_KEY": "test_key",
             "TWITTER_BEARER_TOKEN": "test_twitter_token",

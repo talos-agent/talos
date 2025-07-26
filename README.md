@@ -88,7 +88,7 @@ To run the agent in daemon mode for continuous operation with scheduled jobs:
 
 ```bash
 export OPENAI_API_KEY="your-openai-api-key"
-export GITHUB_TOKEN="your-github-token"
+export GITHUB_API_TOKEN="your-github-token"
 export TWITTER_BEARER_TOKEN="your-twitter-bearer-token"
 export PINATA_API_KEY="your-pinata-api-key"
 export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
@@ -110,7 +110,7 @@ The daemon will run continuously, executing scheduled jobs and can be gracefully
    ```bash
    docker run -d \
      -e OPENAI_API_KEY="your-openai-api-key" \
-     -e GITHUB_TOKEN="your-github-token" \
+     -e GITHUB_API_TOKEN="your-github-token" \
      -e TWITTER_BEARER_TOKEN="your-twitter-bearer-token" \
      -e PINATA_API_KEY="your-pinata-api-key" \
      -e PINATA_SECRET_API_KEY="your-pinata-secret-api-key" \
@@ -133,7 +133,7 @@ The daemon will run continuously, executing scheduled jobs and can be gracefully
 1. Create a `.env` file with your API keys:
    ```bash
    OPENAI_API_KEY=your-openai-api-key
-   GITHUB_TOKEN=your-github-token
+   GITHUB_API_TOKEN=your-github-token
    TWITTER_BEARER_TOKEN=your-twitter-bearer-token
    PINATA_API_KEY=your-pinata-api-key
    PINATA_SECRET_API_KEY=your-pinata-secret-api-key
@@ -157,7 +157,7 @@ The daemon will run continuously, executing scheduled jobs and can be gracefully
 #### Required Environment Variables
 
 - `OPENAI_API_KEY`: Required for AI functionality
-- `GITHUB_TOKEN`: Required for GitHub operations
+- `GITHUB_API_TOKEN`: Required for GitHub operations
 - `TWITTER_BEARER_TOKEN`: Required for Twitter functionality
 - `PINATA_API_KEY`: Required for IPFS operations
 - `PINATA_SECRET_API_KEY`: Required for IPFS operations

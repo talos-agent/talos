@@ -4,13 +4,12 @@ from pydantic_settings import BaseSettings
 
 
 class GitHubSettings(BaseSettings):
-    GITHUB_TOKEN: Optional[str] = None
     GITHUB_API_TOKEN: Optional[str] = None
 
     @model_validator(mode="after")
     def validate_github_token(self):
-        if not self.GITHUB_TOKEN and not self.GITHUB_API_TOKEN:
-            raise ValueError("Either GITHUB_TOKEN or GITHUB_API_TOKEN environment variable is required but not set")
+        if not self.GITHUB_API_TOKEN:
+            raise ValueError("GITHUB_API_TOKEN environment variable is required but not set")
         return self
 
 

@@ -4,7 +4,7 @@ import subprocess
 # Set dummy environment variables
 env = os.environ.copy()
 env["OPENAI_API_KEY"] = "dummy"
-env["GITHUB_TOKEN"] = "dummy"
+env["GITHUB_API_TOKEN"] = "dummy"
 
 # Start the talos process
 process = subprocess.Popen(

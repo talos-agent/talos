@@ -12,7 +12,7 @@ class GithubTools(BaseModel):
     A collection of tools for interacting with the Github API.
     """
 
-    token: str | None = Field(default_factory=lambda: GitHubSettings().GITHUB_API_TOKEN or GitHubSettings().GITHUB_TOKEN)
+    token: str | None = Field(default_factory=lambda: GitHubSettings().GITHUB_API_TOKEN)
     _github: Github = PrivateAttr()
     _headers: dict[str, str] = PrivateAttr()
 

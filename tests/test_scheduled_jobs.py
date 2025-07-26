@@ -169,7 +169,7 @@ class TestMainAgentIntegration:
     def main_agent(self):
         """Create a MainAgent instance for testing."""
         with patch.dict('os.environ', {
-            'GITHUB_TOKEN': 'test_token',
+            'GITHUB_API_TOKEN': 'test_token',
             'TWITTER_BEARER_TOKEN': 'test_twitter_token',
             'OPENAI_API_KEY': 'test_openai_key'
         }):
@@ -216,7 +216,7 @@ class TestMainAgentIntegration:
         job = MockScheduledJob(name="predefined_job")
         
         with patch.dict('os.environ', {
-            'GITHUB_TOKEN': 'test_token',
+            'GITHUB_API_TOKEN': 'test_token',
             'TWITTER_BEARER_TOKEN': 'test_twitter_token',
             'OPENAI_API_KEY': 'test_openai_key'
         }):

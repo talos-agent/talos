@@ -59,9 +59,9 @@ class MainAgent(Agent):
 
     def _setup_router(self) -> None:
         github_settings = GitHubSettings()
-        github_token = github_settings.GITHUB_TOKEN or github_settings.GITHUB_API_TOKEN
+        github_token = github_settings.GITHUB_API_TOKEN
         if not github_token:
-            raise ValueError("GITHUB_TOKEN or GITHUB_API_TOKEN environment variable not set.")
+            raise ValueError("GITHUB_API_TOKEN environment variable not set.")
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
         services: list[Service] = []
