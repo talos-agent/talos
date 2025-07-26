@@ -19,9 +19,11 @@ from talos.services.abstract.service import Service
 from talos.skills.base import Skill
 from talos.skills.cryptography import CryptographySkill
 from talos.skills.proposals import ProposalsSkill
+from talos.skills.pr_review import PRReviewSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
 from talos.skills.twitter_influence import TwitterInfluenceSkill
 from talos.tools.tool_manager import ToolManager
+from talos.tools.github.tools import GithubTools
 from talos.tools.document_loader import DocumentLoaderTool, DatasetSearchTool
 from talos.data.dataset_manager import DatasetManager
 
@@ -67,6 +69,7 @@ class MainAgent(Agent):
             TwitterSentimentSkill(prompt_manager=self.prompt_manager),
             CryptographySkill(),
             TwitterInfluenceSkill(llm=self.model, prompt_manager=self.prompt_manager),
+            PRReviewSkill(llm=self.model, prompt_manager=self.prompt_manager, github_tools=GithubTools(token=github_token)),
         ]
         if not self.router:
             self.router = Router(services=services, skills=skills)
