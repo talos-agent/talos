@@ -25,6 +25,7 @@ from talos.skills.twitter_influence import TwitterInfluenceSkill
 from talos.tools.tool_manager import ToolManager
 from talos.tools.github.tools import GithubTools
 from talos.tools.document_loader import DocumentLoaderTool, DatasetSearchTool
+from talos.tools.arbiscan import ArbiScanSourceCodeTool, ArbiScanABITool
 from talos.data.dataset_manager import DatasetManager
 
 
@@ -98,6 +99,9 @@ class MainAgent(Agent):
         if self.dataset_manager:
             tool_manager.register_tool(DocumentLoaderTool(self.dataset_manager))
             tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
+        
+        tool_manager.register_tool(ArbiScanSourceCodeTool())
+        tool_manager.register_tool(ArbiScanABITool())
         
         self.tool_manager = tool_manager
 
