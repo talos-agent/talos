@@ -11,6 +11,7 @@ from langchain_openai import ChatOpenAI
 
 from talos.core.main_agent import MainAgent
 from talos.core.router import Router
+from talos.settings import OpenAISettings
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +25,7 @@ class TalosDaemon:
         self.shutdown_event = asyncio.Event()
         
     def _validate_environment(self) -> None:
-        if "OPENAI_API_KEY" not in os.environ:
-            raise ValueError("OPENAI_API_KEY environment variable not set.")
+        OpenAISettings()
         
         if not os.path.exists(self.prompts_dir):
             raise FileNotFoundError(f"Prompts directory not found at {self.prompts_dir}")

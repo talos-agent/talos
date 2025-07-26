@@ -1,9 +1,10 @@
-import os
 from typing import Any
 
 import requests
 from github import Auth, Github
 from pydantic import BaseModel, Field, PrivateAttr
+
+from ...settings import GitHubSettings
 
 
 class GithubTools(BaseModel):
@@ -11,7 +12,7 @@ class GithubTools(BaseModel):
     A collection of tools for interacting with the Github API.
     """
 
-    token: str | None = Field(default_factory=lambda: os.environ.get("GITHUB_API_TOKEN"))
+    token: str | None = Field(default_factory=lambda: GitHubSettings().GITHUB_API_TOKEN or GitHubSettings().GITHUB_TOKEN)
     _github: Github = PrivateAttr()
     _headers: dict[str, str] = PrivateAttr()
 

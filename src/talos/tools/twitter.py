@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 from typing import Any, Optional
 
@@ -8,6 +7,7 @@ from langchain.tools import BaseTool
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..models.evaluation import EvaluationResult
+from ..settings import PerspectiveSettings
 from ..skills.twitter_persona import TwitterPersonaSkill
 from .twitter_client import TweepyClient, TwitterClient
 from .twitter_evaluator import DefaultTwitterAccountEvaluator, TwitterAccountEvaluator
@@ -57,16 +57,19 @@ class TwitterTool(BaseTool):
 
     def _initialize_perspective_client(self) -> Optional[Any]:
         """Initializes the Perspective API client."""
-        api_key = os.environ.get("PERSPECTIVE_API_KEY")
-        if not api_key:
+        try:
+            settings = PerspectiveSettings()
+            if not settings.PERSPECTIVE_API_KEY:
+                return None
+            return discovery.build(
+                "commentanalyzer",
+                "v1alpha1",
+                developerKey=settings.PERSPECTIVE_API_KEY,
+                discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
+                static_discovery=False,
+            )
+        except ValueError:
             return None
-        return discovery.build(
-            "commentanalyzer",
-            "v1alpha1",
-            developerKey=api_key,
-            discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
-            static_discovery=False,
-        )
 
     def post_tweet(self, tweet: str) -> str:
         """Posts a tweet."""

@@ -1,11 +1,10 @@
-import os
-
 import tweepy
 from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
 
 from talos.core.agent import Agent
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+from talos.settings import TwitterOAuthSettings
 
 from .twitter import get_all_replies
 
@@ -17,13 +16,10 @@ def post_question():
     Posts a tweet to Twitter asking for crypto market sentiment.
     The tweet ID is saved to a file to be used by the analysis function.
     """
-    consumer_key = os.environ.get("TWITTER_CONSUMER_KEY")
-    consumer_secret = os.environ.get("TWITTER_CONSUMER_SECRET")
-    access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
-    access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
-
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
+    settings = TwitterOAuthSettings()
+    
+    auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 
     tweet = api.update_status("What is your current sentiment about crypto markets today and why?")
@@ -47,13 +43,10 @@ def analyze_and_post_sentiment():
     """
     Analyzes the replies to the tweet posted by post_question() and posts a sentiment analysis summary.
     """
-    consumer_key = os.environ.get("TWITTER_CONSUMER_KEY")
-    consumer_secret = os.environ.get("TWITTER_CONSUMER_SECRET")
-    access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
-    access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
+    settings = TwitterOAuthSettings()
 
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
+    auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 
     with open("tweet_id.txt", "r") as f:
