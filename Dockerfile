@@ -25,6 +25,13 @@ COPY --from=builder /app/pyproject.toml /app/pyproject.toml
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH="/app/src"
 
+# Required environment variables (must be provided at runtime):
+# - OPENAI_API_KEY: OpenAI API key for AI functionality
+# - GITHUB_TOKEN: GitHub token for repository operations
+# - TWITTER_BEARER_TOKEN: Twitter API bearer token for social media features
+# - PINATA_API_KEY: Pinata API key for IPFS operations
+# - PINATA_SECRET_API_KEY: Pinata secret key for IPFS operations
+
 USER talos
 
 EXPOSE 8000
