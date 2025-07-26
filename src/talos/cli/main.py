@@ -13,6 +13,7 @@ from talos.services.key_management import KeyManagement
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter_persona import TwitterPersonaSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
+from talos.cli.daemon import TalosDaemon
 
 app = typer.Typer(invoke_without_command=True)
 twitter_app = typer.Typer()
@@ -188,6 +189,25 @@ def decrypt(encrypted_data: str, key_dir: str = ".keys"):
 
     decoded_data = base64.b64decode(encrypted_data)
     print(km.decrypt(decoded_data))
+
+
+@app.command()
+def daemon(
+    prompts_dir: str = "src/talos/prompts",
+    model_name: str = "gpt-4",
+    temperature: float = 0.0,
+) -> None:
+    """
+    Run the Talos agent in daemon mode for continuous operation with scheduled jobs.
+    """
+    import asyncio
+    
+    daemon = TalosDaemon(
+        prompts_dir=prompts_dir,
+        model_name=model_name,
+        temperature=temperature
+    )
+    asyncio.run(daemon.run())
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  talos-agent:
+    build: .
+    container_name: talos-agent
+    restart: unless-stopped
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
+      - PINATA_API_KEY=${PINATA_API_KEY}
+      - PINATA_SECRET_API_KEY=${PINATA_SECRET_API_KEY}
+    volumes:
+      - talos_data:/app/data
+    networks:
+      - talos_network
+
+volumes:
+  talos_data:
+
+networks:
+  talos_network:
+    driver: bridge
