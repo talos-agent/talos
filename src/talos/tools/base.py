@@ -32,6 +32,28 @@ class Supervisor(ABC, Generic[T]):
         raise NotImplementedError
 
 
+class AsyncSupervisor(ABC, Generic[T]):
+    """
+    An async supervisor can be used to analyze a tool invocation and determine if it is
+    malicious or not. This is the async version of the Supervisor interface.
+    """
+
+    @abstractmethod
+    async def supervise_async(self, invocation: T) -> tuple[bool, str]:
+        """
+        Analyze the tool invocation and determine if it is malicious or not.
+
+        Args:
+            invocation: The tool invocation to analyze.
+
+        Returns:
+            A tuple of a boolean and a string. If the invocation is malicious,
+            the boolean is False and the string is an error message. Otherwise,
+            the boolean is True and the string is empty.
+        """
+        raise NotImplementedError
+
+
 class SupervisedTool(BaseTool):
     """
     A tool that has an optional supervisor. When a tool call is submitted, it
@@ -41,6 +63,7 @@ class SupervisedTool(BaseTool):
     """
 
     supervisor: Supervisor[Any] | None = Field(default=None)
+    async_supervisor: AsyncSupervisor[Any] | None = Field(default=None)
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
         if self.supervisor:
@@ -50,8 +73,12 @@ class SupervisedTool(BaseTool):
         return self._run_unsupervised(*args, **kwargs)
 
     async def _arun(self, *args: Any, **kwargs: Any) -> Any:
-        if self.supervisor:
-            # TODO: Add support for async supervisors.
+        if self.async_supervisor:
+            ok, message = await self.async_supervisor.supervise_async({"args": args, "kwargs": kwargs})
+            if not ok:
+                return message
+        elif self.supervisor:
+            # Fallback to sync supervisor for backward compatibility
             ok, message = self.supervisor.supervise({"args": args, "kwargs": kwargs})
             if not ok:
                 return message
