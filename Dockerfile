@@ -23,13 +23,7 @@ COPY --from=builder /app/src /app/src
 COPY --from=builder /app/pyproject.toml /app/pyproject.toml
 
 ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONPATH="/app/src:$PYTHONPATH"
-
-ENV OPENAI_API_KEY=""
-ENV GITHUB_TOKEN=""
-ENV TWITTER_BEARER_TOKEN=""
-ENV PINATA_API_KEY=""
-ENV PINATA_SECRET_API_KEY=""
+ENV PYTHONPATH="/app/src"
 
 USER talos
 
