@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
-from typing import List, Optional
+from typing import Optional
 
 import typer
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
 
 from talos.core.main_agent import MainAgent
@@ -120,18 +120,12 @@ def main(
 
     # Interactive mode
     print("Entering interactive mode. Type 'exit' to quit.")
-    history: List[BaseMessage] = []
     while True:
         try:
             user_input = input(">> ")
             if user_input.lower() == "exit":
                 break
-            result = main_agent.run(user_input, history=history)
-            history.append(HumanMessage(content=user_input))
-            if isinstance(result, AIMessage):
-                history.append(AIMessage(content=result.content))
-            else:
-                history.append(AIMessage(content=str(result)))
+            result = main_agent.run(user_input)
             if verbose:
                 print(result)
             else:
