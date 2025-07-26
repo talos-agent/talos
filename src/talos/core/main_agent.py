@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from datetime import datetime
 from typing import Any, Optional, List
 
@@ -8,6 +7,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import BaseTool, tool
 
 from talos.core.agent import Agent
+from talos.settings import GitHubSettings
 from talos.core.router import Router
 from talos.core.scheduled_job import ScheduledJob
 from talos.core.job_scheduler import JobScheduler
@@ -59,9 +59,10 @@ class MainAgent(Agent):
         self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
 
     def _setup_router(self) -> None:
-        github_token = os.environ.get("GITHUB_TOKEN")
+        github_settings = GitHubSettings()
+        github_token = github_settings.GITHUB_API_TOKEN
         if not github_token:
-            raise ValueError("GITHUB_TOKEN environment variable not set.")
+            raise ValueError("GITHUB_API_TOKEN environment variable not set.")
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
         services: list[Service] = []

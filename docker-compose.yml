@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
       - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
       - PINATA_API_KEY=${PINATA_API_KEY}
       - PINATA_SECRET_API_KEY=${PINATA_SECRET_API_KEY}

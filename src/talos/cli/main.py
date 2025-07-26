@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from talos.core.main_agent import MainAgent
 from talos.core.router import Router
 from talos.services.key_management import KeyManagement
+from talos.settings import OpenAISettings
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter_persona import TwitterPersonaSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
@@ -93,8 +94,7 @@ def main(
     if not os.path.exists(prompts_dir):
         raise FileNotFoundError(f"Prompts directory not found at {prompts_dir}")
 
-    if "OPENAI_API_KEY" not in os.environ:
-        raise ValueError("OPENAI_API_KEY environment variable not set.")
+    OpenAISettings()
 
     # Create the main agent
     model = ChatOpenAI(model=model_name, temperature=temperature)
