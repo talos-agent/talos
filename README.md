@@ -82,6 +82,96 @@ uv run talos
 
 You can then interact with the agent in a continuous conversation. To exit, type `exit`.
 
+### Daemon Mode
+
+To run the agent in daemon mode for continuous operation with scheduled jobs:
+
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+export GITHUB_TOKEN="your-github-token"
+export TWITTER_BEARER_TOKEN="your-twitter-bearer-token"
+export PINATA_API_KEY="your-pinata-api-key"
+export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
+uv run talos daemon
+```
+
+The daemon will run continuously, executing scheduled jobs and can be gracefully shutdown with SIGTERM or SIGINT.
+
+### Docker Usage
+
+#### Building and Running with Docker
+
+1. Build the Docker image:
+   ```bash
+   docker build -t talos-agent .
+   ```
+
+2. Run the container with environment variables:
+   ```bash
+   docker run -d \
+     -e OPENAI_API_KEY="your-openai-api-key" \
+     -e GITHUB_TOKEN="your-github-token" \
+     -e TWITTER_BEARER_TOKEN="your-twitter-bearer-token" \
+     -e PINATA_API_KEY="your-pinata-api-key" \
+     -e PINATA_SECRET_API_KEY="your-pinata-secret-api-key" \
+     --name talos-agent \
+     talos-agent
+   ```
+
+3. View logs:
+   ```bash
+   docker logs -f talos-agent
+   ```
+
+4. Graceful shutdown:
+   ```bash
+   docker stop talos-agent
+   ```
+
+#### Using Docker Compose
+
+1. Create a `.env` file with your API keys:
+   ```bash
+   OPENAI_API_KEY=your-openai-api-key
+   GITHUB_TOKEN=your-github-token
+   TWITTER_BEARER_TOKEN=your-twitter-bearer-token
+   PINATA_API_KEY=your-pinata-api-key
+   PINATA_SECRET_API_KEY=your-pinata-secret-api-key
+   ```
+
+2. Start the service:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. View logs:
+   ```bash
+   docker-compose logs -f
+   ```
+
+4. Stop the service:
+   ```bash
+   docker-compose down
+   ```
+
+#### Required Environment Variables
+
+- `OPENAI_API_KEY`: Required for AI functionality
+- `GITHUB_TOKEN`: Required for GitHub operations
+- `TWITTER_BEARER_TOKEN`: Required for Twitter functionality
+- `PINATA_API_KEY`: Required for IPFS operations
+- `PINATA_SECRET_API_KEY`: Required for IPFS operations
+
+#### Graceful Shutdown
+
+The Docker container supports graceful shutdown. When you run `docker stop`, it sends a SIGTERM signal to the process, which triggers:
+
+1. Stopping the job scheduler
+2. Completing any running jobs
+3. Clean shutdown of all services
+
+The container will wait up to 10 seconds for graceful shutdown before forcing termination.
+
 ### Proposal Evaluation Example
 
 To run the proposal evaluation example, run the following command:
