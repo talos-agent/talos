@@ -18,11 +18,13 @@ class DatabaseMemoryBackend:
         embeddings_model: Embeddings,
         session_id: Optional[str] = None,
         auto_save: bool = True,
+        verbose: bool = False,
     ):
         self.user_id = user_id
         self.embeddings_model = embeddings_model
         self.session_id = session_id or str(uuid.uuid4())
         self.auto_save = auto_save
+        self.verbose = verbose
         self._ensure_user_exists()
         self._ensure_conversation_exists()
     
@@ -81,6 +83,8 @@ class DatabaseMemoryBackend:
             )
             session.add(memory)
             session.commit()
+            if self.verbose:
+                print(f"\033[32m✓ Memory saved: {description}\033[0m")
     
     def search_memories(self, query: str, k: int = 5) -> List[MemoryRecord]:
         """Search memories using semantic similarity."""
@@ -105,7 +109,7 @@ class DatabaseMemoryBackend:
             similarities.sort(key=lambda x: x[0], reverse=True)
             top_memories = similarities[:k]
             
-            return [
+            results = [
                 MemoryRecord(
                     timestamp=memory.timestamp.timestamp(),
                     description=memory.description,
@@ -114,6 +118,9 @@ class DatabaseMemoryBackend:
                 )
                 for _, memory in top_memories
             ]
+            if self.verbose and results:
+                print(f"\033[34m🔍 Memory search: found {len(results)} relevant memories\033[0m")
+            return results
     
     def load_history(self) -> List[BaseMessage]:
         """Load conversation history from database."""

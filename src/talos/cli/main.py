@@ -114,6 +114,7 @@ def main_command(
         schema=None,
         user_id=user_id,
         use_database_memory=use_database,
+        verbose=verbose,
     )
     
     if not user_id and use_database:
