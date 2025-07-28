@@ -37,11 +37,10 @@ def test_memory_cli_functionality():
     print("=" * 50)
     
     temp_dir = tempfile.mkdtemp()
-    memory_file = Path(temp_dir) / "cli_test_memory.json"
     user_id = "cli-test-user"
     
     try:
-        print(f"Using memory file: {memory_file}")
+        print(f"Using temp directory: {temp_dir}")
         print(f"Using user ID: {user_id}")
         
         print("\n1. Testing CLI availability...")
@@ -53,8 +52,8 @@ def test_memory_cli_functionality():
             assert False, f"CLI failed: {stderr}"
         
         print("\n2. Testing initial memory state...")
-        cmd = f"uv run talos memory list --user-id {user_id} --memory-file {memory_file}"
-        returncode, stdout, stderr = run_cli_command(cmd)
+        cmd = f"uv run talos memory list --user-id {user_id}"
+        returncode, stdout, stderr = run_cli_command(cmd, timeout=30)
         if returncode == 0:
             print("✓ Memory list command works")
             print(f"Initial memories: {stdout.strip()}")
@@ -62,7 +61,7 @@ def test_memory_cli_functionality():
             print(f"✗ Memory list failed: {stderr}")
         
         print("\n3. Testing interactive conversation...")
-        cmd = f"uv run talos main --user-id {user_id} --memory-file {memory_file} --verbose"
+        cmd = f"uv run talos main --user-id {user_id} --verbose"
         input_text = "I like pizza\n"
         
         print(f"Sending input: '{input_text.strip()}'")
@@ -76,7 +75,7 @@ def test_memory_cli_functionality():
         print("\n4. Checking if memory was stored...")
         time.sleep(1)  # Give time for memory to be saved
         
-        cmd = f"uv run talos memory list --user-id {user_id} --memory-file {memory_file}"
+        cmd = f"uv run talos memory list --user-id {user_id}"
         returncode, stdout, stderr = run_cli_command(cmd)
         
         if returncode == 0:
@@ -91,7 +90,7 @@ def test_memory_cli_functionality():
             print(f"✗ Failed to list memories: {stderr}")
         
         print("\n5. Testing memory search...")
-        cmd = f"uv run talos memory search 'pizza' --user-id {user_id} --memory-file {memory_file}"
+        cmd = f"uv run talos memory search 'pizza' --user-id {user_id}"
         returncode, stdout, stderr = run_cli_command(cmd)
         
         if returncode == 0:
@@ -101,6 +100,7 @@ def test_memory_cli_functionality():
             print(f"✗ Memory search failed: {stderr}")
         
         print("\n6. Checking memory file contents...")
+        memory_file = Path("memory/memories.json")
         if memory_file.exists():
             try:
                 with open(memory_file, 'r') as f:
