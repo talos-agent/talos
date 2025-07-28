@@ -314,3 +314,16 @@ class DatabaseMemoryBackend:
             session.query(MemoryModel).delete()
             session.commit()
             return count
+
+    @staticmethod
+    def flush_user_memories(user_id: str) -> int:
+        """Delete all memories for a specific user from the database. Returns count of deleted memories."""
+        with get_session() as session:
+            user = session.query(User).filter(User.user_id == user_id).first()
+            if user is None:
+                return 0
+            
+            count = session.query(MemoryModel).filter(MemoryModel.user_id == user.id).count()
+            session.query(MemoryModel).filter(MemoryModel.user_id == user.id).delete()
+            session.commit()
+            return count

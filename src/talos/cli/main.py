@@ -581,6 +581,13 @@ def flush_memories(
                 else:
                     print("Operation cancelled.")
                 return
+            else:
+                deleted_count = DatabaseMemoryBackend.flush_user_memories(user_id)
+                if deleted_count > 0:
+                    print(f"Successfully deleted {deleted_count} memories for user '{user_id}' from the database.")
+                else:
+                    print(f"No memories found for user '{user_id}' or user does not exist.")
+                return
             
             memory = Memory(
                 embeddings_model=embeddings_model,
