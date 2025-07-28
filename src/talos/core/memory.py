@@ -127,6 +127,23 @@ class Memory:
             print(f"\033[34m🔍 Memory search: found {len(results)} relevant memories\033[0m")
         return results
 
+    def list_all(self, filter_user_id: Optional[str] = None) -> List[MemoryRecord]:
+        """List all memories, optionally filtered by user."""
+        if self._db_backend:
+            results = self._db_backend.list_all_memories(filter_user_id)
+            if self.verbose and results:
+                print(f"\033[34m📋 Listed {len(results)} memories\033[0m")
+            return results
+        
+        if filter_user_id and self.verbose:
+            print("\033[33m⚠️ User filtering not supported in file-based memory backend\033[0m")
+        
+        results = self.memories.copy()
+        results.sort(key=lambda x: x.timestamp, reverse=True)
+        if self.verbose and results:
+            print(f"\033[34m📋 Listed {len(results)} memories\033[0m")
+        return results
+
     def load_history(self) -> List[BaseMessage]:
         if self._db_backend:
             return self._db_backend.load_history()
