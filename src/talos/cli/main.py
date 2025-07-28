@@ -87,6 +87,8 @@ def main(
     model_name: str = "gpt-4",
     temperature: float = 0.0,
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
+    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
+    use_database: bool = typer.Option(False, "--use-database", help="Use database for conversation storage instead of files."),
 ) -> None:
     """
     The main entry point for the Talos agent.
@@ -95,6 +97,11 @@ def main(
         raise FileNotFoundError(f"Prompts directory not found at {prompts_dir}")
 
     OpenAISettings()
+    
+    if not user_id and use_database:
+        import uuid
+        user_id = str(uuid.uuid4())
+        print(f"Generated temporary user ID: {user_id}")
 
     # Create the main agent
     model = ChatOpenAI(model=model_name, temperature=temperature)
@@ -104,6 +111,8 @@ def main(
         model=model,
         router=router,
         schema=None,
+        user_id=user_id,
+        use_database_memory=use_database,
     )
 
     if query:
@@ -202,6 +211,47 @@ def daemon(
         temperature=temperature
     )
     asyncio.run(daemon.run())
+
+
+@app.command()
+def cleanup_users(
+    older_than_hours: int = typer.Option(24, "--older-than", help="Remove temporary users inactive for this many hours."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be deleted without actually deleting."),
+) -> None:
+    """
+    Clean up temporary users and their conversation data.
+    """
+    from talos.database.utils import cleanup_temporary_users, get_user_stats
+    
+    if dry_run:
+        stats = get_user_stats()
+        print("Current database stats:")
+        print(f"  Total users: {stats['total_users']}")
+        print(f"  Permanent users: {stats['permanent_users']}")
+        print(f"  Temporary users: {stats['temporary_users']}")
+        print(f"\nWould clean up temporary users inactive for {older_than_hours} hours.")
+        print("Use --no-dry-run to actually perform the cleanup.")
+    else:
+        count = cleanup_temporary_users(older_than_hours)
+        print(f"Cleaned up {count} temporary users and their conversation data.")
+
+
+@app.command()
+def db_stats() -> None:
+    """
+    Show database statistics.
+    """
+    from talos.database.utils import get_user_stats
+    
+    stats = get_user_stats()
+    print("Database Statistics:")
+    print(f"  Total users: {stats['total_users']}")
+    print(f"  Permanent users: {stats['permanent_users']}")
+    print(f"  Temporary users: {stats['temporary_users']}")
+    
+    if stats['total_users'] > 0:
+        temp_percentage = (stats['temporary_users'] / stats['total_users']) * 100
+        print(f"  Temporary user percentage: {temp_percentage:.1f}%")
 
 
 if __name__ == "__main__":

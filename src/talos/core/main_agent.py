@@ -47,6 +47,7 @@ class MainAgent(Agent):
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
         self._setup_prompt_manager()
+        self._setup_memory()
         self._setup_router()
         self._setup_hypervisor()
         self._setup_dataset_manager()
@@ -57,6 +58,38 @@ class MainAgent(Agent):
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
+
+    def _setup_memory(self) -> None:
+        """Initialize memory with database or file backend based on configuration."""
+        if not self.memory:
+            from talos.core.memory import Memory
+            from langchain_openai import OpenAIEmbeddings
+            
+            embeddings_model = OpenAIEmbeddings()
+            
+            if self.use_database_memory and self.user_id:
+                from talos.database.session import init_database
+                init_database()
+                
+                self.memory = Memory(
+                    embeddings_model=embeddings_model,
+                    user_id=self.user_id,
+                    session_id=self.session_id,
+                    use_database=True,
+                    auto_save=True
+                )
+            else:
+                from pathlib import Path
+                memory_dir = Path("memory")
+                memory_dir.mkdir(exist_ok=True)
+                
+                self.memory = Memory(
+                    file_path=memory_dir / "memories.json",
+                    embeddings_model=embeddings_model,
+                    history_file_path=memory_dir / "history.json",
+                    use_database=False,
+                    auto_save=True
+                )
 
     def _setup_router(self) -> None:
         github_settings = GitHubSettings()
