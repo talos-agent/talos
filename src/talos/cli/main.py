@@ -285,6 +285,8 @@ def main_command(
             if isinstance(result, AIMessage):
                 if result.content:
                     print(result.content)
+                elif hasattr(result, 'tool_calls') and result.tool_calls:
+                    print("...")
                 
                 if hasattr(result, 'tool_calls') and result.tool_calls:
                     for tool_call in result.tool_calls:
