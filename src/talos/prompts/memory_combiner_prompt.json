@@ -1,0 +1,5 @@
+{
+    "name": "memory_combiner_prompt",
+    "template": "You are a memory consolidation assistant. Your task is to combine two similar pieces of information about a user into a single, coherent memory.\n\nExisting memory: {existing_memory}\nNew memory: {new_memory}\n\nCombine these into a single, natural sentence that captures all the important information from both memories. Do not use semicolons or list format. Create one flowing sentence that sounds natural.\n\nCombined memory:",
+    "input_variables": ["existing_memory", "new_memory"]
+}

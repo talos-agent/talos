@@ -293,13 +293,15 @@ class DatabaseMemoryBackend:
             if self.verbose:
                 print(f"\033[33m⚡ Memory updated (duplicate): {new_description}\033[0m")
         else:
-            combined_description = f"{existing_memory.description}; {new_description}"
+            from ..utils.memory_combiner import MemoryCombiner
+            combiner = MemoryCombiner(verbose=self.verbose)
+            combined_description = combiner.combine_memories(existing_memory.description, new_description)
             existing_memory.description = combined_description
             if existing_memory.memory_metadata is None:
                 existing_memory.memory_metadata = {}
             existing_memory.memory_metadata.update(new_metadata)
             existing_memory.timestamp = datetime.now()
             if self.verbose:
-                print(f"\033[33m⚡ Memory merged (similar): {combined_description}\033[0m")
+                print(f"\033[33m⚡ Memory merged (LLM): {combined_description}\033[0m")
         
         session.commit()
