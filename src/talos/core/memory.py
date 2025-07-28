@@ -83,8 +83,6 @@ class Memory:
 
     def add_memory(self, description: str, metadata: Optional[dict] = None):
         if self._db_backend:
-            if self.verbose:
-                print(f"\033[32m✓ Memory saved: {description}\033[0m")
             self._db_backend.add_memory(description, metadata)
             return
         
@@ -114,8 +112,6 @@ class Memory:
     def search(self, query: str, k: int = 5) -> List[MemoryRecord]:
         if self._db_backend:
             results = self._db_backend.search_memories(query, k)
-            if self.verbose and results:
-                print(f"\033[34m🔍 Memory search: found {len(results)} relevant memories\033[0m")
             return results
         
         if not self.index or not self.memories or not self.embeddings_model:

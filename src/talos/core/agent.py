@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
@@ -156,5 +156,40 @@ class Agent(BaseModel):
             return modelled_result
         if isinstance(result, AIMessage):
             self.history.append(result)
+            
+            if hasattr(result, 'tool_calls') and result.tool_calls:
+                tools_by_name = {tool.name: tool for tool in self.tool_manager.get_all_tools()}
+                
+                for tool_call in result.tool_calls:
+                    tool_name = tool_call['name']
+                    tool_args = tool_call['args']
+                    tool_call_id = tool_call['id']
+                    
+                    if tool_name in tools_by_name:
+                        try:
+                            tool_result = tools_by_name[tool_name].invoke(tool_args)
+                            
+                            tool_message = ToolMessage(
+                                content=str(tool_result),
+                                tool_call_id=tool_call_id
+                            )
+                            self.history.append(tool_message)
+                            
+                        except Exception as e:
+                            error_msg = f"Error executing tool {tool_name}: {str(e)}"
+                            tool_message = ToolMessage(
+                                content=error_msg,
+                                tool_call_id=tool_call_id
+                            )
+                            self.history.append(tool_message)
+                
+                chain = self._create_chain()
+                context = self._build_context("", **{})
+                final_result = chain.invoke({"messages": self.history, **context})
+                
+                if isinstance(final_result, AIMessage):
+                    self.history.append(final_result)
+                    return final_result
+            
             return result
         raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
