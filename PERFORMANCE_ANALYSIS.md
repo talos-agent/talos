@@ -129,6 +129,14 @@ for skill in self.router.skills:
 - Added destructor to ensure data persistence
 - Maintains backward compatibility
 
+✅ **GitHub API Repository Caching**: Implemented TTL-based repository caching
+- Added `TTLCache` with configurable cache size (default: 20) and TTL (default: 5 minutes)
+- Created `_get_cached_repo()` method to handle cache logic
+- Updated all 15+ methods to use cached repository objects instead of repeated API calls
+- Added cache management methods: `get_cache_info()` and `clear_cache()`
+- Comprehensive test coverage for cache behavior including TTL expiration and LRU eviction
+- Maintains full backward compatibility with existing API
+
 ## Recommendations
 
 1. Monitor memory usage patterns to optimize batch sizes
