@@ -1,4 +1,5 @@
 from typing import Any
+import time
 
 import requests
 from github import Auth, Github
@@ -15,6 +16,8 @@ class GithubTools(BaseModel):
     token: str | None = Field(default_factory=lambda: GitHubSettings().GITHUB_API_TOKEN)
     _github: Github = PrivateAttr()
     _headers: dict[str, str] = PrivateAttr()
+    _repo_cache: dict[str, tuple[Any, float]] = PrivateAttr(default_factory=dict)
+    _cache_ttl: int = PrivateAttr(default=300)
 
     def model_post_init(self, __context: Any) -> None:
         if not self.token:
@@ -22,11 +25,24 @@ class GithubTools(BaseModel):
         self._github = Github(auth=Auth.Token(self.token))
         self._headers = {"Authorization": f"token {self.token}"}
 
+    def _get_repo_cached(self, repo_key: str):
+        """Get repository with caching to avoid repeated API calls."""
+        current_time = time.time()
+        
+        if repo_key in self._repo_cache:
+            repo, cached_time = self._repo_cache[repo_key]
+            if current_time - cached_time < self._cache_ttl:
+                return repo
+        
+        repo = self._github.get_repo(repo_key)
+        self._repo_cache[repo_key] = (repo, current_time)
+        return repo
+
     def get_open_issues(self, user: str, project: str) -> list[dict[str, Any]]:
         """
         Gets all open issues for a given repository.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         return [
             {"number": issue.number, "title": issue.title, "url": issue.html_url}
             for issue in repo.get_issues(state="open")
@@ -38,14 +54,14 @@ class GithubTools(BaseModel):
 
         :param state: Can be one of 'open', 'closed', or 'all'.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         return [{"number": pr.number, "title": pr.title, "url": pr.html_url} for pr in repo.get_pulls(state=state)]
 
     def get_issue_comments(self, user: str, project: str, issue_number: int) -> list[dict[str, Any]]:
         """
         Gets all comments for a given issue.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         issue = repo.get_issue(number=issue_number)
         comments = []
         for comment in issue.get_comments():
@@ -62,7 +78,7 @@ class GithubTools(BaseModel):
         """
         Gets all comments for a given pull request.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(pr_number)
         comments = []
         for comment in pr.get_issue_comments():
@@ -78,7 +94,7 @@ class GithubTools(BaseModel):
         """
         Replies to a given issue.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         issue = repo.get_issue(number=issue_number)
         issue.create_comment(comment)
 
@@ -86,7 +102,7 @@ class GithubTools(BaseModel):
         """
         Gets all files for a given pull request.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         return [file.filename for file in pr.get_files()]
 
@@ -94,7 +110,7 @@ class GithubTools(BaseModel):
         """
         Gets the diff for a given pull request.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         response = requests.get(pr.patch_url, headers=self._headers)
         response.raise_for_status()
@@ -104,7 +120,7 @@ class GithubTools(BaseModel):
         """
         Gets the project structure for a given repository.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         contents = repo.get_contents(path)
         if isinstance(contents, list):
             return [content.path for content in contents]
@@ -114,7 +130,7 @@ class GithubTools(BaseModel):
         """
         Gets the content of a file.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         content = repo.get_contents(filepath)
         if isinstance(content, list):
             raise ValueError("Path is a directory, not a file.")
@@ -124,7 +140,7 @@ class GithubTools(BaseModel):
         """
         Merges a pull request.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.merge()
 
@@ -132,7 +148,7 @@ class GithubTools(BaseModel):
         """
         Reviews a pull request.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.create_review(body=feedback, event="COMMENT")
 
@@ -140,7 +156,7 @@ class GithubTools(BaseModel):
         """
         Comments on a pull request.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.create_issue_comment(comment)
 
@@ -148,7 +164,7 @@ class GithubTools(BaseModel):
         """
         Approves a pull request.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
         pr.create_review(event="APPROVE")
 
@@ -156,6 +172,6 @@ class GithubTools(BaseModel):
         """
         Creates a new issue.
         """
-        repo = self._github.get_repo(f"{user}/{project}")
+        repo = self._get_repo_cached(f"{user}/{project}")
         issue = repo.create_issue(title=title, body=body)
         return {"number": issue.number, "title": issue.title, "url": issue.html_url}
