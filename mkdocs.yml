@@ -1,0 +1,100 @@
+site_name: Talos Documentation
+site_description: AI Protocol Owner - Autonomous Treasury Management and Governance
+site_url: https://talos-agent.github.io/talos/
+repo_url: https://github.com/talos-agent/talos
+repo_name: talos-agent/talos
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Overview: getting-started/overview.md
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+  - Architecture:
+    - Core Components: architecture/components.md
+    - Agent System: architecture/agents.md
+    - Hypervisor: architecture/hypervisor.md
+    - Skills & Services: architecture/skills-services.md
+  - CLI Reference:
+    - Overview: cli/overview.md
+    - Interactive Mode: cli/interactive.md
+    - GitHub Commands: cli/github.md
+    - Twitter Commands: cli/twitter.md
+    - Cryptography: cli/crypto.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Code Style: development/code-style.md
+    - Performance: development/performance.md
+    - Testing: development/testing.md
+  - Philosophy:
+    - Vision: philosophy/vision.md
+    - Roadmap: philosophy/roadmap.md
+  - API Reference:
+    - Core: api/core.md
+    - Services: api/services.md
+    - Tools: api/tools.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/talos-agent/talos
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/talos_protocol
+
+copyright: Copyright &copy; 2024 Talos Protocol
