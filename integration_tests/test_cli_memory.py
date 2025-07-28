@@ -21,7 +21,7 @@ def run_cli_command(command, input_text=None, timeout=30):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            cwd="/home/ubuntu/repos/talos"
+            cwd="."
         )
         
         stdout, stderr = process.communicate(input=input_text, timeout=timeout)
