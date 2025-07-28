@@ -35,6 +35,7 @@ class Router:
                 "social influence",
                 "twitter credibility",
             ],
+            "devin": ["devin", "task", "tasks", "session", "sessions", "ai agent", "devin ai"],
         }
 
     def route(self, query: str) -> Service | Skill | None:
