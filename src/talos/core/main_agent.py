@@ -112,6 +112,15 @@ class MainAgent(Agent):
         ]
         
         try:
+            from talos.services.implementations.devin import DevinService
+            import os
+            devin_api_key = os.getenv("DEVIN_API_KEY")
+            if devin_api_key:
+                services.append(DevinService(api_key=devin_api_key))
+        except (ImportError, ValueError):
+            pass  # Devin API key not available, skip Devin service
+        
+        try:
             github_settings = GitHubSettings()
             github_token = github_settings.GITHUB_API_TOKEN
             if github_token:
