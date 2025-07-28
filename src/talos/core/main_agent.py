@@ -67,7 +67,7 @@ class MainAgent(Agent):
             
             embeddings_model = OpenAIEmbeddings()
             
-            if self.use_database_memory and self.user_id:
+            if self.use_database_memory:
                 from talos.database.session import init_database
                 init_database()
                 

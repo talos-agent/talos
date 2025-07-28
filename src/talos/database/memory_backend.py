@@ -45,6 +45,9 @@ class DatabaseMemoryBackend:
         """Ensure conversation exists in database, create if not."""
         with get_session() as session:
             user = session.query(User).filter(User.user_id == self.user_id).first()
+            if user is None:
+                raise ValueError(f"User {self.user_id} not found")
+                
             conversation = session.query(ConversationHistory).filter(
                 ConversationHistory.user_id == user.id,
                 ConversationHistory.session_id == self.session_id
@@ -66,10 +69,13 @@ class DatabaseMemoryBackend:
         
         with get_session() as session:
             user = session.query(User).filter(User.user_id == self.user_id).first()
+            if user is None:
+                raise ValueError(f"User {self.user_id} not found")
+                
             memory = MemoryModel(
                 user_id=user.id,
                 description=description,
-                metadata=metadata or {},
+                memory_metadata=metadata or {},
                 embedding=embedding,
                 timestamp=datetime.now()
             )
@@ -82,6 +88,9 @@ class DatabaseMemoryBackend:
         
         with get_session() as session:
             user = session.query(User).filter(User.user_id == self.user_id).first()
+            if user is None:
+                raise ValueError(f"User {self.user_id} not found")
+                
             memories = session.query(MemoryModel).filter(MemoryModel.user_id == user.id).all()
             
             if not memories:
@@ -100,7 +109,7 @@ class DatabaseMemoryBackend:
                 MemoryRecord(
                     timestamp=memory.timestamp.timestamp(),
                     description=memory.description,
-                    metadata=memory.metadata or {},
+                    metadata=memory.memory_metadata or {},
                     embedding=memory.embedding
                 )
                 for _, memory in top_memories
@@ -110,6 +119,9 @@ class DatabaseMemoryBackend:
         """Load conversation history from database."""
         with get_session() as session:
             user = session.query(User).filter(User.user_id == self.user_id).first()
+            if user is None:
+                raise ValueError(f"User {self.user_id} not found")
+                
             conversation = session.query(ConversationHistory).filter(
                 ConversationHistory.user_id == user.id,
                 ConversationHistory.session_id == self.session_id
@@ -122,7 +134,7 @@ class DatabaseMemoryBackend:
                 Message.conversation_id == conversation.id
             ).order_by(Message.timestamp).all()
             
-            result = []
+            result: List[BaseMessage] = []
             for msg in messages:
                 if msg.role == "human":
                     result.append(HumanMessage(content=msg.content))
@@ -137,6 +149,9 @@ class DatabaseMemoryBackend:
         """Save conversation history to database."""
         with get_session() as session:
             user = session.query(User).filter(User.user_id == self.user_id).first()
+            if user is None:
+                raise ValueError(f"User {self.user_id} not found")
+                
             conversation = session.query(ConversationHistory).filter(
                 ConversationHistory.user_id == user.id,
                 ConversationHistory.session_id == self.session_id
@@ -163,7 +178,7 @@ class DatabaseMemoryBackend:
                     conversation_id=conversation.id,
                     role=role,
                     content=msg.content,
-                    metadata={},
+                    message_metadata={},
                     timestamp=datetime.now()
                 )
                 session.add(db_message)
@@ -174,7 +189,7 @@ class DatabaseMemoryBackend:
         """Get recent conversation history for the user."""
         with get_session() as session:
             user = session.query(User).filter(User.user_id == self.user_id).first()
-            if not user:
+            if user is None:
                 return []
             
             conversations = session.query(ConversationHistory).filter(

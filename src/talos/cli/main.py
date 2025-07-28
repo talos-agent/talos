@@ -88,7 +88,7 @@ def main(
     temperature: float = 0.0,
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
-    use_database: bool = typer.Option(False, "--use-database", help="Use database for conversation storage instead of files."),
+    use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
 ) -> None:
     """
     The main entry point for the Talos agent.
@@ -98,7 +98,7 @@ def main(
 
     OpenAISettings()
     
-    if not user_id and use_database:
+    if not user_id:
         import uuid
         user_id = str(uuid.uuid4())
         print(f"Generated temporary user ID: {user_id}")

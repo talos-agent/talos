@@ -47,4 +47,5 @@ def get_session() -> Session:
     if _SessionLocal is None:
         init_database()
     
+    assert _SessionLocal is not None
     return _SessionLocal()
