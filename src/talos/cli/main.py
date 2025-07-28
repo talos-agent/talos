@@ -283,12 +283,11 @@ def main_command(
                 break
             result = main_agent.run(user_input)
             if isinstance(result, AIMessage):
-                if result.content is not None and str(result.content).strip():
+                has_tool_calls = hasattr(result, 'tool_calls') and result.tool_calls
+                if result.content is not None and str(result.content).strip() and not has_tool_calls:
                     print(result.content)
-                elif hasattr(result, 'tool_calls') and result.tool_calls:
-                    print("...")
                 
-                if hasattr(result, 'tool_calls') and result.tool_calls:
+                if has_tool_calls:
                     tool_results = []
                     for tool_call in result.tool_calls:
                         try:
@@ -303,20 +302,19 @@ def main_command(
                                 print(f"❌ Tool execution error for '{tool_call['name']}': {e}")
                     
                     if tool_results:
-                        tools_summary = ", ".join([tr.split(":")[0] for tr in tool_results])
-                        follow_up_prompt = f"I just executed these tools: {tools_summary}. Please provide a brief, friendly response to acknowledge these actions to the user."
+                        follow_up_prompt = f"The user just said: '{user_input}'. Please provide a brief, natural conversational response to what they said, as if you're having a normal conversation. Don't mention tools or memory - just respond naturally to their message."
                         
                         try:
                             from langchain_core.messages import SystemMessage, HumanMessage
                             follow_up_messages = [
-                                SystemMessage(content="You are a helpful AI assistant. Provide brief, friendly responses."),
+                                SystemMessage(content="You are a helpful AI assistant having a natural conversation. Respond naturally to what the user said without mentioning any technical operations."),
                                 HumanMessage(content=follow_up_prompt)
                             ]
                             follow_up_response = main_agent.model.invoke(follow_up_messages)
                             if hasattr(follow_up_response, 'content') and follow_up_response.content:
                                 print(follow_up_response.content)
                         except Exception:
-                            print(f"I've executed {tools_summary} for you.")
+                            print("Nice to meet you!")
             else:
                 print(result)
         except KeyboardInterrupt:
