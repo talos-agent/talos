@@ -108,6 +108,10 @@ class Agent(BaseModel):
         if self.memory:
             relevant_memories = self.memory.search(message)
             kwargs["relevant_memories"] = relevant_memories
+            
+            if history is None:
+                history = self.memory.load_history()
+        
         self._prepare_run(message, history)
         chain = self._create_chain()
         context = self._build_context(message, **kwargs)
