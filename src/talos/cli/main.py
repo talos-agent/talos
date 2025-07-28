@@ -283,8 +283,10 @@ def main_command(
                 break
             result = main_agent.run(user_input)
             if isinstance(result, AIMessage):
-                if result.content:
+                if result.content is not None and str(result.content).strip():
                     print(result.content)
+                elif hasattr(result, 'tool_calls') and result.tool_calls:
+                    print("...")
                 
                 if hasattr(result, 'tool_calls') and result.tool_calls:
                     for tool_call in result.tool_calls:
