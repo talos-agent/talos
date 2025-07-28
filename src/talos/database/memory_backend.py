@@ -205,6 +205,32 @@ class DatabaseMemoryBackend:
             
             return conversations
     
+    def list_all_memories(self, filter_user_id: Optional[str] = None) -> List[MemoryRecord]:
+        """List all memories for the user, optionally filtered by a different user."""
+        with get_session() as session:
+            if filter_user_id:
+                user = session.query(User).filter(User.user_id == filter_user_id).first()
+            else:
+                user = session.query(User).filter(User.user_id == self.user_id).first()
+                
+            if user is None:
+                return []
+                
+            memories = session.query(MemoryModel).filter(MemoryModel.user_id == user.id).order_by(MemoryModel.timestamp.desc()).all()
+            
+            results = [
+                MemoryRecord(
+                    timestamp=memory.timestamp.timestamp(),
+                    description=memory.description,
+                    metadata=memory.memory_metadata or {},
+                    embedding=memory.embedding
+                )
+                for memory in memories
+            ]
+            if self.verbose and results:
+                print(f"\033[34m📋 Listed {len(results)} memories\033[0m")
+            return results
+
     def cleanup_temporary_users(self, older_than_hours: int = 24) -> int:
         """Clean up temporary users and their data older than specified hours."""
         cutoff_time = datetime.now() - timedelta(hours=older_than_hours)
