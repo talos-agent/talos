@@ -554,5 +554,65 @@ def search_memories(
         raise typer.Exit(1)
 
 
+@memory_app.command("flush")
+def flush_memories(
+    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User ID for database backend. If not provided with database backend, flushes ALL memories."),
+    use_database: bool = typer.Option(True, "--use-database", help="Use database backend instead of files"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """Flush unsaved memories to disk. If no user_id provided with database backend, flushes ALL memories after confirmation."""
+    try:
+        from talos.core.memory import Memory
+        from langchain_openai import OpenAIEmbeddings
+        from talos.settings import OpenAISettings
+        
+        OpenAISettings()
+        embeddings_model = OpenAIEmbeddings()
+        
+        if use_database:
+            from talos.database.session import init_database
+            from talos.database.memory_backend import DatabaseMemoryBackend
+            init_database()
+            
+            if not user_id:
+                if typer.confirm("⚠️  No user ID provided. This will DELETE ALL memories from the database. Are you sure?"):
+                    deleted_count = DatabaseMemoryBackend.flush_all_memories()
+                    print(f"Successfully deleted {deleted_count} memories from the database.")
+                else:
+                    print("Operation cancelled.")
+                return
+            
+            memory = Memory(
+                embeddings_model=embeddings_model,
+                user_id=user_id,
+                session_id="cli-session",
+                use_database=True,
+                verbose=verbose
+            )
+        else:
+            from pathlib import Path
+            memory_dir = Path("memory")
+            memory_dir.mkdir(exist_ok=True)
+            
+            memory = Memory(
+                file_path=memory_dir / "memories.json",
+                embeddings_model=embeddings_model,
+                history_file_path=memory_dir / "history.json",
+                use_database=False,
+                verbose=verbose
+            )
+        
+        if hasattr(memory, '_unsaved_count') and memory._unsaved_count > 0:
+            unsaved_count = memory._unsaved_count
+            memory.flush()
+            print(f"Successfully flushed {unsaved_count} unsaved memories to disk.")
+        else:
+            print("No unsaved memories to flush.")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        raise typer.Exit(1)
+
+
 if __name__ == "__main__":
     app()

@@ -254,7 +254,7 @@ class DatabaseMemoryBackend:
             
             session.commit()
             return count
-    
+
     def _find_similar_memory(self, session, user_id: int, embedding: List[float], description: str) -> Optional[MemoryModel]:
         """Find a similar memory based on embedding similarity and description."""
         memories = session.query(MemoryModel).filter(MemoryModel.user_id == user_id).all()
@@ -305,3 +305,12 @@ class DatabaseMemoryBackend:
                 print(f"\033[33m⚡ Memory merged (LLM): {combined_description}\033[0m")
         
         session.commit()
+
+    @staticmethod
+    def flush_all_memories() -> int:
+        """Delete all memories from the database. Returns count of deleted memories."""
+        with get_session() as session:
+            count = session.query(MemoryModel).count()
+            session.query(MemoryModel).delete()
+            session.commit()
+            return count
