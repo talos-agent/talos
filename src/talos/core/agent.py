@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
@@ -156,5 +156,38 @@ class Agent(BaseModel):
             return modelled_result
         if isinstance(result, AIMessage):
             self.history.append(result)
+            if hasattr(result, 'tool_calls') and result.tool_calls:
+                follow_up_response = self._generate_tool_follow_up_response(result)
+                if follow_up_response:
+                    self.history.append(follow_up_response)
+                    return follow_up_response
             return result
         raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
+
+    def _generate_tool_follow_up_response(self, tool_result: AIMessage) -> Optional[AIMessage]:
+        """Generate a conversational response after tool execution."""
+        if not hasattr(tool_result, 'tool_calls') or not tool_result.tool_calls:
+            return None
+        
+        tool_summary = []
+        for tool_call in tool_result.tool_calls:
+            tool_name = tool_call.get('name', 'unknown')
+            tool_summary.append(f"executed {tool_name}")
+        
+        tools_executed = ", ".join(tool_summary)
+        follow_up_prompt = f"I just {tools_executed}. Please provide a brief, friendly response to acknowledge this action to the user."
+        
+        if isinstance(self.model, BaseChatModel):
+            messages = [
+                SystemMessage(content="You are a helpful AI assistant. Provide brief, friendly responses."),
+                HumanMessage(content=follow_up_prompt)
+            ]
+            
+            try:
+                response = self.model.invoke(messages)
+                if isinstance(response, AIMessage) and response.content:
+                    return AIMessage(content=response.content)
+            except Exception:
+                return AIMessage(content=f"I've {tools_executed} for you.")
+        
+        return None
