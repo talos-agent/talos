@@ -202,10 +202,9 @@ def get_query_sentiment(query: str, start_time: Optional[str] = None):
     print(response.answers[0])
 
 
-@app.callback(invoke_without_command=True)
+@app.callback()
 def callback(
     ctx: typer.Context,
-    query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
     use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
@@ -213,8 +212,20 @@ def callback(
     """
     The main entry point for the Talos agent.
     """
-    if ctx.invoked_subcommand is None:
-        main_command(query=query, verbose=verbose, user_id=user_id, use_database=use_database)
+    pass
+
+
+@app.command("main")
+def main_cli(
+    query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
+    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
+    use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
+):
+    """
+    Run the interactive Talos agent.
+    """
+    main_command(query=query, verbose=verbose, user_id=user_id, use_database=use_database)
 
 
 @app.command(name="main")
