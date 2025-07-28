@@ -19,12 +19,14 @@ class DatabaseMemoryBackend:
         session_id: Optional[str] = None,
         auto_save: bool = True,
         verbose: bool = False,
+        similarity_threshold: float = 0.85,
     ):
         self.user_id = user_id
         self.embeddings_model = embeddings_model
         self.session_id = session_id or str(uuid.uuid4())
         self.auto_save = auto_save
         self.verbose = verbose
+        self.similarity_threshold = similarity_threshold
         self._ensure_user_exists()
         self._ensure_conversation_exists()
     
@@ -73,6 +75,11 @@ class DatabaseMemoryBackend:
             user = session.query(User).filter(User.user_id == self.user_id).first()
             if user is None:
                 raise ValueError(f"User {self.user_id} not found")
+            
+            similar_memory = self._find_similar_memory(session, user.id, embedding, description)
+            if similar_memory:
+                self._merge_memories(session, similar_memory, description, metadata or {})
+                return
                 
             memory = MemoryModel(
                 user_id=user.id,
@@ -247,3 +254,52 @@ class DatabaseMemoryBackend:
             
             session.commit()
             return count
+    
+    def _find_similar_memory(self, session, user_id: int, embedding: List[float], description: str) -> Optional[MemoryModel]:
+        """Find a similar memory based on embedding similarity and description."""
+        memories = session.query(MemoryModel).filter(MemoryModel.user_id == user_id).all()
+        
+        if not memories:
+            return None
+        
+        best_similarity = 0.0
+        best_memory = None
+        
+        for memory in memories:
+            if memory.embedding:
+                if memory.description.strip().lower() == description.strip().lower():
+                    return memory
+                
+                similarity = sum(a * b for a, b in zip(embedding, memory.embedding))
+                
+                embedding_norm = sum(x * x for x in embedding) ** 0.5
+                memory_norm = sum(x * x for x in memory.embedding) ** 0.5
+                if embedding_norm > 0 and memory_norm > 0:
+                    similarity = similarity / (embedding_norm * memory_norm)
+                
+                if similarity >= self.similarity_threshold and similarity > best_similarity:
+                    best_similarity = similarity
+                    best_memory = memory
+        
+        return best_memory
+    
+    def _merge_memories(self, session, existing_memory: MemoryModel, new_description: str, new_metadata: dict):
+        """Merge a new memory with an existing similar memory."""
+        if existing_memory.description.strip().lower() == new_description.strip().lower():
+            if existing_memory.memory_metadata is None:
+                existing_memory.memory_metadata = {}
+            existing_memory.memory_metadata.update(new_metadata)
+            existing_memory.timestamp = datetime.now()
+            if self.verbose:
+                print(f"\033[33m⚡ Memory updated (duplicate): {new_description}\033[0m")
+        else:
+            combined_description = f"{existing_memory.description}; {new_description}"
+            existing_memory.description = combined_description
+            if existing_memory.memory_metadata is None:
+                existing_memory.memory_metadata = {}
+            existing_memory.memory_metadata.update(new_metadata)
+            existing_memory.timestamp = datetime.now()
+            if self.verbose:
+                print(f"\033[33m⚡ Memory merged (similar): {combined_description}\033[0m")
+        
+        session.commit()
