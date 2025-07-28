@@ -152,3 +152,7 @@ test_memory.json
 
 # uv lock file
 uv.lock
+
+# SQLite database files
+talos_conversations.db
+*.db
