@@ -72,21 +72,29 @@ def get_query_sentiment(query: str, start_time: Optional[str] = None):
 
 
 @app.callback()
-def callback(ctx: typer.Context, verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output.")):
+def callback(
+    ctx: typer.Context,
+    query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
+    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
+    use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
+):
     """
     The main entry point for the Talos agent.
     """
     if ctx.invoked_subcommand is None:
-        main(query=None, verbose=verbose)
+        main_command(query=query, verbose=verbose, user_id=user_id, use_database=use_database)
 
 
-@app.command()
-def main(
+@app.command(name="main")
+def main_command(
     query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
     prompts_dir: str = "src/talos/prompts",
     model_name: str = "gpt-4",
     temperature: float = 0.0,
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
+    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
+    use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
 ) -> None:
     """
     The main entry point for the Talos agent.
@@ -104,7 +112,12 @@ def main(
         model=model,
         router=router,
         schema=None,
+        user_id=user_id,
+        use_database_memory=use_database,
     )
+    
+    if not user_id and use_database:
+        print(f"Generated temporary user ID: {main_agent.user_id}")
 
     if query:
         # Run the agent
@@ -202,6 +215,47 @@ def daemon(
         temperature=temperature
     )
     asyncio.run(daemon.run())
+
+
+@app.command()
+def cleanup_users(
+    older_than_hours: int = typer.Option(24, "--older-than", help="Remove temporary users inactive for this many hours."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be deleted without actually deleting."),
+) -> None:
+    """
+    Clean up temporary users and their conversation data.
+    """
+    from talos.database.utils import cleanup_temporary_users, get_user_stats
+    
+    if dry_run:
+        stats = get_user_stats()
+        print("Current database stats:")
+        print(f"  Total users: {stats['total_users']}")
+        print(f"  Permanent users: {stats['permanent_users']}")
+        print(f"  Temporary users: {stats['temporary_users']}")
+        print(f"\nWould clean up temporary users inactive for {older_than_hours} hours.")
+        print("Use --no-dry-run to actually perform the cleanup.")
+    else:
+        count = cleanup_temporary_users(older_than_hours)
+        print(f"Cleaned up {count} temporary users and their conversation data.")
+
+
+@app.command()
+def db_stats() -> None:
+    """
+    Show database statistics.
+    """
+    from talos.database.utils import get_user_stats
+    
+    stats = get_user_stats()
+    print("Database Statistics:")
+    print(f"  Total users: {stats['total_users']}")
+    print(f"  Permanent users: {stats['permanent_users']}")
+    print(f"  Temporary users: {stats['temporary_users']}")
+    
+    if stats['total_users'] > 0:
+        temp_percentage = (stats['temporary_users'] / stats['total_users']) * 100
+        print(f"  Temporary user percentage: {temp_percentage:.1f}%")
 
 
 if __name__ == "__main__":

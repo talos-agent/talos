@@ -27,6 +27,9 @@ class Agent(BaseModel):
         prompt_manager: The prompt manager to use.
         schema_class: The schema class to use for structured output.
         tool_manager: The tool manager to use.
+        user_id: Optional user identifier for conversation tracking.
+        session_id: Optional session identifier for conversation grouping.
+        use_database_memory: Whether to use database-backed memory instead of files.
     """
 
     model: BaseChatModel | Runnable
@@ -37,13 +40,15 @@ class Agent(BaseModel):
     is_main_agent: bool = False
     memory: Optional[Memory] = None
     dataset_manager: Optional[DatasetManager] = None
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
+    use_database_memory: bool = False
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
 
     def model_post_init(self, __context: Any) -> None:
         if self.memory:
-            self.history = self.memory.load_history()
             self.tool_manager.register_tool(AddMemoryTool(agent=self))
 
     def set_prompt(self, name: str | list[str]):

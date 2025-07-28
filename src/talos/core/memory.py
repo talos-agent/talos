@@ -21,25 +21,43 @@ class MemoryRecord:
 class Memory:
     """
     A class to handle the saving and loading of an agent's memories.
+    Supports both file-based and database-based backends.
     """
 
     def __init__(
         self,
-        file_path: Path,
-        embeddings_model: Embeddings,
+        file_path: Optional[Path] = None,
+        embeddings_model: Optional[Embeddings] = None,
         history_file_path: Optional[Path] = None,
         batch_size: int = 10,
         auto_save: bool = True,
+        user_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        use_database: bool = False,
     ):
         self.file_path = file_path
         self.history_file_path = history_file_path
         self.embeddings_model = embeddings_model
         self.batch_size = batch_size
         self.auto_save = auto_save
+        self.user_id = user_id
+        self.session_id = session_id
+        self.use_database = use_database
         self.memories: List[MemoryRecord] = []
         self.index: Optional[IndexFlatL2] = None
         self._unsaved_count = 0
-        self._load()
+        self._db_backend = None
+        
+        if self.use_database and self.user_id and self.embeddings_model:
+            from ..database.memory_backend import DatabaseMemoryBackend
+            self._db_backend = DatabaseMemoryBackend(
+                user_id=self.user_id,
+                embeddings_model=self.embeddings_model,
+                session_id=self.session_id,
+                auto_save=self.auto_save
+            )
+        elif not self.use_database and self.file_path:
+            self._load()
 
     def _load(self):
         if self.file_path.exists():
@@ -61,6 +79,13 @@ class Memory:
             write_index(self.index, str(self.file_path.with_suffix(".index")))
 
     def add_memory(self, description: str, metadata: Optional[dict] = None):
+        if self._db_backend:
+            self._db_backend.add_memory(description, metadata)
+            return
+        
+        if not self.embeddings_model:
+            raise ValueError("Embeddings model is required for file-based memory")
+            
         embedding = self.embeddings_model.embed_query(description)
         memory = MemoryRecord(
             timestamp=time.time(),
@@ -80,13 +105,19 @@ class Memory:
             self.flush()
 
     def search(self, query: str, k: int = 5) -> List[MemoryRecord]:
-        if not self.index or not self.memories:
+        if self._db_backend:
+            return self._db_backend.search_memories(query, k)
+        
+        if not self.index or not self.memories or not self.embeddings_model:
             return []
         query_embedding = self.embeddings_model.embed_query(query)
         distances, indices = self.index.search(np.array([query_embedding], dtype=np.float32), k)
         return [self.memories[i] for i in indices[0]]
 
     def load_history(self) -> List[BaseMessage]:
+        if self._db_backend:
+            return self._db_backend.load_history()
+        
         if not self.history_file_path or not self.history_file_path.exists():
             return []
         with open(self.history_file_path, "r") as f:
@@ -94,6 +125,10 @@ class Memory:
         return messages_from_dict(dicts)
 
     def save_history(self, messages: List[BaseMessage]):
+        if self._db_backend:
+            self._db_backend.save_history(messages)
+            return
+        
         if not self.history_file_path:
             return
         if not self.history_file_path.exists():
