@@ -247,3 +247,12 @@ class DatabaseMemoryBackend:
             
             session.commit()
             return count
+
+    @staticmethod
+    def flush_all_memories() -> int:
+        """Delete all memories from the database. Returns count of deleted memories."""
+        with get_session() as session:
+            count = session.query(MemoryModel).count()
+            session.query(MemoryModel).delete()
+            session.commit()
+            return count
