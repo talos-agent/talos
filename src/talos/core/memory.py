@@ -35,6 +35,7 @@ class Memory:
         session_id: Optional[str] = None,
         use_database: bool = False,
         verbose: bool = False,
+        similarity_threshold: float = 0.85,
     ):
         self.file_path = file_path
         self.history_file_path = history_file_path
@@ -45,6 +46,7 @@ class Memory:
         self.session_id = session_id
         self.use_database = use_database
         self.verbose = verbose
+        self.similarity_threshold = similarity_threshold
         self.memories: List[MemoryRecord] = []
         self.index: Optional[IndexFlatL2] = None
         self._unsaved_count = 0
@@ -57,7 +59,8 @@ class Memory:
                 embeddings_model=self.embeddings_model,
                 session_id=self.session_id,
                 auto_save=self.auto_save,
-                verbose=self.verbose
+                verbose=self.verbose,
+                similarity_threshold=self.similarity_threshold
             )
         elif not self.use_database and self.file_path:
             self._load()
@@ -90,6 +93,12 @@ class Memory:
             raise ValueError("Embeddings model is required for file-based memory")
             
         embedding = self.embeddings_model.embed_query(description)
+        
+        similar_memory = self._find_similar_memory(embedding, description)
+        if similar_memory:
+            self._merge_memories(similar_memory, description, metadata or {})
+            return
+        
         memory = MemoryRecord(
             timestamp=time.time(),
             description=description,
@@ -163,6 +172,47 @@ class Memory:
         dicts = messages_to_dict(messages)
         with open(self.history_file_path, "w") as f:
             json.dump(dicts, f, indent=4)
+
+    def _find_similar_memory(self, embedding: List[float], description: str) -> Optional[MemoryRecord]:
+        """Find a similar memory based on embedding similarity and description."""
+        if not self.memories or not self.index:
+            return None
+        
+        distances, indices = self.index.search(np.array([embedding], dtype=np.float32), k=min(5, len(self.memories)))
+        
+        for distance, idx in zip(distances[0], indices[0]):
+            if idx < len(self.memories):
+                candidate = self.memories[idx]
+                similarity = 1 / (1 + distance)
+                
+                if candidate.description.strip().lower() == description.strip().lower():
+                    return candidate
+                
+                if similarity >= self.similarity_threshold:
+                    return candidate
+        
+        return None
+    
+    def _merge_memories(self, existing_memory: MemoryRecord, new_description: str, new_metadata: dict):
+        """Merge a new memory with an existing similar memory."""
+        if existing_memory.description.strip().lower() == new_description.strip().lower():
+            existing_memory.metadata.update(new_metadata)
+            existing_memory.timestamp = time.time()
+            if self.verbose:
+                print(f"\033[33m⚡ Memory updated (duplicate): {new_description}\033[0m")
+        else:
+            from ..utils.memory_combiner import MemoryCombiner
+            combiner = MemoryCombiner(verbose=self.verbose)
+            combined_description = combiner.combine_memories(existing_memory.description, new_description)
+            existing_memory.description = combined_description
+            existing_memory.metadata.update(new_metadata)
+            existing_memory.timestamp = time.time()
+            if self.verbose:
+                print(f"\033[33m⚡ Memory merged (LLM): {combined_description}\033[0m")
+        
+        self._unsaved_count += 1
+        if self.auto_save and self._unsaved_count >= self.batch_size:
+            self.flush()
 
     def flush(self):
         """Manually save all unsaved memories to disk."""
