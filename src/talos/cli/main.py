@@ -160,7 +160,7 @@ def merge_pr(
 @proposals_app.command("eval")
 def eval_proposal(
     filepath: str = typer.Option(..., "--file", "-f", help="Path to the proposal file."),
-    model_name: str = "gpt-4",
+    model_name: str = "gpt-4o",
     temperature: float = 0.0,
 ):
     """
@@ -235,7 +235,7 @@ def main_cli(
 def main_command(
     query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
     prompts_dir: str = "src/talos/prompts",
-    model_name: str = "gpt-4",
+    model_name: str = "gpt-4o",
     temperature: float = 0.0,
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
@@ -285,9 +285,6 @@ def main_command(
             if isinstance(result, AIMessage):
                 has_tool_calls = hasattr(result, 'tool_calls') and result.tool_calls
                 
-                if result.content is not None and str(result.content).strip() and not has_tool_calls:
-                    print(result.content)
-                
                 if has_tool_calls:
                     for tool_call in result.tool_calls:
                         try:
@@ -315,7 +312,21 @@ def main_command(
                             print("Nice to meet you!")
                     except Exception:
                         print("Nice to meet you!")
-            elif result is not None and not isinstance(result, AIMessage):
+                
+                content_to_print = None
+                if hasattr(result, 'content') and result.content:
+                    content_str = str(result.content)
+                    if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
+                        start_idx = content_str.find("content='") + len("content='")
+                        end_idx = content_str.find("' additional_kwargs=")
+                        if start_idx > 8 and end_idx > start_idx:
+                            content_to_print = content_str[start_idx:end_idx]
+                    else:
+                        content_to_print = content_str.strip()
+                
+                if content_to_print:
+                    print(content_to_print)
+            else:
                 print(result)
         except KeyboardInterrupt:
             break
@@ -372,7 +383,7 @@ def decrypt(encrypted_data: str, key_dir: str = ".keys"):
 @app.command()
 def daemon(
     prompts_dir: str = "src/talos/prompts",
-    model_name: str = "gpt-4",
+    model_name: str = "gpt-4o",
     temperature: float = 0.0,
 ) -> None:
     """
