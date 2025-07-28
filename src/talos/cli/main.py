@@ -556,11 +556,11 @@ def search_memories(
 
 @memory_app.command("flush")
 def flush_memories(
-    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User ID for database backend"),
+    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User ID for database backend. If not provided with database backend, flushes ALL memories."),
     use_database: bool = typer.Option(True, "--use-database", help="Use database backend instead of files"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
 ):
-    """Flush unsaved memories to disk."""
+    """Flush unsaved memories to disk. If no user_id provided with database backend, flushes ALL memories after confirmation."""
     try:
         from talos.core.memory import Memory
         from langchain_openai import OpenAIEmbeddings
@@ -571,13 +571,16 @@ def flush_memories(
         
         if use_database:
             from talos.database.session import init_database
+            from talos.database.memory_backend import DatabaseMemoryBackend
             init_database()
             
             if not user_id:
-                import uuid
-                user_id = str(uuid.uuid4())
-                if verbose:
-                    print(f"Generated temporary user ID: {user_id}")
+                if typer.confirm("⚠️  No user ID provided. This will DELETE ALL memories from the database. Are you sure?"):
+                    deleted_count = DatabaseMemoryBackend.flush_all_memories()
+                    print(f"Successfully deleted {deleted_count} memories from the database.")
+                else:
+                    print("Operation cancelled.")
+                return
             
             memory = Memory(
                 embeddings_model=embeddings_model,
