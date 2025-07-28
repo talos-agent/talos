@@ -289,16 +289,34 @@ def main_command(
                     print("...")
                 
                 if hasattr(result, 'tool_calls') and result.tool_calls:
+                    tool_results = []
                     for tool_call in result.tool_calls:
                         try:
                             tool = main_agent.tool_manager.get_tool(tool_call['name'])
                             if tool:
                                 tool_result = tool.invoke(tool_call['args'])
+                                tool_results.append(f"{tool_call['name']}: {tool_result}")
                                 if verbose:
                                     print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}")
                         except Exception as e:
                             if verbose:
                                 print(f"❌ Tool execution error for '{tool_call['name']}': {e}")
+                    
+                    if tool_results:
+                        tools_summary = ", ".join([tr.split(":")[0] for tr in tool_results])
+                        follow_up_prompt = f"I just executed these tools: {tools_summary}. Please provide a brief, friendly response to acknowledge these actions to the user."
+                        
+                        try:
+                            from langchain_core.messages import SystemMessage, HumanMessage
+                            follow_up_messages = [
+                                SystemMessage(content="You are a helpful AI assistant. Provide brief, friendly responses."),
+                                HumanMessage(content=follow_up_prompt)
+                            ]
+                            follow_up_response = main_agent.model.invoke(follow_up_messages)
+                            if hasattr(follow_up_response, 'content') and follow_up_response.content:
+                                print(follow_up_response.content)
+                        except Exception:
+                            print(f"I've executed {tools_summary} for you.")
             else:
                 print(result)
         except KeyboardInterrupt:
