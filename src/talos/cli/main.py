@@ -283,7 +283,20 @@ def main_command(
                 break
             result = main_agent.run(user_input)
             if isinstance(result, AIMessage):
-                print(result.content)
+                if result.content:
+                    print(result.content)
+                
+                if hasattr(result, 'tool_calls') and result.tool_calls:
+                    for tool_call in result.tool_calls:
+                        try:
+                            tool = main_agent.tool_manager.get_tool(tool_call['name'])
+                            if tool:
+                                tool_result = tool.invoke(tool_call['args'])
+                                if verbose:
+                                    print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}")
+                        except Exception as e:
+                            if verbose:
+                                print(f"❌ Tool execution error for '{tool_call['name']}': {e}")
             else:
                 print(result)
         except KeyboardInterrupt:
