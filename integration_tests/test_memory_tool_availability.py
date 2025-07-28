@@ -43,8 +43,10 @@ def test_memory_tool_availability():
                 print(f"✓ Memory tool description: {memory_tool.description}")
             else:
                 print("✗ add_memory tool not found in tool manager")
+                assert False, "add_memory tool not found"
         else:
             print("✗ Tool manager not initialized")
+            assert False, "Tool manager not initialized"
         
         if hasattr(agent, 'memory') and agent.memory:
             print("✓ Memory system initialized")
@@ -58,8 +60,10 @@ def test_memory_tool_availability():
                 print(f"  - {memories[0].description}")
             else:
                 print("✗ Memory search failed")
+                assert False, "Memory search failed"
         else:
             print("✗ Memory system not initialized")
+            assert False, "Memory system not initialized"
         
         if hasattr(agent, 'tools'):
             base_tool_names = [tool.name for tool in agent.tools]
@@ -67,11 +71,9 @@ def test_memory_tool_availability():
         else:
             print("✗ Base agent tools not available")
         
-        return True
-        
     except Exception as e:
         print(f"✗ Test failed: {e}")
-        return False
+        raise
     
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -105,6 +107,7 @@ def test_prompt_analysis():
             print("✓ Prompt mentions 'memory'")
         else:
             print("✗ Prompt does not mention 'memory'")
+            assert False, "Prompt does not mention 'memory'"
         
         if 'tool' in template.lower():
             print("✓ Prompt mentions 'tool'")
@@ -129,11 +132,9 @@ def test_prompt_analysis():
             print("User interaction section:")
             print(user_text[:300] + "..." if len(user_text) > 300 else user_text)
         
-        return True
-        
     except Exception as e:
         print(f"✗ Prompt analysis failed: {e}")
-        return False
+        raise
 
 
 if __name__ == "__main__":

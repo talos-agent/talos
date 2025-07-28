@@ -50,7 +50,7 @@ def test_memory_cli_functionality():
             print("✓ CLI is available and working")
         else:
             print(f"✗ CLI failed: {stderr}")
-            return False
+            assert False, f"CLI failed: {stderr}"
         
         print("\n2. Testing initial memory state...")
         cmd = f"uv run talos memory list --user-id {user_id} --memory-file {memory_file}"
@@ -120,13 +120,11 @@ def test_memory_cli_functionality():
         
     except Exception as e:
         print(f"✗ Test failed with exception: {e}")
-        return False
+        raise
     
     finally:
         import shutil
         shutil.rmtree(temp_dir, ignore_errors=True)
-    
-    return True
 
 
 def test_tool_invocation_detection():
@@ -148,6 +146,7 @@ def test_tool_invocation_detection():
             print(f"✓ {file_path} exists")
         else:
             print(f"✗ {file_path} missing")
+            assert False, f"{file_path} missing"
     
     print("Tool invocation detection test completed")
 
