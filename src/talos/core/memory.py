@@ -34,6 +34,7 @@ class Memory:
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
         use_database: bool = False,
+        verbose: bool = False,
     ):
         self.file_path = file_path
         self.history_file_path = history_file_path
@@ -43,6 +44,7 @@ class Memory:
         self.user_id = user_id
         self.session_id = session_id
         self.use_database = use_database
+        self.verbose = verbose
         self.memories: List[MemoryRecord] = []
         self.index: Optional[IndexFlatL2] = None
         self._unsaved_count = 0
@@ -54,7 +56,8 @@ class Memory:
                 user_id=self.user_id,
                 embeddings_model=self.embeddings_model,
                 session_id=self.session_id,
-                auto_save=self.auto_save
+                auto_save=self.auto_save,
+                verbose=self.verbose
             )
         elif not self.use_database and self.file_path:
             self._load()
@@ -80,6 +83,8 @@ class Memory:
 
     def add_memory(self, description: str, metadata: Optional[dict] = None):
         if self._db_backend:
+            if self.verbose:
+                print(f"\033[32m✓ Memory saved: {description}\033[0m")
             self._db_backend.add_memory(description, metadata)
             return
         
@@ -94,6 +99,8 @@ class Memory:
             embedding=embedding,
         )
         self.memories.append(memory)
+        if self.verbose:
+            print(f"\033[32m✓ Memory saved: {description}\033[0m")
         if self.index is None:
             self.index = IndexFlatL2(len(embedding))
 
@@ -106,13 +113,19 @@ class Memory:
 
     def search(self, query: str, k: int = 5) -> List[MemoryRecord]:
         if self._db_backend:
-            return self._db_backend.search_memories(query, k)
+            results = self._db_backend.search_memories(query, k)
+            if self.verbose and results:
+                print(f"\033[34m🔍 Memory search: found {len(results)} relevant memories\033[0m")
+            return results
         
         if not self.index or not self.memories or not self.embeddings_model:
             return []
         query_embedding = self.embeddings_model.embed_query(query)
         distances, indices = self.index.search(np.array([query_embedding], dtype=np.float32), k)
-        return [self.memories[i] for i in indices[0]]
+        results = [self.memories[i] for i in indices[0]]
+        if self.verbose and results:
+            print(f"\033[34m🔍 Memory search: found {len(results)} relevant memories\033[0m")
+        return results
 
     def load_history(self) -> List[BaseMessage]:
         if self._db_backend:

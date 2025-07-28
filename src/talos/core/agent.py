@@ -43,6 +43,7 @@ class Agent(BaseModel):
     user_id: Optional[str] = None
     session_id: Optional[str] = None
     use_database_memory: bool = False
+    verbose: bool = False
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []

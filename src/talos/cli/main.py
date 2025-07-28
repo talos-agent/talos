@@ -256,6 +256,7 @@ def main_command(
         schema=None,
         user_id=user_id,
         use_database_memory=use_database,
+        verbose=verbose,
     )
     
     if not user_id and use_database:
@@ -264,13 +265,10 @@ def main_command(
     if query:
         # Run the agent
         result = main_agent.run(query)
-        if verbose:
-            print(result)
+        if isinstance(result, AIMessage):
+            print(result.content)
         else:
-            if isinstance(result, AIMessage):
-                print(result.content)
-            else:
-                print(result)
+            print(result)
         return
 
     # Interactive mode
@@ -281,13 +279,10 @@ def main_command(
             if user_input.lower() == "exit":
                 break
             result = main_agent.run(user_input)
-            if verbose:
-                print(result)
+            if isinstance(result, AIMessage):
+                print(result.content)
             else:
-                if isinstance(result, AIMessage):
-                    print(result.content)
-                else:
-                    print(result)
+                print(result)
         except KeyboardInterrupt:
             break
 

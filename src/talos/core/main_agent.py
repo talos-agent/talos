@@ -85,7 +85,8 @@ class MainAgent(Agent):
                     user_id=self.user_id,
                     session_id=session_id,
                     use_database=True,
-                    auto_save=True
+                    auto_save=True,
+                    verbose=self.verbose
                 )
             else:
                 from pathlib import Path
@@ -97,7 +98,8 @@ class MainAgent(Agent):
                     embeddings_model=embeddings_model,
                     history_file_path=memory_dir / "history.json",
                     use_database=False,
-                    auto_save=True
+                    auto_save=True,
+                    verbose=self.verbose
                 )
 
     def _setup_router(self) -> None:
