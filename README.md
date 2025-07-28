@@ -1,8 +1,21 @@
+<div align="center">
+
+![Talos Header](./assets/talos-header.jpeg)
+
 # Talos: An AI Protocol Owner
 
-This repository contains the code for Talos, an AI agent designed to act as an owner for decentralized protocols. Talos is not just a chatbot; it is a sophisticated AI system that can manage and govern a protocol, ensuring its integrity and security.
+[![Documentation](https://img.shields.io/badge/docs-talos.is-blue?style=for-the-badge&logo=gitbook)](https://docs.talos.is/)
+[![Version](https://img.shields.io/badge/version-0.1.0-green?style=for-the-badge)](https://github.com/talos-agent/talos/releases)
+[![Python](https://img.shields.io/badge/python-3.12+-blue?style=for-the-badge&logo=python)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 
-The official documentation for the Talos project can be found at [docs.talos.is](https://docs.talos.is/).
+**🤖 An AI agent designed to act as an autonomous owner for decentralized protocols**
+
+Talos is not just a chatbot; it is a sophisticated AI system that can manage and govern a protocol, ensuring its integrity and security through advanced supervision and governance capabilities.
+
+📖 **[Read the Documentation](https://docs.talos.is/)** | 🚀 **[Quick Start](#usage)** | 🛠️ **[Development](#development)**
+
+</div>
 
 ## What is Talos?
 
