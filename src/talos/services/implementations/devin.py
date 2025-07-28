@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import requests
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, PrivateAttr
+from pydantic import PrivateAttr
 
 from talos.services.abstract.devin import Devin
 
