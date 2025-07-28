@@ -47,6 +47,7 @@ class MainAgent(Agent):
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
         self._setup_prompt_manager()
+        self._ensure_user_id()
         self._setup_memory()
         self._setup_router()
         self._setup_hypervisor()
@@ -58,6 +59,12 @@ class MainAgent(Agent):
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
+
+    def _ensure_user_id(self) -> None:
+        """Ensure user_id is set, generate temporary one if needed."""
+        if not self.user_id and self.use_database_memory:
+            import uuid
+            self.user_id = str(uuid.uuid4())
 
     def _setup_memory(self) -> None:
         """Initialize memory with database or file backend based on configuration."""
@@ -92,20 +99,32 @@ class MainAgent(Agent):
                 )
 
     def _setup_router(self) -> None:
-        github_settings = GitHubSettings()
-        github_token = github_settings.GITHUB_API_TOKEN
-        if not github_token:
-            raise ValueError("GITHUB_API_TOKEN environment variable not set.")
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
         services: list[Service] = []
         skills: list[Skill] = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
-            TwitterSentimentSkill(prompt_manager=self.prompt_manager),
             CryptographySkill(),
-            TwitterInfluenceSkill(llm=self.model, prompt_manager=self.prompt_manager),
-            PRReviewSkill(llm=self.model, prompt_manager=self.prompt_manager, github_tools=GithubTools(token=github_token)),
         ]
+        
+        try:
+            github_settings = GitHubSettings()
+            github_token = github_settings.GITHUB_API_TOKEN
+            if github_token:
+                skills.append(PRReviewSkill(llm=self.model, prompt_manager=self.prompt_manager, github_tools=GithubTools(token=github_token)))
+        except ValueError:
+            pass  # GitHub token not available, skip GitHub-dependent skills
+        
+        try:
+            from talos.tools.twitter_client import TwitterConfig
+            TwitterConfig()  # This will raise ValueError if TWITTER_BEARER_TOKEN is not set
+            skills.extend([
+                TwitterSentimentSkill(prompt_manager=self.prompt_manager),
+                TwitterInfluenceSkill(llm=self.model, prompt_manager=self.prompt_manager),
+            ])
+        except ValueError:
+            pass  # Twitter token not available, skip Twitter-dependent skills
+        
         if not self.router:
             self.router = Router(services=services, skills=skills)
 

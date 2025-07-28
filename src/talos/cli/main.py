@@ -71,13 +71,17 @@ def get_query_sentiment(query: str, start_time: Optional[str] = None):
     print(response.answers[0])
 
 
-@app.callback()
-def callback(ctx: typer.Context, verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output.")):
+@app.callback(invoke_without_command=True)
+def callback(
+    ctx: typer.Context, 
+    query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output.")
+):
     """
     The main entry point for the Talos agent.
     """
     if ctx.invoked_subcommand is None:
-        main(query=None, verbose=verbose)
+        main(query=query, verbose=verbose, user_id=None, use_database=True)
 
 
 @app.command()
@@ -97,11 +101,6 @@ def main(
         raise FileNotFoundError(f"Prompts directory not found at {prompts_dir}")
 
     OpenAISettings()
-    
-    if not user_id:
-        import uuid
-        user_id = str(uuid.uuid4())
-        print(f"Generated temporary user ID: {user_id}")
 
     # Create the main agent
     model = ChatOpenAI(model=model_name, temperature=temperature)
@@ -114,6 +113,9 @@ def main(
         user_id=user_id,
         use_database_memory=use_database,
     )
+    
+    if not user_id and use_database:
+        print(f"Generated temporary user ID: {main_agent.user_id}")
 
     if query:
         # Run the agent

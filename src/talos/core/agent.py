@@ -49,7 +49,6 @@ class Agent(BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         if self.memory:
-            self.history = self.memory.load_history()
             self.tool_manager.register_tool(AddMemoryTool(agent=self))
 
     def set_prompt(self, name: str | list[str]):
