@@ -78,10 +78,12 @@ class MainAgent(Agent):
                 from talos.database.session import init_database
                 init_database()
                 
+                session_id = self.session_id or "cli-session"
+                
                 self.memory = Memory(
                     embeddings_model=embeddings_model,
                     user_id=self.user_id,
-                    session_id=self.session_id,
+                    session_id=session_id,
                     use_database=True,
                     auto_save=True
                 )
