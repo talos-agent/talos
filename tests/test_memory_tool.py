@@ -27,7 +27,7 @@ class TestAddMemoryTool(unittest.TestCase):
         result = tool._run(description)
         # Check that the agent's add_memory method was called
         agent.add_memory.assert_called_once_with(description)
-        self.assertEqual(result, f"Memory added: {description}")
+        self.assertEqual(result, f"Stored in memory: {description}")
 
 
 class TestAddMemoryToolIntegration(unittest.TestCase):
@@ -69,7 +69,7 @@ class TestAddMemoryToolIntegration(unittest.TestCase):
         # Run the tool
         description = "This is a test memory."
         result = tool._run(description)
-        self.assertEqual(result, f"Memory added: {description}")
+        self.assertEqual(result, f"Stored in memory: {description}")
 
         # Check that the memory was added
         memories = self.agent.memory.search(description)

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
@@ -99,7 +99,7 @@ class Agent(BaseModel):
         """
         context = {}
         
-        if self.dataset_manager:
+        if self.dataset_manager and query:
             relevant_documents = self.dataset_manager.search(query, k=5)
             context["relevant_documents"] = relevant_documents
             
@@ -148,45 +148,43 @@ class Agent(BaseModel):
 
     def _process_result(self, result: Any) -> BaseModel:
         if isinstance(result, AIMessage):
+            self.history.append(result)
+            
             if hasattr(result, 'tool_calls') and result.tool_calls:
+                tool_messages = []
                 for tool_call in result.tool_calls:
                     try:
                         tool = self.tool_manager.get_tool(tool_call['name'])
                         if tool:
                             tool_result = tool.invoke(tool_call['args'])
                             print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}", flush=True)
+                            
+                            tool_message = ToolMessage(
+                                content=str(tool_result),
+                                tool_call_id=tool_call['id']
+                            )
+                            tool_messages.append(tool_message)
                     except Exception as e:
                         print(f"❌ Tool execution error for '{tool_call['name']}': {e}", flush=True)
-                
-                content_is_empty = (
-                    not result.content or 
-                    (isinstance(result.content, str) and result.content.strip() == "")
-                )
-                if content_is_empty:
-                    result = AIMessage(
-                        content="Got it! I've saved that information.",
-                        additional_kwargs=result.additional_kwargs if hasattr(result, 'additional_kwargs') else {},
-                        response_metadata=result.response_metadata if hasattr(result, 'response_metadata') else {},
-                        tool_calls=result.tool_calls if hasattr(result, 'tool_calls') else []
-                    )
-            
-            if hasattr(result, 'content') and result.content:
-                content_str = str(result.content)
-                if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
-                    start_idx = content_str.find("content='") + len("content='")
-                    end_idx = content_str.find("' additional_kwargs=")
-                    if start_idx > 8 and end_idx > start_idx:
-                        actual_content = content_str[start_idx:end_idx]
-                        corrected_result = AIMessage(
-                            content=actual_content,
-                            additional_kwargs=result.additional_kwargs if hasattr(result, 'additional_kwargs') else {},
-                            response_metadata=result.response_metadata if hasattr(result, 'response_metadata') else {},
-                            tool_calls=result.tool_calls if hasattr(result, 'tool_calls') else []
+                        tool_message = ToolMessage(
+                            content=f"Error: {str(e)}",
+                            tool_call_id=tool_call['id']
                         )
-                        self.history.append(corrected_result)
-                        return corrected_result
+                        tool_messages.append(tool_message)
+                
+                self.history.extend(tool_messages)
+                
+                chain = self._create_chain()
+                last_human_message = ""
+                for message in reversed(self.history):
+                    if isinstance(message, HumanMessage):
+                        last_human_message = str(message.content)
+                        break
+                context = self._build_context(last_human_message)
+                new_result = chain.invoke({"messages": self.history, **context})
+                
+                return self._process_result(new_result)
             
-            self.history.append(result)
             return result
         if isinstance(result, BaseModel):
             self.history.append(AIMessage(content=str(result)))

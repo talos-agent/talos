@@ -78,7 +78,7 @@ class TwitterTool(BaseTool):
                 return "Tweet not sent. Content is inappropriate."
         assert self.twitter_client is not None
         self.twitter_client.post_tweet(tweet)
-        return "Tweet posted successfully."
+        return f"Posted tweet: {tweet[:50]}{'...' if len(tweet) > 50 else ''}"
 
     def get_all_replies(self, tweet_id: str) -> list[tweepy.Tweet]:
         """Gets all replies to a tweet."""
@@ -92,7 +92,7 @@ class TwitterTool(BaseTool):
                 return "Tweet not sent. Content is inappropriate."
         assert self.twitter_client is not None
         self.twitter_client.reply_to_tweet(tweet_id, tweet)
-        return "Tweet posted successfully."
+        return f"Replied to tweet {tweet_id}: {tweet[:50]}{'...' if len(tweet) > 50 else ''}"
 
     def is_content_appropriate(self, text: str) -> bool:
         """
