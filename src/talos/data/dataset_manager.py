@@ -104,20 +104,20 @@ class DatasetManager(BaseModel):
         
         return self.datasets
 
-    def search(self, query: str, k: int = 5) -> list[str]:
+    def search(self, query: str, k: int = 5, context_search: bool = False) -> list[str]:
         """
         Searches the vector store for similar documents.
         """
         if self._db_backend:
-            return self._db_backend.search(query, k)
+            return self._db_backend.search(query, k, context_search)
         
         if self.vector_store is None:
-            if self.verbose:
+            if self.verbose and not context_search:
                 print("\033[33m⚠️ Dataset search: no datasets available\033[0m")
             return []
         results = self.vector_store.similarity_search(query, k=k)
         result_texts = [doc.page_content for doc in results]
-        if self.verbose and result_texts:
+        if self.verbose and result_texts and not context_search:
             print(f"\033[34m🔍 Dataset search: found {len(result_texts)} relevant documents\033[0m")
         return result_texts
 

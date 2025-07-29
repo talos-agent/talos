@@ -100,7 +100,7 @@ class Agent(BaseModel):
         context = {}
         
         if self.dataset_manager and query:
-            relevant_documents = self.dataset_manager.search(query, k=5)
+            relevant_documents = self.dataset_manager.search(query, k=5, context_search=True)
             context["relevant_documents"] = relevant_documents
             
         return context
@@ -157,7 +157,11 @@ class Agent(BaseModel):
                         tool = self.tool_manager.get_tool(tool_call['name'])
                         if tool:
                             tool_result = tool.invoke(tool_call['args'])
-                            print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}", flush=True)
+                            if tool_call['name'] == 'dataset_search':
+                                display_result = str(tool_result)[:100] + "..." if len(str(tool_result)) > 100 else str(tool_result)
+                            else:
+                                display_result = str(tool_result)
+                            print(f"🔧 Executed tool '{tool_call['name']}': {display_result}", flush=True)
                             
                             tool_message = ToolMessage(
                                 content=str(tool_result),
