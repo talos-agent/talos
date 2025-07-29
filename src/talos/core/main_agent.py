@@ -165,7 +165,18 @@ class MainAgent(Agent):
 
     def _setup_dataset_manager(self) -> None:
         if not self.dataset_manager:
-            self.dataset_manager = DatasetManager(verbose=self.verbose)
+            if self.use_database_memory:
+                from talos.database.session import init_database
+                init_database()
+                
+                self.dataset_manager = DatasetManager(
+                    verbose=self.verbose,
+                    user_id=self.user_id,
+                    session_id=self.session_id or "cli-session",
+                    use_database=True
+                )
+            else:
+                self.dataset_manager = DatasetManager(verbose=self.verbose)
 
     def _setup_tool_manager(self) -> None:
         assert self.router is not None
