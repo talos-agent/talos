@@ -4,7 +4,7 @@ This guide will help you install and set up Talos on your system.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.12 or higher
 - `uv` package manager (recommended) or `pip`
 - Git
 
@@ -77,6 +77,7 @@ export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
 ```bash
 export GITHUB_API_TOKEN="your-github-token"
 export TWITTER_BEARER_TOKEN="your-twitter-bearer-token"
+export ARBISCAN_API_KEY="your-arbiscan-api-key"
 ```
 
 !!! tip "Environment File"
@@ -87,6 +88,7 @@ export TWITTER_BEARER_TOKEN="your-twitter-bearer-token"
     PINATA_SECRET_API_KEY=your-pinata-secret-api-key
     GITHUB_API_TOKEN=your-github-token
     TWITTER_BEARER_TOKEN=your-twitter-bearer-token
+    ARBISCAN_API_KEY=your-arbiscan-api-key
     ```
 
 ## Docker Installation
@@ -106,6 +108,7 @@ export TWITTER_BEARER_TOKEN="your-twitter-bearer-token"
      -e TWITTER_BEARER_TOKEN="your-twitter-bearer-token" \
      -e PINATA_API_KEY="your-pinata-api-key" \
      -e PINATA_SECRET_API_KEY="your-pinata-secret-api-key" \
+     -e ARBISCAN_API_KEY="your-arbiscan-api-key" \
      --name talos-agent \
      talos-agent
    ```

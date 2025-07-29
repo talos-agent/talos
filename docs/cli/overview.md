@@ -85,13 +85,18 @@ talos [global-options] <command> [command-options] [arguments]
 
 | Command | Description |
 |---------|-------------|
-| `twitter` | Twitter-related operations and analysis |
+| `twitter` | Twitter-related operations and sentiment analysis |
 | `github` | GitHub repository management and PR reviews |
+| `proposals` | Governance proposal evaluation |
+| `memory` | Memory management and search operations |
+| `arbiscan` | Arbitrum blockchain contract source code retrieval |
 | `generate-keys` | Generate RSA key pairs for encryption |
 | `get-public-key` | Retrieve the current public key |
 | `encrypt` | Encrypt data using public key |
 | `decrypt` | Decrypt data using private key |
 | `daemon` | Run in continuous daemon mode |
+| `cleanup-users` | Clean up temporary users and conversation data |
+| `db-stats` | Show database statistics |
 
 ## Environment Variables
 
@@ -109,6 +114,7 @@ export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
 export GITHUB_API_TOKEN="your-github-token"        # For GitHub operations
 export TWITTER_BEARER_TOKEN="your-twitter-token"   # For Twitter analysis
 export GITHUB_REPO="owner/repo"                    # Default repository
+export ARBISCAN_API_KEY="your-arbiscan-key"        # For higher rate limits on Arbitrum data
 ```
 
 ## Configuration

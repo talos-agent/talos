@@ -60,7 +60,7 @@ Talos provides a set of services for interacting with various platforms:
 
 ## Development
 
-This project uses `uv` for dependency management.
+This project uses `uv` for dependency management and requires Python 3.12+.
 
 1.  Create a virtual environment:
 
@@ -95,6 +95,14 @@ uv run talos
 
 You can then interact with the agent in a continuous conversation. To exit, type `exit`.
 
+### Non-Interactive Mode
+
+Run a single query and exit:
+
+```bash
+uv run talos "your query here"
+```
+
 ### Daemon Mode
 
 To run the agent in daemon mode for continuous operation with scheduled jobs:
@@ -109,6 +117,25 @@ uv run talos daemon
 ```
 
 The daemon will run continuously, executing scheduled jobs and can be gracefully shutdown with SIGTERM or SIGINT.
+
+### Available CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `twitter` | Twitter-related operations and sentiment analysis |
+| `github` | GitHub repository management and PR reviews |
+| `proposals` | Governance proposal evaluation |
+| `memory` | Memory management and search operations |
+| `arbiscan` | Arbitrum blockchain contract source code retrieval |
+| `generate-keys` | Generate RSA key pairs for encryption |
+| `get-public-key` | Retrieve the current public key |
+| `encrypt` | Encrypt data using public key |
+| `decrypt` | Decrypt data using private key |
+| `daemon` | Run in continuous daemon mode |
+| `cleanup-users` | Clean up temporary users and conversation data |
+| `db-stats` | Show database statistics |
+
+For detailed command usage, see the [CLI Documentation](https://docs.talos.is/cli/overview/).
 
 ### Docker Usage
 
@@ -170,10 +197,14 @@ The daemon will run continuously, executing scheduled jobs and can be gracefully
 #### Required Environment Variables
 
 - `OPENAI_API_KEY`: Required for AI functionality
-- `GITHUB_API_TOKEN`: Required for GitHub operations
-- `TWITTER_BEARER_TOKEN`: Required for Twitter functionality
 - `PINATA_API_KEY`: Required for IPFS operations
 - `PINATA_SECRET_API_KEY`: Required for IPFS operations
+
+#### Optional Environment Variables
+
+- `GITHUB_API_TOKEN`: Required for GitHub operations
+- `TWITTER_BEARER_TOKEN`: Required for Twitter functionality
+- `ARBISCAN_API_KEY`: Optional for higher rate limits when accessing Arbitrum contract data
 
 #### Graceful Shutdown
 
