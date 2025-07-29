@@ -283,28 +283,6 @@ def main_command(
                 break
             result = main_agent.run(user_input)
             if isinstance(result, AIMessage):
-                has_tool_calls = hasattr(result, 'tool_calls') and result.tool_calls
-                
-                if has_tool_calls and verbose:
-                    print("Note: Tools were already executed automatically by the agent.")
-                    
-                follow_up_prompt = f"The user just said: '{user_input}'. Please provide a brief, natural conversational response to what they said, as if you're having a normal conversation. Don't mention tools or memory - just respond naturally to their message."
-                
-                try:
-                    from langchain_core.messages import SystemMessage, HumanMessage
-                    follow_up_messages = [
-                        SystemMessage(content="You are a helpful AI assistant having a natural conversation. Respond naturally to what the user said without mentioning any technical operations."),
-                        HumanMessage(content=follow_up_prompt)
-                    ]
-                    follow_up_response = main_agent.model.invoke(follow_up_messages)
-                    if hasattr(follow_up_response, 'content') and follow_up_response.content:
-                        print(follow_up_response.content)
-                    else:
-                        print("Nice to meet you!")
-                except Exception:
-                    print("Nice to meet you!")
-                
-                content_to_print = None
                 if hasattr(result, 'content') and result.content:
                     content_str = str(result.content)
                     if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
@@ -312,11 +290,9 @@ def main_command(
                         end_idx = content_str.find("' additional_kwargs=")
                         if start_idx > 8 and end_idx > start_idx:
                             content_to_print = content_str[start_idx:end_idx]
+                            print(content_to_print)
                     else:
-                        content_to_print = content_str.strip()
-                
-                if content_to_print:
-                    print(content_to_print)
+                        print(content_str.strip())
             else:
                 print(result)
         except KeyboardInterrupt:

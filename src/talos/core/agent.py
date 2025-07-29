@@ -164,6 +164,9 @@ class Agent(BaseModel):
                             print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}", flush=True)
                     except Exception as e:
                         print(f"❌ Tool execution error for '{tool_call['name']}': {e}", flush=True)
+                
+                if not result.content or result.content.strip() == "":
+                    result.content = "Got it! I've saved that information."
             
             if hasattr(result, 'content') and result.content:
                 content_str = str(result.content)
