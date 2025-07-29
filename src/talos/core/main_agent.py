@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime
 from typing import Any, List, Optional
 
@@ -58,7 +59,51 @@ class MainAgent(Agent):
     def _setup_prompt_manager(self) -> None:
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
-        self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
+        
+        use_voice_enhanced = os.getenv("TALOS_USE_VOICE_ENHANCED", "false").lower() == "true"
+        
+        if use_voice_enhanced:
+            self._setup_voice_enhanced_prompt()
+        else:
+            self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
+
+    def _setup_voice_enhanced_prompt(self) -> None:
+        """Setup voice-enhanced prompt by combining voice analysis with main prompt."""
+        try:
+            if not self.prompt_manager:
+                raise ValueError("Prompt manager not initialized")
+                
+            from talos.skills.twitter_voice import TwitterVoiceSkill
+            
+            voice_skill = TwitterVoiceSkill()
+            voice_result = voice_skill.run(username="talos_is")
+            
+            main_prompt = self.prompt_manager.get_prompt("main_agent_prompt")
+            if not main_prompt:
+                raise ValueError("Could not find main_agent_prompt")
+            
+            voice_enhanced_template = f"{voice_result['voice_prompt']}\n\n{main_prompt.template}"
+            
+            from talos.prompts.prompt import Prompt
+            enhanced_prompt = Prompt(
+                name="voice_enhanced_main_agent",
+                template=voice_enhanced_template,
+                input_variables=main_prompt.input_variables
+            )
+            
+            # Add the enhanced prompt to the manager if it's a FilePromptManager
+            if hasattr(self.prompt_manager, 'prompts'):
+                self.prompt_manager.prompts["voice_enhanced_main_agent"] = enhanced_prompt
+            
+            self.set_prompt(["voice_enhanced_main_agent", "general_agent_prompt"])
+            
+            if self.verbose:
+                print(f"Voice integration enabled using {voice_result['voice_source']}")
+                
+        except Exception as e:
+            if self.verbose:
+                print(f"Voice integration failed, falling back to default prompts: {e}")
+            self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
 
     def _ensure_user_id(self) -> None:
         """Ensure user_id is set, generate temporary one if needed."""
