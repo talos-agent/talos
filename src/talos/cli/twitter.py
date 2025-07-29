@@ -3,6 +3,7 @@ import typer
 
 from talos.skills.twitter_persona import TwitterPersonaSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
+from talos.skills.twitter_voice import TwitterVoiceSkill
 
 twitter_app = typer.Typer()
 
@@ -36,3 +37,22 @@ def get_query_sentiment(query: str, start_time: Optional[str] = None):
         print(f"Sentiment Score: {response.score}/100")
         print("=" * 50)
     print(response.answers[0])
+
+
+@twitter_app.command()
+def integrate_voice(username: str = "talos_is"):
+    """
+    Integrate Twitter voice analysis into agent communication.
+    
+    Args:
+        username: Twitter username to analyze (defaults to talos_is)
+    """
+    skill = TwitterVoiceSkill()
+    result = skill.run(username=username)
+    
+    print(f"=== Voice Integration for @{username} ===\n")
+    print(f"Voice Source: {result['voice_source']}")
+    print(f"Voice Prompt Generated:\n{result['voice_prompt']}")
+    print("\nPersona Analysis:")
+    print(f"Topics: {', '.join(result['persona_analysis'].topics)}")
+    print(f"Style: {', '.join(result['persona_analysis'].style)}")
