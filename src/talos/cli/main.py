@@ -285,33 +285,24 @@ def main_command(
             if isinstance(result, AIMessage):
                 has_tool_calls = hasattr(result, 'tool_calls') and result.tool_calls
                 
-                if has_tool_calls:
-                    for tool_call in result.tool_calls:
-                        try:
-                            tool = main_agent.tool_manager.get_tool(tool_call['name'])
-                            if tool:
-                                tool_result = tool.invoke(tool_call['args'])
-                                if verbose:
-                                    print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}")
-                        except Exception as e:
-                            if verbose:
-                                print(f"❌ Tool execution error for '{tool_call['name']}': {e}")
+                if has_tool_calls and verbose:
+                    print("Note: Tools were already executed automatically by the agent.")
                     
-                    follow_up_prompt = f"The user just said: '{user_input}'. Please provide a brief, natural conversational response to what they said, as if you're having a normal conversation. Don't mention tools or memory - just respond naturally to their message."
-                    
-                    try:
-                        from langchain_core.messages import SystemMessage, HumanMessage
-                        follow_up_messages = [
-                            SystemMessage(content="You are a helpful AI assistant having a natural conversation. Respond naturally to what the user said without mentioning any technical operations."),
-                            HumanMessage(content=follow_up_prompt)
-                        ]
-                        follow_up_response = main_agent.model.invoke(follow_up_messages)
-                        if hasattr(follow_up_response, 'content') and follow_up_response.content:
-                            print(follow_up_response.content)
-                        else:
-                            print("Nice to meet you!")
-                    except Exception:
+                follow_up_prompt = f"The user just said: '{user_input}'. Please provide a brief, natural conversational response to what they said, as if you're having a normal conversation. Don't mention tools or memory - just respond naturally to their message."
+                
+                try:
+                    from langchain_core.messages import SystemMessage, HumanMessage
+                    follow_up_messages = [
+                        SystemMessage(content="You are a helpful AI assistant having a natural conversation. Respond naturally to what the user said without mentioning any technical operations."),
+                        HumanMessage(content=follow_up_prompt)
+                    ]
+                    follow_up_response = main_agent.model.invoke(follow_up_messages)
+                    if hasattr(follow_up_response, 'content') and follow_up_response.content:
+                        print(follow_up_response.content)
+                    else:
                         print("Nice to meet you!")
+                except Exception:
+                    print("Nice to meet you!")
                 
                 content_to_print = None
                 if hasattr(result, 'content') and result.content:

@@ -155,6 +155,16 @@ class Agent(BaseModel):
             self.history.append(AIMessage(content=str(modelled_result)))
             return modelled_result
         if isinstance(result, AIMessage):
+            if hasattr(result, 'tool_calls') and result.tool_calls:
+                for tool_call in result.tool_calls:
+                    try:
+                        tool = self.tool_manager.get_tool(tool_call['name'])
+                        if tool:
+                            tool_result = tool.invoke(tool_call['args'])
+                            print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}", flush=True)
+                    except Exception as e:
+                        print(f"❌ Tool execution error for '{tool_call['name']}': {e}", flush=True)
+            
             if hasattr(result, 'content') and result.content:
                 content_str = str(result.content)
                 if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
