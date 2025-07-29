@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 from typing import Optional, Dict, Any
@@ -112,6 +113,7 @@ def get_contract_source_code(contract_address: str, api_key: Optional[str] = Non
     Returns:
         ContractSourceCode object with the contract details
     """
+    api_key = api_key or os.getenv("ARBISCAN_API_KEY")
     client = ArbiScanClient(api_key=api_key, chain_id=chain_id)
     return client.get_contract_source_code(contract_address)
 
@@ -128,5 +130,6 @@ def get_contract_abi(contract_address: str, api_key: Optional[str] = None, chain
     Returns:
         ContractABI object with parsed ABI
     """
+    api_key = api_key or os.getenv("ARBISCAN_API_KEY")
     client = ArbiScanClient(api_key=api_key, chain_id=chain_id)
     return client.get_contract_abi(contract_address)

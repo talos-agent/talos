@@ -1,4 +1,5 @@
 from typing import Optional
+import os
 import typer
 import json
 
@@ -18,6 +19,7 @@ def get_source_code(
     Gets the source code of a verified smart contract from Arbiscan.
     """
     try:
+        api_key = api_key or os.getenv("ARBISCAN_API_KEY")
         contract_data = get_contract_source_code(
             contract_address=contract_address,
             api_key=api_key,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any, Optional
 from pydantic import BaseModel, Field
 
@@ -27,6 +28,7 @@ class ArbiScanSourceCodeTool(SupervisedTool):
 
     def _run_unsupervised(self, contract_address: str, api_key: Optional[str] = None, chain_id: int = 42161, **kwargs: Any) -> ContractSourceCode:
         """Gets the source code of a verified smart contract from Arbiscan"""
+        api_key = api_key or os.getenv("ARBISCAN_API_KEY")
         return get_contract_source_code(contract_address=contract_address, api_key=api_key, chain_id=chain_id)
 
 
@@ -37,4 +39,5 @@ class ArbiScanABITool(SupervisedTool):
 
     def _run_unsupervised(self, contract_address: str, api_key: Optional[str] = None, chain_id: int = 42161, **kwargs: Any) -> ContractABI:
         """Gets the ABI of a verified smart contract from Arbiscan"""
+        api_key = api_key or os.getenv("ARBISCAN_API_KEY")
         return get_contract_abi(contract_address=contract_address, api_key=api_key, chain_id=chain_id)
