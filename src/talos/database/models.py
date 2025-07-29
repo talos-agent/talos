@@ -61,3 +61,30 @@ class Memory(Base):
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     
     user: Mapped["User"] = relationship("User")
+
+
+class Dataset(Base):
+    __tablename__ = "datasets"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    dataset_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+    
+    user: Mapped["User"] = relationship("User")
+    chunks: Mapped[List["DatasetChunk"]] = relationship("DatasetChunk", back_populates="dataset", cascade="all, delete-orphan")
+
+
+class DatasetChunk(Base):
+    __tablename__ = "dataset_chunks"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    dataset_id: Mapped[int] = mapped_column(Integer, ForeignKey("datasets.id"), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[Optional[List[float]]] = mapped_column(JSON, nullable=True)
+    chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    chunk_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    
+    dataset: Mapped["Dataset"] = relationship("Dataset", back_populates="chunks")

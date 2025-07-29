@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from io import BytesIO
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -25,11 +25,31 @@ class DatasetManager(BaseModel):
     vector_store: Any = Field(default=None)
     embeddings: Any = Field(default_factory=OpenAIEmbeddings)
     verbose: bool = Field(default=False)
+    user_id: Optional[str] = Field(default=None)
+    session_id: Optional[str] = Field(default=None)
+    use_database: bool = Field(default=False)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._db_backend = None
+        
+        if self.use_database and self.user_id and self.embeddings:
+            from ..database.dataset_backend import DatabaseDatasetBackend
+            self._db_backend = DatabaseDatasetBackend(
+                user_id=self.user_id,
+                embeddings_model=self.embeddings,
+                session_id=self.session_id,
+                verbose=self.verbose
+            )
 
     def add_dataset(self, name: str, data: list[str]) -> None:
         """
         Adds a dataset to the DatasetManager.
         """
+        if self._db_backend:
+            self._db_backend.add_dataset(name, data)
+            return
+        
         if name in self.datasets and self.datasets.get(name):
             raise ValueError(f"Dataset with name '{name}' already exists.")
         self.datasets[name] = data
@@ -48,10 +68,12 @@ class DatasetManager(BaseModel):
         """
         Removes a dataset from the DatasetManager.
         """
+        if self._db_backend:
+            self._db_backend.remove_dataset(name)
+            return
+        
         if name not in self.datasets:
             raise ValueError(f"Dataset with name '{name}' not found.")
-        # This is a bit tricky with FAISS. For now, we'll just clear the vector store
-        # and rebuild it without the removed dataset.
         del self.datasets[name]
         self.vector_store = None
         for dataset_name, dataset in self.datasets.items():
@@ -66,6 +88,9 @@ class DatasetManager(BaseModel):
         """
         Gets a dataset by name.
         """
+        if self._db_backend:
+            return self._db_backend.get_dataset(name)
+        
         if name not in self.datasets:
             raise ValueError(f"Dataset with name '{name}' not found.")
         return self.datasets[name]
@@ -74,12 +99,18 @@ class DatasetManager(BaseModel):
         """
         Gets all registered datasets.
         """
+        if self._db_backend:
+            return self._db_backend.get_all_datasets()
+        
         return self.datasets
 
     def search(self, query: str, k: int = 5) -> list[str]:
         """
         Searches the vector store for similar documents.
         """
+        if self._db_backend:
+            return self._db_backend.search(query, k)
+        
         if self.vector_store is None:
             if self.verbose:
                 print("\033[33m⚠️ Dataset search: no datasets available\033[0m")
@@ -102,6 +133,10 @@ class DatasetManager(BaseModel):
             chunk_size: Maximum size of each text chunk
             chunk_overlap: Number of characters to overlap between chunks
         """
+        if self._db_backend:
+            self._db_backend.add_document_from_ipfs(name, ipfs_hash, chunk_size, chunk_overlap)
+            return
+        
         if self.verbose:
             print(f"\033[36m📦 Fetching content from IPFS: {ipfs_hash}\033[0m")
         ipfs_tool = IpfsTool()
@@ -120,6 +155,10 @@ class DatasetManager(BaseModel):
             chunk_size: Maximum size of each text chunk
             chunk_overlap: Number of characters to overlap between chunks
         """
+        if self._db_backend:
+            self._db_backend.add_document_from_url(name, url, chunk_size, chunk_overlap)
+            return
+        
         if self.verbose:
             print(f"\033[36m🌐 Fetching content from URL: {url}\033[0m")
         content = self._fetch_content_from_url(url)
