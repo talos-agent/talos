@@ -165,8 +165,17 @@ class Agent(BaseModel):
                     except Exception as e:
                         print(f"❌ Tool execution error for '{tool_call['name']}': {e}", flush=True)
                 
-                if not result.content or result.content.strip() == "":
-                    result.content = "Got it! I've saved that information."
+                content_is_empty = (
+                    not result.content or 
+                    (isinstance(result.content, str) and result.content.strip() == "")
+                )
+                if content_is_empty:
+                    result = AIMessage(
+                        content="Got it! I've saved that information.",
+                        additional_kwargs=result.additional_kwargs if hasattr(result, 'additional_kwargs') else {},
+                        response_metadata=result.response_metadata if hasattr(result, 'response_metadata') else {},
+                        tool_calls=result.tool_calls if hasattr(result, 'tool_calls') else []
+                    )
             
             if hasattr(result, 'content') and result.content:
                 content_str = str(result.content)
