@@ -160,7 +160,7 @@ def merge_pr(
 @proposals_app.command("eval")
 def eval_proposal(
     filepath: str = typer.Option(..., "--file", "-f", help="Path to the proposal file."),
-    model_name: str = "gpt-4",
+    model_name: str = "gpt-4o",
     temperature: float = 0.0,
 ):
     """
@@ -235,7 +235,7 @@ def main_cli(
 def main_command(
     query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
     prompts_dir: str = "src/talos/prompts",
-    model_name: str = "gpt-4",
+    model_name: str = "gpt-4o",
     temperature: float = 0.0,
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
@@ -283,12 +283,9 @@ def main_command(
                 break
             result = main_agent.run(user_input)
             if isinstance(result, AIMessage):
-                if result.content is not None and str(result.content).strip():
-                    print(result.content)
-                elif hasattr(result, 'tool_calls') and result.tool_calls:
-                    print("...")
+                has_tool_calls = hasattr(result, 'tool_calls') and result.tool_calls
                 
-                if hasattr(result, 'tool_calls') and result.tool_calls:
+                if has_tool_calls:
                     for tool_call in result.tool_calls:
                         try:
                             tool = main_agent.tool_manager.get_tool(tool_call['name'])
@@ -299,6 +296,36 @@ def main_command(
                         except Exception as e:
                             if verbose:
                                 print(f"❌ Tool execution error for '{tool_call['name']}': {e}")
+                    
+                    follow_up_prompt = f"The user just said: '{user_input}'. Please provide a brief, natural conversational response to what they said, as if you're having a normal conversation. Don't mention tools or memory - just respond naturally to their message."
+                    
+                    try:
+                        from langchain_core.messages import SystemMessage, HumanMessage
+                        follow_up_messages = [
+                            SystemMessage(content="You are a helpful AI assistant having a natural conversation. Respond naturally to what the user said without mentioning any technical operations."),
+                            HumanMessage(content=follow_up_prompt)
+                        ]
+                        follow_up_response = main_agent.model.invoke(follow_up_messages)
+                        if hasattr(follow_up_response, 'content') and follow_up_response.content:
+                            print(follow_up_response.content)
+                        else:
+                            print("Nice to meet you!")
+                    except Exception:
+                        print("Nice to meet you!")
+                
+                content_to_print = None
+                if hasattr(result, 'content') and result.content:
+                    content_str = str(result.content)
+                    if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
+                        start_idx = content_str.find("content='") + len("content='")
+                        end_idx = content_str.find("' additional_kwargs=")
+                        if start_idx > 8 and end_idx > start_idx:
+                            content_to_print = content_str[start_idx:end_idx]
+                    else:
+                        content_to_print = content_str.strip()
+                
+                if content_to_print:
+                    print(content_to_print)
             else:
                 print(result)
         except KeyboardInterrupt:
@@ -356,7 +383,7 @@ def decrypt(encrypted_data: str, key_dir: str = ".keys"):
 @app.command()
 def daemon(
     prompts_dir: str = "src/talos/prompts",
-    model_name: str = "gpt-4",
+    model_name: str = "gpt-4o",
     temperature: float = 0.0,
 ) -> None:
     """

@@ -155,6 +155,22 @@ class Agent(BaseModel):
             self.history.append(AIMessage(content=str(modelled_result)))
             return modelled_result
         if isinstance(result, AIMessage):
+            if hasattr(result, 'content') and result.content:
+                content_str = str(result.content)
+                if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
+                    start_idx = content_str.find("content='") + len("content='")
+                    end_idx = content_str.find("' additional_kwargs=")
+                    if start_idx > 8 and end_idx > start_idx:
+                        actual_content = content_str[start_idx:end_idx]
+                        corrected_result = AIMessage(
+                            content=actual_content,
+                            additional_kwargs=result.additional_kwargs if hasattr(result, 'additional_kwargs') else {},
+                            response_metadata=result.response_metadata if hasattr(result, 'response_metadata') else {},
+                            tool_calls=result.tool_calls if hasattr(result, 'tool_calls') else []
+                        )
+                        self.history.append(corrected_result)
+                        return corrected_result
+            
             self.history.append(result)
             return result
         raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
