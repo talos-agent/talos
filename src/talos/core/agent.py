@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
@@ -99,7 +99,7 @@ class Agent(BaseModel):
         """
         context = {}
         
-        if self.dataset_manager:
+        if self.dataset_manager and query:
             relevant_documents = self.dataset_manager.search(query, k=5)
             context["relevant_documents"] = relevant_documents
             
@@ -148,52 +148,43 @@ class Agent(BaseModel):
 
     def _process_result(self, result: Any) -> BaseModel:
         if isinstance(result, AIMessage):
+            self.history.append(result)
+            
             if hasattr(result, 'tool_calls') and result.tool_calls:
-                tool_results = []
+                tool_messages = []
                 for tool_call in result.tool_calls:
                     try:
                         tool = self.tool_manager.get_tool(tool_call['name'])
                         if tool:
                             tool_result = tool.invoke(tool_call['args'])
-                            tool_results.append({
-                                'name': tool_call['name'],
-                                'args': tool_call['args'],
-                                'result': tool_result
-                            })
                             print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}", flush=True)
+                            
+                            tool_message = ToolMessage(
+                                content=str(tool_result),
+                                tool_call_id=tool_call['id']
+                            )
+                            tool_messages.append(tool_message)
                     except Exception as e:
                         print(f"❌ Tool execution error for '{tool_call['name']}': {e}", flush=True)
-                
-                content_is_empty = (
-                    not result.content or 
-                    (isinstance(result.content, str) and result.content.strip() == "")
-                )
-                if content_is_empty and tool_results:
-                    contextual_response = self._generate_contextual_response(tool_results)
-                    result = AIMessage(
-                        content=contextual_response,
-                        additional_kwargs=result.additional_kwargs if hasattr(result, 'additional_kwargs') else {},
-                        response_metadata=result.response_metadata if hasattr(result, 'response_metadata') else {},
-                        tool_calls=result.tool_calls if hasattr(result, 'tool_calls') else []
-                    )
-            
-            if hasattr(result, 'content') and result.content:
-                content_str = str(result.content)
-                if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
-                    start_idx = content_str.find("content='") + len("content='")
-                    end_idx = content_str.find("' additional_kwargs=")
-                    if start_idx > 8 and end_idx > start_idx:
-                        actual_content = content_str[start_idx:end_idx]
-                        corrected_result = AIMessage(
-                            content=actual_content,
-                            additional_kwargs=result.additional_kwargs if hasattr(result, 'additional_kwargs') else {},
-                            response_metadata=result.response_metadata if hasattr(result, 'response_metadata') else {},
-                            tool_calls=result.tool_calls if hasattr(result, 'tool_calls') else []
+                        tool_message = ToolMessage(
+                            content=f"Error: {str(e)}",
+                            tool_call_id=tool_call['id']
                         )
-                        self.history.append(corrected_result)
-                        return corrected_result
+                        tool_messages.append(tool_message)
+                
+                self.history.extend(tool_messages)
+                
+                chain = self._create_chain()
+                last_human_message = ""
+                for message in reversed(self.history):
+                    if isinstance(message, HumanMessage):
+                        last_human_message = str(message.content)
+                        break
+                context = self._build_context(last_human_message)
+                new_result = chain.invoke({"messages": self.history, **context})
+                
+                return self._process_result(new_result)
             
-            self.history.append(result)
             return result
         if isinstance(result, BaseModel):
             self.history.append(AIMessage(content=str(result)))
@@ -203,40 +194,3 @@ class Agent(BaseModel):
             self.history.append(AIMessage(content=str(modelled_result)))
             return modelled_result
         raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
-
-    def _generate_contextual_response(self, tool_results: list) -> str:
-        """Generate a contextual response based on tool execution results and user query."""
-        if not tool_results:
-            return "I've completed the requested action."
-        
-        user_query = ""
-        for message in reversed(self.history):
-            if isinstance(message, HumanMessage):
-                if isinstance(message.content, str):
-                    user_query = message.content
-                elif isinstance(message.content, list):
-                    user_query = " ".join(str(item) for item in message.content)
-                else:
-                    user_query = str(message.content)
-                break
-        
-        if len(tool_results) == 1:
-            tool_result = tool_results[0]
-            tool_name = tool_result['name']
-            
-            if tool_name == 'add_memory':
-                description = tool_result['args'].get('description', '')
-                return f"I've saved that information to memory: {description}"
-            elif 'memory' in tool_name.lower():
-                return f"I've updated the memory based on your request about: {user_query}"
-            elif 'search' in tool_name.lower():
-                return f"I've searched for information related to: {user_query}"
-            elif 'github' in tool_name.lower() or 'pr' in tool_name.lower():
-                return f"I've processed the GitHub-related request: {user_query}"
-            elif 'twitter' in tool_name.lower():
-                return f"I've analyzed the Twitter-related information for: {user_query}"
-            else:
-                return f"I've executed the {tool_name} action for your request: {user_query}"
-        else:
-            tool_names = [tr['name'] for tr in tool_results]
-            return f"I've executed {len(tool_results)} actions ({', '.join(tool_names)}) to address your request: {user_query}"
