@@ -35,6 +35,17 @@ class Router:
                 "social influence",
                 "twitter credibility",
             ],
+            "codebase_evaluation_skill": [
+                "codebase",
+                "code quality",
+                "code evaluation",
+                "repository analysis",
+                "code review",
+                "code assessment",
+                "improve code",
+                "code improvements",
+                "evaluate repository"
+            ],
             "devin": ["devin", "task", "tasks", "session", "sessions", "ai agent", "devin ai"],
         }
 
