@@ -147,7 +147,7 @@ class DatabaseDatasetBackend:
             
             return result
     
-    def search(self, query: str, k: int = 5) -> list[str]:
+    def search(self, query: str, k: int = 5, context_search: bool = False) -> list[str]:
         """Search datasets using semantic similarity."""
         query_embedding = self.embeddings_model.embed_query(query)
         
@@ -162,7 +162,7 @@ class DatabaseDatasetBackend:
             ).all()
             
             if not chunks:
-                if self.verbose:
+                if self.verbose and not context_search:
                     print("\033[33m⚠️ Dataset search: no datasets available\033[0m")
                 return []
             
@@ -176,7 +176,7 @@ class DatabaseDatasetBackend:
             top_chunks = similarities[:k]
             
             results = [chunk.content for _, chunk in top_chunks]
-            if self.verbose and results:
+            if self.verbose and results and not context_search:
                 print(f"\033[34m🔍 Dataset search: found {len(results)} relevant documents\033[0m")
             return results
     
