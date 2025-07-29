@@ -147,13 +147,6 @@ class Agent(BaseModel):
         return self._prompt_template | self.model
 
     def _process_result(self, result: Any) -> BaseModel:
-        if isinstance(result, BaseModel):
-            self.history.append(AIMessage(content=str(result)))
-            return result
-        if isinstance(result, dict) and self.schema_class:
-            modelled_result = self.schema_class.parse_obj(result)
-            self.history.append(AIMessage(content=str(modelled_result)))
-            return modelled_result
         if isinstance(result, AIMessage):
             if hasattr(result, 'tool_calls') and result.tool_calls:
                 for tool_call in result.tool_calls:
@@ -195,4 +188,11 @@ class Agent(BaseModel):
             
             self.history.append(result)
             return result
+        if isinstance(result, BaseModel):
+            self.history.append(AIMessage(content=str(result)))
+            return result
+        if isinstance(result, dict) and self.schema_class:
+            modelled_result = self.schema_class.parse_obj(result)
+            self.history.append(AIMessage(content=str(modelled_result)))
+            return modelled_result
         raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
