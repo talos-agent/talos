@@ -149,11 +149,17 @@ class Agent(BaseModel):
     def _process_result(self, result: Any) -> BaseModel:
         if isinstance(result, AIMessage):
             if hasattr(result, 'tool_calls') and result.tool_calls:
+                tool_results = []
                 for tool_call in result.tool_calls:
                     try:
                         tool = self.tool_manager.get_tool(tool_call['name'])
                         if tool:
                             tool_result = tool.invoke(tool_call['args'])
+                            tool_results.append({
+                                'name': tool_call['name'],
+                                'args': tool_call['args'],
+                                'result': tool_result
+                            })
                             print(f"🔧 Executed tool '{tool_call['name']}': {tool_result}", flush=True)
                     except Exception as e:
                         print(f"❌ Tool execution error for '{tool_call['name']}': {e}", flush=True)
@@ -162,9 +168,10 @@ class Agent(BaseModel):
                     not result.content or 
                     (isinstance(result.content, str) and result.content.strip() == "")
                 )
-                if content_is_empty:
+                if content_is_empty and tool_results:
+                    contextual_response = self._generate_contextual_response(tool_results)
                     result = AIMessage(
-                        content="Got it! I've saved that information.",
+                        content=contextual_response,
                         additional_kwargs=result.additional_kwargs if hasattr(result, 'additional_kwargs') else {},
                         response_metadata=result.response_metadata if hasattr(result, 'response_metadata') else {},
                         tool_calls=result.tool_calls if hasattr(result, 'tool_calls') else []
@@ -196,3 +203,40 @@ class Agent(BaseModel):
             self.history.append(AIMessage(content=str(modelled_result)))
             return modelled_result
         raise TypeError(f"Expected a Pydantic model or a dictionary, but got {type(result)}")
+
+    def _generate_contextual_response(self, tool_results: list) -> str:
+        """Generate a contextual response based on tool execution results and user query."""
+        if not tool_results:
+            return "I've completed the requested action."
+        
+        user_query = ""
+        for message in reversed(self.history):
+            if isinstance(message, HumanMessage):
+                if isinstance(message.content, str):
+                    user_query = message.content
+                elif isinstance(message.content, list):
+                    user_query = " ".join(str(item) for item in message.content)
+                else:
+                    user_query = str(message.content)
+                break
+        
+        if len(tool_results) == 1:
+            tool_result = tool_results[0]
+            tool_name = tool_result['name']
+            
+            if tool_name == 'add_memory':
+                description = tool_result['args'].get('description', '')
+                return f"I've saved that information to memory: {description}"
+            elif 'memory' in tool_name.lower():
+                return f"I've updated the memory based on your request about: {user_query}"
+            elif 'search' in tool_name.lower():
+                return f"I've searched for information related to: {user_query}"
+            elif 'github' in tool_name.lower() or 'pr' in tool_name.lower():
+                return f"I've processed the GitHub-related request: {user_query}"
+            elif 'twitter' in tool_name.lower():
+                return f"I've analyzed the Twitter-related information for: {user_query}"
+            else:
+                return f"I've executed the {tool_name} action for your request: {user_query}"
+        else:
+            tool_names = [tr['name'] for tr in tool_results]
+            return f"I've executed {len(tool_results)} actions ({', '.join(tool_names)}) to address your request: {user_query}"

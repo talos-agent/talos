@@ -250,7 +250,7 @@ class MainAgent(Agent):
             """
             if self.memory:
                 self.memory.add_memory(description, metadata)
-                return "Memory added successfully."
+                return f"Added to memory: {description}"
             return "Memory not configured for this agent."
 
         return add_memory

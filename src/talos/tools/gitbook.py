@@ -46,7 +46,7 @@ class GitBookTool(SupervisedTool):
         """
         response = self._session.put(page_url, json={"content": content})
         response.raise_for_status()
-        return "Page updated successfully."
+        return f"Updated GitBook page: {page_url}"
 
     def _run_unsupervised(self, tool_name: str, **kwargs: Any) -> str:
         if tool_name == "read_page":

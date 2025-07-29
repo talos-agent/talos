@@ -32,10 +32,10 @@ class DocumentLoaderTool(SupervisedTool):
         try:
             if self._is_ipfs_hash(source):
                 self._dataset_manager.add_document_from_ipfs(name, source, chunk_size, chunk_overlap)
-                return f"Successfully loaded document from IPFS hash {source} into dataset '{name}'"
+                return f"Loaded document from IPFS hash {source} into dataset '{name}'"
             else:
                 self._dataset_manager.add_document_from_url(name, source, chunk_size, chunk_overlap)
-                return f"Successfully loaded document from URL {source} into dataset '{name}'"
+                return f"Loaded document from URL {source} into dataset '{name}'"
         except Exception as e:
             return f"Failed to load document: {str(e)}"
     
