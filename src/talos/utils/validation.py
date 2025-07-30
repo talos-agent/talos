@@ -34,7 +34,7 @@ def validate_api_token_format(token: str, token_type: str) -> bool:
         return False
     
     patterns = {
-        'github': r'^(ghp_|gho_|ghu_|ghs_|ghr_)[a-zA-Z0-9]{36}$',
+        'github': r'^(ghp_|gho_|ghu_|ghs_|ghr_)[a-zA-Z0-9]{36}$|^github_pat_[a-zA-Z0-9]{82}$',
         'openai': r'^sk-[a-zA-Z0-9]{48}$',
         'twitter': r'^[a-zA-Z0-9]{25}$'
     }
