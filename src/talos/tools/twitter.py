@@ -73,6 +73,13 @@ class TwitterTool(BaseTool):
 
     def post_tweet(self, tweet: str) -> str:
         """Posts a tweet."""
+        from ..utils.validation import sanitize_user_input
+        if not tweet or not tweet.strip():
+            raise ValueError("Tweet content cannot be empty")
+        if len(tweet) > 280:
+            raise ValueError("Tweet content exceeds 280 characters")
+        tweet = sanitize_user_input(tweet, max_length=280)
+        
         if self.perspective_client:
             if not self.is_content_appropriate(tweet):
                 return "Tweet not sent. Content is inappropriate."
@@ -87,6 +94,15 @@ class TwitterTool(BaseTool):
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> str:
         """Replies to a tweet."""
+        from ..utils.validation import sanitize_user_input
+        if not tweet_id or not tweet_id.strip():
+            raise ValueError("Tweet ID cannot be empty")
+        if not tweet or not tweet.strip():
+            raise ValueError("Tweet content cannot be empty")
+        if len(tweet) > 280:
+            raise ValueError("Tweet content exceeds 280 characters")
+        tweet = sanitize_user_input(tweet, max_length=280)
+        
         if self.perspective_client:
             if not self.is_content_appropriate(tweet):
                 return "Tweet not sent. Content is inappropriate."
@@ -119,12 +135,18 @@ class TwitterTool(BaseTool):
 
     def get_follower_count(self, username: str) -> int:
         """Gets the follower count for a user."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
         return user.public_metrics.followers_count
 
     def get_following_count(self, username: str) -> int:
         """Gets the following count for a user."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
         return user.public_metrics.following_count
@@ -136,6 +158,9 @@ class TwitterTool(BaseTool):
 
     def evaluate_account(self, username: str) -> EvaluationResult:
         """Evaluates a Twitter account and returns a score."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         assert self.account_evaluator is not None
         user = self.twitter_client.get_user(username)
@@ -144,6 +169,10 @@ class TwitterTool(BaseTool):
     def evaluate_crypto_influencer(self, username: str) -> dict:
         """Evaluates a Twitter account as a crypto influencer."""
         from .crypto_influencer_evaluator import CryptoInfluencerEvaluator
+        from ..utils.validation import validate_twitter_username
+        
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
 
         assert self.twitter_client is not None
         evaluator = CryptoInfluencerEvaluator(self.twitter_client)
@@ -154,6 +183,9 @@ class TwitterTool(BaseTool):
 
     def generate_persona_prompt(self, username: str) -> str:
         """Generates a prompt to describe the voice and style of a specific twitter user."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         persona_skill = TwitterPersonaSkill(twitter_client=self.twitter_client)
         response = persona_skill.run(username=username)
