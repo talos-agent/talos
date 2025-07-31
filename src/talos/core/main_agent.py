@@ -235,6 +235,11 @@ class MainAgent(Agent):
         if self.dataset_manager:
             tool_manager.register_tool(DocumentLoaderTool(self.dataset_manager))
             tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
+        else:
+            from langchain_openai import OpenAIEmbeddings
+            basic_dataset_manager = DatasetManager(verbose=self.verbose, embeddings=OpenAIEmbeddings())
+            tool_manager.register_tool(DocumentLoaderTool(basic_dataset_manager))
+            tool_manager.register_tool(DatasetSearchTool(basic_dataset_manager))
 
         tool_manager.register_tool(ArbiScanSourceCodeTool())
         tool_manager.register_tool(ArbiScanABITool())

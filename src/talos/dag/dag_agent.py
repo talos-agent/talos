@@ -43,6 +43,23 @@ class DAGAgent(Agent):
         from langchain_core.language_models import BaseChatModel
         if not isinstance(self.model, BaseChatModel):
             raise ValueError("DAG requires a BaseChatModel, got: " + str(type(self.model)))
+        
+        if dataset_manager and self.user_id and not dataset_manager.use_database:
+            if self.verbose:
+                print("🔄 Upgrading DatasetManager to use database persistence")
+            
+            from talos.database.session import init_database
+            from langchain_openai import OpenAIEmbeddings
+            
+            init_database()
+            
+            dataset_manager = DatasetManager(
+                verbose=dataset_manager.verbose,
+                user_id=self.user_id,
+                session_id=self.session_id or "dag-session",
+                use_database=True,
+                embeddings=OpenAIEmbeddings()
+            )
             
         self.dag_manager.create_default_dag(
             model=self.model,
