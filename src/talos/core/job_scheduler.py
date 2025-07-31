@@ -116,9 +116,17 @@ class JobScheduler(BaseModel):
             logger.warning("Job scheduler is already running")
             return
         
-        self._scheduler.start()
-        self._running = True
-        logger.info("Job scheduler started")
+        try:
+            self._scheduler.start()
+            self._running = True
+            logger.info("Job scheduler started")
+        except RuntimeError as e:
+            if "no current event loop" in str(e).lower():
+                logger.warning(f"No event loop available for job scheduler: {e}")
+                logger.info("Job scheduler will remain inactive (suitable for testing)")
+            else:
+                logger.error(f"Failed to start job scheduler: {e}")
+                raise
     
     def stop(self) -> None:
         """Stop the job scheduler."""
@@ -140,6 +148,10 @@ class JobScheduler(BaseModel):
         Returns:
             True if job was found and paused, False otherwise
         """
+        if not self._running:
+            logger.warning("Job scheduler is not running, cannot pause job")
+            return False
+            
         try:
             self._scheduler.pause_job(job_name)
             logger.info(f"Paused job '{job_name}'")
@@ -158,6 +170,10 @@ class JobScheduler(BaseModel):
         Returns:
             True if job was found and resumed, False otherwise
         """
+        if not self._running:
+            logger.warning("Job scheduler is not running, cannot resume job")
+            return False
+            
         try:
             self._scheduler.resume_job(job_name)
             logger.info(f"Resumed job '{job_name}'")
