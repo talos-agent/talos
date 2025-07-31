@@ -12,7 +12,6 @@ from talos.core.memory import Memory
 from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.supervisor import Supervisor
 from talos.prompts.prompt_manager import PromptManager
-from talos.tools.memory_tool import AddMemoryTool
 from talos.tools.supervised_tool import SupervisedTool
 from talos.tools.tool_manager import ToolManager
 
@@ -50,6 +49,7 @@ class Agent(BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         if self.memory:
+            from talos.tools.memory_tool import AddMemoryTool
             self.tool_manager.register_tool(AddMemoryTool(agent=self))
 
     def set_prompt(self, name: str | list[str]):
