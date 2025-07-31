@@ -19,6 +19,7 @@ from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.service import Service
 from talos.settings import GitHubSettings
 from talos.skills.base import Skill
+from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
 from talos.skills.cryptography import CryptographySkill
 from talos.skills.pr_review import PRReviewSkill
 from talos.skills.proposals import ProposalsSkill
@@ -158,6 +159,7 @@ class MainAgent(Agent):
         skills: list[Skill] = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
             CryptographySkill(),
+            CodebaseEvaluationSkill(llm=self.model, prompt_manager=self.prompt_manager),
         ]
 
         try:
