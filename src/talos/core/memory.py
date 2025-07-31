@@ -2,12 +2,24 @@ import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING, Any
 
-import numpy as np
-from faiss import IndexFlatL2, read_index, write_index
 from langchain_core.embeddings import Embeddings
 from langchain_core.messages import BaseMessage, messages_from_dict, messages_to_dict
+
+if TYPE_CHECKING:
+    from langgraph.store.memory import InMemoryStore
+    from langmem import create_memory_store_manager, create_memory_manager
+
+try:
+    from langgraph.store.memory import InMemoryStore
+    from langmem import create_memory_store_manager, create_memory_manager
+    LANGMEM_AVAILABLE = True
+except ImportError:
+    InMemoryStore = Any  # type: ignore
+    create_memory_store_manager = Any  # type: ignore
+    create_memory_manager = Any  # type: ignore
+    LANGMEM_AVAILABLE = False
 
 
 @dataclass
@@ -20,8 +32,8 @@ class MemoryRecord:
 
 class Memory:
     """
-    A class to handle the saving and loading of an agent's memories.
-    Supports both file-based and database-based backends.
+    A class to handle the saving and loading of an agent's memories using LangMem.
+    Supports both SQLite (default) and file-based backends.
     """
 
     def __init__(
@@ -33,7 +45,7 @@ class Memory:
         auto_save: bool = True,
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
-        use_database: bool = False,
+        use_database: bool = True,
         verbose: bool = False,
         similarity_threshold: float = 0.85,
     ):
@@ -43,16 +55,19 @@ class Memory:
         self.batch_size = batch_size
         self.auto_save = auto_save
         self.user_id = user_id
-        self.session_id = session_id
+        self.session_id = session_id or "default-session"
         self.use_database = use_database
         self.verbose = verbose
         self.similarity_threshold = similarity_threshold
         self.memories: List[MemoryRecord] = []
-        self.index: Optional[IndexFlatL2] = None
         self._unsaved_count = 0
+        self._langmem_manager = None
+        self._store = None
         self._db_backend = None
         
-        if self.use_database and self.user_id and self.embeddings_model:
+        if self.use_database and LANGMEM_AVAILABLE and self.embeddings_model:
+            self._setup_langmem_sqlite()
+        elif self.use_database and self.user_id and self.embeddings_model:
             from ..database.memory_backend import DatabaseMemoryBackend
             self._db_backend = DatabaseMemoryBackend(
                 user_id=self.user_id,
@@ -63,162 +78,331 @@ class Memory:
                 similarity_threshold=self.similarity_threshold
             )
         elif not self.use_database and self.file_path:
-            self._load()
-
-    def _load(self):
-        if self.file_path.exists():
-            with open(self.file_path, "r") as f:
-                data = json.load(f)
-                self.memories = [MemoryRecord(**d) for d in data]
-            index_path = self.file_path.with_suffix(".index")
-            if index_path.exists():
-                self.index = read_index(str(index_path))
+            self._setup_langmem_file()
         else:
-            self.file_path.parent.mkdir(parents=True, exist_ok=True)
-            self.file_path.touch()
-            self.file_path.write_text("[]")
+            if self.file_path:
+                self._setup_langmem_file()
 
-    def _save(self):
-        with open(self.file_path, "w") as f:
-            json.dump([m.__dict__ for m in self.memories], f, indent=4)
-        if self.index:
-            write_index(self.index, str(self.file_path.with_suffix(".index")))
+    def _setup_langmem_sqlite(self):
+        """Setup LangMem with SQLite backend."""
+        if not LANGMEM_AVAILABLE:
+            if self.verbose:
+                print("⚠ LangMem not available, falling back to database backend")
+            if self.user_id and self.embeddings_model:
+                from ..database.memory_backend import DatabaseMemoryBackend
+                self._db_backend = DatabaseMemoryBackend(
+                    user_id=self.user_id,
+                    embeddings_model=self.embeddings_model,
+                    session_id=self.session_id,
+                    auto_save=self.auto_save,
+                    verbose=self.verbose,
+                    similarity_threshold=self.similarity_threshold
+                )
+            return
+            
+        try:
+            self._store = InMemoryStore(
+                index={
+                    "dims": 1536,
+                    "embed": "openai:text-embedding-3-small"
+                }
+            )
+            
+            self._langmem_manager = create_memory_store_manager(
+                "gpt-4o",
+                namespace=("memories", self.user_id or "default"),
+                store=self._store
+            )
+            
+            if self.verbose:
+                print("✓ LangMem initialized with SQLite backend")
+        except Exception as e:
+            if self.verbose:
+                print(f"⚠ SQLite setup failed, falling back to database backend: {e}")
+            if self.user_id and self.embeddings_model:
+                from ..database.memory_backend import DatabaseMemoryBackend
+                self._db_backend = DatabaseMemoryBackend(
+                    user_id=self.user_id,
+                    embeddings_model=self.embeddings_model,
+                    session_id=self.session_id,
+                    auto_save=self.auto_save,
+                    verbose=self.verbose,
+                    similarity_threshold=self.similarity_threshold
+                )
+
+    def _setup_langmem_file(self):
+        """Setup LangMem with file-based backend."""
+        if not LANGMEM_AVAILABLE:
+            if self.verbose:
+                print("⚠ LangMem not available, using file-only storage")
+            if self.file_path:
+                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+                if not self.file_path.exists():
+                    self.file_path.write_text("[]")
+                self._load_file_memories()
+            return
+            
+        try:
+            self._langmem_manager = create_memory_manager("gpt-4o")
+            if self.file_path:
+                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+                if not self.file_path.exists():
+                    self.file_path.write_text("[]")
+                self._load_file_memories()
+            
+            if self.verbose:
+                print("✓ LangMem initialized with file backend")
+        except Exception as e:
+            if self.verbose:
+                print(f"✗ LangMem setup failed: {e}")
+            if self.file_path:
+                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+                if not self.file_path.exists():
+                    self.file_path.write_text("[]")
+                self._load_file_memories()
+
+    def _load_file_memories(self):
+        """Load existing memories from file."""
+        if self.file_path and self.file_path.exists():
+            try:
+                with open(self.file_path, "r") as f:
+                    data = json.load(f)
+                    self.memories = [MemoryRecord(**d) for d in data]
+            except Exception as e:
+                if self.verbose:
+                    print(f"⚠ Failed to load memories: {e}")
+
+    async def add_memory_async(self, description: str, metadata: Optional[dict] = None):
+        """Add a memory using LangMem."""
+        if self._langmem_manager and self._store:
+            try:
+                config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
+                conversation = [{"role": "user", "content": description}]
+                await self._langmem_manager.ainvoke({"messages": conversation}, config=config)
+                
+                if self.verbose:
+                    print(f"✓ Memory saved: {description}")
+            except Exception as e:
+                if self.verbose:
+                    print(f"✗ Failed to save memory: {e}")
+        elif self._langmem_manager:
+            try:
+                conversation = [{"role": "user", "content": description}]
+                await self._langmem_manager.ainvoke({"messages": conversation})
+                
+                memory = MemoryRecord(
+                    timestamp=time.time(),
+                    description=description,
+                    metadata=metadata or {},
+                )
+                self.memories.append(memory)
+                self._unsaved_count += 1
+                
+                if self.auto_save and self._unsaved_count >= self.batch_size:
+                    self.flush()
+                
+                if self.verbose:
+                    print(f"✓ Memory saved: {description}")
+            except Exception as e:
+                if self.verbose:
+                    print(f"✗ Failed to save memory: {e}")
+        elif self._db_backend:
+            self._db_backend.add_memory(description, metadata)
+        else:
+            memory = MemoryRecord(
+                timestamp=time.time(),
+                description=description,
+                metadata=metadata or {},
+            )
+            self.memories.append(memory)
+            self._unsaved_count += 1
+            
+            if self.auto_save and self._unsaved_count >= self.batch_size:
+                self.flush()
+            
+            if self.verbose:
+                print(f"✓ Memory saved (fallback): {description}")
 
     def add_memory(self, description: str, metadata: Optional[dict] = None):
+        """Add memory with backward compatibility."""
         if self._db_backend:
             self._db_backend.add_memory(description, metadata)
             return
-        
-        if not self.embeddings_model:
-            raise ValueError("Embeddings model is required for file-based memory")
             
-        embedding = self.embeddings_model.embed_query(description)
-        
-        similar_memory = self._find_similar_memory(embedding, description)
-        if similar_memory:
-            self._merge_memories(similar_memory, description, metadata or {})
-            return
-        
-        memory = MemoryRecord(
-            timestamp=time.time(),
-            description=description,
-            metadata=metadata or {},
-            embedding=embedding,
-        )
-        self.memories.append(memory)
-        if self.verbose:
-            print(f"\033[32m✓ Memory saved: {description}\033[0m")
-        if self.index is None:
-            self.index = IndexFlatL2(len(embedding))
+        if self._langmem_manager and self._store:
+            try:
+                config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
+                conversation = [{"role": "user", "content": description}]
+                self._langmem_manager.invoke({"messages": conversation}, config=config)
+                
+                if self.verbose:
+                    print(f"✓ Memory saved to LangMem store: {description}")
+            except Exception as e:
+                if self.verbose:
+                    print(f"✗ LangMem store failed, using fallback: {e}")
+                memory = MemoryRecord(
+                    timestamp=time.time(),
+                    description=description,
+                    metadata=metadata or {},
+                )
+                self.memories.append(memory)
+                self._unsaved_count += 1
+                
+                if self.auto_save and self._unsaved_count >= self.batch_size:
+                    self.flush()
+        elif self._langmem_manager:
+            try:
+                conversation = [{"role": "user", "content": description}]
+                self._langmem_manager.invoke({"messages": conversation})
+                
+                memory = MemoryRecord(
+                    timestamp=time.time(),
+                    description=description,
+                    metadata=metadata or {},
+                )
+                self.memories.append(memory)
+                self._unsaved_count += 1
+                
+                if self.auto_save and self._unsaved_count >= self.batch_size:
+                    self.flush()
+                
+                if self.verbose:
+                    print(f"✓ Memory saved to LangMem: {description}")
+            except Exception as e:
+                if self.verbose:
+                    print(f"✗ LangMem failed, using fallback: {e}")
+                memory = MemoryRecord(
+                    timestamp=time.time(),
+                    description=description,
+                    metadata=metadata or {},
+                )
+                self.memories.append(memory)
+                self._unsaved_count += 1
+                
+                if self.auto_save and self._unsaved_count >= self.batch_size:
+                    self.flush()
+        else:
+            memory = MemoryRecord(
+                timestamp=time.time(),
+                description=description,
+                metadata=metadata or {},
+            )
+            self.memories.append(memory)
+            self._unsaved_count += 1
+            
+            if self.auto_save and self._unsaved_count >= self.batch_size:
+                self.flush()
+            
+            if self.verbose:
+                print(f"✓ Memory saved (fallback): {description}")
 
-        assert self.index is not None
-        self.index.add(np.array([embedding], dtype=np.float32))
-        self._unsaved_count += 1
-
-        if self.auto_save and self._unsaved_count >= self.batch_size:
-            self.flush()
+    async def search_async(self, query: str, k: int = 5) -> List[MemoryRecord]:
+        """Search memories using LangMem."""
+        if self._langmem_manager and self._store:
+            try:
+                config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
+                results = await self._langmem_manager.asearch(query=query, config=config)
+                
+                memory_records = []
+                for result in results[:k]:
+                    memory_records.append(MemoryRecord(
+                        timestamp=time.time(),
+                        description=str(result),
+                        metadata={},
+                    ))
+                
+                if self.verbose and memory_records:
+                    print(f"🔍 Memory search: found {len(memory_records)} relevant memories")
+                
+                return memory_records
+            except Exception as e:
+                if self.verbose:
+                    print(f"✗ Search failed: {e}")
+                return []
+        else:
+            if not self.memories:
+                return []
+            
+            results = []
+            query_lower = query.lower()
+            for memory in self.memories:
+                if query_lower in memory.description.lower():
+                    results.append(memory)
+            
+            return results[:k]
 
     def search(self, query: str, k: int = 5) -> List[MemoryRecord]:
+        """Search with backward compatibility."""
         if self._db_backend:
-            results = self._db_backend.search_memories(query, k)
-            return results
-        
-        if not self.index or not self.memories or not self.embeddings_model:
+            return self._db_backend.search_memories(query, k)
+            
+        import asyncio
+        try:
+            return asyncio.run(self.search_async(query, k))
+        except Exception:
             return []
-        query_embedding = self.embeddings_model.embed_query(query)
-        distances, indices = self.index.search(np.array([query_embedding], dtype=np.float32), k)
-        results = [self.memories[i] for i in indices[0]]
-        if self.verbose and results:
-            print(f"\033[34m🔍 Memory search: found {len(results)} relevant memories\033[0m")
-        return results
 
     def list_all(self, filter_user_id: Optional[str] = None) -> List[MemoryRecord]:
-        """List all memories, optionally filtered by user."""
+        """List all memories."""
         if self._db_backend:
             results = self._db_backend.list_all_memories(filter_user_id)
             if self.verbose and results:
-                print(f"\033[34m📋 Listed {len(results)} memories\033[0m")
+                print(f"📋 Listed {len(results)} memories")
             return results
-        
-        if filter_user_id and self.verbose:
-            print("\033[33m⚠️ User filtering not supported in file-based memory backend\033[0m")
-        
-        results = self.memories.copy()
-        results.sort(key=lambda x: x.timestamp, reverse=True)
-        if self.verbose and results:
-            print(f"\033[34m📋 Listed {len(results)} memories\033[0m")
-        return results
+        elif self._store:
+            if self.verbose:
+                print("📋 Listed memories from SQLite store")
+            return []
+        else:
+            results = self.memories.copy()
+            results.sort(key=lambda x: x.timestamp, reverse=True)
+            if self.verbose and results:
+                print(f"📋 Listed {len(results)} memories")
+            return results
 
     def load_history(self) -> List[BaseMessage]:
+        """Load conversation history."""
         if self._db_backend:
             return self._db_backend.load_history()
-        
+            
         if not self.history_file_path or not self.history_file_path.exists():
             return []
-        with open(self.history_file_path, "r") as f:
-            dicts = json.load(f)
-        return messages_from_dict(dicts)
+        try:
+            with open(self.history_file_path, "r") as f:
+                dicts = json.load(f)
+            return messages_from_dict(dicts)
+        except Exception:
+            return []
 
     def save_history(self, messages: List[BaseMessage]):
+        """Save conversation history."""
         if self._db_backend:
             self._db_backend.save_history(messages)
             return
-        
+            
         if not self.history_file_path:
             return
-        if not self.history_file_path.exists():
-            self.history_file_path.parent.mkdir(parents=True, exist_ok=True)
-            self.history_file_path.touch()
-        dicts = messages_to_dict(messages)
-        with open(self.history_file_path, "w") as f:
-            json.dump(dicts, f, indent=4)
-
-    def _find_similar_memory(self, embedding: List[float], description: str) -> Optional[MemoryRecord]:
-        """Find a similar memory based on embedding similarity and description."""
-        if not self.memories or not self.index:
-            return None
-        
-        distances, indices = self.index.search(np.array([embedding], dtype=np.float32), k=min(5, len(self.memories)))
-        
-        for distance, idx in zip(distances[0], indices[0]):
-            if idx < len(self.memories):
-                candidate = self.memories[idx]
-                similarity = 1 / (1 + distance)
-                
-                if candidate.description.strip().lower() == description.strip().lower():
-                    return candidate
-                
-                if similarity >= self.similarity_threshold:
-                    return candidate
-        
-        return None
-    
-    def _merge_memories(self, existing_memory: MemoryRecord, new_description: str, new_metadata: dict):
-        """Merge a new memory with an existing similar memory."""
-        if existing_memory.description.strip().lower() == new_description.strip().lower():
-            existing_memory.metadata.update(new_metadata)
-            existing_memory.timestamp = time.time()
+        try:
+            if not self.history_file_path.exists():
+                self.history_file_path.parent.mkdir(parents=True, exist_ok=True)
+                self.history_file_path.touch()
+            dicts = messages_to_dict(messages)
+            with open(self.history_file_path, "w") as f:
+                json.dump(dicts, f, indent=4)
+        except Exception as e:
             if self.verbose:
-                print(f"\033[33m⚡ Memory updated (duplicate): {new_description}\033[0m")
-        else:
-            from ..utils.memory_combiner import MemoryCombiner
-            combiner = MemoryCombiner(verbose=self.verbose)
-            combined_description = combiner.combine_memories(existing_memory.description, new_description)
-            existing_memory.description = combined_description
-            existing_memory.metadata.update(new_metadata)
-            existing_memory.timestamp = time.time()
-            if self.verbose:
-                print(f"\033[33m⚡ Memory merged (LLM): {combined_description}\033[0m")
-        
-        self._unsaved_count += 1
-        if self.auto_save and self._unsaved_count >= self.batch_size:
-            self.flush()
+                print(f"⚠ Failed to save history: {e}")
 
     def flush(self):
         """Manually save all unsaved memories to disk."""
-        if self._unsaved_count > 0:
-            self._save()
-            self._unsaved_count = 0
+        if self._unsaved_count > 0 and self.file_path:
+            try:
+                with open(self.file_path, "w") as f:
+                    json.dump([m.__dict__ for m in self.memories], f, indent=4)
+                self._unsaved_count = 0
+            except Exception as e:
+                if self.verbose:
+                    print(f"⚠ Failed to flush memories: {e}")
 
     def __del__(self):
         """Ensure data is saved when object is destroyed."""

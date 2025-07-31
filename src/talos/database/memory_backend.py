@@ -1,3 +1,4 @@
+import warnings
 import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional
@@ -7,6 +8,12 @@ from langchain_core.messages import BaseMessage, AIMessage, HumanMessage, System
 from .models import User, ConversationHistory, Message, Memory as MemoryModel
 from .session import get_session
 from ..core.memory import MemoryRecord
+
+warnings.warn(
+    "DatabaseMemoryBackend is deprecated. Use Memory class with use_database=True for SQLite via LangMem.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class DatabaseMemoryBackend:
