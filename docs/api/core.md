@@ -165,19 +165,9 @@ class MemoryItem(BaseModel):
     embedding: Optional[List[float]] = None
 ```
 
-## Router System
+## Skill and Service Management
 
-### Router
-
-Routes queries to appropriate skills and services based on content analysis.
-
-```python
-class Router:
-    def __init__(self):
-        """Initialize router with empty skill and service registries."""
-```
-
-#### Methods
+Skills and services are now managed directly by the MainAgent without a separate Router component.
 
 ##### `register_skill(skill: Skill, keywords: List[str]) -> None`
 
@@ -412,31 +402,24 @@ for result in results:
 memory.flush()
 ```
 
-### Router Usage
+### MainAgent Skill Management
 
 ```python
-from talos.core.router import Router
+from talos.core.main_agent import MainAgent
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
 
-# Create router
-router = Router()
+# Create main agent (skills are automatically registered)
+agent = MainAgent(model=model, prompts_dir="prompts")
 
-# Register skills
-router.register_skill(
-    ProposalsSkill(), 
-    keywords=["proposal", "governance", "vote"]
-)
-router.register_skill(
-    TwitterSentimentSkill(),
-    keywords=["sentiment", "twitter", "social"]
-)
+# Skills are managed directly by MainAgent
+# Access skills through agent.skills list
+for skill in agent.skills:
+    print(f"Available skill: {skill.name}")
 
-# Route queries
-handler = router.route("Analyze this governance proposal")
-if handler:
-    result = handler.run(proposal_text="...")
-    print(result.answers[0])
+# Use agent to process queries
+result = agent.run("Analyze this governance proposal")
+print(result)
 ```
 
 ## Error Handling

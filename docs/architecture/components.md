@@ -76,7 +76,7 @@ Talos uses a variety of tools to interact with external services like Twitter, G
 
 The `MainAgent` serves as the top-level orchestrator that integrates all system components:
 
-- **Router Integration** - Routes queries to appropriate skills/services
+- **Direct Skill/Service Management** - Manages skills and services directly
 - **Hypervisor Integration** - Ensures all actions are supervised
 - **Tool Management** - Manages available tools and their registration
 - **Memory System** - Persistent conversation history and semantic search

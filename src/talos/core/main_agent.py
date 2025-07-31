@@ -9,7 +9,6 @@ from langchain_core.tools import BaseTool, tool
 
 from talos.core.agent import Agent
 from talos.core.job_scheduler import JobScheduler
-from talos.core.router import Router
 from talos.core.scheduled_job import ScheduledJob
 from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.hypervisor import Hypervisor
@@ -37,7 +36,8 @@ class MainAgent(Agent):
     Also manages scheduled jobs for autonomous execution.
     """
 
-    router: Optional[Router] = None
+    skills: list[Skill] = []
+    services: list[Service] = []
     prompts_dir: str
     model: BaseChatModel
     is_main_agent: bool = True
@@ -51,7 +51,7 @@ class MainAgent(Agent):
         self._setup_prompt_manager()
         self._ensure_user_id()
         self._setup_memory()
-        self._setup_router()
+        self._setup_skills_and_services()
         self._setup_hypervisor()
         self._setup_dataset_manager()
         self._setup_tool_manager()
@@ -152,7 +152,7 @@ class MainAgent(Agent):
                     verbose=self.verbose,
                 )
 
-    def _setup_router(self) -> None:
+    def _setup_skills_and_services(self) -> None:
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
         services: list[Service] = []
@@ -198,8 +198,8 @@ class MainAgent(Agent):
         except ValueError:
             pass  # Twitter token not available, skip Twitter-dependent skills
 
-        if not self.router:
-            self.router = Router(services=services, skills=skills)
+        self.skills = skills
+        self.services = services
 
     def _setup_hypervisor(self) -> None:
         if not self.prompt_manager:
@@ -226,9 +226,8 @@ class MainAgent(Agent):
                 self.dataset_manager = DatasetManager(verbose=self.verbose)
 
     def _setup_tool_manager(self) -> None:
-        assert self.router is not None
         tool_manager = ToolManager()
-        for skill in self.router.skills:
+        for skill in self.skills:
             tool_manager.register_tool(skill.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
         tool_manager.register_tool(self._add_memory_tool())
@@ -339,8 +338,11 @@ class MainAgent(Agent):
             Returns:
                 The ticket object.
             """
-            assert self.router is not None
-            skill = self.router.get_skill(service_name)
+            skill = None
+            for s in self.skills:
+                if s.name == service_name:
+                    skill = s
+                    break
             if not skill:
                 raise ValueError(f"Skill '{service_name}' not found.")
             ticket = skill.get_ticket_status(ticket_id)
@@ -351,16 +353,16 @@ class MainAgent(Agent):
         return get_ticket_status
 
     def _build_context(self, query: str, **kwargs) -> dict:
-        assert self.router is not None
-
         base_context = super()._build_context(query, **kwargs)
 
-        active_tickets = self.router.get_all_tickets()
+        active_tickets = []
+        for skill in self.skills:
+            active_tickets.extend(skill.get_all_tickets())
         ticket_info = [f"- {ticket.ticket_id}: last updated at {ticket.updated_at}" for ticket in active_tickets]
 
         main_agent_context = {
             "time": datetime.now().isoformat(),
-            "available_services": ", ".join([service.name for service in self.router.services]),
+            "available_services": ", ".join([service.name for service in self.services]),
             "active_tickets": " ".join(ticket_info),
         }
 

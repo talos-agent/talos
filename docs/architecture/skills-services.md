@@ -206,14 +206,14 @@ Handles GitHub operations and PR reviews:
 4. **Test Coverage** - Ensure adequate test coverage
 5. **Documentation** - Verify documentation updates
 
-## Router System
+## Skill and Service Management
 
-### Query Routing
+### Direct Management
 
-The `Router` directs queries to appropriate skills and services:
+The `MainAgent` directly manages skills and services without a separate Router:
 
 ```python
-class Router:
+class MainAgent:
     def __init__(self):
         self.skills = []
         self.services = []
@@ -235,12 +235,8 @@ class Router:
 Skills and services are dynamically registered:
 
 ```python
-# Skill registration
-router.register_skill(ProposalsSkill(), keywords=["proposal", "governance"])
-router.register_skill(TwitterSentimentSkill(), keywords=["sentiment", "twitter"])
-
-# Service registration
-router.register_service(YieldManagerService(), keywords=["yield", "apr", "staking"])
+# Skills and services are automatically registered during MainAgent initialization
+# based on available API keys and configuration
 ```
 
 ## Integration Patterns

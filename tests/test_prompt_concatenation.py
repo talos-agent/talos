@@ -4,7 +4,6 @@ import pytest
 from langchain_core.language_models import BaseChatModel
 
 from talos.core.main_agent import MainAgent
-from talos.core.router import Router
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
@@ -65,15 +64,9 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         mock_file_prompt_manager.return_value = mock_prompt_manager
         mock_hypervisor.return_value = MagicMock(spec=Hypervisor)
 
-        from talos.skills.proposals import ProposalsSkill
-
         MainAgent(
             model=mock_model,
             prompts_dir="",
             prompt_manager=mock_prompt_manager,
             schema=None,
-            router=Router(
-                services=[],
-                skills=[ProposalsSkill(llm=mock_model)],
-            ),
         )

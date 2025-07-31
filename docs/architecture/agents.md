@@ -11,7 +11,8 @@ The `MainAgent` serves as the top-level orchestrator that integrates all system 
 ```python
 class MainAgent:
     def __init__(self):
-        self.router = Router()
+        self.skills = []
+        self.services = []
         self.hypervisor = Hypervisor()
         self.tool_manager = ToolManager()
         self.memory = Memory()
@@ -26,7 +27,7 @@ class MainAgent:
 
 **Workflow:**
 1. Receives user input
-2. Routes query through Router to appropriate skill/service
+2. Routes query directly to appropriate skill/service
 3. Executes actions through SupervisedTool wrappers
 4. Stores results in Memory for future reference
 5. Returns structured response to user
