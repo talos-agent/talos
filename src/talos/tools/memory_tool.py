@@ -7,12 +7,6 @@ from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:
     from talos.core.agent import Agent
-else:
-    import sys
-    if 'talos.core.agent' in sys.modules:
-        from talos.core.agent import Agent
-    else:
-        Agent = 'Agent'  # Use string annotation as fallback
 
 
 class AddMemorySchema(BaseModel):
