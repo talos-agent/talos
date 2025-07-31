@@ -1,23 +1,28 @@
 """
-Talos DAG (Directed Acyclic Graph) module for LangGraph-based agent architecture.
+Talos DAG Module
 
-This module provides a DAG-based approach to agent execution where nodes can be:
-- Data sources (DatasetManager, external APIs)
-- Agents (specialized AI agents for different tasks)
-- Prompts (prompt templates and management)
-- Tools (external integrations and utilities)
-- Services (business logic implementations)
-- Skills (LLM-driven capabilities)
+This module implements a DAG (Directed Acyclic Graph) architecture for the Talos AI agent,
+using LangGraph's memory and tools patterns for centralized state management and tool execution.
 
-The DAG architecture enables:
-- Modular and extensible agent design
-- Proposal-based architecture modifications
-- On-chain representation of agent structure
-- Supervised execution with hypervisor integration
+The DAG architecture supports various node types:
+- Data sources (databases, APIs, files)
+- Agents (specialized AI agents for specific tasks)
+- Prompts (dynamic prompt generation and management)
+- Tools (LangGraph-integrated tools and APIs)
+- Services (backend services and integrations)
+- Skills (specialized capabilities and workflows)
+
+Key features:
+- LangGraph-centric architecture with checkpointer memory
+- Thread-based conversation tracking
+- Integrated tool execution with LangGraph ToolNode
+- Modular design with pluggable node types
+- On-chain representation and storage
+- State management and context passing between nodes
 """
 
 from talos.dag.dag_agent import DAGAgent
-from talos.dag.graph import TalosDAG, DAGProposal
+from talos.dag.graph import TalosDAG
 from talos.dag.manager import DAGManager
 from talos.dag.nodes import (
     DAGNode,
@@ -30,12 +35,10 @@ from talos.dag.nodes import (
     RouterNode,
     GraphState,
 )
-from talos.dag.proposal_skill import DAGProposalSkill, DAGProposalResult
 
 __all__ = [
     "DAGAgent",
     "TalosDAG",
-    "DAGProposal",
     "DAGManager",
     "DAGNode",
     "AgentNode",
@@ -46,6 +49,4 @@ __all__ = [
     "PromptNode",
     "RouterNode",
     "GraphState",
-    "DAGProposalSkill",
-    "DAGProposalResult",
 ]

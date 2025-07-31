@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, TypedDict
 
 from langchain_core.tools import BaseTool
+from langchain_core.messages import BaseMessage
+from langgraph.prebuilt import ToolNode as LangGraphToolNode
 from pydantic import BaseModel, ConfigDict
 
 from talos.core.agent import Agent
@@ -15,7 +17,7 @@ from talos.skills.base import Skill
 
 class GraphState(TypedDict):
     """State that flows through the DAG nodes."""
-    messages: List[str]
+    messages: List[BaseMessage]
     context: Dict[str, Any]
     current_query: str
     results: Dict[str, Any]
@@ -58,7 +60,8 @@ class AgentNode(DAGNode):
         result = self.agent.run(query)
         
         state["results"][self.node_id] = result
-        state["messages"].append(f"Agent {self.name} processed: {query}")
+        from langchain_core.messages import AIMessage
+        state["messages"].append(AIMessage(content=f"Agent {self.name} processed: {query}"))
         
         return state
     
@@ -87,7 +90,8 @@ class SkillNode(DAGNode):
         result = self.skill.run(**context)
         
         state["results"][self.node_id] = result
-        state["messages"].append(f"Skill {self.name} executed")
+        from langchain_core.messages import AIMessage
+        state["messages"].append(AIMessage(content=f"Skill {self.name} executed"))
         
         return state
     
@@ -113,7 +117,8 @@ class ServiceNode(DAGNode):
     def execute(self, state: GraphState) -> GraphState:
         """Execute the service with parameters from state."""
         state["results"][self.node_id] = f"Service {self.service.name} executed"
-        state["messages"].append(f"Service {self.name} processed")
+        from langchain_core.messages import AIMessage
+        state["messages"].append(AIMessage(content=f"Service {self.name} processed"))
         
         return state
     
@@ -129,24 +134,31 @@ class ServiceNode(DAGNode):
 
 
 class ToolNode(DAGNode):
-    """Node that wraps a Tool for execution in the DAG."""
+    """Node that wraps LangGraph's ToolNode for execution in the DAG."""
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    tool: BaseTool
+    tools: List[BaseTool]
     node_type: str = "tool"
+    _langgraph_tool_node: Optional[LangGraphToolNode] = None
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.tools:
+            self._langgraph_tool_node = LangGraphToolNode(self.tools)
     
     def execute(self, state: GraphState) -> GraphState:
-        """Execute the tool with parameters from state."""
-        context = state.get("context", {})
+        """Execute the tools using LangGraph's ToolNode."""
+        if not self._langgraph_tool_node:
+            state["results"][self.node_id] = "Error: No tools configured"
+            return state
         
         try:
-            result = self.tool.invoke(context)
-            state["results"][self.node_id] = result
-            state["messages"].append(f"Tool {self.name} executed successfully")
+            result = self._langgraph_tool_node.invoke(state)
+            state.update(result)
+            state["results"][self.node_id] = "Tools executed successfully"
         except Exception as e:
-            state["results"][self.node_id] = f"Tool execution failed: {str(e)}"
-            state["messages"].append(f"Tool {self.name} failed: {str(e)}")
+            state["results"][self.node_id] = f"Error: {str(e)}"
         
         return state
     
@@ -156,8 +168,7 @@ class ToolNode(DAGNode):
             "node_type": self.node_type,
             "name": self.name,
             "description": self.description,
-            "tool_name": self.tool.name,
-            "metadata": self.metadata
+            "tool_count": len(self.tools) if self.tools else 0
         }
 
 
@@ -180,7 +191,8 @@ class DataSourceNode(DAGNode):
         else:
             state["results"][self.node_id] = f"Data from {self.name}"
         
-        state["messages"].append(f"Data source {self.name} provided data")
+        from langchain_core.messages import AIMessage
+        state["messages"].append(AIMessage(content=f"Data source {self.name} provided data"))
         return state
     
     def get_node_config(self) -> Dict[str, Any]:
@@ -213,7 +225,8 @@ class PromptNode(DAGNode):
         else:
             state["results"][self.node_id] = f"Failed to load prompt: {', '.join(self.prompt_names)}"
         
-        state["messages"].append(f"Prompt node {self.name} processed")
+        from langchain_core.messages import AIMessage
+        state["messages"].append(AIMessage(content=f"Prompt node {self.name} processed"))
         return state
     
     def get_node_config(self) -> Dict[str, Any]:
@@ -247,7 +260,8 @@ class RouterNode(DAGNode):
         
         state["context"]["next_node"] = next_node or "default"
         state["results"][self.node_id] = f"Routed to: {next_node or 'default'}"
-        state["messages"].append(f"Router {self.name} determined next path")
+        from langchain_core.messages import AIMessage
+        state["messages"].append(AIMessage(content=f"Router {self.name} determined next path"))
         
         return state
     

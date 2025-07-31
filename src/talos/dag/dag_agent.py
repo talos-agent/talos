@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, ConfigDict
@@ -54,33 +54,18 @@ class DAGAgent(Agent):
         )
     
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
-        """Execute the query using the DAG instead of traditional agent flow."""
-        if self.memory:
-            relevant_memories = self.memory.search(message)
-            kwargs["relevant_memories"] = relevant_memories
-            
-            if history is None:
-                history = self.memory.load_history()
+        """Execute the query using the DAG with LangGraph memory patterns."""
+        thread_id = kwargs.get("thread_id", "default_conversation")
         
         context = self._build_context(message, **kwargs)
         context.update(kwargs)
         
-        if history:
-            context["conversation_history"] = [msg.content for msg in history]
-        
         try:
             if self.dag_manager is None:
                 raise ValueError("DAG manager not initialized")
-            result_state = self.dag_manager.execute_dag(message, context)
+            result_state = self.dag_manager.execute_dag(message, context, thread_id=thread_id)
             
             processed_result = self._process_dag_result(result_state, message)
-            
-            if self.memory:
-                from langchain_core.messages import AIMessage
-                if isinstance(processed_result, AIMessage):
-                    self.add_to_history([processed_result])
-                    self.memory.save_history(self.history)
-            
             return processed_result
             
         except Exception as e:
@@ -113,24 +98,6 @@ class DAGAgent(Agent):
         
         return ai_message
     
-    def propose_dag_modification(
-        self,
-        title: str,
-        description: str,
-        proposed_changes: Dict[str, Any],
-        rationale: str
-    ) -> str:
-        """Propose a modification to the DAG architecture."""
-        if self.dag_manager is None:
-            raise ValueError("DAG manager not initialized")
-        proposal = self.dag_manager.propose_dag_modification(
-            title=title,
-            description=description,
-            proposed_changes=proposed_changes,
-            rationale=rationale
-        )
-        return proposal.proposal_id
-    
     def get_dag_visualization(self) -> str:
         """Get a visualization of the current DAG structure."""
         if self.dag_manager is None:
@@ -142,15 +109,3 @@ class DAGAgent(Agent):
         if self.dag_manager is None:
             return "{}"
         return self.dag_manager.serialize_dag_for_chain()
-    
-    def evaluate_dag_proposal(self, proposal_id: str, approved: bool) -> bool:
-        """Evaluate and potentially apply a DAG modification proposal."""
-        if self.dag_manager is None:
-            return False
-        return self.dag_manager.evaluate_proposal(proposal_id, approved)
-    
-    def get_proposal_status(self) -> Dict[str, Any]:
-        """Get the status of all DAG modification proposals."""
-        if self.dag_manager is None:
-            return {"pending": 0, "approved": 0, "pending_proposals": [], "approved_proposals": []}
-        return self.dag_manager.get_proposal_status()

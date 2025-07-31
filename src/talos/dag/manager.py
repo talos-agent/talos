@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import uuid
 from typing import Any, Dict, List, Optional
 
 from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, ConfigDict
 
-from talos.dag.graph import TalosDAG, DAGProposal
+from talos.dag.graph import TalosDAG
 from talos.dag.nodes import (
     SkillNode, ServiceNode, ToolNode, 
     DataSourceNode, PromptNode, RouterNode, GraphState
@@ -25,8 +24,6 @@ class DAGManager(BaseModel):
     
     current_dag: Optional[TalosDAG] = None
     dag_history: List[TalosDAG] = []
-    pending_proposals: List[DAGProposal] = []
-    approved_proposals: List[DAGProposal] = []
     
     def create_default_dag(
         self,
@@ -99,12 +96,13 @@ class DAGManager(BaseModel):
             )
             dag.add_node(service_node)
         
-        for tool_name, tool in tool_manager.tools.items():
+        if tool_manager.tools:
+            tools_list = list(tool_manager.tools.values())
             tool_node = ToolNode(
-                node_id=f"{tool_name}_tool",
-                name=f"{tool_name.title()} Tool",
-                description=f"Tool for {tool_name} operations",
-                tool=tool
+                node_id="tools",
+                name="Tools",
+                description="LangGraph tools for various operations",
+                tools=tools_list
             )
             dag.add_node(tool_node)
         
@@ -119,49 +117,7 @@ class DAGManager(BaseModel):
         self.current_dag = dag
         return dag
     
-    def propose_dag_modification(
-        self,
-        title: str,
-        description: str,
-        proposed_changes: Dict[str, Any],
-        rationale: str
-    ) -> DAGProposal:
-        """Create a new DAG modification proposal."""
-        proposal = DAGProposal(
-            proposal_id=str(uuid.uuid4()),
-            title=title,
-            description=description,
-            proposed_changes=proposed_changes,
-            rationale=rationale,
-            impact_assessment="Pending evaluation"
-        )
-        
-        self.pending_proposals.append(proposal)
-        return proposal
-    
-    def evaluate_proposal(self, proposal_id: str, approved: bool) -> bool:
-        """Evaluate and potentially apply a DAG modification proposal."""
-        proposal = None
-        for p in self.pending_proposals:
-            if p.proposal_id == proposal_id:
-                proposal = p
-                break
-        
-        if not proposal:
-            return False
-        
-        self.pending_proposals.remove(proposal)
-        
-        if approved and self.current_dag:
-            self.dag_history.append(self.current_dag)
-            
-            self.current_dag = proposal.apply_to_dag(self.current_dag)
-            self.approved_proposals.append(proposal)
-            return True
-        
-        return False
-    
-    def execute_dag(self, query: str, context: Optional[Dict[str, Any]] = None) -> GraphState:
+    def execute_dag(self, query: str, context: Optional[Dict[str, Any]] = None, thread_id: str = "default") -> GraphState:
         """Execute the current DAG with a query."""
         if not self.current_dag:
             raise ValueError("No DAG available for execution")
@@ -174,7 +130,7 @@ class DAGManager(BaseModel):
             "metadata": {"dag_name": self.current_dag.name}
         }
         
-        return self.current_dag.execute(initial_state)
+        return self.current_dag.execute(initial_state, thread_id=thread_id)
     
     def get_dag_visualization(self) -> str:
         """Get a text visualization of the current DAG."""
@@ -197,26 +153,3 @@ class DAGManager(BaseModel):
         
         self.current_dag = self.dag_history.pop()
         return True
-    
-    def get_proposal_status(self) -> Dict[str, Any]:
-        """Get status of all proposals."""
-        return {
-            "pending": len(self.pending_proposals),
-            "approved": len(self.approved_proposals),
-            "pending_proposals": [
-                {
-                    "id": p.proposal_id,
-                    "title": p.title,
-                    "description": p.description
-                }
-                for p in self.pending_proposals
-            ],
-            "approved_proposals": [
-                {
-                    "id": p.proposal_id,
-                    "title": p.title,
-                    "description": p.description
-                }
-                for p in self.approved_proposals
-            ]
-        }

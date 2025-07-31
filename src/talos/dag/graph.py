@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict, List, Optional
 
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import MemorySaver
 from pydantic import BaseModel, ConfigDict
 
 from talos.dag.nodes import DAGNode, GraphState
@@ -21,6 +22,7 @@ class TalosDAG(BaseModel):
     conditional_edges: Dict[str, Dict[str, str]] = {}
     graph: Optional[StateGraph] = None
     compiled_graph: Optional[Any] = None
+    checkpointer: Optional[MemorySaver] = None
     
     def add_node(self, node: DAGNode) -> None:
         """Add a node to the DAG."""
@@ -77,17 +79,19 @@ class TalosDAG(BaseModel):
             first_node = next(iter(self.nodes.keys()))
             self.graph.add_edge(START, first_node)
         
-        self.compiled_graph = self.graph.compile()
+        self.checkpointer = MemorySaver()
+        self.compiled_graph = self.graph.compile(checkpointer=self.checkpointer)
     
-    def execute(self, initial_state: GraphState) -> GraphState:
-        """Execute the DAG with the given initial state."""
+    def execute(self, initial_state: GraphState, thread_id: str = "default") -> GraphState:
+        """Execute the DAG with the given initial state and thread ID for memory."""
         if not self.compiled_graph:
             self._rebuild_graph()
         
         if not self.compiled_graph:
             raise ValueError("No compiled graph available for execution")
         
-        result = self.compiled_graph.invoke(initial_state)
+        config = {"configurable": {"thread_id": thread_id}}
+        result = self.compiled_graph.invoke(initial_state, config=config)
         return result
     
     def get_graph_config(self) -> Dict[str, Any]:
@@ -132,37 +136,3 @@ class TalosDAG(BaseModel):
                     lines.append(f"    - {condition} -> {target}")
         
         return "\n".join(lines)
-
-
-class DAGProposal(BaseModel):
-    """Proposal for modifying the DAG structure."""
-    
-    proposal_id: str
-    title: str
-    description: str
-    proposed_changes: Dict[str, Any]
-    rationale: str
-    impact_assessment: str
-    
-    def apply_to_dag(self, dag: TalosDAG) -> TalosDAG:
-        """Apply the proposed changes to a DAG."""
-        changes = self.proposed_changes
-        
-        if "add_nodes" in changes:
-            for node_config in changes["add_nodes"]:
-                pass
-        
-        if "remove_nodes" in changes:
-            for node_id in changes["remove_nodes"]:
-                dag.remove_node(node_id)
-        
-        if "add_edges" in changes:
-            for edge in changes["add_edges"]:
-                dag.add_edge(edge["source"], edge["destination"])
-        
-        if "remove_edges" in changes:
-            for edge in changes["remove_edges"]:
-                dag.edges = [(s, d) for s, d in dag.edges if not (s == edge["source"] and d == edge["destination"])]
-        
-        dag._rebuild_graph()
-        return dag
