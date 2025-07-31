@@ -287,9 +287,10 @@ When adding new skills to Talos:
            pass
    ```
 
-2. **Register with router**:
+2. **Add to MainAgent setup**:
    ```python
-   router.register_skill(MyNewSkill(), keywords=["keyword1", "keyword2"])
+   # Skills are automatically registered in MainAgent._setup_skills_and_services()
+   # Add your skill to the skills list in that method
    ```
 
 3. **Add comprehensive tests**

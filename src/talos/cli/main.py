@@ -8,7 +8,6 @@ from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
 
 from talos.core.main_agent import MainAgent
-from talos.core.router import Router
 from talos.services.key_management import KeyManagement
 from talos.settings import OpenAISettings
 from talos.cli.daemon import TalosDaemon
@@ -74,11 +73,9 @@ def main_command(
 
     # Create the main agent
     model = ChatOpenAI(model=model_name, temperature=temperature)
-    router = Router([], [])
     main_agent = MainAgent(
         prompts_dir=prompts_dir,
         model=model,
-        router=router,
         schema=None,
         user_id=user_id,
         use_database_memory=use_database,

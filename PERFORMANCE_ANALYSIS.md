@@ -102,7 +102,7 @@ def load_prompts(self) -> None:
 **Issue**: Tools are registered in loops without checking for duplicates efficiently.
 
 ```python
-for skill in self.router.skills:
+for skill in self.skills:
     tool_manager.register_tool(skill.create_ticket_tool())  # ← Potential duplicate registrations
 ```
 

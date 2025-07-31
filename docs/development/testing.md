@@ -20,7 +20,7 @@ tests/
 │   ├── core/
 │   │   ├── test_agent.py
 │   │   ├── test_memory.py
-│   │   └── test_router.py
+│   │   └── test_main_agent.py
 │   ├── skills/
 │   │   ├── test_proposals.py
 │   │   ├── test_sentiment.py

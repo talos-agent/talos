@@ -10,7 +10,6 @@ from typing import Optional
 from langchain_openai import ChatOpenAI
 
 from talos.core.main_agent import MainAgent
-from talos.core.router import Router
 from talos.settings import OpenAISettings
 
 logger = logging.getLogger(__name__)
@@ -53,12 +52,10 @@ class TalosDaemon:
         logger.info("Initializing MainAgent...")
         
         model = ChatOpenAI(model=self.model_name, temperature=self.temperature)
-        router = Router([], [])
         
         self.main_agent = MainAgent(
             prompts_dir=self.prompts_dir,
             model=model,
-            router=router,
             schema=None,
         )
         
