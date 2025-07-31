@@ -59,6 +59,8 @@ class Agent(BaseModel):
         prompt_names = name if isinstance(name, list) else [name]
         if self.dataset_manager:
             prompt_names.append("relevant_documents_prompt")
+        if self.memory:
+            prompt_names.append("relevant_memories_prompt")
         
         prompt = self.prompt_manager.get_prompt(prompt_names)
         if not prompt:
@@ -102,6 +104,9 @@ class Agent(BaseModel):
         if self.dataset_manager and query:
             relevant_documents = self.dataset_manager.search(query, k=5, context_search=True)
             context["relevant_documents"] = relevant_documents
+        
+        if "relevant_memories" in kwargs and kwargs["relevant_memories"]:
+            context["relevant_memories"] = kwargs["relevant_memories"]
             
         return context
 
@@ -109,6 +114,9 @@ class Agent(BaseModel):
         if self.memory:
             relevant_memories = self.memory.search(message)
             kwargs["relevant_memories"] = relevant_memories
+            
+            if self.verbose and relevant_memories:
+                print(f"🧠 Found {len(relevant_memories)} relevant memories for context")
             
             if history is None:
                 history = self.memory.load_history()

@@ -313,6 +313,10 @@ class Memory:
                 
                 if self.verbose and memory_records:
                     print(f"🔍 Memory search: found {len(memory_records)} relevant memories")
+                    for i, memory in enumerate(memory_records, 1):
+                        print(f"  {i}. {memory.description}")
+                        if memory.metadata:
+                            print(f"     Metadata: {memory.metadata}")
                 
                 return memory_records
             except Exception as e:
@@ -348,6 +352,12 @@ class Memory:
             results = self._db_backend.list_all_memories(filter_user_id)
             if self.verbose and results:
                 print(f"📋 Listed {len(results)} memories")
+                for i, memory in enumerate(results[:5], 1):
+                    print(f"  {i}. {memory.description}")
+                    if memory.metadata:
+                        print(f"     Metadata: {memory.metadata}")
+                if len(results) > 5:
+                    print(f"  ... and {len(results) - 5} more memories")
             return results
         elif self._store:
             if self.verbose:
@@ -358,6 +368,12 @@ class Memory:
             results.sort(key=lambda x: x.timestamp, reverse=True)
             if self.verbose and results:
                 print(f"📋 Listed {len(results)} memories")
+                for i, memory in enumerate(results[:5], 1):
+                    print(f"  {i}. {memory.description}")
+                    if memory.metadata:
+                        print(f"     Metadata: {memory.metadata}")
+                if len(results) > 5:
+                    print(f"  ... and {len(results) - 5} more memories")
             return results
 
     def load_history(self) -> List[BaseMessage]:
