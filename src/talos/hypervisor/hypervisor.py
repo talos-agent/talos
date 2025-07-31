@@ -31,8 +31,19 @@ class Hypervisor(Agent, Supervisor):
         """
         Approves or denies an action.
         """
+        from talos.utils.validation import sanitize_user_input
+        
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
+        
+        if not action or not action.strip():
+            raise ValueError("Action cannot be empty")
+        
+        action = sanitize_user_input(action, max_length=1000)
+        
+        if not isinstance(args, dict):
+            raise ValueError("Args must be a dictionary")
+        
         agent_history = self.agent.history if self.agent else []
         prompt = self.prompt_manager.get_prompt("hypervisor")
         if not prompt:
@@ -45,7 +56,15 @@ class Hypervisor(Agent, Supervisor):
                 agent_history=agent_history,
             )
         )
-        result = json.loads(str(response))
-        if result["approve"]:
+        
+        try:
+            result = json.loads(str(response))
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON response from hypervisor: {e}")
+        
+        if not isinstance(result, dict):
+            raise ValueError("Hypervisor response must be a JSON object")
+        
+        if result.get("approve"):
             return True, None
         return False, result.get("reason")

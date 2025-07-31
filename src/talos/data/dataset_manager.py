@@ -4,7 +4,6 @@ import re
 from io import BytesIO
 from typing import Any, Optional
 
-import requests
 from bs4 import BeautifulSoup
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
@@ -167,8 +166,9 @@ class DatasetManager(BaseModel):
 
     def _fetch_content_from_url(self, url: str) -> str:
         """Fetch content from URL, handling different content types."""
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
+        from talos.utils.http_client import SecureHTTPClient
+        http_client = SecureHTTPClient()
+        response = http_client.get(url)
 
         content_type = response.headers.get("content-type", "").lower()
 

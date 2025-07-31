@@ -1,9 +1,9 @@
 import os
-import requests
 import json
 from typing import Optional, Dict, Any
 
 from talos.models.arbiscan import ContractSourceCode, ContractABI, ArbiScanResponse, ArbiScanABIResponse
+from talos.utils.http_client import SecureHTTPClient
 
 
 class ArbiScanClient:
@@ -27,8 +27,8 @@ class ArbiScanClient:
         if self.api_key:
             params["apikey"] = self.api_key
             
-        response = requests.get(self.base_url, params=params)
-        response.raise_for_status()
+        http_client = SecureHTTPClient()
+        response = http_client.get(self.base_url, params=params)
         return response.json()
     
     def get_contract_source_code(self, contract_address: str) -> ContractSourceCode:
@@ -45,6 +45,9 @@ class ArbiScanClient:
             ValueError: If contract is not verified or not found
             requests.RequestException: If API request fails
         """
+        from talos.utils.validation import sanitize_user_input
+        contract_address = sanitize_user_input(contract_address, max_length=100)
+        
         params = {
             "module": "contract",
             "action": "getsourcecode",
@@ -79,6 +82,9 @@ class ArbiScanClient:
             ValueError: If contract is not verified or not found
             requests.RequestException: If API request fails
         """
+        from talos.utils.validation import sanitize_user_input
+        contract_address = sanitize_user_input(contract_address, max_length=100)
+        
         params = {
             "module": "contract",
             "action": "getabi",

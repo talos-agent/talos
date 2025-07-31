@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
+import logging
 
 import tweepy
 from pydantic import model_validator
@@ -7,6 +8,8 @@ from pydantic_settings import BaseSettings
 from textblob import TextBlob
 
 from talos.models.twitter import TwitterUser, Tweet, ReferencedTweet
+
+logger = logging.getLogger(__name__)
 
 
 class PaginatedTwitterResponse:
@@ -31,6 +34,14 @@ class TwitterConfig(BaseSettings):
     def validate_bearer_token(self):
         if not self.TWITTER_BEARER_TOKEN:
             raise ValueError("TWITTER_BEARER_TOKEN environment variable is required but not set")
+        
+        from talos.utils.validation import validate_api_token_format, mask_sensitive_data
+        if not validate_api_token_format(self.TWITTER_BEARER_TOKEN, 'twitter'):
+            logger.warning("Twitter bearer token format appears invalid")
+        
+        masked_token = mask_sensitive_data(self.TWITTER_BEARER_TOKEN)
+        logger.info(f"Twitter client initialized with token: {masked_token}")
+        
         return self
 
 
@@ -78,6 +89,10 @@ class TweepyClient(TwitterClient):
         self.client = tweepy.Client(bearer_token=config.TWITTER_BEARER_TOKEN)
 
     def get_user(self, username: str) -> TwitterUser:
+        from talos.utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
+        
         response = self.client.get_user(
             username=username,
             user_fields=[
@@ -107,6 +122,12 @@ class TweepyClient(TwitterClient):
     def search_tweets(
         self, query: str, start_time: Optional[str] = None, max_tweets: int = 500
     ) -> PaginatedTwitterResponse:
+        from talos.utils.validation import sanitize_user_input
+        if not query or not query.strip():
+            raise ValueError("Search query cannot be empty")
+        query = sanitize_user_input(query, max_length=500)
+        if max_tweets <= 0 or max_tweets > 1000:
+            raise ValueError("max_tweets must be between 1 and 1000")
         all_tweets: list[Any] = []
         all_users: list[Any] = []
         next_token = None
@@ -143,6 +164,10 @@ class TweepyClient(TwitterClient):
         return PaginatedTwitterResponse(all_tweets, all_users, request_count)
 
     def get_user_timeline(self, username: str) -> list[Tweet]:
+        from talos.utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
+        
         user = self.get_user(username)
         if not user:
             return []
@@ -162,6 +187,10 @@ class TweepyClient(TwitterClient):
         return [self._convert_to_tweet_model(tweet) for tweet in (response.data or [])]
 
     def get_user_mentions(self, username: str) -> list[Tweet]:
+        from talos.utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
+        
         user = self.get_user(username)
         if not user:
             return []
@@ -181,6 +210,9 @@ class TweepyClient(TwitterClient):
         return [self._convert_to_tweet_model(tweet) for tweet in (response.data or [])]
 
     def get_tweet(self, tweet_id: int) -> Tweet:
+        if not isinstance(tweet_id, int) or tweet_id <= 0:
+            raise ValueError(f"Invalid tweet ID: {tweet_id}")
+        
         response = self.client.get_tweet(
             str(tweet_id),
             tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"]
@@ -191,6 +223,11 @@ class TweepyClient(TwitterClient):
         """
         Gets the sentiment of tweets that match a search query.
         """
+        from talos.utils.validation import sanitize_user_input
+        if not search_query or not search_query.strip():
+            raise ValueError("Search query cannot be empty")
+        search_query = sanitize_user_input(search_query, max_length=500)
+        
         response = self.search_tweets(search_query)
         sentiment = 0
         if response.data:
@@ -201,9 +238,23 @@ class TweepyClient(TwitterClient):
         return 0
 
     def post_tweet(self, tweet: str) -> Any:
+        from talos.utils.validation import sanitize_user_input
+        if not tweet or not tweet.strip():
+            raise ValueError("Tweet content cannot be empty")
+        if len(tweet) > 280:
+            raise ValueError("Tweet content exceeds 280 characters")
+        tweet = sanitize_user_input(tweet, max_length=280)
         return self.client.create_tweet(text=tweet)
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
+        from talos.utils.validation import sanitize_user_input
+        if not tweet_id or not tweet_id.strip():
+            raise ValueError("Tweet ID cannot be empty")
+        if not tweet or not tweet.strip():
+            raise ValueError("Tweet content cannot be empty")
+        if len(tweet) > 280:
+            raise ValueError("Tweet content exceeds 280 characters")
+        tweet = sanitize_user_input(tweet, max_length=280)
         return self.client.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
 
     def _convert_to_tweet_model(self, tweet_data: Any) -> Tweet:
