@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import asyncio
+import base64
 import os
 from typing import Optional
 
 import typer
 from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
+from nacl.public import PublicKey, SealedBox
 
 from talos.core.main_agent import MainAgent
 from talos.services.key_management import KeyManagement
@@ -16,6 +19,7 @@ from talos.cli.twitter import twitter_app
 from talos.cli.proposals import proposals_app
 from talos.cli.memory import memory_app
 from talos.cli.arbiscan import arbiscan_app
+from talos.database.utils import cleanup_temporary_users, get_user_stats
 
 app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
@@ -23,8 +27,6 @@ app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
 app.add_typer(memory_app, name="memory")
 app.add_typer(arbiscan_app, name="arbiscan")
-
-
 
 
 @app.callback()
@@ -38,19 +40,6 @@ def callback(
     The main entry point for the Talos agent.
     """
     pass
-
-
-@app.command("main")
-def main_cli(
-    query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
-    user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
-    use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
-):
-    """
-    Run the interactive Talos agent.
-    """
-    main_command(query=query, verbose=verbose, user_id=user_id, use_database=use_database)
 
 
 @app.command(name="main")
@@ -103,16 +92,7 @@ def main_command(
                 break
             result = main_agent.run(user_input)
             if isinstance(result, AIMessage):
-                if hasattr(result, 'content') and result.content:
-                    content_str = str(result.content)
-                    if content_str.startswith("content='") and "' additional_kwargs=" in content_str:
-                        start_idx = content_str.find("content='") + len("content='")
-                        end_idx = content_str.find("' additional_kwargs=")
-                        if start_idx > 8 and end_idx > start_idx:
-                            content_to_print = content_str[start_idx:end_idx]
-                            print(content_to_print)
-                    else:
-                        print(content_str.strip())
+                print(result.content)
             else:
                 print(result)
         except KeyboardInterrupt:
@@ -146,10 +126,6 @@ def encrypt(data: str, public_key_file: str):
     with open(public_key_file, "rb") as f:
         public_key = f.read()
 
-    import base64
-
-    from nacl.public import PublicKey, SealedBox
-
     sealed_box = SealedBox(PublicKey(public_key))
     encrypted = sealed_box.encrypt(data.encode())
     print(base64.b64encode(encrypted).decode())
@@ -161,8 +137,6 @@ def decrypt(encrypted_data: str, key_dir: str = ".keys"):
     Decrypts a message.
     """
     km = KeyManagement(key_dir=key_dir)
-    import base64
-
     decoded_data = base64.b64decode(encrypted_data)
     print(km.decrypt(decoded_data))
 
@@ -176,8 +150,6 @@ def daemon(
     """
     Run the Talos agent in daemon mode for continuous operation with scheduled jobs.
     """
-    import asyncio
-    
     daemon = TalosDaemon(
         prompts_dir=prompts_dir,
         model_name=model_name,
@@ -194,8 +166,6 @@ def cleanup_users(
     """
     Clean up temporary users and their conversation data.
     """
-    from talos.database.utils import cleanup_temporary_users, get_user_stats
-    
     if dry_run:
         stats = get_user_stats()
         print("Current database stats:")
@@ -214,8 +184,6 @@ def db_stats() -> None:
     """
     Show database statistics.
     """
-    from talos.database.utils import get_user_stats
-    
     stats = get_user_stats()
     print("Database Statistics:")
     print(f"  Total users: {stats['total_users']}")
@@ -225,8 +193,6 @@ def db_stats() -> None:
     if stats['total_users'] > 0:
         temp_percentage = (stats['temporary_users'] / stats['total_users']) * 100
         print(f"  Temporary user percentage: {temp_percentage:.1f}%")
-
-
 
 
 if __name__ == "__main__":
