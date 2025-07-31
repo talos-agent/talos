@@ -46,9 +46,15 @@ def get_source_code(
     except ValueError as e:
         error_msg = str(e)
         if "NOTOK" in error_msg or "Missing/Invalid API Key" in error_msg:
-            typer.echo("Error: Arbiscan API key is required to get contract source code.", err=True)
-            typer.echo("Please provide an API key using the --api-key option.", err=True)
-            typer.echo("You can get a free API key from https://arbiscan.io/apis", err=True)
+            provided_api_key = api_key or os.getenv("ARBISCAN_API_KEY")
+            if not provided_api_key:
+                typer.echo("Error: Arbiscan API key is required to get contract source code.", err=True)
+                typer.echo("Please provide an API key using the --api-key option or set the ARBISCAN_API_KEY environment variable.", err=True)
+                typer.echo("You can get a free API key from https://arbiscan.io/apis", err=True)
+            else:
+                typer.echo("Error: Invalid Arbiscan API key provided.", err=True)
+                typer.echo("Please check your API key and try again.", err=True)
+                typer.echo("You can get a free API key from https://arbiscan.io/apis", err=True)
         else:
             typer.echo(f"Error: {error_msg}", err=True)
         raise typer.Exit(1)
