@@ -85,6 +85,21 @@ class Memory:
 
     def _setup_langmem_sqlite(self):
         """Setup LangMem with SQLite backend."""
+        if not LANGMEM_AVAILABLE:
+            if self.verbose:
+                print("⚠ LangMem not available, falling back to database backend")
+            if self.user_id and self.embeddings_model:
+                from ..database.memory_backend import DatabaseMemoryBackend
+                self._db_backend = DatabaseMemoryBackend(
+                    user_id=self.user_id,
+                    embeddings_model=self.embeddings_model,
+                    session_id=self.session_id,
+                    auto_save=self.auto_save,
+                    verbose=self.verbose,
+                    similarity_threshold=self.similarity_threshold
+                )
+            return
+            
         try:
             self._store = InMemoryStore(
                 index={
@@ -117,6 +132,16 @@ class Memory:
 
     def _setup_langmem_file(self):
         """Setup LangMem with file-based backend."""
+        if not LANGMEM_AVAILABLE:
+            if self.verbose:
+                print("⚠ LangMem not available, using file-only storage")
+            if self.file_path:
+                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+                if not self.file_path.exists():
+                    self.file_path.write_text("[]")
+                self._load_file_memories()
+            return
+            
         try:
             self._langmem_manager = create_memory_manager("gpt-4o")
             if self.file_path:
@@ -130,6 +155,11 @@ class Memory:
         except Exception as e:
             if self.verbose:
                 print(f"✗ LangMem setup failed: {e}")
+            if self.file_path:
+                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+                if not self.file_path.exists():
+                    self.file_path.write_text("[]")
+                self._load_file_memories()
 
     def _load_file_memories(self):
         """Load existing memories from file."""
@@ -178,6 +208,20 @@ class Memory:
                     print(f"✗ Failed to save memory: {e}")
         elif self._db_backend:
             self._db_backend.add_memory(description, metadata)
+        else:
+            memory = MemoryRecord(
+                timestamp=time.time(),
+                description=description,
+                metadata=metadata or {},
+            )
+            self.memories.append(memory)
+            self._unsaved_count += 1
+            
+            if self.auto_save and self._unsaved_count >= self.batch_size:
+                self.flush()
+            
+            if self.verbose:
+                print(f"✓ Memory saved (fallback): {description}")
 
     def add_memory(self, description: str, metadata: Optional[dict] = None):
         """Add memory with backward compatibility."""
@@ -185,18 +229,72 @@ class Memory:
             self._db_backend.add_memory(description, metadata)
             return
             
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(asyncio.run, self.add_memory_async(description, metadata))
-                    future.result()
-            else:
-                asyncio.run(self.add_memory_async(description, metadata))
-        except Exception:
-            asyncio.run(self.add_memory_async(description, metadata))
+        if self._langmem_manager and self._store:
+            try:
+                config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
+                conversation = [{"role": "user", "content": description}]
+                self._langmem_manager.invoke({"messages": conversation}, config=config)
+                
+                if self.verbose:
+                    print(f"✓ Memory saved to LangMem store: {description}")
+            except Exception as e:
+                if self.verbose:
+                    print(f"✗ LangMem store failed, using fallback: {e}")
+                memory = MemoryRecord(
+                    timestamp=time.time(),
+                    description=description,
+                    metadata=metadata or {},
+                )
+                self.memories.append(memory)
+                self._unsaved_count += 1
+                
+                if self.auto_save and self._unsaved_count >= self.batch_size:
+                    self.flush()
+        elif self._langmem_manager:
+            try:
+                conversation = [{"role": "user", "content": description}]
+                self._langmem_manager.invoke({"messages": conversation})
+                
+                memory = MemoryRecord(
+                    timestamp=time.time(),
+                    description=description,
+                    metadata=metadata or {},
+                )
+                self.memories.append(memory)
+                self._unsaved_count += 1
+                
+                if self.auto_save and self._unsaved_count >= self.batch_size:
+                    self.flush()
+                
+                if self.verbose:
+                    print(f"✓ Memory saved to LangMem: {description}")
+            except Exception as e:
+                if self.verbose:
+                    print(f"✗ LangMem failed, using fallback: {e}")
+                memory = MemoryRecord(
+                    timestamp=time.time(),
+                    description=description,
+                    metadata=metadata or {},
+                )
+                self.memories.append(memory)
+                self._unsaved_count += 1
+                
+                if self.auto_save and self._unsaved_count >= self.batch_size:
+                    self.flush()
+        else:
+            memory = MemoryRecord(
+                timestamp=time.time(),
+                description=description,
+                metadata=metadata or {},
+            )
+            self.memories.append(memory)
+            self._unsaved_count += 1
+            
+            if self.auto_save and self._unsaved_count >= self.batch_size:
+                self.flush()
+            
+            if self.verbose:
+                print(f"✓ Memory saved (fallback): {description}")
 
     async def search_async(self, query: str, k: int = 5) -> List[MemoryRecord]:
         """Search memories using LangMem."""
