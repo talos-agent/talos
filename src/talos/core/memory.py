@@ -2,18 +2,23 @@ import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING, Any
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.messages import BaseMessage, messages_from_dict, messages_to_dict
+
+if TYPE_CHECKING:
+    from langgraph.store.memory import InMemoryStore
+    from langmem import create_memory_store_manager, create_memory_manager
+
 try:
     from langgraph.store.memory import InMemoryStore
     from langmem import create_memory_store_manager, create_memory_manager
     LANGMEM_AVAILABLE = True
 except ImportError:
-    InMemoryStore = None
-    create_memory_store_manager = None
-    create_memory_manager = None
+    InMemoryStore = Any  # type: ignore
+    create_memory_store_manager = Any  # type: ignore
+    create_memory_manager = Any  # type: ignore
     LANGMEM_AVAILABLE = False
 
 
