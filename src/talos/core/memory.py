@@ -2,7 +2,7 @@ import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Any
+from typing import List, Optional, TYPE_CHECKING, Any, Union
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.messages import BaseMessage, messages_from_dict, messages_to_dict
@@ -46,7 +46,7 @@ class Memory:
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
         use_database: bool = True,
-        verbose: bool = False,
+        verbose: Union[bool, int] = False,
         similarity_threshold: float = 0.85,
     ):
         self.file_path = file_path
@@ -83,10 +83,16 @@ class Memory:
             if self.file_path:
                 self._setup_langmem_file()
 
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
+
     def _setup_langmem_sqlite(self):
         """Setup LangMem with SQLite backend."""
         if not LANGMEM_AVAILABLE:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print("⚠ LangMem not available, falling back to database backend")
             if self.user_id and self.embeddings_model:
                 from ..database.memory_backend import DatabaseMemoryBackend
@@ -114,10 +120,10 @@ class Memory:
                 store=self._store
             )
             
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print("✓ LangMem initialized with SQLite backend")
         except Exception as e:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"⚠ SQLite setup failed, falling back to database backend: {e}")
             if self.user_id and self.embeddings_model:
                 from ..database.memory_backend import DatabaseMemoryBackend
@@ -133,7 +139,7 @@ class Memory:
     def _setup_langmem_file(self):
         """Setup LangMem with file-based backend."""
         if not LANGMEM_AVAILABLE:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print("⚠ LangMem not available, using file-only storage")
             if self.file_path:
                 self.file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,10 +156,10 @@ class Memory:
                     self.file_path.write_text("[]")
                 self._load_file_memories()
             
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print("✓ LangMem initialized with file backend")
         except Exception as e:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"✗ LangMem setup failed: {e}")
             if self.file_path:
                 self.file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -169,7 +175,7 @@ class Memory:
                     data = json.load(f)
                     self.memories = [MemoryRecord(**d) for d in data]
             except Exception as e:
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"⚠ Failed to load memories: {e}")
 
     async def add_memory_async(self, description: str, metadata: Optional[dict] = None):
@@ -180,10 +186,10 @@ class Memory:
                 conversation = [{"role": "user", "content": description}]
                 await self._langmem_manager.ainvoke({"messages": conversation}, config=config)
                 
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved: {description}")
             except Exception as e:
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✗ Failed to save memory: {e}")
         elif self._langmem_manager:
             try:
@@ -201,10 +207,10 @@ class Memory:
                 if self.auto_save and self._unsaved_count >= self.batch_size:
                     self.flush()
                 
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved: {description}")
             except Exception as e:
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✗ Failed to save memory: {e}")
         elif self._db_backend:
             self._db_backend.add_memory(description, metadata)
@@ -220,7 +226,7 @@ class Memory:
             if self.auto_save and self._unsaved_count >= self.batch_size:
                 self.flush()
             
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"✓ Memory saved (fallback): {description}")
 
     def add_memory(self, description: str, metadata: Optional[dict] = None):
@@ -235,10 +241,10 @@ class Memory:
                 conversation = [{"role": "user", "content": description}]
                 self._langmem_manager.invoke({"messages": conversation}, config=config)
                 
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved to LangMem store: {description}")
             except Exception as e:
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✗ LangMem store failed, using fallback: {e}")
                 memory = MemoryRecord(
                     timestamp=time.time(),
@@ -266,10 +272,10 @@ class Memory:
                 if self.auto_save and self._unsaved_count >= self.batch_size:
                     self.flush()
                 
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved to LangMem: {description}")
             except Exception as e:
-                if self.verbose:
+                if self._get_verbose_level() >= 1:
                     print(f"✗ LangMem failed, using fallback: {e}")
                 memory = MemoryRecord(
                     timestamp=time.time(),
@@ -293,7 +299,7 @@ class Memory:
             if self.auto_save and self._unsaved_count >= self.batch_size:
                 self.flush()
             
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"✓ Memory saved (fallback): {description}")
 
     async def search_async(self, query: str, k: int = 5) -> List[MemoryRecord]:
@@ -311,13 +317,23 @@ class Memory:
                         metadata={},
                     ))
                 
-                if self.verbose and memory_records:
+                verbose_level = self._get_verbose_level()
+                if verbose_level >= 1 and memory_records:
                     print(f"🔍 Memory search: found {len(memory_records)} relevant memories")
+                    if verbose_level >= 2:
+                        for i, memory in enumerate(memory_records, 1):
+                            print(f"  {i}. {memory.description}")
+                            if memory.metadata:
+                                print(f"     Metadata: {memory.metadata}")
                 
                 return memory_records
             except Exception as e:
-                if self.verbose:
+                verbose_level = self._get_verbose_level()
+                if verbose_level >= 1:
                     print(f"✗ Search failed: {e}")
+                    if verbose_level >= 2:
+                        print(f"  Error details: {str(e)}")
+                        print(f"  Query: {query}")
                 return []
         else:
             if not self.memories:
@@ -346,18 +362,34 @@ class Memory:
         """List all memories."""
         if self._db_backend:
             results = self._db_backend.list_all_memories(filter_user_id)
-            if self.verbose and results:
+            verbose_level = self._get_verbose_level()
+            if verbose_level >= 1 and results:
                 print(f"📋 Listed {len(results)} memories")
+                if verbose_level >= 2:
+                    for i, memory in enumerate(results[:5], 1):
+                        print(f"  {i}. {memory.description}")
+                        if memory.metadata:
+                            print(f"     Metadata: {memory.metadata}")
+                    if len(results) > 5:
+                        print(f"  ... and {len(results) - 5} more memories")
             return results
         elif self._store:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print("📋 Listed memories from SQLite store")
             return []
         else:
             results = self.memories.copy()
             results.sort(key=lambda x: x.timestamp, reverse=True)
-            if self.verbose and results:
+            verbose_level = self._get_verbose_level()
+            if verbose_level >= 1 and results:
                 print(f"📋 Listed {len(results)} memories")
+                if verbose_level >= 2:
+                    for i, memory in enumerate(results[:5], 1):
+                        print(f"  {i}. {memory.description}")
+                        if memory.metadata:
+                            print(f"     Metadata: {memory.metadata}")
+                    if len(results) > 5:
+                        print(f"  ... and {len(results) - 5} more memories")
             return results
 
     def load_history(self) -> List[BaseMessage]:
@@ -390,8 +422,12 @@ class Memory:
             with open(self.history_file_path, "w") as f:
                 json.dump(dicts, f, indent=4)
         except Exception as e:
-            if self.verbose:
+            verbose_level = self._get_verbose_level()
+            if verbose_level >= 1:
                 print(f"⚠ Failed to save history: {e}")
+                if verbose_level >= 2:
+                    print(f"  Error details: {str(e)}")
+                    print(f"  History file: {self.history_file_path}")
 
     def flush(self):
         """Manually save all unsaved memories to disk."""
@@ -401,8 +437,12 @@ class Memory:
                     json.dump([m.__dict__ for m in self.memories], f, indent=4)
                 self._unsaved_count = 0
             except Exception as e:
-                if self.verbose:
+                verbose_level = self._get_verbose_level()
+                if verbose_level >= 1:
                     print(f"⚠ Failed to flush memories: {e}")
+                    if verbose_level >= 2:
+                        print(f"  Error details: {str(e)}")
+                        print(f"  Memory file: {self.file_path}")
 
     def __del__(self):
         """Ensure data is saved when object is destroyed."""

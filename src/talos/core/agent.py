@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
@@ -42,7 +42,7 @@ class Agent(BaseModel):
     user_id: Optional[str] = None
     session_id: Optional[str] = None
     use_database_memory: bool = False
-    verbose: bool = False
+    verbose: Union[bool, int] = False
 
     _prompt_template: ChatPromptTemplate = PrivateAttr()
     history: list[BaseMessage] = []
@@ -59,6 +59,8 @@ class Agent(BaseModel):
         prompt_names = name if isinstance(name, list) else [name]
         if self.dataset_manager:
             prompt_names.append("relevant_documents_prompt")
+        if self.memory:
+            prompt_names.append("relevant_memories_prompt")
         
         prompt = self.prompt_manager.get_prompt(prompt_names)
         if not prompt:
@@ -102,13 +104,31 @@ class Agent(BaseModel):
         if self.dataset_manager and query:
             relevant_documents = self.dataset_manager.search(query, k=5, context_search=True)
             context["relevant_documents"] = relevant_documents
+        
+        if "relevant_memories" in kwargs and kwargs["relevant_memories"]:
+            context["relevant_memories"] = kwargs["relevant_memories"]
             
         return context
+
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
         if self.memory:
             relevant_memories = self.memory.search(message)
             kwargs["relevant_memories"] = relevant_memories
+            
+            verbose_level = self._get_verbose_level()
+            if verbose_level >= 1 and relevant_memories:
+                print(f"🧠 Found {len(relevant_memories)} relevant memories for context")
+                if verbose_level >= 2:
+                    for i, memory in enumerate(relevant_memories[:3], 1):
+                        print(f"  {i}. {memory.description}")
+                    if len(relevant_memories) > 3:
+                        print(f"  ... and {len(relevant_memories) - 3} more")
             
             if history is None:
                 history = self.memory.load_history()

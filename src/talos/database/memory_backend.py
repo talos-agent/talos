@@ -1,7 +1,7 @@
 import warnings
 import uuid
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Union
 from langchain_core.embeddings import Embeddings
 from langchain_core.messages import BaseMessage, AIMessage, HumanMessage, SystemMessage
 
@@ -25,7 +25,7 @@ class DatabaseMemoryBackend:
         embeddings_model: Embeddings,
         session_id: Optional[str] = None,
         auto_save: bool = True,
-        verbose: bool = False,
+        verbose: Union[bool, int] = False,
         similarity_threshold: float = 0.85,
     ):
         self.user_id = user_id
@@ -36,6 +36,12 @@ class DatabaseMemoryBackend:
         self.similarity_threshold = similarity_threshold
         self._ensure_user_exists()
         self._ensure_conversation_exists()
+        
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
     
     def _ensure_user_exists(self) -> User:
         """Ensure user exists in database, create if not."""
@@ -97,7 +103,7 @@ class DatabaseMemoryBackend:
             )
             session.add(memory)
             session.commit()
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"\033[32m✓ Memory saved: {description}\033[0m")
     
     def search_memories(self, query: str, k: int = 5) -> List[MemoryRecord]:
@@ -132,7 +138,7 @@ class DatabaseMemoryBackend:
                 )
                 for _, memory in top_memories
             ]
-            if self.verbose and results:
+            if self._get_verbose_level() >= 1 and results:
                 print(f"\033[34m🔍 Memory search: found {len(results)} relevant memories\033[0m")
             return results
     
@@ -241,7 +247,7 @@ class DatabaseMemoryBackend:
                 )
                 for memory in memories
             ]
-            if self.verbose and results:
+            if self._get_verbose_level() >= 1 and results:
                 print(f"\033[34m📋 Listed {len(results)} memories\033[0m")
             return results
 
@@ -297,7 +303,7 @@ class DatabaseMemoryBackend:
                 existing_memory.memory_metadata = {}
             existing_memory.memory_metadata.update(new_metadata)
             existing_memory.timestamp = datetime.now()
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"\033[33m⚡ Memory updated (duplicate): {new_description}\033[0m")
         else:
             from ..utils.memory_combiner import MemoryCombiner
@@ -308,7 +314,7 @@ class DatabaseMemoryBackend:
                 existing_memory.memory_metadata = {}
             existing_memory.memory_metadata.update(new_metadata)
             existing_memory.timestamp = datetime.now()
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"\033[33m⚡ Memory merged (LLM): {combined_description}\033[0m")
         
         session.commit()

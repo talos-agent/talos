@@ -10,7 +10,7 @@ def list_memories(
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User ID to filter memories by"),
     filter_user: Optional[str] = typer.Option(None, "--filter-user", help="Filter memories by a different user"),
     use_database: bool = typer.Option(True, "--use-database", help="Use database backend instead of files"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+    verbose: int = typer.Option(0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed.")
 ):
     """List all memories with optional user filtering."""
     try:
@@ -28,7 +28,7 @@ def list_memories(
             if not user_id:
                 import uuid
                 user_id = str(uuid.uuid4())
-                if verbose:
+                if verbose >= 1:
                     print(f"Generated temporary user ID: {user_id}")
             
             memory = Memory(
@@ -77,7 +77,7 @@ def search_memories(
     filter_user: Optional[str] = typer.Option(None, "--filter-user", help="Filter memories by a different user"),
     limit: int = typer.Option(5, "--limit", "-l", help="Maximum number of results to return"),
     use_database: bool = typer.Option(True, "--use-database", help="Use database backend instead of files"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+    verbose: int = typer.Option(0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed.")
 ):
     """Search memories using semantic similarity with optional user filtering."""
     try:
@@ -95,7 +95,7 @@ def search_memories(
             if not user_id:
                 import uuid
                 user_id = str(uuid.uuid4())
-                if verbose:
+                if verbose >= 1:
                     print(f"Generated temporary user ID: {user_id}")
             
             memory = Memory(
@@ -152,7 +152,7 @@ def search_memories(
 def flush_memories(
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User ID for database backend. If not provided with database backend, flushes ALL memories."),
     use_database: bool = typer.Option(True, "--use-database", help="Use database backend instead of files"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+    verbose: int = typer.Option(0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed.")
 ):
     """Flush unsaved memories to disk. If no user_id provided with database backend, flushes ALL memories after confirmation."""
     try:

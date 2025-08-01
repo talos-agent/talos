@@ -1,0 +1,6 @@
+{
+    "name": "relevant_memories_prompt",
+    "description": "Prompt template for injecting relevant memories from memory search.",
+    "template": "\n\n## Relevant Memories\n\nThe following memories from previous conversations are relevant to this query:\n\n{relevant_memories}\n\nUse this information to provide personalized and contextual responses based on what you remember about the user.",
+    "input_variables": ["relevant_memories"]
+}

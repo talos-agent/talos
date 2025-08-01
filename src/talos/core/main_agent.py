@@ -56,6 +56,12 @@ class MainAgent(Agent):
         self._setup_dataset_manager()
         self._setup_tool_manager()
         self._setup_job_scheduler()
+        
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
 
     def _setup_prompt_manager(self) -> None:
         if not self.prompt_manager:
@@ -98,11 +104,11 @@ class MainAgent(Agent):
             
             self.set_prompt(["voice_enhanced_main_agent", "general_agent_prompt"])
             
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"Voice integration enabled using {voice_result['voice_source']}")
                 
         except Exception as e:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"Voice integration failed, falling back to default prompts: {e}")
             self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
 

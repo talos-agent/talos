@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from io import BytesIO
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from bs4 import BeautifulSoup
 from langchain_community.vectorstores import FAISS
@@ -23,7 +23,7 @@ class DatasetManager(BaseModel):
     datasets: dict[str, Any] = Field(default_factory=dict)
     vector_store: Any = Field(default=None)
     embeddings: Any = Field(default_factory=OpenAIEmbeddings)
-    verbose: bool = Field(default=False)
+    verbose: Union[bool, int] = Field(default=False)
     user_id: Optional[str] = Field(default=None)
     session_id: Optional[str] = Field(default=None)
     use_database: bool = Field(default=False)
@@ -53,15 +53,19 @@ class DatasetManager(BaseModel):
             raise ValueError(f"Dataset with name '{name}' already exists.")
         self.datasets[name] = data
         if not data:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"\033[33m⚠️ Dataset '{name}' added but is empty\033[0m")
             return
         if self.vector_store is None:
             self.vector_store = FAISS.from_texts(data, self.embeddings)
         else:
             self.vector_store.add_texts(data)
-        if self.verbose:
+        verbose_level = self._get_verbose_level()
+        if verbose_level >= 1:
             print(f"\033[32m✓ Dataset '{name}' added with {len(data)} chunks\033[0m")
+            if verbose_level >= 2:
+                print(f"  Dataset type: {type(self.vector_store).__name__}")
+                print(f"  Total datasets: {len(self.datasets)}")
 
     def remove_dataset(self, name: str) -> None:
         """
@@ -75,6 +79,16 @@ class DatasetManager(BaseModel):
             raise ValueError(f"Dataset with name '{name}' not found.")
         del self.datasets[name]
         self.vector_store = None
+        self._rebuild_vector_store()
+        
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
+        
+    def _rebuild_vector_store(self):
+        """Rebuild the vector store from all datasets."""
         for dataset_name, dataset in self.datasets.items():
             if not dataset:
                 continue
@@ -111,13 +125,20 @@ class DatasetManager(BaseModel):
             return self._db_backend.search(query, k, context_search)
         
         if self.vector_store is None:
-            if self.verbose and not context_search:
+            if self._get_verbose_level() >= 1 and not context_search:
                 print("\033[33m⚠️ Dataset search: no datasets available\033[0m")
             return []
         results = self.vector_store.similarity_search(query, k=k)
         result_texts = [doc.page_content for doc in results]
-        if self.verbose and result_texts and not context_search:
+        verbose_level = self._get_verbose_level()
+        if verbose_level >= 1 and result_texts and not context_search:
             print(f"\033[34m🔍 Dataset search: found {len(result_texts)} relevant documents\033[0m")
+            if verbose_level >= 2:
+                for i, doc_text in enumerate(result_texts[:3], 1):
+                    content_preview = doc_text[:100] + "..." if len(doc_text) > 100 else doc_text
+                    print(f"  {i}. {content_preview}")
+                if len(result_texts) > 3:
+                    print(f"  ... and {len(result_texts) - 3} more documents")
         return result_texts
 
     def add_document_from_ipfs(
@@ -136,8 +157,11 @@ class DatasetManager(BaseModel):
             self._db_backend.add_document_from_ipfs(name, ipfs_hash, chunk_size, chunk_overlap)
             return
         
-        if self.verbose:
+        verbose_level = self._get_verbose_level()
+        if verbose_level >= 1:
             print(f"\033[36m📦 Fetching content from IPFS: {ipfs_hash}\033[0m")
+            if verbose_level >= 2:
+                print(f"  IPFS hash: {ipfs_hash}")
         ipfs_tool = IpfsTool()
         content = ipfs_tool.get_content(ipfs_hash)
 
@@ -158,9 +182,14 @@ class DatasetManager(BaseModel):
             self._db_backend.add_document_from_url(name, url, chunk_size, chunk_overlap)
             return
         
-        if self.verbose:
+        verbose_level = self._get_verbose_level()
+        if verbose_level >= 1:
             print(f"\033[36m🌐 Fetching content from URL: {url}\033[0m")
         content = self._fetch_content_from_url(url)
+        if verbose_level >= 2:
+            print(f"  URL: {url}")
+            content_type = "text/html"  # Default content type for verbose output
+            print(f"  Content type: {content_type}")
         chunks = self._process_and_chunk_content(content, chunk_size, chunk_overlap)
         self.add_dataset(name, chunks)
 
