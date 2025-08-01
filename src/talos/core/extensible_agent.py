@@ -12,7 +12,7 @@ from talos.skills.base import Skill
 from talos.tools.tool_manager import ToolManager
 
 if TYPE_CHECKING:
-    from talos.dag.rigid_nodes import NodeVersion
+    from talos.dag.structured_nodes import NodeVersion
 
 
 class SupportAgent(BaseModel):
@@ -147,7 +147,7 @@ class SupportAgent(BaseModel):
 
 
 class SupportAgentRegistry(BaseModel):
-    """Registry for managing specialized support agents with rigid delegation rules."""
+    """Registry for managing specialized support agents with structured delegation rules."""
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
@@ -201,7 +201,7 @@ class SupportAgentRegistry(BaseModel):
 
 class DelegatingMainAgent(DAGAgent):
     """
-    Main agent that delegates tasks to specialized support agents with rigid DAG structure.
+    Main agent that delegates tasks to specialized support agents with structured DAG structure.
     Each support agent has a specific architecture for handling their domain of tasks.
     """
     
@@ -213,10 +213,10 @@ class DelegatingMainAgent(DAGAgent):
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
         self._setup_support_agents()
-        self._build_rigid_dag()
+        self._build_structured_dag()
     
     def _setup_support_agents(self) -> None:
-        """Setup specialized support agents with rigid architectures."""
+        """Setup specialized support agents with structured architectures."""
         if self.prompt_manager:
             from talos.skills.proposals import ProposalsSkill
             
@@ -310,8 +310,8 @@ class DelegatingMainAgent(DAGAgent):
         except (ImportError, ValueError):
             pass  # GitHub dependencies not available
     
-    def _build_rigid_dag(self) -> None:
-        """Build a rigid DAG structure with predefined delegation patterns."""
+    def _build_structured_dag(self) -> None:
+        """Build a structured DAG structure with predefined delegation patterns."""
         self.delegation_rules = {}
         for agent in self.support_agents.values():
             for keyword in agent.delegation_keywords:
@@ -321,7 +321,7 @@ class DelegatingMainAgent(DAGAgent):
     
     def delegate_task(self, query: str, context: Optional[Dict[str, Any]] = None) -> Any:
         """
-        Delegate a task to the appropriate support agent based on rigid rules.
+        Delegate a task to the appropriate support agent based on structured rules.
         
         Args:
             query: The task query
@@ -396,7 +396,7 @@ class DelegatingMainAgent(DAGAgent):
         )
         
         self.support_agents[domain] = agent
-        self._build_rigid_dag()
+        self._build_structured_dag()
         
         return agent
     
@@ -418,7 +418,7 @@ class DelegatingMainAgent(DAGAgent):
                 del self.delegation_rules[keyword]
             
             del self.support_agents[domain]
-            self._build_rigid_dag()
+            self._build_structured_dag()
             return True
         return False
     
@@ -431,7 +431,7 @@ class DelegatingMainAgent(DAGAgent):
         return self.support_agents.get(domain)
     
     def _rebuild_dag(self) -> None:
-        """Rebuild the rigid DAG with current support agents."""
+        """Rebuild the structured DAG with current support agents."""
         if not self.dag_manager:
             self.dag_manager = DAGManager()
         
@@ -499,33 +499,114 @@ class DelegatingMainAgent(DAGAgent):
             "delegation_rules": self.delegation_rules,
             "support_agents": agents_info,
             "dag_available": self.dag_manager is not None,
-            "architecture_type": "rigid_delegation"
+            "architecture_type": "structured_delegation"
         }
 
 
-class RigidMainAgent(DAGAgent):
+class StructuredMainAgent(DAGAgent):
     """
-    Main agent with rigid DAG structure and blockchain-native node upgrades.
-    Each support agent is a precisely defined node that can be individually upgraded.
+    Main agent with structured DAG architecture for blockchain-native node upgrades.
+    
+    This class represents the core of a blockchain-native AI system that enables
+    individual component upgrades while maintaining deterministic behavior and
+    system integrity. It orchestrates a network of specialized support agents
+    through a structured DAG architecture.
+    
+    Blockchain-Native Architecture:
+        The agent is designed from the ground up for blockchain compatibility:
+        - Deterministic execution paths ensure reproducible results
+        - Individual node upgrades enable granular system evolution
+        - Hash-based verification prevents tampering and ensures integrity
+        - Serializable state enables on-chain storage and verification
+        
+    Key Features:
+        - Structured DAG with versioned nodes for controlled upgrades
+        - Deterministic delegation patterns using hash-based routing
+        - Individual support agent upgrade capabilities
+        - Blockchain-compatible serialization and state management
+        - Comprehensive upgrade validation and rollback support
+        
+    Support Agent Architecture:
+        Each support agent represents a specialized capability with:
+        - Unique domain expertise (governance, analytics, research, etc.)
+        - Individual versioning and upgrade policies
+        - Specific task patterns and delegation keywords
+        - Custom architectures for handling domain-specific tasks
+        
+    Upgrade Methodology:
+        The system supports three types of upgrades:
+        1. Individual node upgrades with version validation
+        2. Controlled rollbacks to previous versions
+        3. DAG-wide configuration updates with integrity checks
+        
+    Deterministic Delegation:
+        Task routing uses deterministic patterns:
+        - Keyword-based matching with sorted rule evaluation
+        - Hash-based verification of delegation rules
+        - Reproducible routing decisions across environments
+        - Fallback mechanisms for unmatched queries
+        
+    Attributes:
+        support_agents: Registry of available support agents
+        structured_dag_manager: Manager for DAG operations and upgrades
+        
+    Examples:
+        >>> agent = StructuredMainAgent(
+        ...     model=ChatOpenAI(model="gpt-4"),
+        ...     prompts_dir="/path/to/prompts",
+        ...     verbose=True
+        ... )
+        >>> 
+        >>> # Delegate a governance task
+        >>> result = agent.delegate_task("Analyze governance proposal for voting")
+        >>> 
+        >>> # Upgrade a specific node
+        >>> success = agent.upgrade_support_agent(
+        ...     "governance", 
+        ...     enhanced_agent, 
+        ...     NodeVersion(1, 1, 0)
+        ... )
+        >>> 
+        >>> # Export for blockchain storage
+        >>> blockchain_data = agent.export_for_blockchain()
     """
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     support_agents: Dict[str, SupportAgent] = {}
-    rigid_dag_manager: Optional[Any] = None
+    structured_dag_manager: Optional[Any] = None
     delegation_hash: str = ""
     
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
-        self._setup_rigid_support_agents()
-        self._build_rigid_dag()
+        self._setup_structured_support_agents()
+        self._build_structured_dag()
     
-    def _setup_rigid_support_agents(self) -> None:
-        """Setup default support agents for rigid DAG."""
+    def _setup_structured_support_agents(self) -> None:
+        """
+        Setup default support agents for the structured DAG.
+        
+        This method initializes the core set of support agents that provide
+        specialized capabilities for the AI system. Each agent is configured
+        with specific domain expertise, task patterns, and delegation keywords.
+        
+        Default Support Agents:
+        - Governance: Handles proposals, voting, and DAO operations
+        - Analytics: Processes data analysis and reporting tasks
+        
+        Each agent is initialized with:
+        - Semantic versioning starting at 1.0.0
+        - Compatible upgrade policy for safe evolution
+        - Domain-specific task patterns and keywords
+        - Specialized architecture for handling their domain
+        
+        The setup ensures deterministic agent ordering and consistent
+        initialization across different execution environments.
+        """
         governance_agent = SupportAgent(
             name="governance",
             domain="governance",
-            description="Rigid governance agent for blockchain proposals",
+            description="Structured governance agent for blockchain proposals",
             architecture={
                 "task_flow": ["validate", "analyze", "execute", "confirm"],
                 "decision_points": ["proposal_validity", "consensus_mechanism", "execution_safety"],
@@ -538,7 +619,7 @@ class RigidMainAgent(DAGAgent):
         analytics_agent = SupportAgent(
             name="analytics",
             domain="analytics",
-            description="Rigid analytics agent for data processing",
+            description="Structured analytics agent for data processing",
             architecture={
                 "task_flow": ["collect", "process", "analyze", "report"],
                 "decision_points": ["data_source", "analysis_method", "output_format"],
@@ -553,12 +634,35 @@ class RigidMainAgent(DAGAgent):
             "analytics": analytics_agent
         }
     
-    def _build_rigid_dag(self) -> None:
-        """Build the rigid DAG structure with versioned nodes."""
+    def _build_structured_dag(self) -> None:
+        """
+        Build the structured DAG with current support agents.
+        
+        This method constructs the blockchain-native DAG architecture:
+        1. Creates StructuredDAGManager for controlled operations
+        2. Builds DAG with deterministic node ordering
+        3. Establishes routing and delegation patterns
+        4. Validates DAG structure and integrity
+        
+        The resulting DAG provides:
+        - Deterministic execution paths for reproducible results
+        - Individual node upgrade capabilities
+        - Hash-based verification of structure integrity
+        - Blockchain-compatible serialization format
+        
+        DAG Structure:
+        - Router node for task delegation
+        - Individual support agent nodes with versioning
+        - Shared prompt and data source nodes
+        - Deterministic edge connections
+        
+        Raises:
+            ValueError: If DAG construction fails or validation errors occur
+        """
         if not self.prompt_manager:
             return
         
-        from talos.dag.rigid_manager import RigidDAGManager
+        from talos.dag.structured_manager import StructuredDAGManager
         
         services = []
         if hasattr(self, 'services'):
@@ -568,20 +672,20 @@ class RigidMainAgent(DAGAgent):
         if hasattr(self, 'tool_manager'):
             tool_manager = self.tool_manager
         
-        self.rigid_dag_manager = RigidDAGManager()
+        self.structured_dag_manager = StructuredDAGManager()
         
         try:
-            self.dag = self.rigid_dag_manager.create_rigid_dag(
+            self.dag = self.structured_dag_manager.create_structured_dag(
                 model=self.model,  # type: ignore
                 prompt_manager=self.prompt_manager,
                 support_agents=self.support_agents,
                 services=services,
                 tool_manager=tool_manager,
                 dataset_manager=getattr(self, 'dataset_manager', None),
-                dag_name="rigid_blockchain_dag"
+                dag_name="structured_blockchain_dag"
             )
         except Exception as e:
-            print(f"Warning: Could not build rigid DAG: {e}")
+            print(f"Warning: Could not build structured DAG: {e}")
     
     def upgrade_support_agent(
         self,
@@ -591,37 +695,171 @@ class RigidMainAgent(DAGAgent):
         force: bool = False
     ) -> bool:
         """
-        Upgrade a specific support agent node with version compatibility checks.
+        Upgrade a specific support agent with comprehensive validation.
+        
+        This method enables individual component upgrades in the blockchain-native
+        AI system. It performs controlled upgrades while maintaining system integrity
+        and deterministic behavior.
+        
+        Upgrade Process:
+        1. Validates the target domain exists and is upgradeable
+        2. Checks version compatibility against current upgrade policy
+        3. Performs the upgrade through the structured DAG manager
+        4. Updates support agent registry with new configuration
+        5. Rebuilds DAG structure with updated node
+        
+        Safety Measures:
+        - Version compatibility validation prevents breaking changes
+        - Upgrade policies enforce safe transition paths
+        - Rollback capability preserved for recovery
+        - DAG integrity maintained throughout process
+        
+        Args:
+            domain: Domain identifier of the support agent to upgrade
+            new_agent: Updated support agent configuration
+            new_version: Target version for the upgrade
+            force: Whether to bypass version compatibility checks
+            
+        Returns:
+            True if upgrade succeeded, False if validation failed
+            
+        Examples:
+            >>> enhanced_agent = SupportAgent(
+            ...     name="governance_v2",
+            ...     domain="governance",
+            ...     description="Enhanced governance with new features",
+            ...     # ... additional configuration
+            ... )
+            >>> success = agent.upgrade_support_agent(
+            ...     "governance",
+            ...     enhanced_agent,
+            ...     NodeVersion(1, 1, 0)
+            ... )
+            >>> if success:
+            ...     print("Governance agent upgraded successfully")
         """
-        if not self.rigid_dag_manager:
+        if not self.structured_dag_manager:
             return False
         
-        success = self.rigid_dag_manager.upgrade_node(domain, new_agent, new_version, force)
+        success = self.structured_dag_manager.upgrade_node(domain, new_agent, new_version, force)
         if success:
             self.support_agents[domain] = new_agent
         
         return success
     
     def validate_upgrade(self, domain: str, new_version: "NodeVersion") -> Dict[str, Any]:
-        """Validate if a node upgrade is possible."""
-        if not self.rigid_dag_manager:
-            return {"valid": False, "reason": "No rigid DAG manager"}
+        """
+        Validate if a support agent can be upgraded to the specified version.
         
-        return self.rigid_dag_manager.validate_upgrade(domain, new_version)
+        This method provides comprehensive upgrade validation before attempting
+        actual upgrades. It helps prevent incompatible changes and ensures
+        safe evolution of the AI system.
+        
+        Validation Checks:
+        - Domain existence and upgrade capability
+        - Version compatibility against upgrade policy
+        - Semantic versioning rules enforcement
+        - Breaking change detection
+        
+        Args:
+            domain: Domain identifier of the support agent
+            new_version: Proposed version for upgrade validation
+            
+        Returns:
+            Dictionary containing detailed validation results:
+            - "valid": Boolean indicating if upgrade is allowed
+            - "reason": Detailed explanation of validation result
+            - "current_version": Current version of the support agent
+            - "upgrade_policy": Current upgrade policy in effect
+            - "target_version": Proposed target version
+            
+        Examples:
+            >>> result = agent.validate_upgrade("governance", NodeVersion(2, 0, 0))
+            >>> if not result["valid"]:
+            ...     print(f"Upgrade blocked: {result['reason']}")
+            >>> else:
+            ...     print("Upgrade validation passed")
+        """
+        if not self.structured_dag_manager:
+            return {"valid": False, "reason": "No structured DAG manager"}
+        
+        return self.structured_dag_manager.validate_upgrade(domain, new_version)
     
     def rollback_node(self, domain: str, target_version: "NodeVersion") -> bool:
-        """Rollback a node to a previous version."""
-        if not self.rigid_dag_manager:
+        """
+        Rollback a support agent to a previous version.
+        
+        This method enables controlled rollback of individual components
+        when issues are discovered after upgrades. It maintains system
+        stability by allowing quick recovery to known-good states.
+        
+        Rollback Process:
+        1. Validates the target domain and version
+        2. Ensures target version is older than current version
+        3. Performs rollback through structured DAG manager
+        4. Updates support agent registry
+        5. Rebuilds DAG with rolled-back configuration
+        
+        Safety Measures:
+        - Only allows rollback to older versions
+        - Preserves DAG structural integrity
+        - Maintains deterministic behavior
+        - Updates all relevant hashes and metadata
+        
+        Args:
+            domain: Domain identifier of the support agent
+            target_version: Previous version to rollback to
+            
+        Returns:
+            True if rollback succeeded, False if validation failed
+            
+        Examples:
+            >>> success = agent.rollback_node("governance", NodeVersion(1, 0, 0))
+            >>> if success:
+            ...     print("Governance agent rolled back successfully")
+        """
+        if not self.structured_dag_manager:
             return False
         
-        return self.rigid_dag_manager.rollback_node(domain, target_version)
+        return self.structured_dag_manager.rollback_node(domain, target_version)
     
     def get_node_status(self, domain: str) -> Dict[str, Any]:
-        """Get detailed status of a specific node."""
-        if not self.rigid_dag_manager or domain not in self.rigid_dag_manager.node_registry:
+        """
+        Get detailed status of a specific support agent node.
+        
+        This method provides comprehensive information about individual
+        support agents, including their current configuration, version
+        status, and upgrade capabilities.
+        
+        Status Information:
+        - Current version and upgrade policy
+        - Node hash for blockchain verification
+        - Delegation keywords and task patterns
+        - Architecture configuration
+        - Upgrade compatibility status
+        
+        Args:
+            domain: Domain identifier of the support agent
+            
+        Returns:
+            Dictionary containing detailed node status:
+            - "version": Current semantic version
+            - "upgrade_policy": Current upgrade policy
+            - "node_hash": Blockchain verification hash
+            - "delegation_keywords": Keywords for task routing
+            - "task_patterns": Supported task patterns
+            - "architecture": Agent architecture configuration
+            - "error": Error message if node not found
+            
+        Examples:
+            >>> status = agent.get_node_status("governance")
+            >>> print(f"Governance agent v{status['version']}")
+            >>> print(f"Upgrade policy: {status['upgrade_policy']}")
+        """
+        if not self.structured_dag_manager or domain not in self.structured_dag_manager.node_registry:
             return {"error": "Node not found"}
         
-        node = self.rigid_dag_manager.node_registry[domain]
+        node = self.structured_dag_manager.node_registry[domain]
         return {
             "node_id": node.node_id,
             "version": str(node.node_version),
@@ -632,22 +870,76 @@ class RigidMainAgent(DAGAgent):
             "node_hash": node.node_hash
         }
     
-    def get_rigid_status(self) -> Dict[str, Any]:
-        """Get comprehensive status of the rigid DAG."""
-        if not self.rigid_dag_manager:
-            return {"status": "No rigid DAG manager"}
+    def get_structured_status(self) -> Dict[str, Any]:
+        """
+        Get comprehensive status of the structured DAG and all components.
         
-        return self.rigid_dag_manager.get_rigid_dag_status()
+        This method provides a complete overview of the blockchain-native
+        AI system, including DAG structure, node status, and blockchain
+        readiness indicators.
+        
+        Comprehensive Status:
+        - DAG metadata (name, version, node count)
+        - Individual node status and versions
+        - Delegation hash and routing configuration
+        - Edge and conditional edge mappings
+        - Blockchain compatibility indicators
+        
+        Returns:
+            Dictionary containing complete system status:
+            - "dag_name": Name of the current DAG
+            - "dag_version": Current DAG version
+            - "total_nodes": Number of nodes in the DAG
+            - "structured_nodes": Detailed information for each node
+            - "delegation_hash": Current delegation hash
+            - "blockchain_ready": Blockchain compatibility status
+            - "edges": DAG edge configuration
+            - "conditional_edges": Conditional routing rules
+            
+        Examples:
+            >>> status = agent.get_structured_status()
+            >>> print(f"System has {status['total_nodes']} nodes")
+            >>> print(f"Blockchain ready: {status['blockchain_ready']}")
+            >>> for node_id, info in status['structured_nodes'].items():
+            ...     print(f"{node_id}: v{info['version']}")
+        """
+        if not self.structured_dag_manager:
+            return {"status": "No structured DAG manager"}
+        
+        return self.structured_dag_manager.get_structured_dag_status()
     
     def export_for_blockchain(self) -> Dict[str, Any]:
-        """Export DAG configuration for blockchain storage."""
-        if not self.rigid_dag_manager:
+        """
+        Export DAG configuration for blockchain storage.
+        
+        This method produces a deterministic, serializable representation
+        of the entire DAG structure suitable for on-chain storage and
+        verification. The export includes all node configurations,
+        delegation rules, and integrity hashes.
+        
+        Returns:
+            Dictionary containing blockchain-ready DAG configuration
+        """
+        if not self.structured_dag_manager:
             return {}
         
-        return self.rigid_dag_manager.export_for_blockchain()
+        return self.structured_dag_manager.export_for_blockchain()
     
     def delegate_task(self, query: str, context: Optional[Dict[str, Any]] = None) -> Any:
-        """Delegate task using rigid DAG execution."""
+        """
+        Delegate task using structured DAG execution.
+        
+        This method routes tasks through the structured DAG architecture,
+        enabling deterministic delegation to appropriate support agents
+        based on the configured routing rules.
+        
+        Args:
+            query: Task query to be delegated
+            context: Optional context for task execution
+            
+        Returns:
+            Results from DAG execution or error message
+        """
         if self.dag:
             try:
                 from talos.dag.nodes import GraphState
@@ -666,4 +958,4 @@ class RigidMainAgent(DAGAgent):
             except Exception as e:
                 return f"DAG execution failed: {e}"
         
-        return f"Rigid main agent handling: {query}"
+        return f"Structured main agent handling: {query}"

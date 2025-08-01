@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Demo script showing the rigid LangGraph framework for blockchain-native AI.
+Demo script showing the structured LangGraph framework for blockchain-native AI.
 
 This script demonstrates:
-1. Creating a RigidMainAgent with deterministic DAG structure
+1. Creating a StructuredMainAgent with deterministic DAG structure
 2. Individual node upgrades with version compatibility checks
 3. Blockchain-native serialization and state management
 4. Deterministic delegation patterns with hash-based routing
@@ -15,8 +15,8 @@ from pathlib import Path
 
 from langchain_openai import ChatOpenAI
 
-from talos.core.extensible_agent import RigidMainAgent, SupportAgent
-from talos.dag.rigid_nodes import NodeVersion
+from talos.core.extensible_agent import StructuredMainAgent, SupportAgent
+from talos.dag.structured_nodes import NodeVersion
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.skills.base import Skill
 
@@ -56,16 +56,16 @@ class ResearchSkill(Skill):
 
 
 def main():
-    """Demonstrate the rigid framework capabilities."""
-    print("🔗 Talos Rigid Blockchain Framework Demo")
+    """Demonstrate the structured framework capabilities."""
+    print("🔗 Talos Structured Blockchain Framework Demo")
     print("=" * 50)
     
     model = ChatOpenAI(model="gpt-4o-mini")
     prompts_dir = Path(__file__).parent.parent / "src" / "talos" / "prompts"
     prompt_manager = FilePromptManager(str(prompts_dir))
     
-    print("\n1. Creating RigidMainAgent...")
-    agent = RigidMainAgent(
+    print("\n1. Creating StructuredMainAgent...")
+    agent = StructuredMainAgent(
         model=model,
         prompts_dir=str(prompts_dir),
         prompt_manager=prompt_manager,
@@ -73,10 +73,10 @@ def main():
         use_database_memory=False
     )
     
-    print(f"✅ Rigid agent created with {len(agent.support_agents)} default support agents")
+    print(f"✅ Structured agent created with {len(agent.support_agents)} default support agents")
     
-    print("\n2. Initial Rigid DAG Status:")
-    status = agent.get_rigid_status()
+    print("\n2. Initial Structured DAG Status:")
+    status = agent.get_structured_status()
     if 'dag_name' in status:
         print(f"   DAG name: {status['dag_name']}")
         print(f"   DAG version: {status['dag_version']}")
@@ -84,11 +84,11 @@ def main():
         print(f"   Delegation hash: {status['delegation_hash']}")
         print(f"   Blockchain ready: {status['blockchain_ready']}")
         
-        for node_id, info in status['rigid_nodes'].items():
+        for node_id, info in status['structured_nodes'].items():
             print(f"   - {node_id}: v{info['version']} (hash: {info['node_hash'][:8]}...)")
     else:
         print(f"   Status: {status}")
-        print("   ⚠️  Rigid DAG not properly initialized")
+        print("   ⚠️  Structured DAG not properly initialized")
     
     print("\n3. Testing individual node status...")
     for domain in ["governance", "analytics"]:
@@ -118,7 +118,7 @@ def main():
     else:
         print("   ❌ Blockchain export failed")
     
-    print("\n6. Testing rigid delegation...")
+    print("\n6. Testing structured delegation...")
     
     try:
         result = agent.delegate_task("Analyze governance proposal for voting")
@@ -165,11 +165,11 @@ def main():
         print("   ❌ Failed to rollback governance agent")
     
     print("\n9. Final DAG Status:")
-    final_status = agent.get_rigid_status()
+    final_status = agent.get_structured_status()
     print(f"   Total nodes: {final_status['total_nodes']}")
     print(f"   Delegation hash: {final_status['delegation_hash']}")
     
-    for node_id, info in final_status['rigid_nodes'].items():
+    for node_id, info in final_status['structured_nodes'].items():
         print(f"   - {node_id}: v{info['version']} (policy: {info['upgrade_policy']})")
     
     print("\n10. DAG Visualization:")
@@ -179,15 +179,30 @@ def main():
     except Exception as e:
         print(f"   DAG not available: {e}")
     
-    print("\n🎉 Rigid Framework Demo completed!")
+    print("\n🎉 Structured Framework Demo completed!")
     print("\nKey Features Demonstrated:")
-    print("✅ Rigid DAG structure with versioned nodes")
+    print("✅ Structured DAG structure with versioned nodes")
     print("✅ Individual node identification and upgrade")
     print("✅ Version compatibility validation")
     print("✅ Blockchain-native serialization")
     print("✅ Deterministic delegation with hash-based routing")
     print("✅ Node rollback capabilities")
     print("✅ Single component upgrade for blockchain AI")
+    
+    print("\n📋 Architecture Benefits:")
+    print("🔹 Deterministic execution for reproducible results")
+    print("🔹 Individual component upgrades without system downtime")
+    print("🔹 Hash-based verification for integrity assurance")
+    print("🔹 Blockchain-compatible serialization format")
+    print("🔹 Safe upgrade paths with rollback capabilities")
+    print("🔹 Comprehensive monitoring and status reporting")
+    
+    print("\n🚀 Next Steps:")
+    print("• Integrate with blockchain storage systems")
+    print("• Implement automated upgrade pipelines")
+    print("• Add custom support agents for specific domains")
+    print("• Deploy in production environments")
+    print("• Monitor system performance and upgrade patterns")
 
 
 if __name__ == "__main__":
