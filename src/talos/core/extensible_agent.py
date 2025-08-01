@@ -1,53 +1,55 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
-
-from langchain_core.language_models import BaseChatModel
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, ConfigDict
 
 from talos.core.memory import Memory
 from talos.dag.dag_agent import DAGAgent
 from talos.dag.manager import DAGManager
-from talos.data.dataset_manager import DatasetManager
 from talos.prompts.prompt_manager import PromptManager
 from talos.skills.base import Skill
+from talos.tools.tool_manager import ToolManager
+
+if TYPE_CHECKING:
+    from talos.dag.rigid_nodes import NodeVersion
 
 
-class SkillAgent(BaseModel):
+class SupportAgent(BaseModel):
     """
-    Individual skill agent with its own configuration, memory, and LLM.
-    Can gather additional information via chat before executing actions.
+    Specialized support agent with a specific architecture for handling domain tasks.
+    Each support agent has predefined capabilities and delegation patterns.
     """
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    skill: Skill
     name: str
-    description: Optional[str] = None
+    domain: str  # e.g., "governance", "security", "development"
+    description: str
+    architecture: Dict[str, Any]  # Specific architecture definition
     
-    model: Optional[BaseChatModel] = None
+    skills: List[Skill] = []
+    model: Optional[Any] = None
     memory: Optional[Memory] = None
-    dataset_manager: Optional[DatasetManager] = None
     prompt_manager: Optional[PromptManager] = None
     
-    use_individual_memory: bool = False
-    use_shared_memory: bool = True
-    chat_enabled: bool = True
+    delegation_keywords: List[str] = []  # Keywords that trigger this agent
+    task_patterns: List[str] = []  # Task patterns this agent handles
     
     conversation_history: List[BaseMessage] = []
     
     def model_post_init(self, __context: Any) -> None:
-        if self.use_individual_memory and not self.memory:
-            self._setup_individual_memory()
+        if not self.memory:
+            self._setup_agent_memory()
+        self._validate_architecture()
     
-    def _setup_individual_memory(self) -> None:
-        """Setup individual memory for this skill agent."""
+    def _setup_agent_memory(self) -> None:
+        """Setup memory for this support agent."""
         from langchain_openai import OpenAIEmbeddings
         from pathlib import Path
         
         embeddings_model = OpenAIEmbeddings()
-        memory_dir = Path("memory") / f"skill_{self.name}"
+        memory_dir = Path("memory") / f"agent_{self.name}"
         memory_dir.mkdir(parents=True, exist_ok=True)
         
         self.memory = Memory(
@@ -59,146 +61,201 @@ class SkillAgent(BaseModel):
             verbose=False,
         )
     
-    def gather_information(self, query: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_architecture(self) -> None:
+        """Validate that the agent architecture is properly defined."""
+        required_keys = ["task_flow", "decision_points", "capabilities"]
+        for key in required_keys:
+            if key not in self.architecture:
+                self.architecture[key] = []
+    
+    def analyze_task(self, query: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Gather additional information via chat before executing the skill.
-        This allows the skill agent to ask clarifying questions or gather context.
+        Analyze the task using the agent's specific architecture.
+        Determines the best approach based on the agent's capabilities.
         """
-        if not self.chat_enabled:
-            return context
-        
         model = self.model
         if not model:
             from langchain_openai import ChatOpenAI
             model = ChatOpenAI(model="gpt-4o-mini")
         
-        info_gathering_prompt = f"""
-        You are a specialized skill agent for: {self.name}
-        Description: {self.description or 'No description provided'}
+        analysis_prompt = f"""
+        You are a specialized support agent for: {self.domain}
+        Agent: {self.name}
+        Description: {self.description}
         
-        You have been asked to handle this query: {query}
-        Current context: {context}
+        Architecture capabilities: {self.architecture.get('capabilities', [])}
+        Task patterns you handle: {self.task_patterns}
         
-        Determine if you need additional information to properly execute this skill.
-        If you need more information, respond with a JSON object containing:
+        Analyze this task: {query}
+        Context: {context}
+        
+        Based on your architecture, determine:
+        1. Can you handle this task? (yes/no)
+        2. What approach should you take?
+        3. What information do you need?
+        4. Which of your skills should be used?
+        
+        Respond with a JSON object:
         {{
-            "needs_info": true,
-            "questions": ["question1", "question2", ...],
-            "reasoning": "why you need this information"
-        }}
-        
-        If you have enough information, respond with:
-        {{
-            "needs_info": false,
-            "ready_to_execute": true
+            "can_handle": true/false,
+            "approach": "description of approach",
+            "required_info": ["info1", "info2"],
+            "recommended_skills": ["skill1", "skill2"],
+            "confidence": 0.0-1.0
         }}
         """
         
         try:
             from langchain_core.messages import HumanMessage
-            model.invoke([HumanMessage(content=info_gathering_prompt)])
+            response = model.invoke([HumanMessage(content=analysis_prompt)])
             
             enhanced_context = context.copy()
-            enhanced_context["skill_agent_processed"] = True
-            enhanced_context["skill_name"] = self.name
+            enhanced_context["agent_analysis"] = response.content
+            enhanced_context["agent_name"] = self.name
+            enhanced_context["agent_domain"] = self.domain
             
             return enhanced_context
             
         except Exception:
             return context
     
-    def execute_with_context(self, context: Dict[str, Any]) -> Any:
-        """Execute the skill with the gathered context."""
-        if self.memory and self.use_individual_memory:
+    def execute_task(self, context: Dict[str, Any]) -> Any:
+        """Execute the task using the agent's architecture and skills."""
+        if self.memory:
             memory_context = self.memory.search(context.get("current_query", ""), k=3)
-            context["individual_memory"] = memory_context
+            context["agent_memory"] = memory_context
         
-        result = self.skill.run(**context)
+        task_flow = self.architecture.get("task_flow", ["analyze", "execute"])
+        results = {}
         
-        if self.memory and self.use_individual_memory:
+        for step in task_flow:
+            if step == "analyze":
+                results["analysis"] = self.analyze_task(
+                    context.get("current_query", ""), context
+                )
+            elif step == "execute" and self.skills:
+                skill = self.skills[0]  # For now, use first skill
+                results["execution"] = skill.run(**context)
+        
+        if self.memory:
             self.memory.add_memory(
-                f"Executed {self.name}: {str(result)[:200]}",
-                {"skill": self.name, "context": context}
+                f"Agent {self.name} executed task: {str(results)[:200]}",
+                {"agent": self.name, "domain": self.domain, "context": context}
             )
         
-        return result
+        return results
 
 
-class SkillRegistry(BaseModel):
-    """Registry for managing skill agents dynamically."""
+class SupportAgentRegistry(BaseModel):
+    """Registry for managing specialized support agents with rigid delegation rules."""
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    _skills: Dict[str, SkillAgent] = {}
+    _agents: Dict[str, SupportAgent] = {}
+    _delegation_map: Dict[str, str] = {}  # keyword -> agent_name
     
-    def register_skill(self, skill_agent: SkillAgent) -> None:
-        """Register a new skill agent."""
-        self._skills[skill_agent.name] = skill_agent
+    def register_agent(self, agent: SupportAgent) -> None:
+        """Register a new support agent and update delegation rules."""
+        self._agents[agent.name] = agent
+        
+        for keyword in agent.delegation_keywords:
+            self._delegation_map[keyword.lower()] = agent.name
     
-    def unregister_skill(self, skill_name: str) -> bool:
-        """Remove a skill agent."""
-        if skill_name in self._skills:
-            del self._skills[skill_name]
+    def unregister_agent(self, agent_name: str) -> bool:
+        """Remove a support agent and clean up delegation rules."""
+        if agent_name in self._agents:
+            keywords_to_remove = [k for k, v in self._delegation_map.items() if v == agent_name]
+            for keyword in keywords_to_remove:
+                del self._delegation_map[keyword]
+            
+            del self._agents[agent_name]
             return True
         return False
     
-    def get_skill(self, skill_name: str) -> Optional[SkillAgent]:
-        """Get a skill agent by name."""
-        return self._skills.get(skill_name)
+    def get_agent(self, agent_name: str) -> Optional[SupportAgent]:
+        """Get a support agent by name."""
+        return self._agents.get(agent_name)
     
-    def list_skills(self) -> List[str]:
-        """List all registered skill names."""
-        return list(self._skills.keys())
+    def find_agent_for_task(self, query: str) -> Optional[SupportAgent]:
+        """Find the best support agent for a given task based on delegation rules."""
+        query_lower = query.lower()
+        
+        for keyword, agent_name in self._delegation_map.items():
+            if keyword in query_lower:
+                return self._agents.get(agent_name)
+        
+        return None
     
-    def get_all_skills(self) -> Dict[str, SkillAgent]:
-        """Get all registered skill agents."""
-        return self._skills.copy()
+    def list_agents(self) -> List[str]:
+        """List all registered agent names."""
+        return list(self._agents.keys())
+    
+    def get_all_agents(self) -> Dict[str, SupportAgent]:
+        """Get all registered support agents."""
+        return self._agents.copy()
+    
+    def get_delegation_rules(self) -> Dict[str, str]:
+        """Get current delegation rules."""
+        return self._delegation_map.copy()
 
 
-class ExtensibleMainAgent(DAGAgent):
+class DelegatingMainAgent(DAGAgent):
     """
-    Main agent that provides an extensible framework for managing skill agents.
-    Supports easy addition/removal of capabilities and individual skill configurations.
+    Main agent that delegates tasks to specialized support agents with rigid DAG structure.
+    Each support agent has a specific architecture for handling their domain of tasks.
     """
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    skill_registry: SkillRegistry = SkillRegistry()
-    interaction_mode: str = "orchestrated"  # "orchestrated" or "direct"
+    support_agents: Dict[str, "SupportAgent"] = {}
+    delegation_rules: Dict[str, str] = {}  # keyword -> agent mapping
     
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
-        self._setup_default_skills()
+        self._setup_support_agents()
+        self._build_rigid_dag()
     
-    def _setup_default_skills(self) -> None:
-        """Setup default skills as skill agents."""
-        from talos.skills.proposals import ProposalsSkill
+    def _setup_support_agents(self) -> None:
+        """Setup specialized support agents with rigid architectures."""
+        if self.prompt_manager:
+            from talos.skills.proposals import ProposalsSkill
+            
+            governance_agent = SupportAgent(
+                name="governance_agent",
+                domain="governance",
+                description="Specialized agent for governance proposals and DAO operations",
+                architecture={
+                    "task_flow": ["analyze", "research", "evaluate", "execute"],
+                    "decision_points": ["proposal_type", "complexity", "stakeholders"],
+                    "capabilities": ["proposal_analysis", "voting_guidance", "governance_research"]
+                },
+                skills=[ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager)],  # type: ignore
+                delegation_keywords=["proposal", "governance", "voting", "dao"],
+                task_patterns=["analyze proposal", "evaluate governance", "voting recommendation"]
+            )
+            self.support_agents["governance"] = governance_agent
+        
         from talos.skills.cryptography import CryptographySkill
         
-        if self.prompt_manager:
-            proposals_skill_agent = SkillAgent(
-                skill=ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),  # type: ignore
-                name="proposals",
-                description="Evaluates governance proposals using AI analysis",
-                use_individual_memory=True,
-                chat_enabled=True
-            )
-            self.skill_registry.register_skill(proposals_skill_agent)
-        
-        crypto_skill_agent = SkillAgent(
-            skill=CryptographySkill(),
-            name="cryptography",
-            description="Provides encryption and decryption capabilities",
-            use_individual_memory=False,
-            chat_enabled=False
+        security_agent = SupportAgent(
+            name="security_agent",
+            domain="security",
+            description="Specialized agent for cryptography and security operations",
+            architecture={
+                "task_flow": ["validate", "encrypt", "secure"],
+                "decision_points": ["security_level", "encryption_type", "key_management"],
+                "capabilities": ["encryption", "decryption", "key_generation", "security_audit"]
+            },
+            skills=[CryptographySkill()],
+            delegation_keywords=["encrypt", "decrypt", "security", "crypto", "key"],
+            task_patterns=["encrypt data", "decrypt message", "security analysis"]
         )
+        self.support_agents["security"] = security_agent
         
-        self.skill_registry.register_skill(crypto_skill_agent)
-        
-        self._setup_optional_skills()
+        self._setup_optional_agents()
     
-    def _setup_optional_skills(self) -> None:
-        """Setup optional skills that depend on external services."""
+    def _setup_optional_agents(self) -> None:
+        """Setup optional support agents that depend on external services."""
         try:
             from talos.skills.twitter_sentiment import TwitterSentimentSkill
             from talos.tools.twitter_client import TwitterConfig
@@ -206,14 +263,20 @@ class ExtensibleMainAgent(DAGAgent):
             TwitterConfig()  # Check if Twitter token is available
             
             if self.prompt_manager:
-                twitter_skill_agent = SkillAgent(
-                    skill=TwitterSentimentSkill(prompt_manager=self.prompt_manager),
-                    name="twitter_sentiment",
-                    description="Analyzes Twitter sentiment for queries",
-                    use_individual_memory=True,
-                    chat_enabled=True
+                social_agent = SupportAgent(
+                    name="social_agent",
+                    domain="social_media",
+                    description="Specialized agent for social media analysis and sentiment",
+                    architecture={
+                        "task_flow": ["collect", "analyze", "sentiment", "report"],
+                        "decision_points": ["platform", "sentiment_type", "analysis_depth"],
+                        "capabilities": ["sentiment_analysis", "trend_detection", "social_monitoring"]
+                    },
+                    skills=[TwitterSentimentSkill(prompt_manager=self.prompt_manager)],
+                    delegation_keywords=["twitter", "sentiment", "social", "trend"],
+                    task_patterns=["analyze sentiment", "social media analysis", "trend detection"]
                 )
-                self.skill_registry.register_skill(twitter_skill_agent)
+                self.support_agents["social"] = social_agent
             
         except (ImportError, ValueError):
             pass  # Twitter dependencies not available
@@ -225,123 +288,157 @@ class ExtensibleMainAgent(DAGAgent):
             
             github_settings = GitHubSettings()
             if github_settings.GITHUB_API_TOKEN and self.prompt_manager:
-                pr_review_skill_agent = SkillAgent(
-                    skill=PRReviewSkill(
+                dev_agent = SupportAgent(
+                    name="development_agent",
+                    domain="development",
+                    description="Specialized agent for code review and development tasks",
+                    architecture={
+                        "task_flow": ["analyze_code", "review", "suggest", "validate"],
+                        "decision_points": ["code_quality", "security_issues", "best_practices"],
+                        "capabilities": ["code_review", "pr_analysis", "security_scan", "quality_check"]
+                    },
+                    skills=[PRReviewSkill(
                         llm=self.model,  # type: ignore
                         prompt_manager=self.prompt_manager,
                         github_tools=GithubTools(token=github_settings.GITHUB_API_TOKEN)
-                    ),
-                    name="pr_review",
-                    description="Reviews GitHub pull requests and provides feedback",
-                    use_individual_memory=True,
-                    chat_enabled=True
+                    )],
+                    delegation_keywords=["github", "pr", "review", "code", "development"],
+                    task_patterns=["review pull request", "analyze code", "development task"]
                 )
-                self.skill_registry.register_skill(pr_review_skill_agent)
+                self.support_agents["development"] = dev_agent
                 
         except (ImportError, ValueError):
             pass  # GitHub dependencies not available
     
-    def add_skill_agent(
-        self,
-        skill: Skill,
-        name: str,
-        description: Optional[str] = None,
-        model: Optional[BaseChatModel] = None,
-        use_individual_memory: bool = False,
-        chat_enabled: bool = True,
-        **kwargs
-    ) -> SkillAgent:
+    def _build_rigid_dag(self) -> None:
+        """Build a rigid DAG structure with predefined delegation patterns."""
+        self.delegation_rules = {}
+        for agent in self.support_agents.values():
+            for keyword in agent.delegation_keywords:
+                self.delegation_rules[keyword.lower()] = agent.name
+        
+        self._rebuild_dag()
+    
+    def delegate_task(self, query: str, context: Optional[Dict[str, Any]] = None) -> Any:
         """
-        Add a new skill agent to the system.
+        Delegate a task to the appropriate support agent based on rigid rules.
         
         Args:
-            skill: The skill instance to wrap
-            name: Unique name for the skill agent
-            description: Description of the skill's capabilities
-            model: Optional individual LLM for this skill
-            use_individual_memory: Whether to use individual memory
-            chat_enabled: Whether the skill can gather info via chat
-            **kwargs: Additional configuration options
-        
+            query: The task query
+            context: Additional context for the task
+            
         Returns:
-            The created SkillAgent instance
+            Result from the delegated agent or main agent
         """
-        skill_agent = SkillAgent(
-            skill=skill,
+        if context is None:
+            context = {}
+        
+        query_lower = query.lower()
+        delegated_agent = None
+        
+        for keyword, agent_name in self.delegation_rules.items():
+            if keyword in query_lower:
+                delegated_agent = self.support_agents.get(agent_name)
+                break
+        
+        if delegated_agent:
+            context["current_query"] = query
+            context["delegated_from"] = "main_agent"
+            
+            enhanced_context = delegated_agent.analyze_task(query, context)
+            return delegated_agent.execute_task(enhanced_context)
+        else:
+            return self._handle_main_agent_task(query, context)
+    
+    def _handle_main_agent_task(self, query: str, context: Dict[str, Any]) -> Any:
+        """Handle tasks that don't match any support agent patterns."""
+        context["current_query"] = query
+        context["handled_by"] = "main_agent"
+        
+        return f"Main agent handling: {query}"
+    
+    def add_support_agent(
+        self,
+        name: str,
+        domain: str,
+        description: str,
+        architecture: Dict[str, Any],
+        skills: List[Skill],
+        delegation_keywords: List[str],
+        task_patterns: List[str],
+        model: Optional[Any] = None
+    ) -> SupportAgent:
+        """
+        Add a new support agent with specific architecture.
+        
+        Args:
+            name: Unique name for the support agent
+            domain: Domain of expertise
+            description: Description of capabilities
+            architecture: Specific architecture definition
+            skills: List of skills this agent can use
+            delegation_keywords: Keywords that trigger this agent
+            task_patterns: Task patterns this agent handles
+            model: Optional individual LLM for this agent
+            
+        Returns:
+            The created SupportAgent instance
+        """
+        agent = SupportAgent(
             name=name,
+            domain=domain,
             description=description,
-            model=model,
-            use_individual_memory=use_individual_memory,
-            chat_enabled=chat_enabled,
-            **kwargs
+            architecture=architecture,
+            skills=skills,
+            delegation_keywords=delegation_keywords,
+            task_patterns=task_patterns,
+            model=model or self.model
         )
         
-        self.skill_registry.register_skill(skill_agent)
-        self._rebuild_dag()
+        self.support_agents[domain] = agent
+        self._build_rigid_dag()
         
-        return skill_agent
+        return agent
     
-    def remove_skill_agent(self, skill_name: str) -> bool:
+    def remove_support_agent(self, domain: str) -> bool:
         """
-        Remove a skill agent from the system.
+        Remove a support agent from the system.
         
         Args:
-            skill_name: Name of the skill to remove
+            domain: Domain of the agent to remove
             
         Returns:
-            True if skill was removed, False if not found
+            True if agent was removed, False if not found
         """
-        success = self.skill_registry.unregister_skill(skill_name)
-        if success:
-            self._rebuild_dag()
-        return success
-    
-    def list_skill_agents(self) -> List[str]:
-        """List all available skill agents."""
-        return self.skill_registry.list_skills()
-    
-    def get_skill_agent(self, skill_name: str) -> Optional[SkillAgent]:
-        """Get a specific skill agent by name."""
-        return self.skill_registry.get_skill(skill_name)
-    
-    def set_interaction_mode(self, mode: str) -> None:
-        """
-        Set the interaction mode.
-        
-        Args:
-            mode: "orchestrated" for main agent coordination, "direct" for direct skill access
-        """
-        if mode not in ["orchestrated", "direct"]:
-            raise ValueError("Mode must be 'orchestrated' or 'direct'")
-        self.interaction_mode = mode
-    
-    def interact_with_skill(self, skill_name: str, query: str, **kwargs) -> Any:
-        """
-        Directly interact with a specific skill agent.
-        
-        Args:
-            skill_name: Name of the skill to interact with
-            query: Query to send to the skill
-            **kwargs: Additional context for the skill
+        if domain in self.support_agents:
+            agent = self.support_agents[domain]
             
-        Returns:
-            Result from the skill execution
-        """
-        skill_agent = self.skill_registry.get_skill(skill_name)
-        if not skill_agent:
-            raise ValueError(f"Skill '{skill_name}' not found")
-        
-        context = {"current_query": query, **kwargs}
-        enhanced_context = skill_agent.gather_information(query, context)
-        
-        return skill_agent.execute_with_context(enhanced_context)
+            keywords_to_remove = [k for k, v in self.delegation_rules.items() if v == agent.name]
+            for keyword in keywords_to_remove:
+                del self.delegation_rules[keyword]
+            
+            del self.support_agents[domain]
+            self._build_rigid_dag()
+            return True
+        return False
+    
+    def list_support_agents(self) -> List[str]:
+        """List all available support agents."""
+        return list(self.support_agents.keys())
+    
+    def get_support_agent(self, domain: str) -> Optional[SupportAgent]:
+        """Get a specific support agent by domain."""
+        return self.support_agents.get(domain)
     
     def _rebuild_dag(self) -> None:
-        """Rebuild the DAG with current skill agents."""
+        """Rebuild the rigid DAG with current support agents."""
         if not self.dag_manager:
             self.dag_manager = DAGManager()
         
-        skills = [skill_agent.skill for skill_agent in self.skill_registry.get_all_skills().values()]
+        skills = []
+        for agent in self.support_agents.values():
+            skills.extend(agent.skills)
+        
         services: list[Any] = []  # Services can be added similarly
         
         from talos.tools.tool_manager import ToolManager
@@ -356,7 +453,7 @@ class ExtensibleMainAgent(DAGAgent):
     
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:
         """
-        Execute query using either orchestrated or direct mode.
+        Execute query using delegation-based approach.
         
         Args:
             message: The query message
@@ -366,29 +463,207 @@ class ExtensibleMainAgent(DAGAgent):
         Returns:
             Result from execution
         """
-        if self.interaction_mode == "direct":
-            skill_name = kwargs.get("skill_name")
-            if skill_name:
-                return self.interact_with_skill(skill_name, message, **kwargs)
+        context = kwargs.copy()
+        if history:
+            context["history"] = history
         
-        return super().run(message, history, **kwargs)
+        result = self.delegate_task(message, context)
+        
+        if not isinstance(result, BaseModel):
+            from pydantic import BaseModel as PydanticBaseModel
+            
+            class TaskResult(PydanticBaseModel):
+                result: Any
+                delegated_to: str = "unknown"
+                
+            return TaskResult(result=result)
+        
+        return result
     
-    def get_framework_status(self) -> Dict[str, Any]:
-        """Get status information about the extensible framework."""
-        skills_info = {}
-        for name, skill_agent in self.skill_registry.get_all_skills().items():
-            skills_info[name] = {
-                "description": skill_agent.description,
-                "individual_memory": skill_agent.use_individual_memory,
-                "chat_enabled": skill_agent.chat_enabled,
-                "has_individual_model": skill_agent.model is not None,
-                "skill_type": type(skill_agent.skill).__name__
+    def get_delegation_status(self) -> Dict[str, Any]:
+        """Get status information about the delegation framework."""
+        agents_info = {}
+        for domain, agent in self.support_agents.items():
+            agents_info[domain] = {
+                "name": agent.name,
+                "description": agent.description,
+                "architecture": agent.architecture,
+                "delegation_keywords": agent.delegation_keywords,
+                "task_patterns": agent.task_patterns,
+                "skills_count": len(agent.skills),
+                "has_individual_model": agent.model is not None
             }
         
         return {
-            "interaction_mode": self.interaction_mode,
-            "total_skills": len(self.skill_registry.list_skills()),
-            "skills": skills_info,
+            "total_agents": len(self.support_agents),
+            "delegation_rules": self.delegation_rules,
+            "support_agents": agents_info,
             "dag_available": self.dag_manager is not None,
-            "memory_backend": "database" if getattr(self, 'use_database_memory', False) else "file"
+            "architecture_type": "rigid_delegation"
         }
+
+
+class RigidMainAgent(DAGAgent):
+    """
+    Main agent with rigid DAG structure and blockchain-native node upgrades.
+    Each support agent is a precisely defined node that can be individually upgraded.
+    """
+    
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    support_agents: Dict[str, SupportAgent] = {}
+    rigid_dag_manager: Optional[Any] = None
+    delegation_hash: str = ""
+    
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        self._setup_rigid_support_agents()
+        self._build_rigid_dag()
+    
+    def _setup_rigid_support_agents(self) -> None:
+        """Setup default support agents for rigid DAG."""
+        governance_agent = SupportAgent(
+            name="governance",
+            domain="governance",
+            description="Rigid governance agent for blockchain proposals",
+            architecture={
+                "task_flow": ["validate", "analyze", "execute", "confirm"],
+                "decision_points": ["proposal_validity", "consensus_mechanism", "execution_safety"],
+                "capabilities": ["proposal_validation", "consensus_coordination", "safe_execution"]
+            },
+            delegation_keywords=["governance", "proposal", "vote", "consensus"],
+            task_patterns=["validate proposal", "coordinate consensus", "execute governance"]
+        )
+        
+        analytics_agent = SupportAgent(
+            name="analytics",
+            domain="analytics",
+            description="Rigid analytics agent for data processing",
+            architecture={
+                "task_flow": ["collect", "process", "analyze", "report"],
+                "decision_points": ["data_source", "analysis_method", "output_format"],
+                "capabilities": ["data_collection", "statistical_analysis", "report_generation"]
+            },
+            delegation_keywords=["analytics", "data", "analysis", "report"],
+            task_patterns=["analyze data", "generate report", "process metrics"]
+        )
+        
+        self.support_agents = {
+            "governance": governance_agent,
+            "analytics": analytics_agent
+        }
+    
+    def _build_rigid_dag(self) -> None:
+        """Build the rigid DAG structure with versioned nodes."""
+        if not self.prompt_manager:
+            return
+        
+        from talos.dag.rigid_manager import RigidDAGManager
+        
+        services = []
+        if hasattr(self, 'services'):
+            services = self.services
+        
+        tool_manager = ToolManager()
+        if hasattr(self, 'tool_manager'):
+            tool_manager = self.tool_manager
+        
+        self.rigid_dag_manager = RigidDAGManager()
+        
+        try:
+            self.dag = self.rigid_dag_manager.create_rigid_dag(
+                model=self.model,  # type: ignore
+                prompt_manager=self.prompt_manager,
+                support_agents=self.support_agents,
+                services=services,
+                tool_manager=tool_manager,
+                dataset_manager=getattr(self, 'dataset_manager', None),
+                dag_name="rigid_blockchain_dag"
+            )
+        except Exception as e:
+            print(f"Warning: Could not build rigid DAG: {e}")
+    
+    def upgrade_support_agent(
+        self,
+        domain: str,
+        new_agent: SupportAgent,
+        new_version: "NodeVersion",
+        force: bool = False
+    ) -> bool:
+        """
+        Upgrade a specific support agent node with version compatibility checks.
+        """
+        if not self.rigid_dag_manager:
+            return False
+        
+        success = self.rigid_dag_manager.upgrade_node(domain, new_agent, new_version, force)
+        if success:
+            self.support_agents[domain] = new_agent
+        
+        return success
+    
+    def validate_upgrade(self, domain: str, new_version: "NodeVersion") -> Dict[str, Any]:
+        """Validate if a node upgrade is possible."""
+        if not self.rigid_dag_manager:
+            return {"valid": False, "reason": "No rigid DAG manager"}
+        
+        return self.rigid_dag_manager.validate_upgrade(domain, new_version)
+    
+    def rollback_node(self, domain: str, target_version: "NodeVersion") -> bool:
+        """Rollback a node to a previous version."""
+        if not self.rigid_dag_manager:
+            return False
+        
+        return self.rigid_dag_manager.rollback_node(domain, target_version)
+    
+    def get_node_status(self, domain: str) -> Dict[str, Any]:
+        """Get detailed status of a specific node."""
+        if not self.rigid_dag_manager or domain not in self.rigid_dag_manager.node_registry:
+            return {"error": "Node not found"}
+        
+        node = self.rigid_dag_manager.node_registry[domain]
+        return {
+            "node_id": node.node_id,
+            "version": str(node.node_version),
+            "domain": node.support_agent.domain,
+            "architecture": node.support_agent.architecture,
+            "delegation_keywords": node.support_agent.delegation_keywords,
+            "upgrade_policy": node.upgrade_policy,
+            "node_hash": node.node_hash
+        }
+    
+    def get_rigid_status(self) -> Dict[str, Any]:
+        """Get comprehensive status of the rigid DAG."""
+        if not self.rigid_dag_manager:
+            return {"status": "No rigid DAG manager"}
+        
+        return self.rigid_dag_manager.get_rigid_dag_status()
+    
+    def export_for_blockchain(self) -> Dict[str, Any]:
+        """Export DAG configuration for blockchain storage."""
+        if not self.rigid_dag_manager:
+            return {}
+        
+        return self.rigid_dag_manager.export_for_blockchain()
+    
+    def delegate_task(self, query: str, context: Optional[Dict[str, Any]] = None) -> Any:
+        """Delegate task using rigid DAG execution."""
+        if self.dag:
+            try:
+                from talos.dag.nodes import GraphState
+                from langchain_core.messages import HumanMessage
+                
+                initial_state: GraphState = {
+                    "messages": [HumanMessage(content=query)],
+                    "context": context or {},
+                    "current_query": query,
+                    "results": {},
+                    "metadata": {}
+                }
+                
+                result = self.dag.execute(initial_state)
+                return result.get("results", {})
+            except Exception as e:
+                return f"DAG execution failed: {e}"
+        
+        return f"Rigid main agent handling: {query}"

@@ -8,7 +8,7 @@ from pydantic import ConfigDict
 from talos.dag.extensible_nodes import ExtensibleSkillNode, ConfigurableAgentNode
 
 if TYPE_CHECKING:
-    from talos.core.extensible_agent import SkillAgent, SkillRegistry
+    from talos.core.extensible_agent import SupportAgent, SupportAgentRegistry
 from talos.dag.graph import TalosDAG
 from talos.dag.manager import DAGManager
 from talos.dag.nodes import (
@@ -27,13 +27,13 @@ class ExtensibleDAGManager(DAGManager):
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    skill_registry: Optional["SkillRegistry"] = None
+    skill_registry: Optional["SupportAgentRegistry"] = None
     
     def create_extensible_dag(
         self,
         model: BaseChatModel,
         prompt_manager: PromptManager,
-        skill_registry: "SkillRegistry",
+        skill_registry: "SupportAgentRegistry",
         services: List[Service],
         tool_manager: ToolManager,
         dataset_manager: Optional[DatasetManager] = None,
@@ -57,7 +57,7 @@ class ExtensibleDAGManager(DAGManager):
         dag.add_node(prompt_node)
         
         routing_logic = {}
-        skill_agents = skill_registry.get_all_skills()
+        skill_agents = skill_registry.get_all_agents()
         
         for skill_name, skill_agent in skill_agents.items():
             routing_logic[skill_name.lower()] = f"{skill_name}_skill"
@@ -136,12 +136,12 @@ class ExtensibleDAGManager(DAGManager):
         self.current_dag = dag
         return dag
     
-    def add_skill_to_dag(self, skill_agent: "SkillAgent") -> bool:
+    def add_skill_to_dag(self, skill_agent: "SupportAgent") -> bool:
         """Add a new skill agent to the current DAG."""
         if not self.current_dag or not self.skill_registry:
             return False
         
-        self.skill_registry.register_skill(skill_agent)
+        self.skill_registry.register_agent(skill_agent)
         
         skill_node = ExtensibleSkillNode(
             node_id=f"{skill_agent.name}_skill",
@@ -171,7 +171,7 @@ class ExtensibleDAGManager(DAGManager):
         if not self.current_dag or not self.skill_registry:
             return False
         
-        success = self.skill_registry.unregister_skill(skill_name)
+        success = self.skill_registry.unregister_agent(skill_name)
         if not success:
             return False
         
@@ -212,8 +212,8 @@ class ExtensibleDAGManager(DAGManager):
                 skill_nodes[node_id] = {
                     "name": node.name,
                     "skill_agent": node.skill_agent.name,
-                    "chat_enabled": node.skill_agent.chat_enabled,
-                    "individual_memory": node.skill_agent.use_individual_memory
+                    "domain": node.skill_agent.domain,
+                    "architecture": node.skill_agent.architecture
                 }
             elif isinstance(node, ConfigurableAgentNode):
                 configurable_nodes[node_id] = {
@@ -229,5 +229,5 @@ class ExtensibleDAGManager(DAGManager):
             "configurable_nodes": configurable_nodes,
             "edges": self.current_dag.edges,
             "conditional_edges": list(self.current_dag.conditional_edges.keys()),
-            "registered_skills": self.skill_registry.list_skills() if self.skill_registry else []
+            "registered_skills": self.skill_registry.list_agents() if self.skill_registry else []
         }

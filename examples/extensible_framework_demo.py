@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Demo script showing how to use the extensible LangGraph framework for Talos.
+Demo script showing the rigid LangGraph framework for blockchain-native AI.
 
 This script demonstrates:
-1. Creating an ExtensibleMainAgent
-2. Adding and removing skill agents dynamically
-3. Configuring skills with individual LLMs and memory
-4. Using both orchestrated and direct interaction modes
-5. Skills gathering information via chat before execution
+1. Creating a RigidMainAgent with deterministic DAG structure
+2. Individual node upgrades with version compatibility checks
+3. Blockchain-native serialization and state management
+4. Deterministic delegation patterns with hash-based routing
+5. Node rollback and upgrade validation
 """
 
 import os
@@ -15,58 +15,57 @@ from pathlib import Path
 
 from langchain_openai import ChatOpenAI
 
-from talos.core.extensible_agent import ExtensibleMainAgent
+from talos.core.extensible_agent import RigidMainAgent, SupportAgent
+from talos.dag.rigid_nodes import NodeVersion
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.skills.base import Skill
 
 
-class DemoSkill(Skill):
-    """A simple demo skill for testing the extensible framework."""
+class AnalyticsSkill(Skill):
+    """A skill for data analytics and reporting."""
     
     @property
     def name(self) -> str:
-        return "demo"
+        return "analytics"
     
     def run(self, **kwargs) -> str:
         query = kwargs.get("current_query", "No query provided")
-        context = kwargs.get("skill_agent_processed", False)
+        agent_analysis = kwargs.get("agent_analysis", "No analysis")
         
-        result = f"Demo skill '{self.name}' executed with query: '{query}'"
-        if context:
-            result += " (processed by skill agent)"
+        result = f"Analytics skill executed: '{query}'"
+        if agent_analysis:
+            result += f" with agent analysis: {agent_analysis[:100]}..."
         
         return result
 
 
-class ChatEnabledSkill(Skill):
-    """A skill that demonstrates chat-enabled information gathering."""
+class ResearchSkill(Skill):
+    """A skill for research and information gathering."""
     
     @property
     def name(self) -> str:
-        return "chat_demo"
+        return "research"
     
     def run(self, **kwargs) -> str:
         query = kwargs.get("current_query", "No query provided")
-        enhanced_context = kwargs.get("skill_agent_processed", False)
+        agent_domain = kwargs.get("agent_domain", "unknown")
         
-        result = f"Chat-enabled skill executed: '{query}'"
-        if enhanced_context:
-            result += " with enhanced context from chat gathering"
+        result = f"Research skill executed for {agent_domain} domain: '{query}'"
         
         return result
 
 
 def main():
-    """Demonstrate the extensible framework capabilities."""
-    print("🚀 Talos Extensible Framework Demo")
+    """Demonstrate the rigid framework capabilities."""
+    print("🔗 Talos Rigid Blockchain Framework Demo")
     print("=" * 50)
     
     model = ChatOpenAI(model="gpt-4o-mini")
     prompts_dir = Path(__file__).parent.parent / "src" / "talos" / "prompts"
     prompt_manager = FilePromptManager(str(prompts_dir))
     
-    print("\n1. Creating ExtensibleMainAgent...")
-    agent = ExtensibleMainAgent(
+    print("\n1. Creating RigidMainAgent...")
+    agent = RigidMainAgent(
         model=model,
         prompts_dir=str(prompts_dir),
         prompt_manager=prompt_manager,
@@ -74,91 +73,121 @@ def main():
         use_database_memory=False
     )
     
-    print(f"✅ Agent created with {len(agent.list_skill_agents())} default skills")
+    print(f"✅ Rigid agent created with {len(agent.support_agents)} default support agents")
     
-    print("\n2. Initial Framework Status:")
-    status = agent.get_framework_status()
-    print(f"   Interaction mode: {status['interaction_mode']}")
-    print(f"   Total skills: {status['total_skills']}")
-    for skill_name, info in status['skills'].items():
-        print(f"   - {skill_name}: {info['description']}")
-    
-    print("\n3. Adding custom skill with individual memory...")
-    demo_skill = DemoSkill()
-    skill_agent = agent.add_skill_agent(
-        skill=demo_skill,
-        name="custom_demo",
-        description="A custom demo skill with individual memory",
-        use_individual_memory=True,
-        chat_enabled=False
-    )
-    print(f"✅ Added skill: {skill_agent.name}")
-    
-    print("\n4. Adding chat-enabled skill with custom LLM...")
-    chat_skill = ChatEnabledSkill()
-    custom_model = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
-    chat_skill_agent = agent.add_skill_agent(
-        skill=chat_skill,
-        name="chat_demo",
-        description="A skill that can gather info via chat",
-        model=custom_model,
-        use_individual_memory=True,
-        chat_enabled=True
-    )
-    print(f"✅ Added chat-enabled skill: {chat_skill_agent.name}")
-    
-    print("\n5. Updated Framework Status:")
-    status = agent.get_framework_status()
-    print(f"   Total skills: {status['total_skills']}")
-    for skill_name, info in status['skills'].items():
-        memory_type = "individual" if info['individual_memory'] else "shared"
-        chat_status = "enabled" if info['chat_enabled'] else "disabled"
-        print(f"   - {skill_name}: {memory_type} memory, chat {chat_status}")
-    
-    print("\n6. Testing direct skill interaction...")
-    agent.set_interaction_mode("direct")
-    
-    try:
-        result = agent.interact_with_skill(
-            "custom_demo", 
-            "Test query for custom demo skill",
-            additional_context="some extra info"
-        )
-        print(f"✅ Direct interaction result: {result}")
-    except Exception as e:
-        print(f"❌ Direct interaction failed: {e}")
-    
-    print("\n7. Testing orchestrated mode...")
-    agent.set_interaction_mode("orchestrated")
-    
-    try:
-        print("   Orchestrated mode set (DAG execution would happen here)")
-    except Exception as e:
-        print(f"❌ Orchestrated mode failed: {e}")
-    
-    print("\n8. Testing skill removal...")
-    success = agent.remove_skill_agent("custom_demo")
-    if success:
-        print("✅ Successfully removed custom_demo skill")
-        status = agent.get_framework_status()
-        print(f"   Remaining skills: {list(status['skills'].keys())}")
+    print("\n2. Initial Rigid DAG Status:")
+    status = agent.get_rigid_status()
+    if 'dag_name' in status:
+        print(f"   DAG name: {status['dag_name']}")
+        print(f"   DAG version: {status['dag_version']}")
+        print(f"   Total nodes: {status['total_nodes']}")
+        print(f"   Delegation hash: {status['delegation_hash']}")
+        print(f"   Blockchain ready: {status['blockchain_ready']}")
+        
+        for node_id, info in status['rigid_nodes'].items():
+            print(f"   - {node_id}: v{info['version']} (hash: {info['node_hash'][:8]}...)")
     else:
-        print("❌ Failed to remove skill")
+        print(f"   Status: {status}")
+        print("   ⚠️  Rigid DAG not properly initialized")
     
-    print("\n9. DAG Visualization:")
+    print("\n3. Testing individual node status...")
+    for domain in ["governance", "analytics"]:
+        node_status = agent.get_node_status(domain)
+        if "error" not in node_status:
+            print(f"   {domain}: v{node_status['version']} - {node_status['upgrade_policy']} policy")
+            print(f"     Keywords: {node_status['delegation_keywords']}")
+        else:
+            print(f"   {domain}: {node_status['error']}")
+    
+    print("\n4. Testing node upgrade validation...")
+    new_version = NodeVersion(major=1, minor=1, patch=0)
+    validation = agent.validate_upgrade("governance", new_version)
+    print(f"   Governance upgrade to v{new_version}: {validation}")
+    
+    incompatible_version = NodeVersion(major=2, minor=0, patch=0)
+    validation = agent.validate_upgrade("governance", incompatible_version)
+    print(f"   Governance upgrade to v{incompatible_version}: {validation}")
+    
+    print("\n5. Testing blockchain serialization...")
+    blockchain_data = agent.export_for_blockchain()
+    if blockchain_data:
+        print(f"   DAG version: {blockchain_data.get('dag_version')}")
+        print(f"   Checksum: {blockchain_data.get('checksum', '')[:16]}...")
+        print(f"   Nodes: {len(blockchain_data.get('nodes', {}))}")
+        print(f"   Edges: {len(blockchain_data.get('edges', []))}")
+    else:
+        print("   ❌ Blockchain export failed")
+    
+    print("\n6. Testing rigid delegation...")
+    
+    try:
+        result = agent.delegate_task("Analyze governance proposal for voting")
+        print(f"   ✅ Governance delegation: {str(result)[:100]}...")
+    except Exception as e:
+        print(f"   ❌ Governance delegation failed: {e}")
+    
+    try:
+        result = agent.delegate_task("Generate analytics report on user data")
+        print(f"   ✅ Analytics delegation: {str(result)[:100]}...")
+    except Exception as e:
+        print(f"   ❌ Analytics delegation failed: {e}")
+    
+    print("\n7. Testing node upgrade (compatible version)...")
+    new_governance_agent = SupportAgent(
+        name="governance_v2",
+        domain="governance",
+        description="Enhanced governance agent with improved consensus",
+        architecture={
+            "task_flow": ["validate", "analyze", "simulate", "execute", "confirm"],
+            "decision_points": ["proposal_validity", "consensus_mechanism", "execution_safety", "rollback_plan"],
+            "capabilities": ["proposal_validation", "consensus_coordination", "safe_execution", "simulation"]
+        },
+        delegation_keywords=["governance", "proposal", "vote", "consensus", "dao"],
+        task_patterns=["validate proposal", "coordinate consensus", "execute governance", "simulate outcome"]
+    )
+    
+    upgrade_version = NodeVersion(major=1, minor=1, patch=0)
+    success = agent.upgrade_support_agent("governance", new_governance_agent, upgrade_version)
+    if success:
+        print(f"   ✅ Successfully upgraded governance agent to v{upgrade_version}")
+        updated_status = agent.get_node_status("governance")
+        print(f"     New version: {updated_status['version']}")
+        print(f"     New hash: {updated_status['node_hash'][:8]}...")
+    else:
+        print("   ❌ Failed to upgrade governance agent")
+    
+    print("\n8. Testing rollback capability...")
+    rollback_version = NodeVersion(major=1, minor=0, patch=0)
+    rollback_success = agent.rollback_node("governance", rollback_version)
+    if rollback_success:
+        print(f"   ✅ Successfully rolled back governance agent to v{rollback_version}")
+    else:
+        print("   ❌ Failed to rollback governance agent")
+    
+    print("\n9. Final DAG Status:")
+    final_status = agent.get_rigid_status()
+    print(f"   Total nodes: {final_status['total_nodes']}")
+    print(f"   Delegation hash: {final_status['delegation_hash']}")
+    
+    for node_id, info in final_status['rigid_nodes'].items():
+        print(f"   - {node_id}: v{info['version']} (policy: {info['upgrade_policy']})")
+    
+    print("\n10. DAG Visualization:")
     try:
         viz = agent.get_dag_visualization()
         print(viz)
     except Exception as e:
         print(f"   DAG not available: {e}")
     
-    print("\n🎉 Demo completed!")
+    print("\n🎉 Rigid Framework Demo completed!")
     print("\nKey Features Demonstrated:")
-    print("✅ Dynamic skill addition and removal")
-    print("✅ Individual skill configurations (memory, LLM)")
-    print("✅ Chat-enabled information gathering")
-    print("✅ Direct and orchestrated interaction modes")
-    print("✅ Framework status monitoring")
+    print("✅ Rigid DAG structure with versioned nodes")
+    print("✅ Individual node identification and upgrade")
+    print("✅ Version compatibility validation")
+    print("✅ Blockchain-native serialization")
+    print("✅ Deterministic delegation with hash-based routing")
+    print("✅ Node rollback capabilities")
+    print("✅ Single component upgrade for blockchain AI")
 
 
 if __name__ == "__main__":

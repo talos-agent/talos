@@ -9,7 +9,7 @@ from pydantic import ConfigDict
 from talos.dag.nodes import DAGNode, GraphState
 
 if TYPE_CHECKING:
-    from talos.core.extensible_agent import SkillAgent
+    from talos.core.extensible_agent import SupportAgent
 
 
 class ExtensibleSkillNode(DAGNode):
@@ -19,7 +19,7 @@ class ExtensibleSkillNode(DAGNode):
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    skill_agent: "SkillAgent"
+    skill_agent: "SupportAgent"
     node_type: str = "extensible_skill"
     
     def execute(self, state: GraphState) -> GraphState:
@@ -27,7 +27,7 @@ class ExtensibleSkillNode(DAGNode):
         query = state["current_query"]
         context = state.get("context", {})
         
-        enhanced_context = self.skill_agent.gather_information(query, context)
+        enhanced_context = self.skill_agent.analyze_task(query, context)
         
         enhanced_context.update({
             "current_query": query,
@@ -36,7 +36,7 @@ class ExtensibleSkillNode(DAGNode):
             "metadata": state.get("metadata", {})
         })
         
-        result = self.skill_agent.execute_with_context(enhanced_context)
+        result = self.skill_agent.execute_task(enhanced_context)
         
         state["results"][self.node_id] = result
         state["messages"].append(
@@ -44,9 +44,9 @@ class ExtensibleSkillNode(DAGNode):
         )
         
         state["metadata"][f"{self.node_id}_config"] = {
-            "individual_memory": self.skill_agent.use_individual_memory,
-            "chat_enabled": self.skill_agent.chat_enabled,
-            "skill_type": type(self.skill_agent.skill).__name__
+            "domain": self.skill_agent.domain,
+            "architecture": self.skill_agent.architecture,
+            "skills_count": len(self.skill_agent.skills)
         }
         
         return state
@@ -63,9 +63,9 @@ class ExtensibleSkillNode(DAGNode):
         }
         
         base_config["skill_agent_config"] = {
-            "individual_memory": self.skill_agent.use_individual_memory,
-            "shared_memory": self.skill_agent.use_shared_memory,
-            "chat_enabled": self.skill_agent.chat_enabled,
+            "domain": self.skill_agent.domain,
+            "architecture": self.skill_agent.architecture,
+            "delegation_keywords": self.skill_agent.delegation_keywords,
             "has_individual_model": self.skill_agent.model is not None,
             "skill_description": self.skill_agent.description
         }

@@ -37,6 +37,8 @@ from talos.dag.nodes import (
 )
 from talos.dag.extensible_nodes import ExtensibleSkillNode, ConfigurableAgentNode
 from talos.dag.extensible_manager import ExtensibleDAGManager
+from talos.dag.rigid_nodes import RigidSupportAgentNode, RigidRouterNode, NodeVersion
+from talos.dag.rigid_manager import RigidDAGManager
 
 __all__ = [
     "DAGAgent",
@@ -54,4 +56,8 @@ __all__ = [
     "ExtensibleSkillNode",
     "ConfigurableAgentNode",
     "ExtensibleDAGManager",
+    "RigidSupportAgentNode",
+    "RigidRouterNode",
+    "NodeVersion",
+    "RigidDAGManager",
 ]
