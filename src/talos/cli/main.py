@@ -32,7 +32,7 @@ app.add_typer(arbiscan_app, name="arbiscan")
 @app.callback()
 def callback(
     ctx: typer.Context,
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
+    verbose: int = typer.Option(0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed."),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
     use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
 ):
@@ -48,7 +48,7 @@ def main_command(
     prompts_dir: str = "src/talos/prompts",
     model_name: str = "gpt-4o",
     temperature: float = 0.0,
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output."),
+    verbose: int = typer.Option(0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed."),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
     use_database: bool = typer.Option(True, "--use-database", help="Use database for conversation storage instead of files."),
 ) -> None:

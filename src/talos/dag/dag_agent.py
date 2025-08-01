@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, ConfigDict
@@ -20,11 +20,18 @@ class DAGAgent(Agent):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     dag_manager: Optional[DAGManager] = None
+    verbose: Union[bool, int] = False
     
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
         if self.dag_manager is None:
             self.dag_manager = DAGManager()
+    
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
     
     def setup_dag(
         self,
@@ -69,7 +76,7 @@ class DAGAgent(Agent):
             return processed_result
             
         except Exception as e:
-            if self.verbose:
+            if self._get_verbose_level() >= 1:
                 print(f"DAG execution failed, falling back to traditional agent: {e}")
             return super().run(message, history, **kwargs)
     

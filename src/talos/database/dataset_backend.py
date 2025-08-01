@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from langchain_core.embeddings import Embeddings
 from langchain_community.vectorstores import FAISS
 
@@ -16,13 +16,19 @@ class DatabaseDatasetBackend:
         user_id: str,
         embeddings_model: Embeddings,
         session_id: Optional[str] = None,
-        verbose: bool = False,
+        verbose: Union[bool, int] = False,
     ):
         self.user_id = user_id
         self.embeddings_model = embeddings_model
         self.session_id = session_id or str(uuid.uuid4())
         self.verbose = verbose
-        self._ensure_user_exists()
+        
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
+    
     
     def _ensure_user_exists(self) -> User:
         """Ensure user exists in database, create if not."""
@@ -62,7 +68,8 @@ class DatabaseDatasetBackend:
                 )
                 session.add(dataset)
                 session.commit()
-                if self.verbose:
+                verbose_level = self._get_verbose_level()
+                if verbose_level >= 1:
                     print(f"\033[33m⚠️ Dataset '{name}' added but is empty\033[0m")
                 return
             
@@ -87,8 +94,12 @@ class DatabaseDatasetBackend:
                 session.add(chunk)
             
             session.commit()
-            if self.verbose:
+            verbose_level = self._get_verbose_level()
+            if verbose_level >= 1:
                 print(f"\033[32m✓ Dataset '{name}' added with {len(data)} chunks\033[0m")
+                if verbose_level >= 2:
+                    print(f"  Dataset ID: {dataset.id}")
+                    print(f"  Document count: {len(data)}")
     
     def remove_dataset(self, name: str) -> None:
         """Remove a dataset from the database."""
@@ -162,7 +173,7 @@ class DatabaseDatasetBackend:
             ).all()
             
             if not chunks:
-                if self.verbose and not context_search:
+                if self._get_verbose_level() >= 1 and not context_search:
                     print("\033[33m⚠️ Dataset search: no datasets available\033[0m")
                 return []
             
@@ -176,8 +187,15 @@ class DatabaseDatasetBackend:
             top_chunks = similarities[:k]
             
             results = [chunk.content for _, chunk in top_chunks]
-            if self.verbose and results and not context_search:
+            verbose_level = self._get_verbose_level()
+            if verbose_level >= 1 and results and not context_search:
                 print(f"\033[34m🔍 Dataset search: found {len(results)} relevant documents\033[0m")
+                if verbose_level >= 2:
+                    for i, result in enumerate(results[:3], 1):
+                        content_preview = result[:100] + "..." if len(result) > 100 else result
+                        print(f"  {i}. {content_preview}")
+                    if len(results) > 3:
+                        print(f"  ... and {len(results) - 3} more documents")
             return results
     
     def _build_vector_store(self) -> Optional[FAISS]:
@@ -215,8 +233,11 @@ class DatabaseDatasetBackend:
         self, name: str, ipfs_hash: str, chunk_size: int = 1000, chunk_overlap: int = 200
     ) -> None:
         """Load a document from IPFS hash and add it to the dataset."""
-        if self.verbose:
+        verbose_level = self._get_verbose_level()
+        if verbose_level >= 1:
             print(f"\033[36m📦 Fetching content from IPFS: {ipfs_hash}\033[0m")
+            if verbose_level >= 2:
+                print(f"  IPFS hash: {ipfs_hash}")
         
         from ..tools.ipfs import IpfsTool
         ipfs_tool = IpfsTool()
@@ -229,8 +250,11 @@ class DatabaseDatasetBackend:
         self, name: str, url: str, chunk_size: int = 1000, chunk_overlap: int = 200
     ) -> None:
         """Load a document from URL and add it to the dataset."""
-        if self.verbose:
+        verbose_level = self._get_verbose_level()
+        if verbose_level >= 1:
             print(f"\033[36m🌐 Fetching content from URL: {url}\033[0m")
+            if verbose_level >= 2:
+                print(f"  URL: {url}")
         
         content = self._fetch_content_from_url(url)
         chunks = self._process_and_chunk_content(content, chunk_size, chunk_overlap)
