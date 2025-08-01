@@ -18,6 +18,7 @@ from talos.cli.github import github_app
 from talos.cli.twitter import twitter_app
 from talos.cli.proposals import proposals_app
 from talos.cli.memory import memory_app
+from talos.cli.dataset import dataset_app
 from talos.cli.arbiscan import arbiscan_app
 from talos.database.utils import cleanup_temporary_users, get_user_stats
 
@@ -26,6 +27,7 @@ app.add_typer(twitter_app, name="twitter")
 app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
 app.add_typer(memory_app, name="memory")
+app.add_typer(dataset_app, name="dataset")
 app.add_typer(arbiscan_app, name="arbiscan")
 
 
