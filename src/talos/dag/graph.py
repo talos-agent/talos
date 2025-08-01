@@ -114,6 +114,49 @@ class TalosDAG(BaseModel):
         config = self.get_graph_config()
         return json.dumps(config, indent=2)
     
+    def serialize_for_blockchain(self) -> Dict[str, Any]:
+        """Serialize DAG for blockchain storage with deterministic ordering."""
+        config = self.get_graph_config()
+        
+        sorted_nodes = dict(sorted(config["nodes"].items()))
+        sorted_edges = sorted(config["edges"])
+        sorted_conditional_edges = dict(sorted(config["conditional_edges"].items()))
+        
+        blockchain_config = {
+            "dag_version": "1.0.0",
+            "name": self.name,
+            "description": self.description,
+            "nodes": sorted_nodes,
+            "edges": sorted_edges,
+            "conditional_edges": sorted_conditional_edges,
+            "metadata": config["metadata"],
+            "checksum": self._calculate_dag_checksum(sorted_nodes, sorted_edges)
+        }
+        
+        return blockchain_config
+    
+    def _calculate_dag_checksum(self, nodes: Dict[str, Any], edges: List[tuple]) -> str:
+        """Calculate deterministic checksum for DAG state."""
+        import hashlib
+        dag_data = {
+            "nodes": nodes,
+            "edges": edges
+        }
+        dag_json = json.dumps(dag_data, sort_keys=True)
+        return hashlib.sha256(dag_json.encode()).hexdigest()
+    
+    def validate_upgrade_compatibility(self, new_node_config: Dict[str, Any]) -> bool:
+        """Validate if a node upgrade is compatible with current DAG."""
+        node_id = new_node_config.get("node_id")
+        if not node_id or node_id not in self.nodes:
+            return False
+        
+        current_node = self.nodes[node_id]
+        if hasattr(current_node, 'node_version') and hasattr(current_node, 'upgrade_policy'):
+            return True
+        
+        return False
+    
     def visualize_graph(self) -> str:
         """Return a text representation of the graph structure."""
         lines = [f"DAG: {self.name}"]

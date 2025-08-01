@@ -35,6 +35,10 @@ from talos.dag.nodes import (
     RouterNode,
     GraphState,
 )
+from talos.dag.extensible_nodes import ExtensibleSkillNode, ConfigurableAgentNode
+from talos.dag.extensible_manager import ExtensibleDAGManager
+from talos.dag.structured_nodes import StructuredSupportAgentNode, StructuredRouterNode, NodeVersion
+from talos.dag.structured_manager import StructuredDAGManager
 
 __all__ = [
     "DAGAgent",
@@ -49,4 +53,11 @@ __all__ = [
     "PromptNode",
     "RouterNode",
     "GraphState",
+    "ExtensibleSkillNode",
+    "ConfigurableAgentNode",
+    "ExtensibleDAGManager",
+    "StructuredSupportAgentNode",
+    "StructuredRouterNode",
+    "NodeVersion",
+    "StructuredDAGManager",
 ]
