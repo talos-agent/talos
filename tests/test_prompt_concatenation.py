@@ -77,6 +77,8 @@ def test_prompt_node_backward_compatibility(mock_model: BaseChatModel) -> None:
     from talos.dag.nodes import PromptNode, GraphState
     from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
     
+    PromptNode.model_rebuild()
+    
     with patch("os.listdir", return_value=[]):
         mock_prompt_manager = FilePromptManager(prompts_dir="dummy_dir")
     

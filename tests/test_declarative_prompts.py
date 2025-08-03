@@ -10,6 +10,8 @@ from talos.prompts.prompt_config import (
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.dag.nodes import PromptNode, GraphState
 
+PromptNode.model_rebuild()
+
 
 def test_static_prompt_selector():
     """Test static prompt selector (backward compatibility)."""
@@ -39,7 +41,7 @@ def test_prompt_config_integration():
         variables={"test_var": "test_value"}
     )
     
-    mock_manager = MagicMock()
+    mock_manager = MagicMock(spec=FilePromptManager)
     mock_manager.get_prompt_with_config.return_value = Prompt(
         name="test", template="Test template", input_variables=[]
     )
