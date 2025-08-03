@@ -70,3 +70,35 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
             prompt_manager=mock_prompt_manager,
             schema=None,
         )
+
+
+def test_prompt_node_backward_compatibility(mock_model: BaseChatModel) -> None:
+    """Test that PromptNode still works with legacy prompt_names."""
+    from talos.dag.nodes import PromptNode, GraphState
+    from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+    
+    with patch("os.listdir", return_value=[]):
+        mock_prompt_manager = FilePromptManager(prompts_dir="dummy_dir")
+    
+    mock_prompt_manager.prompts = {
+        "test_prompt": Prompt(
+            name="test_prompt",
+            template="Test template",
+            input_variables=[],
+        )
+    }
+    
+    node = PromptNode(
+        node_id="test_node",
+        name="Test Node",
+        prompt_manager=mock_prompt_manager,
+        prompt_names=["test_prompt"]
+    )
+    
+    state: GraphState = {
+        "messages": [], "context": {}, "current_query": "test", 
+        "results": {}, "metadata": {}
+    }
+    
+    result = node.execute(state)
+    assert "Applied prompt using prompt names" in result["results"]["test_node"]

@@ -114,12 +114,20 @@ class StructuredDAGManager(DAGManager):
         delegation_rules = self._create_deterministic_delegation(support_agents)
         self.delegation_hash = self._calculate_delegation_hash(delegation_rules)
         
+        from talos.prompts.prompt_config import PromptConfig, StaticPromptSelector
+        
+        legacy_config = PromptConfig(
+            selector=StaticPromptSelector(
+                prompt_names=["main_agent_prompt", "general_agent_prompt"]
+            )
+        )
+        
         prompt_node = PromptNode(
             node_id="main_prompt",
             name="Main Agent Prompt",
             description="Primary prompt for the structured Talos agent",
             prompt_manager=prompt_manager,
-            prompt_names=["main_agent_prompt", "general_agent_prompt"]
+            prompt_config=legacy_config
         )
         dag.add_node(prompt_node)
         

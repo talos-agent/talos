@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict, TYPE_CHECKING
 
 from langchain_core.tools import BaseTool
 from langchain_core.messages import BaseMessage
@@ -13,6 +13,11 @@ from talos.data.dataset_manager import DatasetManager
 from talos.prompts.prompt_manager import PromptManager
 from talos.services.abstract.service import Service
 from talos.skills.base import Skill
+
+if TYPE_CHECKING:
+    from talos.prompts.prompt_config import PromptConfig
+else:
+    PromptConfig = "PromptConfig"
 
 
 class GraphState(TypedDict):
@@ -212,32 +217,57 @@ class PromptNode(DAGNode):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     prompt_manager: PromptManager
-    prompt_names: List[str]
+    prompt_names: Optional[List[str]] = None
+    prompt_config: Optional[PromptConfig] = None
     node_type: str = "prompt"
+    
+    def __init__(self, **data):
+        if not data.get('prompt_names') and not data.get('prompt_config'):
+            raise ValueError("Either prompt_names or prompt_config must be provided")
+        super().__init__(**data)
+        
+    @classmethod
+    def model_rebuild(cls):
+        """Rebuild the model to resolve forward references."""
+        super().model_rebuild()
     
     def execute(self, state: GraphState) -> GraphState:
         """Apply prompt templates to the current context."""
-        prompt = self.prompt_manager.get_prompt(self.prompt_names)
+        if self.prompt_config:
+            prompt = self.prompt_manager.get_prompt_with_config(
+                self.prompt_config, 
+                state.get("context", {})
+            )
+            config_desc = "declarative config"
+        else:
+            prompt = self.prompt_manager.get_prompt(self.prompt_names or [])
+            config_desc = f"prompt names: {', '.join(self.prompt_names or [])}"
         
         if prompt:
             state["context"]["active_prompt"] = prompt.template
-            state["results"][self.node_id] = f"Applied prompt: {', '.join(self.prompt_names)}"
+            state["results"][self.node_id] = f"Applied prompt using {config_desc}"
         else:
-            state["results"][self.node_id] = f"Failed to load prompt: {', '.join(self.prompt_names)}"
+            state["results"][self.node_id] = f"Failed to load prompt using {config_desc}"
         
         from langchain_core.messages import AIMessage
         state["messages"].append(AIMessage(content=f"Prompt node {self.name} processed"))
         return state
     
     def get_node_config(self) -> Dict[str, Any]:
-        return {
+        config = {
             "node_id": self.node_id,
             "node_type": self.node_type,
             "name": self.name,
             "description": self.description,
-            "prompt_names": self.prompt_names,
             "metadata": self.metadata
         }
+        
+        if self.prompt_config:
+            config["prompt_config"] = "declarative"
+        else:
+            config["prompt_names"] = ", ".join(self.prompt_names) if self.prompt_names else None
+            
+        return config
 
 
 class RouterNode(DAGNode):
