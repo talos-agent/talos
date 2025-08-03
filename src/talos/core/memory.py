@@ -67,16 +67,13 @@ class Memory:
         
         if self.use_database and LANGMEM_AVAILABLE and self.embeddings_model:
             self._setup_langmem_sqlite()
-        elif self.use_database and self.user_id and self.embeddings_model:
-            from ..database.memory_backend import DatabaseMemoryBackend
-            self._db_backend = DatabaseMemoryBackend(
-                user_id=self.user_id,
-                embeddings_model=self.embeddings_model,
-                session_id=self.session_id,
-                auto_save=self.auto_save,
-                verbose=self.verbose,
-                similarity_threshold=self.similarity_threshold
-            )
+        elif self.use_database and not LANGMEM_AVAILABLE and self.file_path:
+            if self._get_verbose_level() >= 1:
+                print("⚠ LangMem not available, falling back to file-based storage")
+            self.use_database = False
+            self._setup_langmem_file()
+        elif self.use_database:
+            raise ValueError("Database backend requested but LangMem is not available. Please install langmem or use file-based storage.")
         elif not self.use_database and self.file_path:
             self._setup_langmem_file()
         else:
@@ -93,17 +90,8 @@ class Memory:
         """Setup LangMem with SQLite backend."""
         if not LANGMEM_AVAILABLE:
             if self._get_verbose_level() >= 1:
-                print("⚠ LangMem not available, falling back to database backend")
-            if self.user_id and self.embeddings_model:
-                from ..database.memory_backend import DatabaseMemoryBackend
-                self._db_backend = DatabaseMemoryBackend(
-                    user_id=self.user_id,
-                    embeddings_model=self.embeddings_model,
-                    session_id=self.session_id,
-                    auto_save=self.auto_save,
-                    verbose=self.verbose,
-                    similarity_threshold=self.similarity_threshold
-                )
+                print("⚠ LangMem not available, cannot use database backend")
+            raise ValueError("LangMem is required for database backend but is not available")
             return
             
         try:
@@ -124,17 +112,8 @@ class Memory:
                 print("✓ LangMem initialized with SQLite backend")
         except Exception as e:
             if self._get_verbose_level() >= 1:
-                print(f"⚠ SQLite setup failed, falling back to database backend: {e}")
-            if self.user_id and self.embeddings_model:
-                from ..database.memory_backend import DatabaseMemoryBackend
-                self._db_backend = DatabaseMemoryBackend(
-                    user_id=self.user_id,
-                    embeddings_model=self.embeddings_model,
-                    session_id=self.session_id,
-                    auto_save=self.auto_save,
-                    verbose=self.verbose,
-                    similarity_threshold=self.similarity_threshold
-                )
+                print(f"⚠ SQLite setup failed: {e}")
+            raise ValueError(f"Failed to setup LangMem SQLite backend: {e}")
 
     def _setup_langmem_file(self):
         """Setup LangMem with file-based backend."""
@@ -212,8 +191,6 @@ class Memory:
             except Exception as e:
                 if self._get_verbose_level() >= 1:
                     print(f"✗ Failed to save memory: {e}")
-        elif self._db_backend:
-            self._db_backend.add_memory(description, metadata)
         else:
             memory = MemoryRecord(
                 timestamp=time.time(),
@@ -231,10 +208,6 @@ class Memory:
 
     def add_memory(self, description: str, metadata: Optional[dict] = None):
         """Add memory with backward compatibility."""
-        if self._db_backend:
-            self._db_backend.add_memory(description, metadata)
-            return
-            
         if self._langmem_manager and self._store:
             try:
                 config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
@@ -349,9 +322,6 @@ class Memory:
 
     def search(self, query: str, k: int = 5) -> List[MemoryRecord]:
         """Search with backward compatibility."""
-        if self._db_backend:
-            return self._db_backend.search_memories(query, k)
-            
         import asyncio
         try:
             return asyncio.run(self.search_async(query, k))
@@ -360,20 +330,7 @@ class Memory:
 
     def list_all(self, filter_user_id: Optional[str] = None) -> List[MemoryRecord]:
         """List all memories."""
-        if self._db_backend:
-            results = self._db_backend.list_all_memories(filter_user_id)
-            verbose_level = self._get_verbose_level()
-            if verbose_level >= 1 and results:
-                print(f"📋 Listed {len(results)} memories")
-                if verbose_level >= 2:
-                    for i, memory in enumerate(results[:5], 1):
-                        print(f"  {i}. {memory.description}")
-                        if memory.metadata:
-                            print(f"     Metadata: {memory.metadata}")
-                    if len(results) > 5:
-                        print(f"  ... and {len(results) - 5} more memories")
-            return results
-        elif self._store:
+        if self._store:
             if self._get_verbose_level() >= 1:
                 print("📋 Listed memories from SQLite store")
             return []
@@ -394,9 +351,6 @@ class Memory:
 
     def load_history(self) -> List[BaseMessage]:
         """Load conversation history."""
-        if self._db_backend:
-            return self._db_backend.load_history()
-            
         if not self.history_file_path or not self.history_file_path.exists():
             return []
         try:
@@ -408,10 +362,6 @@ class Memory:
 
     def save_history(self, messages: List[BaseMessage]):
         """Save conversation history."""
-        if self._db_backend:
-            self._db_backend.save_history(messages)
-            return
-            
         if not self.history_file_path:
             return
         try:

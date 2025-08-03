@@ -102,19 +102,3 @@ class DevinService(Devin):
         """
         payload = {"task": description, **kwargs}
         return self._make_request("POST", "/sessions", json=payload)
-
-    def get_all_tasks(self) -> List[Dict[str, Any]]:
-        """Legacy method - redirects to get_all_sessions()"""
-        return self.get_all_sessions()
-
-    def get_task_info(self, task_id: str) -> Dict[str, Any]:
-        """Legacy method - redirects to get_session_info()"""
-        return self.get_session_info(task_id)
-
-    def respond_to_task(self, task_id: str, response: str) -> Dict[str, Any]:
-        """Legacy method - redirects to send_message_to_session()"""
-        return self.send_message_to_session(task_id, response)
-
-    def create_task(self, description: str, **kwargs) -> Dict[str, Any]:
-        """Legacy method - redirects to create_session()"""
-        return self.create_session(description, **kwargs)
