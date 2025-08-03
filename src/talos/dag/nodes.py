@@ -218,7 +218,7 @@ class PromptNode(DAGNode):
     
     prompt_manager: PromptManager
     prompt_names: Optional[List[str]] = None
-    prompt_config: Optional[PromptConfig] = None
+    prompt_config: Optional["PromptConfig"] = None
     node_type: str = "prompt"
     
     def __init__(self, **data):
