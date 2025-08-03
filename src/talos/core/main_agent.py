@@ -19,6 +19,7 @@ from talos.services.abstract.service import Service
 from talos.settings import GitHubSettings
 from talos.skills.base import Skill
 from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+from talos.skills.codebase_implementation import CodebaseImplementationSkill
 from talos.skills.cryptography import CryptographySkill
 from talos.skills.pr_review import PRReviewSkill
 from talos.skills.proposals import ProposalsSkill
@@ -56,7 +57,7 @@ class MainAgent(Agent):
         self._setup_dataset_manager()
         self._setup_tool_manager()
         self._setup_job_scheduler()
-        
+
     def _get_verbose_level(self) -> int:
         """Convert verbose to integer level for backward compatibility."""
         if isinstance(self.verbose, bool):
@@ -66,9 +67,9 @@ class MainAgent(Agent):
     def _setup_prompt_manager(self) -> None:
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
-        
+
         use_voice_enhanced = os.getenv("TALOS_USE_VOICE_ENHANCED", "false").lower() == "true"
-        
+
         if use_voice_enhanced:
             self._setup_voice_enhanced_prompt()
         else:
@@ -79,34 +80,35 @@ class MainAgent(Agent):
         try:
             if not self.prompt_manager:
                 raise ValueError("Prompt manager not initialized")
-                
+
             from talos.skills.twitter_voice import TwitterVoiceSkill
-            
+
             voice_skill = TwitterVoiceSkill()
             voice_result = voice_skill.run(username="talos_is")
-            
+
             main_prompt = self.prompt_manager.get_prompt("main_agent_prompt")
             if not main_prompt:
                 raise ValueError("Could not find main_agent_prompt")
-            
+
             voice_enhanced_template = f"{voice_result['voice_prompt']}\n\n{main_prompt.template}"
-            
+
             from talos.prompts.prompt import Prompt
+
             enhanced_prompt = Prompt(
                 name="voice_enhanced_main_agent",
                 template=voice_enhanced_template,
-                input_variables=main_prompt.input_variables
+                input_variables=main_prompt.input_variables,
             )
-            
+
             # Add the enhanced prompt to the manager if it's a FilePromptManager
-            if hasattr(self.prompt_manager, 'prompts'):
+            if hasattr(self.prompt_manager, "prompts"):
                 self.prompt_manager.prompts["voice_enhanced_main_agent"] = enhanced_prompt
-            
+
             self.set_prompt(["voice_enhanced_main_agent", "general_agent_prompt"])
-            
+
             if self._get_verbose_level() >= 1:
                 print(f"Voice integration enabled using {voice_result['voice_source']}")
-                
+
         except Exception as e:
             if self._get_verbose_level() >= 1:
                 print(f"Voice integration failed, falling back to default prompts: {e}")
@@ -162,6 +164,7 @@ class MainAgent(Agent):
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
         services: list[Service] = []
+        devin_service = None
         skills: list[Skill] = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
             CryptographySkill(),
@@ -175,21 +178,32 @@ class MainAgent(Agent):
 
             devin_api_key = os.getenv("DEVIN_API_KEY")
             if devin_api_key:
-                services.append(DevinService(api_key=devin_api_key))
+                devin_service = DevinService(api_key=devin_api_key)
+                services.append(devin_service)
         except (ImportError, ValueError):
             pass  # Devin API key not available, skip Devin service
 
+        github_tools = None
         try:
             github_settings = GitHubSettings()
             github_token = github_settings.GITHUB_API_TOKEN
             if github_token:
+                github_tools = GithubTools(token=github_token)
                 skills.append(
-                    PRReviewSkill(
-                        llm=self.model, prompt_manager=self.prompt_manager, github_tools=GithubTools(token=github_token)
-                    )
+                    PRReviewSkill(llm=self.model, prompt_manager=self.prompt_manager, github_tools=github_tools)
                 )
         except ValueError:
             pass  # GitHub token not available, skip GitHub-dependent skills
+
+        if devin_service:
+            skills.append(
+                CodebaseImplementationSkill(
+                    llm=self.model,
+                    prompt_manager=self.prompt_manager,
+                    devin_service=devin_service,
+                    github_tools=github_tools,
+                )
+            )
 
         try:
             from talos.tools.twitter_client import TwitterConfig
@@ -220,13 +234,14 @@ class MainAgent(Agent):
         if not self.dataset_manager:
             if self.use_database_memory:
                 from talos.database.session import init_database
+
                 init_database()
-                
+
                 self.dataset_manager = DatasetManager(
                     verbose=self.verbose,
                     user_id=self.user_id,
                     session_id=self.session_id or "cli-session",
-                    use_database=True
+                    use_database=True,
                 )
             else:
                 self.dataset_manager = DatasetManager(verbose=self.verbose)
@@ -243,6 +258,7 @@ class MainAgent(Agent):
             tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
         else:
             from langchain_openai import OpenAIEmbeddings
+
             basic_dataset_manager = DatasetManager(verbose=self.verbose, embeddings=OpenAIEmbeddings())
             tool_manager.register_tool(DocumentLoaderTool(basic_dataset_manager))
             tool_manager.register_tool(DatasetSearchTool(basic_dataset_manager))
