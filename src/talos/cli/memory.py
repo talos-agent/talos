@@ -164,32 +164,9 @@ def flush_memories(
         embeddings_model = OpenAIEmbeddings()
         
         if use_database:
-            from talos.database.session import init_database
-            from talos.database.memory_backend import DatabaseMemoryBackend
-            init_database()
-            
-            if not user_id:
-                if typer.confirm("⚠️  No user ID provided. This will DELETE ALL memories from the database. Are you sure?"):
-                    deleted_count = DatabaseMemoryBackend.flush_all_memories()
-                    print(f"Successfully deleted {deleted_count} memories from the database.")
-                else:
-                    print("Operation cancelled.")
-                return
-            else:
-                deleted_count = DatabaseMemoryBackend.flush_user_memories(user_id)
-                if deleted_count > 0:
-                    print(f"Successfully deleted {deleted_count} memories for user '{user_id}' from the database.")
-                else:
-                    print(f"No memories found for user '{user_id}' or user does not exist.")
-                return
-            
-            memory = Memory(
-                embeddings_model=embeddings_model,
-                user_id=user_id,
-                session_id="cli-session",
-                use_database=True,
-                verbose=verbose
-            )
+            print("Database-based memory flushing is no longer supported.")
+            print("Use file-based memory storage instead with --no-use-database flag.")
+            return
         else:
             from pathlib import Path
             memory_dir = Path("memory")
