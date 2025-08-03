@@ -225,11 +225,6 @@ class PromptNode(DAGNode):
         if not data.get('prompt_names') and not data.get('prompt_config'):
             raise ValueError("Either prompt_names or prompt_config must be provided")
         super().__init__(**data)
-        
-    @classmethod
-    def model_rebuild(cls):
-        """Rebuild the model to resolve forward references."""
-        super().model_rebuild()
     
     def execute(self, state: GraphState) -> GraphState:
         """Apply prompt templates to the current context."""
