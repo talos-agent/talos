@@ -40,12 +40,20 @@ class DAGManager(BaseModel):
             description="Default Talos agent DAG with integrated skills, services, and tools"
         )
         
+        from talos.prompts.prompt_config import PromptConfig, StaticPromptSelector
+        
+        legacy_config = PromptConfig(
+            selector=StaticPromptSelector(
+                prompt_names=["main_agent_prompt", "general_agent_prompt"]
+            )
+        )
+        
         prompt_node = PromptNode(
             node_id="main_prompt",
             name="Main Agent Prompt",
             description="Primary prompt for the Talos agent",
             prompt_manager=prompt_manager,
-            prompt_names=["main_agent_prompt", "general_agent_prompt"]
+            prompt_config=legacy_config
         )
         dag.add_node(prompt_node)
         

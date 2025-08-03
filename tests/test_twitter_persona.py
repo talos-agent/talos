@@ -38,6 +38,9 @@ class MockTwitterClient(TwitterClient):
 class MockPromptManager(PromptManager):
     def get_prompt(self, name: str) -> Prompt | None:
         return Prompt(name="test_prompt", template="This is a test prompt.", input_variables=[])
+    
+    def get_prompt_with_config(self, config, context):
+        return Prompt(name="test_prompt", template="This is a test prompt.", input_variables=[])
 
 
 class TestTwitterPersona(unittest.TestCase):

@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import json
 import os
-from typing import Dict
+from typing import Any, Dict, TYPE_CHECKING
 
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_manager import PromptManager
+
+if TYPE_CHECKING:
+    from talos.prompts.prompt_config import PromptConfig
 
 
 class FilePromptManager(PromptManager):
@@ -61,3 +66,33 @@ class FilePromptManager(PromptManager):
             )
 
         return self.prompts.get(name)
+
+    def get_prompt_with_config(self, config: PromptConfig, context: Dict[str, Any]) -> Prompt | None:
+        """
+        Gets prompts using declarative configuration and context.
+        """
+        
+        prompt_names = config.get_prompt_names(context)
+        if not prompt_names:
+            return None
+            
+        base_prompt = self.get_prompt(prompt_names)
+        if not base_prompt:
+            return None
+            
+        enhanced_template = base_prompt.template
+        if config.variables or config.transformations:
+            try:
+                enhanced_template = self.apply_variable_transformations(
+                    base_prompt.template, 
+                    {**context, **config.variables}, 
+                    config.transformations
+                )
+            except KeyError:
+                pass
+                
+        return Prompt(
+            name=f"configured_{base_prompt.name}",
+            template=enhanced_template,
+            input_variables=base_prompt.input_variables
+        )

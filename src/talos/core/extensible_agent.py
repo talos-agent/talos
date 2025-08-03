@@ -5,12 +5,12 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, ConfigDict
 
 from talos.core.memory import Memory
-from talos.dag.dag_agent import DAGAgent
 from talos.dag.manager import DAGManager
 from talos.prompts.prompt_manager import PromptManager
 from talos.skills.base import Skill
 from talos.tools.tool_manager import ToolManager
 
+from talos.dag.dag_agent import DAGAgent
 if TYPE_CHECKING:
     from talos.dag.structured_nodes import NodeVersion
 

@@ -1,0 +1,20 @@
+{
+    "name": "adaptive_agent_config",
+    "description": "Adaptive prompt configuration that selects prompts based on context",
+    "selector": {
+        "type": "conditional",
+        "conditions": {
+            "has_voice_analysis": "voice_enhanced_agent_prompt",
+            "is_proposal_context": "proposal_evaluation_prompt",
+            "is_github_context": "github_pr_review_prompt"
+        },
+        "default_prompt": "main_agent_prompt"
+    },
+    "variables": {
+        "system_mode": "autonomous",
+        "safety_level": "high"
+    },
+    "transformations": {
+        "system_mode": "uppercase"
+    }
+}
