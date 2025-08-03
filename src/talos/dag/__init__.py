@@ -40,6 +40,11 @@ from talos.dag.extensible_manager import ExtensibleDAGManager
 from talos.dag.structured_nodes import StructuredSupportAgentNode, StructuredRouterNode, NodeVersion
 from talos.dag.structured_manager import StructuredDAGManager
 
+try:
+    PromptNode.model_rebuild()
+except Exception:
+    pass
+
 __all__ = [
     "DAGAgent",
     "TalosDAG",
