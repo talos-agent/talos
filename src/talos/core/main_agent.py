@@ -283,19 +283,13 @@ class MainAgent(Agent):
         self.job_scheduler.start()
 
     def _setup_startup_task_manager(self) -> None:
-        """Initialize the startup task manager and register predefined tasks."""
-        from talos.startup_tasks import create_example_startup_tasks
-        
+        """Initialize the startup task manager and discover tasks from files."""
         if not self.startup_task_manager:
             self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
         
-        example_tasks = create_example_startup_tasks()
-        for task in example_tasks:
-            self.startup_task_manager.register_task(task)
-        
         import logging
         logger = logging.getLogger(__name__)
-        logger.info(f"Startup task manager initialized with {len(example_tasks)} tasks")
+        logger.info(f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks")
 
     def add_scheduled_job(self, job: ScheduledJob) -> None:
         """

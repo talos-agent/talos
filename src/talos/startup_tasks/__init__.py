@@ -1,10 +1,10 @@
 """
-Startup tasks for Talos daemon.
+Startup tasks directory - individual task files with hash-based names.
 
-This module contains startup tasks that are executed when the daemon starts.
-Tasks are similar to database migrations - they run once and are tracked for completion.
+Each task file follows the pattern:
+- Filename: {hash}.py (e.g., ec68f0115789.py)
+- Contains a create_task() function that returns a StartupTask instance
+- Self-contained and easily manageable like Django migrations
+
+Tasks are automatically discovered by StartupTaskManager on daemon startup.
 """
-
-from .example_tasks import create_example_startup_tasks
-
-__all__ = ["create_example_startup_tasks"]
