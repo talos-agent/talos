@@ -11,10 +11,7 @@ from talos.core.agent import Agent
 from talos.core.job_scheduler import JobScheduler
 from talos.core.scheduled_job import ScheduledJob
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from talos.core.startup_task_manager import StartupTaskManager
+from talos.core.startup_task_manager import StartupTaskManager
 from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.models.services import Ticket
@@ -51,7 +48,7 @@ class MainAgent(Agent):
     dataset_manager: Optional[DatasetManager] = None
     job_scheduler: Optional[JobScheduler] = None
     scheduled_jobs: List[ScheduledJob] = []
-    startup_task_manager: Optional["StartupTaskManager"] = None
+    startup_task_manager: Optional[StartupTaskManager] = None
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
@@ -287,7 +284,6 @@ class MainAgent(Agent):
 
     def _setup_startup_task_manager(self) -> None:
         """Initialize the startup task manager and register predefined tasks."""
-        from talos.core.startup_task_manager import StartupTaskManager
         from talos.startup_tasks import create_example_startup_tasks
         
         if not self.startup_task_manager:
