@@ -33,3 +33,17 @@ class OnChainManagement(ABC):
         Deploys a new vault contract.
         """
         pass
+
+    @abstractmethod
+    def deploy_contract(self, bytecode: str, salt: str, chain_id: int, force: bool = False) -> str:
+        """
+        Deploy a smart contract with duplicate prevention.
+        """
+        pass
+
+    @abstractmethod
+    def check_deployment_duplicate(self, bytecode: str, salt: str, chain_id: int) -> bool:
+        """
+        Check if a contract deployment would be a duplicate.
+        """
+        pass
