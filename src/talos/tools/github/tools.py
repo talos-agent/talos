@@ -6,7 +6,7 @@ from github import Auth, Github
 from pydantic import BaseModel, Field, PrivateAttr
 
 from ...settings import GitHubSettings
-from ...utils.validation import validate_github_username, validate_github_repo_name, mask_sensitive_data, validate_api_token_format
+from ...utils.validation import validate_github_username, validate_github_repo_name, mask_sensitive_data
 from ...utils.http_client import SecureHTTPClient
 
 logger = logging.getLogger(__name__)
@@ -27,9 +27,6 @@ class GithubTools(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         if not self.token:
             raise ValueError("Github token not provided.")
-        
-        if not validate_api_token_format(self.token, 'github'):
-            logger.warning("GitHub token format appears invalid")
         
         self._github = Github(auth=Auth.Token(self.token))
         self._http_client = SecureHTTPClient()
