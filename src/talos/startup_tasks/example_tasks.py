@@ -44,14 +44,8 @@ class DeployContractTask(StartupTask):
     contract_name: str
     private_key_env: str
     
-    def __init__(self, contract_name: str, private_key_env: str, **kwargs):
-        super().__init__(
-            name=f"deploy_contract_{contract_name}",
-            description=f"Deploy {contract_name} contract using private key from {private_key_env}",
-            contract_name=contract_name,
-            private_key_env=private_key_env,
-            **kwargs
-        )
+    def __init__(self, **data):
+        super().__init__(**data)
     
     async def run(self, **kwargs: Any) -> str:
         """Deploy a smart contract."""
@@ -107,6 +101,8 @@ def create_example_startup_tasks() -> List[StartupTask]:
     tasks = [
         InitializeSystemTask(),
         DeployContractTask(
+            name="deploy_contract_TalosGovernance",
+            description="Deploy TalosGovernance contract using private key from TALOS_DEPLOY_KEY",
             contract_name="TalosGovernance",
             private_key_env="TALOS_DEPLOY_KEY"
         ),
