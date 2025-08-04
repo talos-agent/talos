@@ -41,9 +41,7 @@ def get_web3_connection(chain_id: int) -> Web3:
     return w3
 
 
-def deploy_contract(
-    request: ContractDeploymentRequest, private_key: str, force: bool = False
-) -> ContractDeploymentResult:
+def deploy_contract(request: ContractDeploymentRequest, private_key: str) -> ContractDeploymentResult:
     """Deploy a contract using CREATE2."""
     w3 = get_web3_connection(request.chain_id)
     account = Account.from_key(private_key)

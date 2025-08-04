@@ -35,9 +35,9 @@ class OnChainManagement(ABC):
         pass
 
     @abstractmethod
-    def deploy_contract(self, bytecode: str, salt: str, chain_id: int, force: bool = False) -> str:
+    def deploy_contract(self, bytecode: str, salt: str, chain_id: int, check_duplicates: bool = False) -> str:
         """
-        Deploy a smart contract with duplicate prevention.
+        Deploy a smart contract with optional duplicate checking.
         """
         pass
 

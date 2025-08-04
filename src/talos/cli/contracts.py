@@ -20,12 +20,12 @@ def deploy_contract(
     constructor_args: Optional[str] = typer.Option(
         None, "--constructor-args", help="JSON array of constructor arguments"
     ),
-    force: bool = typer.Option(False, "--force", "-f", help="Force deployment even if duplicate exists"),
+    check: bool = typer.Option(False, "--check", help="Check for duplicate deployment and prevent if found"),
     gas_limit: Optional[int] = typer.Option(None, "--gas-limit", help="Gas limit for deployment"),
     output_format: str = typer.Option("formatted", "--format", help="Output format: 'formatted' or 'json'"),
 ):
     """
-    Deploy a smart contract with duplicate prevention.
+    Deploy a smart contract with optional duplicate checking.
     """
     try:
         if not os.path.exists(bytecode_file):
@@ -49,7 +49,7 @@ def deploy_contract(
             salt=salt,
             chain_id=chain_id,
             constructor_args=parsed_constructor_args,
-            force=force,
+            check_duplicates=check,
             gas_limit=gas_limit,
         )
 
@@ -64,7 +64,7 @@ def deploy_contract(
             if result.gas_used:
                 print(f"Gas Used: {result.gas_used}")
             if result.was_duplicate:
-                print("⚠️  This was a duplicate deployment (existing contract returned)")
+                print("⚠️  Duplicate deployment prevented (existing contract returned)")
             else:
                 print("✅ New contract deployed successfully")
 

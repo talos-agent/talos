@@ -18,13 +18,13 @@ class ContractDeploymentArgs(BaseModel):
     salt: str = Field(..., description="Salt for CREATE2 deployment")
     chain_id: int = Field(42161, description="Chain ID to deploy on")
     constructor_args: Optional[list] = Field(None, description="Constructor arguments")
-    force: bool = Field(False, description="Force deployment even if duplicate exists")
+    check_duplicates: bool = Field(False, description="Check for duplicate deployment and prevent if found")
     gas_limit: Optional[int] = Field(None, description="Gas limit for deployment")
 
 
 class ContractDeploymentTool(SupervisedTool):
     name: str = "contract_deployment_tool"
-    description: str = "Deploy smart contracts with duplicate prevention"
+    description: str = "Deploy smart contracts with optional duplicate checking"
     args_schema: type[BaseModel] = ContractDeploymentArgs
 
     def _run_unsupervised(
@@ -33,30 +33,31 @@ class ContractDeploymentTool(SupervisedTool):
         salt: str,
         chain_id: int = 42161,
         constructor_args: Optional[list] = None,
-        force: bool = False,
+        check_duplicates: bool = False,
         gas_limit: Optional[int] = None,
         **kwargs: Any,
     ) -> ContractDeploymentResult:
-        """Deploy a smart contract with duplicate prevention."""
+        """Deploy a smart contract with optional duplicate checking."""
 
         signature = calculate_contract_signature(bytecode, salt)
 
-        with get_session() as session:
-            existing = (
-                session.query(ContractDeployment)
-                .filter(ContractDeployment.contract_signature == signature, ContractDeployment.chain_id == chain_id)
-                .first()
-            )
-
-            if existing and not force:
-                return ContractDeploymentResult(
-                    contract_address=existing.contract_address,
-                    transaction_hash=existing.transaction_hash,
-                    contract_signature=signature,
-                    chain_id=chain_id,
-                    gas_used=None,
-                    was_duplicate=True,
+        if check_duplicates:
+            with get_session() as session:
+                existing = (
+                    session.query(ContractDeployment)
+                    .filter(ContractDeployment.contract_signature == signature, ContractDeployment.chain_id == chain_id)
+                    .first()
                 )
+
+                if existing:
+                    return ContractDeploymentResult(
+                        contract_address=existing.contract_address,
+                        transaction_hash=existing.transaction_hash,
+                        contract_signature=signature,
+                        chain_id=chain_id,
+                        gas_used=None,
+                        was_duplicate=True,
+                    )
 
         private_key = os.getenv("DEPLOYMENT_PRIVATE_KEY")
         if not private_key:
@@ -71,7 +72,7 @@ class ContractDeploymentTool(SupervisedTool):
             gas_price=None,
         )
 
-        result = deploy_contract(request, private_key, force)
+        result = deploy_contract(request, private_key)
 
         self._store_deployment(result, signature, salt, bytecode)
 
