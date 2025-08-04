@@ -61,6 +61,12 @@ class TalosDaemon:
         
         logger.info("MainAgent initialized successfully")
         
+        if self.main_agent.startup_task_manager:
+            logger.info("Executing startup tasks...")
+            import asyncio
+            asyncio.create_task(self.main_agent.startup_task_manager.execute_pending_tasks())
+            logger.info("Startup tasks execution initiated")
+        
         if self.main_agent.job_scheduler:
             logger.info(f"Job scheduler is running: {self.main_agent.job_scheduler.is_running()}")
             scheduled_jobs = self.main_agent.list_scheduled_jobs()

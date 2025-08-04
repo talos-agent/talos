@@ -10,6 +10,8 @@ from langchain_core.tools import BaseTool, tool
 from talos.core.agent import Agent
 from talos.core.job_scheduler import JobScheduler
 from talos.core.scheduled_job import ScheduledJob
+
+from talos.core.startup_task_manager import StartupTaskManager
 from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.models.services import Ticket
@@ -46,6 +48,7 @@ class MainAgent(Agent):
     dataset_manager: Optional[DatasetManager] = None
     job_scheduler: Optional[JobScheduler] = None
     scheduled_jobs: List[ScheduledJob] = []
+    startup_task_manager: Optional[StartupTaskManager] = None
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
@@ -57,6 +60,7 @@ class MainAgent(Agent):
         self._setup_dataset_manager()
         self._setup_tool_manager()
         self._setup_job_scheduler()
+        self._setup_startup_task_manager()
 
     def _get_verbose_level(self) -> int:
         """Convert verbose to integer level for backward compatibility."""
@@ -277,6 +281,15 @@ class MainAgent(Agent):
             self.job_scheduler.register_job(job)
 
         self.job_scheduler.start()
+
+    def _setup_startup_task_manager(self) -> None:
+        """Initialize the startup task manager and discover tasks from files."""
+        if not self.startup_task_manager:
+            self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
+        
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks")
 
     def add_scheduled_job(self, job: ScheduledJob) -> None:
         """
