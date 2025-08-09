@@ -15,16 +15,11 @@ from experimental.archon.tests.conftest import SentimentState
 class TestTypePreservation:
     """Test that Pydantic types are properly preserved during serialization."""
 
-    def test_state_schema_extraction_preserves_types(self, sentiment_graph_builder, mock_ipfs_storage, monkeypatch):
+    def test_state_schema_extraction_preserves_types(self, sentiment_graph_builder, setup_ipfs_mocks):
         """Test that state schema extraction captures complete Pydantic information."""
 
-        def mock_store(graph_json: str) -> str:
-            fake_hash = f"Qm{hash(graph_json)}"
-            mock_ipfs_storage[fake_hash] = graph_json
-            return fake_hash
-
         loader = GraphLoader()
-        monkeypatch.setattr(loader, "store_to_ipfs", mock_store)
+        setup_ipfs_mocks(loader)
 
         # Serialize the graph
         graph_json = loader.serialize_graph_from_builder(
@@ -43,8 +38,6 @@ class TestTypePreservation:
         assert state_schema["name"] == "SentimentState"
 
         # Verify we can load the class and generate the schema on demand
-        from experimental.archon.tests.conftest import SentimentState
-
         json_schema = SentimentState.model_json_schema()
 
         # Check that field types can be retrieved from the loaded class
@@ -68,23 +61,11 @@ class TestTypePreservation:
         assert properties["final_action"]["default"] == ""
 
     @pytest.mark.asyncio
-    async def test_type_preservation_round_trip(self, sentiment_graph_builder, mock_ipfs_storage, monkeypatch):
+    async def test_type_preservation_round_trip(self, sentiment_graph_builder, setup_ipfs_mocks):
         """Test that types are preserved through complete serialization round trip."""
 
-        def mock_store(graph_json: str) -> str:
-            fake_hash = f"Qm{hash(graph_json)}"
-            mock_ipfs_storage[fake_hash] = graph_json
-            return fake_hash
-
-        def mock_retrieve(ipfs_hash: str):
-            from experimental.archon.src.graph_models import StoredGraphDefinition
-
-            json_data = mock_ipfs_storage[ipfs_hash]
-            return StoredGraphDefinition.model_validate(json.loads(json_data))
-
         loader = GraphLoader()
-        monkeypatch.setattr(loader, "store_to_ipfs", mock_store)
-        monkeypatch.setattr(loader, "retrieve_from_ipfs", mock_retrieve)
+        setup_ipfs_mocks(loader)
 
         # Save the graph
         ipfs_hash = loader.save_graph_from_builder(

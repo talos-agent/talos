@@ -8,7 +8,7 @@ on IPFS with proper validation and type safety.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Hashable
 
 from langchain_core.runnables.graph import Edge, Node
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -28,14 +28,10 @@ class GraphModel(BaseModel, Immutable):
     @staticmethod
     def _validate_function_reference(value: str) -> str:
         """Validate function reference format and security constraints."""
-        if not isinstance(value, str):
-            raise ValueError("Function reference must be a string")
-
-        if ":" not in value:
-            raise ValueError("Function reference must be in format 'module.path:function_name'")
-
         if value.count(":") != 1:
-            raise ValueError("Function reference must have exactly one ':' separator")
+            raise ValueError(
+                "Function reference must be in format 'module.path:function_name' with exactly one ':' separator"
+            )
 
         module_path, function_name = value.split(":", 1)
 
@@ -68,9 +64,7 @@ class GraphMetadata(GraphModel):
     langgraph_version: str = "0.2.60"
 
 
-# Note: We create Pydantic-compatible wrappers for LangGraph's Node and Edge types
-# to ensure compatibility with our immutable model architecture while maintaining
-# compatibility with LangGraph's structure.
+# Note: It's a bit duplicative, but I prefer to fully separate our internal classes from LangGraph's classes.
 
 
 class LangGraphNode(GraphModel):
@@ -145,7 +139,7 @@ class ConditionalEdgeDefinition(GraphModel):
 
     source_node: str
     condition_function_reference: str = Field(description="Format: 'module.path:function_name'")
-    target_mapping: dict[str, str]
+    target_mapping: dict[Hashable, str]
 
     @field_validator("condition_function_reference")
     @classmethod
@@ -171,19 +165,11 @@ class SerializableGraphDefinition(GraphModel):
     state_type_name: str
 
 
-class LangGraphDefinition(GraphModel):
-    """Structured representation of LangGraph's native to_json() output using wrapper types."""
-
-    nodes: list[LangGraphNode]
-    edges: list[LangGraphEdge]
-
-
 class StateSchema(GraphModel):
     """Pydantic-only state schema representation."""
 
     name: str
     class_reference: str = Field(description="Format: 'module.path:ClassName'")
-    description: str | None = None
 
     @field_validator("class_reference")
     @classmethod
@@ -204,8 +190,7 @@ class ExecutionConfig(GraphModel):
 class StoredGraphDefinition(GraphModel):
     """Complete stored graph definition using serializable pre-compilation data."""
 
-    type: str = "serializable_graph_definition"
-    version: str = "2.0.0"  # Updated version for new approach
+    version: str = "0.0.1"
     metadata: GraphMetadata
 
     # Serializable graph definition from StateGraph builder (before compilation)
@@ -213,16 +198,8 @@ class StoredGraphDefinition(GraphModel):
         description="Complete serializable graph structure from StateGraph builder"
     )
 
-    # LangGraph's native representation (optional, for reference)
-    langgraph_definition: LangGraphDefinition | None = Field(
-        default=None,
-        description="Optional: LangGraph's compiled representation for reference",
-    )
-
-    # Additional info that LangGraph doesn't capture
     state_schema: StateSchema = Field(description="Structured information about the state schema")
 
-    # Execution configuration
     execution_config: ExecutionConfig = Field(
         default_factory=ExecutionConfig,
         description="Structured execution configuration options",

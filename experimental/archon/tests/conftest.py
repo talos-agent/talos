@@ -4,9 +4,15 @@ Shared test fixtures for Archon graph storage tests.
 
 from __future__ import annotations
 
+import json
+from typing import Any, Callable
+
 import pytest
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
+
+from experimental.archon.src.graph_loader import GraphLoader
+from experimental.archon.src.graph_models import StoredGraphDefinition
 
 
 class SentimentState(BaseModel):
@@ -79,3 +85,84 @@ def mock_ipfs_storage():
     Returns a dictionary that will store graph definitions by hash.
     """
     return {}
+
+
+class IPFSMockHelpers:
+    """Helper functions for mocking IPFS operations."""
+
+    @staticmethod
+    def create_mock_store(storage: dict[str, str]) -> Callable[[str], str]:
+        """Create a mock store function that saves to the provided storage."""
+
+        def mock_store(graph_json: str) -> str:
+            fake_hash = f"Qm{hash(graph_json)}"
+            storage[fake_hash] = graph_json
+            return fake_hash
+
+        return mock_store
+
+    @staticmethod
+    def create_mock_retrieve(storage: dict[str, str]) -> Callable[[str], StoredGraphDefinition]:
+        """Create a mock retrieve function that loads from the provided storage."""
+
+        def mock_retrieve(ipfs_hash: str) -> StoredGraphDefinition:
+            json_data = storage[ipfs_hash]
+            return StoredGraphDefinition.model_validate(json.loads(json_data))
+
+        return mock_retrieve
+
+
+@pytest.fixture
+def mock_ipfs_functions(mock_ipfs_storage):
+    """
+    Provide mock IPFS store and retrieve functions.
+    Returns a tuple of (mock_store, mock_retrieve) functions.
+    """
+    mock_store = IPFSMockHelpers.create_mock_store(mock_ipfs_storage)
+    mock_retrieve = IPFSMockHelpers.create_mock_retrieve(mock_ipfs_storage)
+    return mock_store, mock_retrieve
+
+
+@pytest.fixture
+def setup_ipfs_mocks(monkeypatch, mock_ipfs_functions):
+    """
+    Fixture that sets up IPFS mocks for a GraphLoader or GraphExecutor.
+    Returns a function that applies the mocks to a given loader/executor.
+    """
+    mock_store, mock_retrieve = mock_ipfs_functions
+
+    def apply_mocks(obj: Any) -> None:
+        """Apply IPFS mocks to a GraphLoader or GraphExecutor instance."""
+        if hasattr(obj, "loader"):  # GraphExecutor
+            target = obj.loader
+        else:  # GraphLoader
+            target = obj
+
+        monkeypatch.setattr(target, "store_to_ipfs", mock_store)
+        monkeypatch.setattr(target, "retrieve_from_ipfs", mock_retrieve)
+
+    return apply_mocks
+
+
+@pytest.fixture
+def loader_with_ipfs_mocks(setup_ipfs_mocks):
+    """
+    Create a GraphLoader with IPFS mocks already applied.
+    This fixture can be used directly instead of creating and mocking separately.
+    """
+    loader = GraphLoader()
+    setup_ipfs_mocks(loader)
+    return loader
+
+
+@pytest.fixture
+def executor_with_ipfs_mocks(setup_ipfs_mocks):
+    """
+    Create a GraphExecutor with IPFS mocks already applied.
+    This fixture can be used directly instead of creating and mocking separately.
+    """
+    from experimental.archon.src.graph_executor import GraphExecutor
+
+    executor = GraphExecutor()
+    setup_ipfs_mocks(executor)
+    return executor

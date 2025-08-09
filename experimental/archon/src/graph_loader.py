@@ -20,7 +20,9 @@ from typing import Any, Awaitable, Callable, Hashable, Union
 import requests
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.graph import CompiledGraph
+from langgraph.utils.runnable import RunnableCallable
 from pinata_python.pinning import Pinning
+from pydantic import BaseModel
 
 from .graph_models import (
     ConditionalEdgeDefinition,
@@ -48,10 +50,6 @@ class GraphLoader:
         >>> recreated_graph = loader.load_graph(ipfs_hash)
     """
 
-    def __init__(self) -> None:
-        """Initialize the GraphLoader."""
-        pass
-
     def serialize_graph_from_builder(
         self,
         state_graph: StateGraph,
@@ -77,17 +75,12 @@ class GraphLoader:
         # Extract serializable node definitions
         nodes = []
         for node_name, node_spec in state_graph.nodes.items():
-            # Extract function information from StateNodeSpec
-            if not hasattr(node_spec, "runnable"):
-                raise ValueError(f"Node '{node_name}' missing expected 'runnable' attribute")
-
             runnable = node_spec.runnable
+            assert isinstance(runnable, RunnableCallable), "Only RunnableCallables are currently supported."
 
-            # For sync functions: use runnable.func
-            # For async functions: runnable.func is None, use runnable.afunc
-            if hasattr(runnable, "func") and runnable.func is not None:
+            if runnable.func is not None:
                 func = runnable.func
-            elif hasattr(runnable, "afunc") and runnable.afunc is not None:
+            elif runnable.afunc is not None:
                 func = runnable.afunc
             else:
                 raise ValueError(
@@ -95,32 +88,24 @@ class GraphLoader:
                     f"Expected runnable.func or runnable.afunc to be set"
                 )
 
-            if not hasattr(func, "__module__") or not hasattr(func, "__name__"):
-                raise ValueError(f"Function for node '{node_name}' missing __module__ or __name__ attributes")
-
             function_reference = f"{func.__module__}:{func.__name__}"
-
             nodes.append(GraphNodeDefinition(name=node_name, function_reference=function_reference))
 
         # Extract simple edges
         edges = []
-        for edge_tuple in getattr(state_graph, "edges", set()):
+        for edge_tuple in state_graph.edges:
             source, target = edge_tuple
             edges.append(GraphEdgeDefinition(source=source, target=target))
 
         # Extract conditional edges from branches
         conditional_edges = []
-        branches = getattr(state_graph, "branches", {})
+        branches = state_graph.branches
         for source_node, branch_dict in branches.items():
-            # The branch dict has function names as keys
             for func_name, branch_obj in branch_dict.items():
-                if not hasattr(branch_obj, "path"):
-                    raise ValueError(f"Conditional edge from '{source_node}' missing expected 'path' attribute")
-
-                # Extract condition function similar to node functions
-                if hasattr(branch_obj.path, "func") and branch_obj.path.func is not None:
+                assert isinstance(branch_obj.path, RunnableCallable), "Only RunnableCallables are currently supported."
+                if branch_obj.path.func is not None:
                     condition_func = branch_obj.path.func
-                elif hasattr(branch_obj.path, "afunc") and branch_obj.path.afunc is not None:
+                elif branch_obj.path.afunc is not None:
                     condition_func = branch_obj.path.afunc
                 else:
                     raise ValueError(
@@ -128,20 +113,12 @@ class GraphLoader:
                         f"Expected branch_obj.path.func or branch_obj.path.afunc to be set"
                     )
 
-                if not hasattr(condition_func, "__module__") or not hasattr(condition_func, "__name__"):
-                    raise ValueError(
-                        f"Condition function for edge from '{source_node}' missing __module__ or __name__ attributes"
-                    )
-
-                if not hasattr(branch_obj, "ends"):
-                    raise ValueError(f"Conditional edge from '{source_node}' missing expected 'ends' attribute")
-
                 condition_function_reference = f"{condition_func.__module__}:{condition_func.__name__}"
                 conditional_edges.append(
                     ConditionalEdgeDefinition(
                         source_node=source_node,
                         condition_function_reference=condition_function_reference,
-                        target_mapping=branch_obj.ends,
+                        target_mapping=branch_obj.ends or {},
                     )
                 )
 
@@ -157,9 +134,7 @@ class GraphLoader:
             edges=edges,
             conditional_edges=conditional_edges,
             state_channels=state_channels,
-            state_type_name=(
-                state_graph.state_schema.__name__ if hasattr(state_graph, "state_schema") else "UnknownState"
-            ),
+            state_type_name=state_graph.schema.__name__,
         )
 
         # Create state schema from the StateGraph's state schema
@@ -192,32 +167,18 @@ class GraphLoader:
         Raises:
             ValueError: If state schema is not a Pydantic BaseModel
         """
-        # Get the state schema class from the StateGraph
-        if not hasattr(state_graph, "schemas") or not state_graph.schemas:
-            raise ValueError("StateGraph must have a state schema defined")
-
         # Get the first (and should be only) schema class
         schema_class = next(iter(state_graph.schemas.keys()))
 
-        # Verify it's a Pydantic BaseModel
-        try:
-            from pydantic import BaseModel
-
-            if not issubclass(schema_class, BaseModel):
-                raise ValueError(f"State schema must be a Pydantic BaseModel, got {type(schema_class)}")
-        except (TypeError, ImportError) as e:
-            raise ValueError(f"Invalid state schema class: {e}")
-
-        # Extract module and class information
-        if not hasattr(schema_class, "__module__") or not hasattr(schema_class, "__name__"):
-            raise ValueError("State schema class missing __module__ or __name__ attributes")
+        assert issubclass(schema_class, BaseModel), (
+            f"State schema must be a Pydantic BaseModel, got {type(schema_class)}"
+        )
 
         class_reference = f"{schema_class.__module__}:{schema_class.__name__}"
 
         return StateSchema(
             name=schema_class.__name__,
             class_reference=class_reference,
-            description=f"State schema for {schema_class.__name__}",
         )
 
     def store_to_ipfs(self, graph_json: str) -> str:
@@ -230,18 +191,15 @@ class GraphLoader:
         Returns:
             IPFS hash of the stored content
         """
-        # Get credentials from environment when needed
         api_key = os.getenv("PINATA_API_KEY")
         secret_key = os.getenv("PINATA_SECRET_API_KEY")
 
         if not api_key or not secret_key:
             raise ValueError("PINATA_API_KEY and PINATA_SECRET_API_KEY environment variables required for IPFS storage")
 
-        # Initialize Pinata client
         pinata = Pinning(PINATA_API_KEY=api_key, PINATA_API_SECRET=secret_key)
 
         # Pin JSON content to IPFS via Pinata
-        # First save to temp file since pinata-python expects a file path
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             f.write(graph_json)
             temp_path: str = f.name
@@ -283,19 +241,11 @@ class GraphLoader:
             the serialized function references (module + name).
         """
 
-        # Dynamically load the Pydantic model class
         state_class = self._load_class_from_reference(stored_definition.state_schema.class_reference)
+        assert issubclass(state_class, BaseModel), (
+            f"Loaded state class must be a Pydantic BaseModel, got {type(state_class)}"
+        )
 
-        # Verify it's a Pydantic BaseModel
-        try:
-            from pydantic import BaseModel
-
-            if not issubclass(state_class, BaseModel):
-                raise ValueError(f"Loaded state class must be a Pydantic BaseModel, got {type(state_class)}")
-        except (TypeError, ImportError) as e:
-            raise ValueError(f"Invalid loaded state class: {e}")
-
-        # Create StateGraph with the proper Pydantic model
         builder = StateGraph(state_class)
 
         for node_def in stored_definition.graph_definition.nodes:
@@ -312,10 +262,9 @@ class GraphLoader:
         for cond_edge_def in stored_definition.graph_definition.conditional_edges:
             try:
                 condition_func = self._load_function_from_reference(cond_edge_def.condition_function_reference)
-                target_mapping: dict[Hashable, str] = {}
-                for key, value in cond_edge_def.target_mapping.items():
-                    target_value = END if value == "__end__" else value
-                    target_mapping[key] = target_value
+                target_mapping: dict[Hashable, str] = {
+                    k: END if v == "__end__" else v for k, v in cond_edge_def.target_mapping.items()
+                }
                 builder.add_conditional_edges(cond_edge_def.source_node, condition_func, target_mapping)
             except Exception as e:
                 raise ImportError(f"Failed to load conditional edge from {cond_edge_def.source_node}: {e}")
@@ -327,12 +276,6 @@ class GraphLoader:
     ) -> Union[Callable[..., Any], Callable[..., Awaitable[Any]]]:
         """
         Dynamically load a function from a module:function reference string.
-
-        Args:
-            function_reference: Function reference in format "module.path:function_name"
-
-        Returns:
-            The loaded function object (can be sync or async)
         """
         try:
             module_name, function_name = function_reference.split(":", 1)
@@ -344,15 +287,6 @@ class GraphLoader:
     def _load_class_from_reference(self, class_reference: str) -> type:
         """
         Dynamically load a class from a module:class reference string.
-
-        Args:
-            class_reference: Class reference in format "module.path:ClassName"
-
-        Returns:
-            The loaded class object
-
-        Raises:
-            ImportError: If the class cannot be loaded
         """
         try:
             module_name, class_name = class_reference.split(":", 1)
@@ -367,12 +301,6 @@ class GraphLoader:
     def recreate_graph(self, stored_definition: StoredGraphDefinition) -> CompiledGraph:
         """
         Recreate and compile a LangGraph from its stored definition.
-
-        Args:
-            stored_definition: StoredGraphDefinition object from IPFS
-
-        Returns:
-            Recreated CompiledGraph ready for execution
         """
         state_graph = self.recreate_graph_from_definition(stored_definition)
         return state_graph.compile()
@@ -420,12 +348,6 @@ class GraphLoader:
     def get_graph_info(self, ipfs_hash: str) -> GraphMetadata:
         """
         Get metadata about a stored graph without recreating it.
-
-        Args:
-            ipfs_hash: IPFS hash of the stored graph definition
-
-        Returns:
-            GraphMetadata with information about the stored graph
         """
         stored_definition = self.retrieve_from_ipfs(ipfs_hash)
         return stored_definition.metadata

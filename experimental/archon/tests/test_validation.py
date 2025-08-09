@@ -15,7 +15,6 @@ class TestFunctionReferenceValidation:
 
     def test_valid_function_reference(self):
         """Test that valid function references are accepted."""
-        # Valid reference
         node = GraphNodeDefinition(
             name="test_node", function_reference="experimental.archon.tests.test_validation:test_function"
         )
