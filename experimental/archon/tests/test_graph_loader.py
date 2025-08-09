@@ -4,35 +4,16 @@ Tests for GraphLoader - Graph storage and retrieval from IPFS.
 
 from __future__ import annotations
 
-import json
-
-import pytest
-
-from experimental.archon.src.graph_loader import GraphLoader
-from experimental.archon.src.graph_models import StoredGraphDefinition
-
 from .conftest import analyze_sentiment, make_decision, no_action, take_action
 
 
 class TestGraphLoaderWithMockedIPFS:
     """Test GraphLoader with mocked IPFS storage."""
 
-    def test_end_to_end_save_load(self, sentiment_graph_builder, mock_ipfs_storage, monkeypatch):
+    def test_end_to_end_save_load(self, sentiment_graph_builder, mock_ipfs_storage, loader_with_ipfs_mocks):
         """Test complete workflow: save graph to 'IPFS', retrieve it, and execute."""
 
-        def mock_store(graph_json: str) -> str:
-            fake_hash = f"Qm{hash(graph_json)}"
-            mock_ipfs_storage[fake_hash] = graph_json
-            return fake_hash
-
-        def mock_retrieve(ipfs_hash: str) -> StoredGraphDefinition:
-            json_data = mock_ipfs_storage[ipfs_hash]
-            return StoredGraphDefinition.model_validate(json.loads(json_data))
-
-        # Create loader - no credentials needed since we mock the IPFS methods
-        loader = GraphLoader()
-        monkeypatch.setattr(loader, "store_to_ipfs", mock_store)
-        monkeypatch.setattr(loader, "retrieve_from_ipfs", mock_retrieve)
+        loader = loader_with_ipfs_mocks
 
         # Step 1: Save the graph
         ipfs_hash = loader.save_graph_from_builder(
@@ -125,64 +106,3 @@ class TestGraphLoaderWithMockedIPFS:
             module_part, func_part = ref.split(":")
             assert module_part, f"Empty module in reference: {ref}"
             assert func_part, f"Empty function name in reference: {ref}"
-
-    @pytest.mark.asyncio
-    async def test_save_load_and_execute_graph(self, sentiment_graph_builder, mock_ipfs_storage, monkeypatch):
-        """Test that we can save a graph, load it back, and execute it successfully."""
-
-        def mock_store(graph_json: str) -> str:
-            fake_hash = f"Qm{hash(graph_json)}"
-            mock_ipfs_storage[fake_hash] = graph_json
-            return fake_hash
-
-        def mock_retrieve(ipfs_hash: str) -> StoredGraphDefinition:
-            json_data = mock_ipfs_storage[ipfs_hash]
-            return StoredGraphDefinition.model_validate(json.loads(json_data))
-
-        loader = GraphLoader()
-        monkeypatch.setattr(loader, "store_to_ipfs", mock_store)
-        monkeypatch.setattr(loader, "retrieve_from_ipfs", mock_retrieve)
-
-        # Step 1: Save the graph to IPFS
-        ipfs_hash = loader.save_graph_from_builder(
-            sentiment_graph_builder,
-            name="executable_workflow",
-            description="Test executable workflow",
-        )
-
-        # Step 2: Load the graph back from IPFS
-        recreated_graph = loader.load_graph(ipfs_hash)
-
-        # Step 3: Execute the recreated graph with positive sentiment input
-        positive_input = {
-            "input_text": "This is good news!",
-            "sentiment_score": 0.0,
-            "decision": "",
-            "final_action": "",
-        }
-
-        positive_result = await recreated_graph.ainvoke(positive_input)
-
-        # Verify positive sentiment path
-        assert positive_result["input_text"] == "This is good news!"
-        assert positive_result["sentiment_score"] == 0.8  # "good" triggers positive score
-        assert positive_result["decision"] == "positive"
-        assert "Taking positive action" in positive_result["final_action"]
-        assert "0.8" in positive_result["final_action"]
-
-        # Step 4: Execute with negative sentiment input
-        negative_input = {
-            "input_text": "This is terrible news!",
-            "sentiment_score": 0.0,
-            "decision": "",
-            "final_action": "",
-        }
-
-        negative_result = await recreated_graph.ainvoke(negative_input)
-
-        # Verify negative sentiment path
-        assert negative_result["input_text"] == "This is terrible news!"
-        assert negative_result["sentiment_score"] == 0.3  # "terrible" doesn't contain "good"
-        assert negative_result["decision"] == "negative"
-        assert "No action needed" in negative_result["final_action"]
-        assert "0.3" in negative_result["final_action"]

@@ -65,24 +65,9 @@ class GraphExecutor:
         self.loader = GraphLoader()
 
     def load_graph(self, ipfs_hash: str) -> LoadedGraph:
-        """
-        Load a graph and expose its state class for type-safe usage.
-
-        Args:
-            ipfs_hash: IPFS hash of the stored graph definition
-
-        Returns:
-            LoadedGraph with both compiled graph and state class
-
-        Raises:
-            ImportError: If graph functions or state class cannot be loaded
-            ValueError: If graph structure is invalid
-        """
-        # Load the stored definition first to get state class
         stored_definition = self.loader.retrieve_from_ipfs(ipfs_hash)
         state_class = self.loader._load_class_from_reference(stored_definition.state_schema.class_reference)
 
-        # Load the compiled graph
         compiled_graph = self.loader.load_graph(ipfs_hash)
 
         return LoadedGraph(compiled_graph, state_class)
@@ -97,15 +82,6 @@ class GraphExecutor:
 
         Returns:
             Final state dictionary after graph execution
-
-        Raises:
-            ImportError: If graph functions cannot be loaded
-            ValueError: If graph structure is invalid
-            Exception: If graph execution fails
-
-        Note:
-            This method always uses async execution (ainvoke) which works
-            universally for sync, async, and mixed graphs.
         """
         loaded_graph = self.load_graph(ipfs_hash)
         return await loaded_graph.execute(input_state)
