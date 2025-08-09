@@ -37,7 +37,7 @@ class MainAgent:
 The `Agent` class provides core functionality inherited by all specialized agents:
 
 **Core Features:**
-- **LLM Interaction** - Standardized interface to language models (default: GPT-4o)
+- **LLM Interaction** - Standardized interface to language models (default: GPT-5)
 - **Conversation History** - Maintains context across interactions using message history
 - **Memory Integration** - Semantic search and retrieval of past conversations
 - **Prompt Management** - Template-based prompt system with dynamic loading
@@ -45,7 +45,7 @@ The `Agent` class provides core functionality inherited by all specialized agent
 **Implementation Details:**
 ```python
 class Agent:
-    def __init__(self, model: str = "gpt-4o"):
+    def __init__(self, model: str = "gpt-5"):
         self.model = model
         self.history = []
         self.memory = Memory()
@@ -153,7 +153,7 @@ Agents can be configured with different LLM models:
 
 ```python
 # Default configuration
-agent = Agent(model="gpt-4o")
+agent = Agent(model="gpt-5")
 
 # Custom model for specific tasks
 code_review_agent = Agent(model="gpt-4o-code")

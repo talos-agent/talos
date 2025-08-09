@@ -16,7 +16,7 @@ uv run talos proposals eval --file <filepath>
 - `--file, -f`: Path to the proposal file (required)
 
 **Options:**
-- `--model-name`: LLM model to use (default: "gpt-4o")
+- `--model-name`: LLM model to use (default: "gpt-5")
 - `--temperature`: Temperature for LLM generation (default: 0.0)
 
 ## Usage Examples
@@ -28,7 +28,7 @@ uv run talos proposals eval --file <filepath>
 uv run talos proposals eval --file governance_proposal.txt
 
 # Use a different model
-uv run talos proposals eval --file proposal.md --model-name gpt-4o --temperature 0.1
+uv run talos proposals eval --file proposal.md --model-name gpt-5 --temperature 0.1
 ```
 
 ### Proposal File Format

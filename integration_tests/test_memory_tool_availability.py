@@ -20,7 +20,7 @@ def test_memory_tool_availability():
     memory_file = Path(temp_dir) / "test_memory.json"
     
     try:
-        model = ChatOpenAI(model="gpt-4o", api_key="dummy-key")
+        model = ChatOpenAI(model="gpt-5", api_key="dummy-key")
         
         agent = MainAgent(
             model=model,

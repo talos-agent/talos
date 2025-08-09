@@ -84,7 +84,7 @@ Use Google-style docstrings for all modules, classes, and functions:
 ```python
 def analyze_sentiment(
     text: str, 
-    model: str = "gpt-4o",
+    model: str = "gpt-5",
     confidence_threshold: float = 0.7
 ) -> SentimentResult:
     """Analyze sentiment of the given text using an LLM.
@@ -94,7 +94,7 @@ def analyze_sentiment(
     
     Args:
         text: The text to analyze for sentiment. Must not be empty.
-        model: The LLM model to use for analysis. Defaults to "gpt-4o".
+        model: The LLM model to use for analysis. Defaults to "gpt-5".
         confidence_threshold: Minimum confidence score to return results.
             Must be between 0.0 and 1.0.
             
@@ -137,7 +137,7 @@ class AgentConfig(BaseModel):
         extra='forbid'
     )
     
-    model_name: str = Field(default="gpt-4o", description="LLM model to use")
+    model_name: str = Field(default="gpt-5", description="LLM model to use")
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     max_tokens: int = Field(default=1000, gt=0)
 ```
@@ -151,7 +151,7 @@ class Agent(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     name: str
-    model: str = "gpt-4o"
+    model: str = "gpt-5"
     memory: Memory | None = None
     
     def model_post_init(self, __context: Any) -> None:
@@ -384,7 +384,7 @@ def mock_openai_client():
 def test_agent(mock_openai_client):
     """Create test agent with mocked dependencies."""
     with patch('talos.core.agent.OpenAI', return_value=mock_openai_client):
-        return Agent(name="test_agent", model="gpt-4o")
+        return Agent(name="test_agent", model="gpt-5")
 
 def test_agent_generates_response(test_agent):
     """Test that agent generates appropriate response."""

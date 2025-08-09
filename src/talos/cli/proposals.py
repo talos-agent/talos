@@ -10,7 +10,7 @@ proposals_app = typer.Typer()
 @proposals_app.command("eval")
 def eval_proposal(
     filepath: str = typer.Option(..., "--file", "-f", help="Path to the proposal file."),
-    model_name: str = "gpt-4o",
+    model_name: str = "gpt-5",
     temperature: float = 0.0,
 ):
     """

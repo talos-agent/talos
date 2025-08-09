@@ -248,7 +248,7 @@ approval_settings:
 ```yaml
 hypervisor:
   supervisor: "hybrid"
-  llm_model: "gpt-4o"
+  llm_model: "gpt-5"
   confidence_threshold: 0.8
   
 risk_categories:

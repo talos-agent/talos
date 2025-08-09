@@ -170,7 +170,7 @@ Run the Talos agent in daemon mode for continuous operation.
 
 ```bash
 uv run talos daemon
-uv run talos daemon --model-name gpt-4o --temperature 0.1
+uv run talos daemon --model-name gpt-5 --temperature 0.1
 ```
 
 #### `cleanup-users [--older-than] [--dry-run]`

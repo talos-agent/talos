@@ -54,7 +54,7 @@ def callback(
 def main_command(
     query: Optional[str] = typer.Argument(None, help="The query to send to the agent."),
     prompts_dir: str = "src/talos/prompts",
-    model_name: str = "gpt-4o",
+    model_name: str = "gpt-5",
     temperature: float = 0.0,
     verbose: int = typer.Option(
         0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed."
@@ -156,7 +156,7 @@ def decrypt(encrypted_data: str, key_dir: str = ".keys"):
 @app.command()
 def daemon(
     prompts_dir: str = "src/talos/prompts",
-    model_name: str = "gpt-4o",
+    model_name: str = "gpt-5",
     temperature: float = 0.0,
 ) -> None:
     """

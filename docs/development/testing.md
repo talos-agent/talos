@@ -108,7 +108,7 @@ Follow the Arrange-Act-Assert pattern:
 ```python
 def test_agent_processes_query_successfully():
     # Arrange - Set up test data and dependencies
-    agent = Agent(name="test_agent", model="gpt-4o")
+    agent = Agent(name="test_agent", model="gpt-5")
     query = "What is the current market sentiment?"
     expected_response_type = QueryResponse
     
@@ -477,7 +477,7 @@ from talos.core.memory import Memory
 def test_config():
     """Test configuration for all tests."""
     return {
-        "model": "gpt-4o",
+        "model": "gpt-5",
         "test_mode": True,
         "api_timeout": 30
     }
@@ -498,7 +498,7 @@ def mock_api_keys(monkeypatch):
 @pytest.fixture
 def test_agent(mock_api_keys):
     """Create test agent with mocked dependencies."""
-    return Agent(name="test_agent", model="gpt-4o")
+    return Agent(name="test_agent", model="gpt-5")
 
 @pytest.fixture
 def test_memory(temp_directory):
