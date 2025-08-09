@@ -53,7 +53,7 @@ Calculates optimal staking APR using market data and sentiment analysis.
 
 ```python
 class YieldManagerService(Service):
-    def __init__(self, model: str = "gpt-4o"):
+    def __init__(self, model: str = "gpt-5"):
         """Initialize yield manager service.
         
         Args:

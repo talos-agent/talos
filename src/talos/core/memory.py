@@ -103,7 +103,7 @@ class Memory:
             )
             
             self._langmem_manager = create_memory_store_manager(
-                "gpt-4o",
+                "gpt-5",
                 namespace=("memories", self.user_id or "default"),
                 store=self._store
             )
@@ -128,7 +128,7 @@ class Memory:
             return
             
         try:
-            self._langmem_manager = create_memory_manager("gpt-4o")
+            self._langmem_manager = create_memory_manager("gpt-5")
             if self.file_path:
                 self.file_path.parent.mkdir(parents=True, exist_ok=True)
                 if not self.file_path.exists():

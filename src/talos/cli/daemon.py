@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class TalosDaemon:
-    def __init__(self, prompts_dir: str = "src/talos/prompts", model_name: str = "gpt-4", temperature: float = 0.0):
+    def __init__(self, prompts_dir: str = "src/talos/prompts", model_name: str = "gpt-5", temperature: float = 0.0):
         self.prompts_dir = prompts_dir
         self.model_name = model_name
         self.temperature = temperature

@@ -174,7 +174,7 @@ class TestMainAgentIntegration:
             'OPENAI_API_KEY': 'test_openai_key'
         }):
             agent = MainAgent(
-                model=ChatOpenAI(model="gpt-4o", api_key="test_key"),
+                model=ChatOpenAI(model="gpt-5", api_key="test_key"),
                 prompts_dir="src/talos/prompts"
             )
             if agent.job_scheduler:
@@ -221,7 +221,7 @@ class TestMainAgentIntegration:
             'OPENAI_API_KEY': 'test_openai_key'
         }):
             agent = MainAgent(
-                model=ChatOpenAI(model="gpt-4o", api_key="test_key"),
+                model=ChatOpenAI(model="gpt-5", api_key="test_key"),
                 prompts_dir="src/talos/prompts",
                 scheduled_jobs=[job]
             )

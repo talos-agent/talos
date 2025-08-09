@@ -26,7 +26,7 @@ class TestMemoryIntegration:
     
     def test_main_agent_memory_tool_registration(self):
         """Test that MainAgent properly registers memory tools."""
-        model = ChatOpenAI(model="gpt-4o", api_key="dummy-key")
+        model = ChatOpenAI(model="gpt-5", api_key="dummy-key")
         
         agent = MainAgent(
             model=model,
@@ -42,7 +42,7 @@ class TestMemoryIntegration:
     
     def test_memory_storage_and_retrieval(self):
         """Test memory storage and retrieval functionality."""
-        model = ChatOpenAI(model="gpt-4o", api_key="dummy-key")
+        model = ChatOpenAI(model="gpt-5", api_key="dummy-key")
         
         agent = MainAgent(
             model=model,

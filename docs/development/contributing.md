@@ -197,7 +197,7 @@ from talos.utils.helpers import format_response
 ```python
 def test_agent_processes_query_successfully():
     # Arrange
-    agent = Agent(model="gpt-4o")
+    agent = Agent(model="gpt-5")
     query = "What is the current market sentiment?"
     
     # Act
@@ -239,7 +239,7 @@ uv run pytest -k "test_sentiment"
 Use Google-style docstrings:
 
 ```python
-def analyze_sentiment(text: str, model: str = "gpt-4o") -> float:
+def analyze_sentiment(text: str, model: str = "gpt-5") -> float:
     """Analyze sentiment of the given text.
     
     Args:

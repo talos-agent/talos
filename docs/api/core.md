@@ -13,14 +13,14 @@ class Agent:
     def __init__(
         self, 
         name: str, 
-        model: str = "gpt-4o",
+        model: str = "gpt-5",
         memory: Optional[Memory] = None
     ):
         """Initialize an agent with specified configuration.
         
         Args:
             name: Unique identifier for the agent
-            model: LLM model to use (default: "gpt-4o")
+            model: LLM model to use (default: "gpt-5")
             memory: Optional memory instance for conversation history
         """
 ```
@@ -259,7 +259,7 @@ class AgentConfig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     name: str
-    model: str = "gpt-4o"
+    model: str = "gpt-5"
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     max_tokens: int = Field(default=1000, gt=0)
     memory_enabled: bool = True

@@ -26,7 +26,7 @@ Please adhere to the following code style guidelines:
 
 ## General Guidance
 
-*   The default model for this project is `gpt-4o`.
+*   The default model for this project is `gpt-5`.
 *   Write clear and descriptive commit messages.
 *   Break down large changes into smaller, logical commits.
 *   Ensure that all new code is covered by tests.

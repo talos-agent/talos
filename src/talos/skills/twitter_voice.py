@@ -20,7 +20,7 @@ class TwitterVoiceSkill(Skill):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     prompt_manager: PromptManager = Field(default_factory=lambda: FilePromptManager("src/talos/prompts"))
-    llm: Any = Field(default_factory=lambda: ChatOpenAI(model="gpt-4o"))
+    llm: Any = Field(default_factory=lambda: ChatOpenAI(model="gpt-5"))
     twitter_persona_skill: TwitterPersonaSkill | None = Field(default=None)
 
     @property
