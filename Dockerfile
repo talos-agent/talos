@@ -2,28 +2,50 @@ FROM python:3.12-slim@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
+# Pin versions and timestamps for reproducibility.
+ARG SOURCE_DATE_EPOCH=1755248916
+ARG DEBIAN_SNAPSHOT=20250815T025533Z
+ARG DEBIAN_DIST=trixie
+ARG UV_VERSION=0.8.11
+# Do not include uv metadata as that includes non-reproducable timestamps.
+ARG UV_NO_INSTALLER_METADATA=1
+# Disable emitting debug symbols as those can contain randomized local paths.
+ARG CFLAGS="-g0"
 
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PYTHONDONTWRITEBYTECODE=1
+# Install Debian packages.
+RUN rm -f /etc/apt/sources.list.d/* && \
+    echo "deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT} ${DEBIAN_DIST} main" > /etc/apt/sources.list && \
+    echo "deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT} ${DEBIAN_DIST}-security main" >> /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/10no-check-valid-until && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends gcc libc6-dev
 
-RUN python -m pip install --no-cache-dir uv==0.2.22
+# Install uv for Python package management.
+RUN pip install uv==${UV_VERSION}
 
-COPY requirements.txt pyproject.toml README.md ./
+# Create virtualenv and install Python dependencies.
+COPY pyproject.toml uv.lock README.md ./
 COPY src/ ./src/
+# Ensure all source files have fixed timestamps, permissions and owners.
+RUN find -exec touch -d @${SOURCE_DATE_EPOCH} "{}" \; && \
+    find -type f -exec chmod 644 "{}" \; && \
+    find -type d -exec chmod 755 "{}" \; && \
+    chown -R root:root .
 
 # Use a filtered requirements file to avoid installing the local package (which would re-resolve deps)
 RUN grep -v '^\-e file:///app$' requirements.txt > requirements.lock && \
     uv venv && \
     . .venv/bin/activate && \
-    uv pip install -r requirements.lock
+    uv sync --locked
 
-FROM python:3.12-slim@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047 AS runtime
+FROM python:3.12-slim@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047
 
 WORKDIR /app
 
-RUN useradd --create-home --shell /bin/bash talos
+ARG SOURCE_DATE_EPOCH
+
+# NOTE: Use a deterministic "password age" for reproducibility.
+RUN useradd --system talos && chage -d "$((SOURCE_DATE_EPOCH / (24*3600)))" talos
 
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
