@@ -1,6 +1,8 @@
 services:
   talos-agent:
     build: .
+    # NOTE: Run ./scripts/build_and_push_container_image.sh to retrieve the digest.
+    image: ghcr.io/kostko/talos:latest-agent@sha256:e7ea46cf8dbf99062339993c13dcba1c2f93d8bb0422acef207747741d13c93e
     container_name: talos-agent
     restart: unless-stopped
     environment:
@@ -11,7 +13,8 @@ services:
       - PINATA_SECRET_API_KEY=${PINATA_SECRET_API_KEY}
     volumes:
       - talos_data:/app/data
+    ports:
+      - "8000:8000"
 
 volumes:
   talos_data:
-
