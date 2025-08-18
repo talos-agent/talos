@@ -1,18 +1,39 @@
-FROM python:3.12-slim as builder
+FROM python:3.12-slim@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047 AS builder
 
 WORKDIR /app
 
-RUN pip install uv
+# Pin versions and timestamps for reproducibility.
+ARG SOURCE_DATE_EPOCH=1755248916
+ARG DEBIAN_SNAPSHOT=20250815T025533Z
+ARG DEBIAN_DIST=trixie
+ARG UV_VERSION=0.8.11
+# Do not include uv metadata as that includes non-reproducable timestamps.
+ARG UV_NO_INSTALLER_METADATA=1
 
+# Install Debian packages.
+RUN echo "deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT} ${DEBIAN_DIST} main" > /etc/apt/sources.list && \
+    echo "deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT} ${DEBIAN_DIST}-security main" >> /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/10no-check-valid-until && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends gcc libc6-dev
+
+# Install uv for Python package management.
+RUN pip install uv==${UV_VERSION}
+
+# Create virtualenv and install Python dependencies.
 COPY requirements.txt pyproject.toml README.md ./
 COPY src/ ./src/
 
 RUN uv venv && \
     . .venv/bin/activate && \
-    uv pip install -r requirements.txt && \
-    uv pip install -e .
+    uv pip install -r requirements.txt
 
-FROM python:3.12-slim
+#RUN uv venv && \
+#    . .venv/bin/activate && \
+#    uv pip install -r requirements.txt && \
+#    uv pip install -e .
+
+FROM python:3.12-slim@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047
 
 WORKDIR /app
 
