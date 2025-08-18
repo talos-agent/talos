@@ -1,18 +1,25 @@
-FROM python:3.12-slim as builder
+FROM python:3.12-slim@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047 AS builder
 
 WORKDIR /app
 
-RUN pip install uv
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN python -m pip install --no-cache-dir uv==0.2.22
 
 COPY requirements.txt pyproject.toml README.md ./
 COPY src/ ./src/
 
-RUN uv venv && \
+# Use a filtered requirements file to avoid installing the local package (which would re-resolve deps)
+RUN grep -v '^\-e file:///app$' requirements.txt > requirements.lock && \
+    uv venv && \
     . .venv/bin/activate && \
-    uv pip install -r requirements.txt && \
-    uv pip install -e .
+    uv pip install -r requirements.lock
 
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047 AS runtime
 
 WORKDIR /app
 
