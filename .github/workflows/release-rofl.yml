@@ -59,4 +59,16 @@ jobs:
         run: oasis rofl push --deployment ${DEPLOYMENT} --format json
         # TODO: Parse OCI reference from output.
 
-      # TODO: Generate transaction proposal and queue to multisig for execution.
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: yarn
+          cache-dependency-path: scripts/propose_transactions
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: scripts/propose_transactions
+
+      - name: Propose transactions to safe.oasis.io
+        run: node ./scripts/propose_transactions/main.mjs "${{ secrets.PROPOSER_PRIVATE_KEY }}"
