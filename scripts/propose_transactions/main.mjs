@@ -14,7 +14,6 @@ const PROPOSER_PRIVATE_KEY = process.argv[3]
 
 const APP_ID = 'rofl1qz8c57nvrru0rdtv7242rzwv269a87zh6c8auqr3'
 // TODO: could get machine from nexus API or
-//       could check that this machine is still running APP_ID using RPC
 const MACHINE = {
   provider: 'oasis1qrfeadn03ljm0kfx8wx0d5zf6kj79pxqvv0dukdm',
   id: '0000000000000004',
@@ -44,6 +43,19 @@ async function generateTransactions() {
     .setArgs({ id: oasisRT.rofl.fromBech32(APP_ID) })
     .query(nic)
   console.log('Found app', app)
+
+  const machine = await roflmarket.queryInstance().setArgs({
+    id: oasis.misc.fromHex(MACHINE.id),
+    provider: oasis.staking.addressFromBech32(MACHINE.provider),
+  }).query(nic)
+  console.log('Found machine', machine)
+
+  if (!machine.deployment?.app_id) {
+    throw new Error(`Machine ${MACHINE.id} isn't running any app. Expected ${APP_ID}`)
+  }
+  if (oasisRT.rofl.toBech32(machine.deployment.app_id) !== APP_ID) {
+    throw new Error(`Machine ${MACHINE.id} is running app ${oasisRT.rofl.toBech32(machine.deployment.app_id)}. Expected ${APP_ID}`)
+  }
 
   const txUpdateEnclaves = rofl.callUpdate().setBody({
     id: app.id,
