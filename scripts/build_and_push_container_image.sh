@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [[ -z "${TARGET_IMAGE}" ]]; then
-    echo "ERROR: Required environment variable TARGET_IMAGE not set."
-    exit 1
-fi
+set -e
+
+COMPOSE_FILE=$(yq -r '.artifacts.container.compose' rofl.yaml)
+TARGET_IMAGE=$(yq -r '.services."talos-agent".image' ${COMPOSE_FILE} | cut -d '@' -f 1)
 
 BUILDER_NAME=buildkit_23
 BUILDER_IMAGE=moby/buildkit:v0.23.2

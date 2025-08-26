@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 COMPOSE_FILE=$(yq -r '.artifacts.container.compose' rofl.yaml)
 TALOS_AGENT_IMAGE=$(yq -r '.services."talos-agent".image' ${COMPOSE_FILE})
 

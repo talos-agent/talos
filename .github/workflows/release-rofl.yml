@@ -18,7 +18,7 @@ jobs:
       packages: write
     env:
       DEPLOYMENT: testnet
-      TARGET_IMAGE: ghcr.io/kostko/talos:latest-agent # TODO: Fix image name.
+      SAFE_ADDRESS: "0xB5f3Ae130F2596aB2446d7A3eDaB0705a4540c45"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,17 +56,14 @@ jobs:
         run: oasis rofl build --deployment ${DEPLOYMENT} --offline --verify
 
       - name: Push ROFL ORC to OCI repository
-        env:
-          DEPLOYMENT: testnet
         run: |
-          OCI_AND_HASH=$(oasis rofl push --deployment ${DEPLOYMENT} --format json)
-          echo "OCI_AND_HASH=${OCI_AND_HASH//$'\n'/}" >> $GITHUB_ENV
-        # { "manifest_hash": "97...", "oci_reference": "rofl.sh/d8..:17..@sha256:53.." }
+          DEPLOYMENT_INFO=$(oasis rofl push --deployment ${DEPLOYMENT} --format json)
+          echo "DEPLOYMENT_INFO=${DEPLOYMENT_INFO//$'\n'/}" >> $GITHUB_ENV
 
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: "22.x"
           cache: yarn
           cache-dependency-path: scripts/propose_transactions
 
@@ -75,4 +72,6 @@ jobs:
         working-directory: scripts/propose_transactions
 
       - name: Propose transactions to safe.oasis.io
-        run: node ./scripts/propose_transactions/main.mjs "${OCI_AND_HASH}" "${{ secrets.PROPOSER_PRIVATE_KEY }}"
+        env:
+          PROPOSER_PRIVATE_KEY: ${{ secrets.PROPOSER_PRIVATE_KEY }}
+        run: node ./scripts/propose_transactions/main.mjs
