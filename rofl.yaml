@@ -1,5 +1,8 @@
 name: talos
 version: 0.1.0
+repository: https://github.com/talos-agent/talos
+homepage: https://talos.is
+description: Talos is.
 tee: tdx
 kind: container
 resources:
@@ -17,6 +20,37 @@ artifacts:
     runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.7.3/rofl-containers#964fbd8edaea8041fd9c5304bb4631b7126d57d06062cc3922e50313cdeef618
     compose: docker-compose.rofl.yml
 deployments:
+  mainnet:
+    app_id: rofl1qpykfkl6ea78cyy67d35f7fmpk3pg36vashka4v9
+    network: mainnet
+    paratime: sapphire
+    admin: talos_mainnet_boot
+    oci_repository: ghcr.io/talos-agent/talos:latest-orc
+    trust_root:
+      height: 26130891
+      hash: 01c2dac4f9d636e9e159b1e56ebecbcdda8a9dccb452128a3954d0cf8b6e033e
+    policy:
+      quotes:
+        pcs:
+          tcb_validity_period: 30
+          min_tcb_evaluation_data_number: 18
+          tdx: {}
+      enclaves:
+        - id: 5BGllKuT9kVqHlnNbEZ9xHzP3Jt18lnyYjTUDxF/SzgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: E2d50zXzTEWkdLuurO6h1qAjAFVdDbU78+EMbmQKzu8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+      endorsements:
+        - and:
+            - provider: oasis1qzc8pldvm8vm3duvdrj63wgvkw34y9ucfcxzetqr
+            - or:
+                - provider_instance_admin: oasis1qpx5xq4kwtuawjdc0wty0d0mz08ha62jrc2c236j
+                - provider_instance_admin: oasis1qz2lty9v4glt5ts8ljhfpnd05dy3cwmtnyshws8q
+      fees: endorsing_node
+      max_expiration: 3
+    machines:
+      default:
+        provider: oasis1qzc8pldvm8vm3duvdrj63wgvkw34y9ucfcxzetqr
+        offer: large
+        id: 000000000000001e
   testnet:
     app_id: rofl1qz8c57nvrru0rdtv7242rzwv269a87zh6c8auqr3
     network: testnet

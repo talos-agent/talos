@@ -4,11 +4,7 @@ on:
   push:
     tags:
       - "v[0-9]+.[0-9]+*"
-    branches:
-      - "kostko/feature/rofl" # TODO: Remove.
-
-permissions:
-  contents: write
+  pull_request: # XXX: Remove.
 
 jobs:
   release-rofl:
@@ -17,8 +13,8 @@ jobs:
       contents: read
       packages: write
     env:
-      DEPLOYMENT: testnet
-      SAFE_ADDRESS: "0xB5f3Ae130F2596aB2446d7A3eDaB0705a4540c45"
+      DEPLOYMENT: mainnet
+      SAFE_ADDRESS: "0x70739eB50e269f1f1eb27c6f8932f63389B1Cb63"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,7 +22,7 @@ jobs:
       # TODO: Move this to dedicated GitHub Action for CLI install.
       - name: Install Oasis CLI
         env:
-          CLI_VERSION: 0.15.0
+          CLI_VERSION: 0.15.1
         run: |
           mkdir -p /tmp/oasis-cli
           cd /tmp/oasis-cli

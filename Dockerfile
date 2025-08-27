@@ -32,9 +32,7 @@ RUN find -exec touch -d @${SOURCE_DATE_EPOCH} "{}" \; && \
     find -type d -exec chmod 755 "{}" \; && \
     chown -R root:root .
 
-# Use a filtered requirements file to avoid installing the local package (which would re-resolve deps)
-RUN grep -v '^\-e file:///app$' requirements.txt > requirements.lock && \
-    uv venv && \
+RUN uv venv && \
     . .venv/bin/activate && \
     uv sync --locked
 
