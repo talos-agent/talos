@@ -13,12 +13,16 @@ const DEPLOYMENT_INFO = JSON.parse(process.env["DEPLOYMENT_INFO"]);
 const DEPLOYMENT = process.env["DEPLOYMENT"];
 const PROPOSER_PRIVATE_KEY = process.env["PROPOSER_PRIVATE_KEY"];
 const SAFE_ADDRESS = process.env["SAFE_ADDRESS"];
+const APP_CONFIG_UPDATE_FILE = process.env["APP_CONFIG_UPDATE_FILE"];
 
 // Parse and load the ROFL app manifest.
 const roflAppManifest = yaml.parse(readFileSync("rofl.yaml", "utf8"));
 const roflAppDeployment = roflAppManifest.deployments[DEPLOYMENT];
 const roflAppId = roflAppDeployment.app_id;
 const roflMachine = roflAppDeployment.machines["default"];
+const roflAppConfigUpdate = oasis.misc.fromCBOR(
+  readFileSync(APP_CONFIG_UPDATE_FILE),
+);
 
 const networks = {
   // Sapphire Mainnet.
@@ -51,14 +55,6 @@ async function generateTransactions() {
   const roflmarket = new oasisRT.roflmarket.Wrapper(sapphireRuntimeId);
   const rofl = new oasisRT.rofl.Wrapper(sapphireRuntimeId);
 
-  /** @type {any[]} */
-  const enclaveIds = roflAppDeployment.policy.enclaves;
-  const enclaves = enclaveIds.map((e) => ({
-    // split https://github.com/oasisprotocol/oasis-core/blob/113878af787d6c6f8da22d6b8a33f6a249180c8b/go/common/sgx/common.go#L209-L221
-    mr_enclave: oasis.misc.fromBase64(e.id).slice(0, 32),
-    mr_signer: oasis.misc.fromBase64(e.id).slice(32),
-  }));
-
   const app = await rofl
     .queryApp()
     .setArgs({ id: oasisRT.rofl.fromBech32(roflAppId) })
@@ -87,16 +83,7 @@ async function generateTransactions() {
 
   const txUpdateEnclaves = rofl
     .callUpdate()
-    .setBody({
-      id: app.id,
-      admin: app.admin,
-      metadata: app.metadata,
-      policy: {
-        ...app.policy,
-        enclaves: enclaves,
-      },
-      secrets: app.secrets,
-    })
+    .setBody(roflAppConfigUpdate.call.body)
     .toSubcall();
 
   const txUpdateMachine = roflmarket

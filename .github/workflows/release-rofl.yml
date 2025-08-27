@@ -21,7 +21,7 @@ jobs:
       # TODO: Move this to dedicated GitHub Action for CLI install.
       - name: Install Oasis CLI
         env:
-          CLI_VERSION: 0.15.1
+          CLI_VERSION: 0.15.2
         run: |
           mkdir -p /tmp/oasis-cli
           cd /tmp/oasis-cli
@@ -49,6 +49,11 @@ jobs:
 
       - name: Build ROFL ORC for deployment, verify it matches the manifest
         run: oasis rofl build --deployment ${DEPLOYMENT} --offline --verify
+
+      - name: Generate ROFL app configuration file for update
+        run: |
+          oasis rofl update --deployment ${DEPLOYMENT} --format cbor --unsigned --account test:alice > update.cbor
+          echo "APP_CONFIG_UPDATE_FILE=update.cbor" >> $GITHUB_ENV
 
       - name: Push ROFL ORC to OCI repository
         run: |
