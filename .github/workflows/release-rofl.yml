@@ -1,0 +1,73 @@
+name: release-rofl
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+*"
+  pull_request: # XXX: Remove.
+
+jobs:
+  release-rofl:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      DEPLOYMENT: mainnet
+      SAFE_ADDRESS: "0x70739eB50e269f1f1eb27c6f8932f63389B1Cb63"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # TODO: Move this to dedicated GitHub Action for CLI install.
+      - name: Install Oasis CLI
+        env:
+          CLI_VERSION: 0.15.1
+        run: |
+          mkdir -p /tmp/oasis-cli
+          cd /tmp/oasis-cli
+          wget "https://github.com/oasisprotocol/cli/releases/download/v${CLI_VERSION}/oasis_cli_${CLI_VERSION}_linux_amd64.tar.gz" -O cli.tar.gz
+          tar --strip-components 1 -xf cli.tar.gz
+          echo "/tmp/oasis-cli" >> ${GITHUB_PATH}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Talos Docker image
+        run: |
+          OUTPUT_IMAGE_NAME_PATH="/tmp/image-name" ./scripts/build_and_push_container_image.sh
+          echo "EXPECTED_TALOS_AGENT_IMAGE=$(cat /tmp/image-name)" >> ${GITHUB_ENV}
+
+      - name: Verify image digest matches the compose file
+        run: ./scripts/verify_container_image.sh
+
+      - name: Build ROFL ORC for deployment, verify it matches the manifest
+        run: oasis rofl build --deployment ${DEPLOYMENT} --offline --verify
+
+      - name: Push ROFL ORC to OCI repository
+        run: |
+          DEPLOYMENT_INFO=$(oasis rofl push --deployment ${DEPLOYMENT} --format json)
+          echo "DEPLOYMENT_INFO=${DEPLOYMENT_INFO//$'\n'/}" >> $GITHUB_ENV
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: yarn
+          cache-dependency-path: scripts/propose_transactions
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: scripts/propose_transactions
+
+      - name: Propose transactions to safe.oasis.io
+        env:
+          PROPOSER_PRIVATE_KEY: ${{ secrets.PROPOSER_PRIVATE_KEY }}
+        run: node ./scripts/propose_transactions/main.mjs
