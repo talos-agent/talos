@@ -24,7 +24,7 @@ deployments:
     app_id: rofl1qpykfkl6ea78cyy67d35f7fmpk3pg36vashka4v9
     network: mainnet
     paratime: sapphire
-    admin: talos_mainnet_boot
+    admin: oasis1qz2lty9v4glt5ts8ljhfpnd05dy3cwmtnyshws8q
     oci_repository: ghcr.io/talos-agent/talos:latest-orc
     trust_root:
       height: 26130891
@@ -55,7 +55,7 @@ deployments:
     app_id: rofl1qz8c57nvrru0rdtv7242rzwv269a87zh6c8auqr3
     network: testnet
     paratime: sapphire
-    admin: talos_testnet_boot
+    admin: oasis1qqfrhj832yux84nn5k0u0hjaa7jps8rc0cj9rku5
     oci_repository: ghcr.io/kostko/talos:latest-orc
     trust_root:
       height: 27959263
