@@ -51,7 +51,6 @@ class SupervisedTool(BaseTool):
 
     async def _arun(self, *args: Any, **kwargs: Any) -> Any:
         if self.supervisor:
-            # TODO: Add support for async supervisors.
             ok, message = self.supervisor.supervise({"args": args, "kwargs": kwargs})
             if not ok:
                 return message

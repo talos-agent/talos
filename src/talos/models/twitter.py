@@ -55,3 +55,9 @@ class Tweet(BaseModel):
             if ref.type == "replied_to":
                 return ref.id
         return None
+
+
+class TwitterPersonaResponse(BaseModel):
+    report: str = Field(..., description="General report on the user's persona and communication style")
+    topics: list[str] = Field(..., description="List of topics the user typically discusses")
+    style: list[str] = Field(..., description="List of adjectives describing the user's communication style")

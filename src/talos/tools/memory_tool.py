@@ -26,4 +26,4 @@ class AddMemoryTool(BaseTool):
     def _run(self, description: str) -> str:
         """Adds a memory to the agent's memory."""
         self.agent.add_memory(description)
-        return f"Memory added: {description}"
+        return f"Stored in memory: {description}"

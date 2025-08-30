@@ -48,3 +48,34 @@ class OnChainManagementService(OnChainManagement):
         if sentiment.score is not None:
             new_apr = self.yield_manager.update_staking_apr(sentiment.score, "\n".join(sentiment.answers))
             print(f"Setting staking APR to {new_apr}")
+
+    def deploy_contract(self, bytecode: str, salt: str, chain_id: int, check_duplicates: bool = False) -> str:
+        """
+        Deploy a smart contract with optional duplicate checking.
+        """
+        from talos.tools.contract_deployment import ContractDeploymentTool
+
+        tool = ContractDeploymentTool()
+        result = tool._run_unsupervised(
+            bytecode=bytecode, salt=salt, chain_id=chain_id, check_duplicates=check_duplicates
+        )
+        return result.contract_address
+
+    def check_deployment_duplicate(self, bytecode: str, salt: str, chain_id: int) -> bool:
+        """
+        Check if a contract deployment would be a duplicate.
+        """
+        from talos.database.models import ContractDeployment
+        from talos.database.session import get_session
+        from talos.utils.contract_deployment import calculate_contract_signature
+
+        signature = calculate_contract_signature(bytecode, salt)
+
+        with get_session() as session:
+            existing = (
+                session.query(ContractDeployment)
+                .filter(ContractDeployment.contract_signature == signature, ContractDeployment.chain_id == chain_id)
+                .first()
+            )
+
+            return existing is not None

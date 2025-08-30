@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 from typing import Any, Optional
 
@@ -8,6 +7,7 @@ from langchain.tools import BaseTool
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..models.evaluation import EvaluationResult
+from ..settings import PerspectiveSettings
 from ..skills.twitter_persona import TwitterPersonaSkill
 from .twitter_client import TweepyClient, TwitterClient
 from .twitter_evaluator import DefaultTwitterAccountEvaluator, TwitterAccountEvaluator
@@ -57,25 +57,35 @@ class TwitterTool(BaseTool):
 
     def _initialize_perspective_client(self) -> Optional[Any]:
         """Initializes the Perspective API client."""
-        api_key = os.environ.get("PERSPECTIVE_API_KEY")
-        if not api_key:
+        try:
+            settings = PerspectiveSettings()
+            if not settings.PERSPECTIVE_API_KEY:
+                return None
+            return discovery.build(
+                "commentanalyzer",
+                "v1alpha1",
+                developerKey=settings.PERSPECTIVE_API_KEY,
+                discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
+                static_discovery=False,
+            )
+        except ValueError:
             return None
-        return discovery.build(
-            "commentanalyzer",
-            "v1alpha1",
-            developerKey=api_key,
-            discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
-            static_discovery=False,
-        )
 
     def post_tweet(self, tweet: str) -> str:
         """Posts a tweet."""
+        from ..utils.validation import sanitize_user_input
+        if not tweet or not tweet.strip():
+            raise ValueError("Tweet content cannot be empty")
+        if len(tweet) > 280:
+            raise ValueError("Tweet content exceeds 280 characters")
+        tweet = sanitize_user_input(tweet, max_length=280)
+        
         if self.perspective_client:
             if not self.is_content_appropriate(tweet):
                 return "Tweet not sent. Content is inappropriate."
         assert self.twitter_client is not None
         self.twitter_client.post_tweet(tweet)
-        return "Tweet posted successfully."
+        return f"Posted tweet: {tweet[:50]}{'...' if len(tweet) > 50 else ''}"
 
     def get_all_replies(self, tweet_id: str) -> list[tweepy.Tweet]:
         """Gets all replies to a tweet."""
@@ -84,12 +94,21 @@ class TwitterTool(BaseTool):
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> str:
         """Replies to a tweet."""
+        from ..utils.validation import sanitize_user_input
+        if not tweet_id or not tweet_id.strip():
+            raise ValueError("Tweet ID cannot be empty")
+        if not tweet or not tweet.strip():
+            raise ValueError("Tweet content cannot be empty")
+        if len(tweet) > 280:
+            raise ValueError("Tweet content exceeds 280 characters")
+        tweet = sanitize_user_input(tweet, max_length=280)
+        
         if self.perspective_client:
             if not self.is_content_appropriate(tweet):
                 return "Tweet not sent. Content is inappropriate."
         assert self.twitter_client is not None
         self.twitter_client.reply_to_tweet(tweet_id, tweet)
-        return "Tweet posted successfully."
+        return f"Replied to tweet {tweet_id}: {tweet[:50]}{'...' if len(tweet) > 50 else ''}"
 
     def is_content_appropriate(self, text: str) -> bool:
         """
@@ -116,12 +135,18 @@ class TwitterTool(BaseTool):
 
     def get_follower_count(self, username: str) -> int:
         """Gets the follower count for a user."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
         return user.public_metrics.followers_count
 
     def get_following_count(self, username: str) -> int:
         """Gets the following count for a user."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         user = self.twitter_client.get_user(username)
         return user.public_metrics.following_count
@@ -133,6 +158,9 @@ class TwitterTool(BaseTool):
 
     def evaluate_account(self, username: str) -> EvaluationResult:
         """Evaluates a Twitter account and returns a score."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         assert self.account_evaluator is not None
         user = self.twitter_client.get_user(username)
@@ -141,6 +169,10 @@ class TwitterTool(BaseTool):
     def evaluate_crypto_influencer(self, username: str) -> dict:
         """Evaluates a Twitter account as a crypto influencer."""
         from .crypto_influencer_evaluator import CryptoInfluencerEvaluator
+        from ..utils.validation import validate_twitter_username
+        
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
 
         assert self.twitter_client is not None
         evaluator = CryptoInfluencerEvaluator(self.twitter_client)
@@ -151,9 +183,13 @@ class TwitterTool(BaseTool):
 
     def generate_persona_prompt(self, username: str) -> str:
         """Generates a prompt to describe the voice and style of a specific twitter user."""
+        from ..utils.validation import validate_twitter_username
+        if not validate_twitter_username(username):
+            raise ValueError(f"Invalid Twitter username: {username}")
         assert self.twitter_client is not None
         persona_skill = TwitterPersonaSkill(twitter_client=self.twitter_client)
-        return persona_skill.run(username=username).answers[0]
+        response = persona_skill.run(username=username)
+        return response.report
 
     def _run(self, tool_name: str, **kwargs):
         if tool_name == "post_tweet":

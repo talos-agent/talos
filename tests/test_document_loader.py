@@ -16,8 +16,8 @@ class TestDocumentLoader(unittest.TestCase):
         self.assertTrue(self.document_loader._is_ipfs_hash("QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG"))
         self.assertTrue(self.document_loader._is_ipfs_hash("ipfs://QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG"))
         self.assertFalse(self.document_loader._is_ipfs_hash("https://example.com/document.pdf"))
-
-    @patch("talos.data.dataset_manager.requests.get")
+    
+    @patch('talos.utils.http_client.SecureHTTPClient.get')
     def test_fetch_content_from_url_text(self, mock_get):
         mock_response = Mock()
         mock_response.headers = {"content-type": "text/plain"}

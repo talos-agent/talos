@@ -12,6 +12,9 @@ from talos.prompts.prompt_manager import PromptManager
 class MockPromptManager(PromptManager):
     def get_prompt(self, name: str) -> Prompt | None:
         return Prompt(name="default", template="test template", input_variables=[])
+    
+    def get_prompt_with_config(self, config, context):
+        return Prompt(name="default", template="test template", input_variables=[])
 
 
 @pytest.fixture

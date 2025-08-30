@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from enum import Enum
 from typing import Any
 
@@ -8,6 +7,7 @@ import requests
 from pydantic import BaseModel, Field, PrivateAttr
 
 from .base import SupervisedTool
+from ..settings import GitBookSettings
 
 
 class GitBookToolName(str, Enum):
@@ -28,8 +28,9 @@ class GitBookTool(SupervisedTool):
     _session: requests.Session = PrivateAttr()
 
     def model_post_init(self, __context: Any) -> None:
+        settings = GitBookSettings()
         self._session = requests.Session()
-        self._session.headers.update({"Authorization": f"Bearer {os.environ['GITBOOK_API_KEY']}"})
+        self._session.headers.update({"Authorization": f"Bearer {settings.GITBOOK_API_KEY}"})
 
     def read_page(self, page_url: str) -> str:
         """
@@ -45,7 +46,7 @@ class GitBookTool(SupervisedTool):
         """
         response = self._session.put(page_url, json={"content": content})
         response.raise_for_status()
-        return "Page updated successfully."
+        return f"Updated GitBook page: {page_url}"
 
     def _run_unsupervised(self, tool_name: str, **kwargs: Any) -> str:
         if tool_name == "read_page":

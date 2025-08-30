@@ -9,20 +9,27 @@ from langchain_core.tools import BaseTool, tool
 
 from talos.core.agent import Agent
 from talos.core.job_scheduler import JobScheduler
-from talos.core.router import Router
 from talos.core.scheduled_job import ScheduledJob
+
+from talos.core.startup_task_manager import StartupTaskManager
 from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.models.services import Ticket
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.service import Service
+from talos.settings import GitHubSettings
 from talos.skills.base import Skill
+from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+from talos.skills.codebase_implementation import CodebaseImplementationSkill
 from talos.skills.cryptography import CryptographySkill
+from talos.skills.pr_review import PRReviewSkill
 from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter_influence import TwitterInfluenceSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
+from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
 from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
+from talos.tools.github.tools import GithubTools
 from talos.tools.tool_manager import ToolManager
 
 
@@ -32,7 +39,8 @@ class MainAgent(Agent):
     Also manages scheduled jobs for autonomous execution.
     """
 
-    router: Optional[Router] = None
+    skills: list[Skill] = []
+    services: list[Service] = []
     prompts_dir: str
     model: BaseChatModel
     is_main_agent: bool = True
@@ -40,36 +48,182 @@ class MainAgent(Agent):
     dataset_manager: Optional[DatasetManager] = None
     job_scheduler: Optional[JobScheduler] = None
     scheduled_jobs: List[ScheduledJob] = []
+    startup_task_manager: Optional[StartupTaskManager] = None
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
         self._setup_prompt_manager()
-        self._setup_router()
+        self._ensure_user_id()
+        self._setup_memory()
+        self._setup_skills_and_services()
         self._setup_hypervisor()
         self._setup_dataset_manager()
         self._setup_tool_manager()
         self._setup_job_scheduler()
+        self._setup_startup_task_manager()
+
+    def _get_verbose_level(self) -> int:
+        """Convert verbose to integer level for backward compatibility."""
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
+        return max(0, min(2, self.verbose))
 
     def _setup_prompt_manager(self) -> None:
         if not self.prompt_manager:
             self.prompt_manager = FilePromptManager(self.prompts_dir)
-        self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
 
-    def _setup_router(self) -> None:
-        github_token = os.environ.get("GITHUB_TOKEN")
-        if not github_token:
-            raise ValueError("GITHUB_TOKEN environment variable not set.")
+        use_voice_enhanced = os.getenv("TALOS_USE_VOICE_ENHANCED", "false").lower() == "true"
+
+        if use_voice_enhanced:
+            self._setup_voice_enhanced_prompt()
+        else:
+            self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
+
+    def _setup_voice_enhanced_prompt(self) -> None:
+        """Setup voice-enhanced prompt by combining voice analysis with main prompt."""
+        try:
+            if not self.prompt_manager:
+                raise ValueError("Prompt manager not initialized")
+
+            from talos.skills.twitter_voice import TwitterVoiceSkill
+
+            voice_skill = TwitterVoiceSkill()
+            voice_result = voice_skill.run(username="talos_is")
+
+            main_prompt = self.prompt_manager.get_prompt("main_agent_prompt")
+            if not main_prompt:
+                raise ValueError("Could not find main_agent_prompt")
+
+            voice_enhanced_template = f"{voice_result['voice_prompt']}\n\n{main_prompt.template}"
+
+            from talos.prompts.prompt import Prompt
+
+            enhanced_prompt = Prompt(
+                name="voice_enhanced_main_agent",
+                template=voice_enhanced_template,
+                input_variables=main_prompt.input_variables,
+            )
+
+            # Add the enhanced prompt to the manager if it's a FilePromptManager
+            if hasattr(self.prompt_manager, "prompts"):
+                self.prompt_manager.prompts["voice_enhanced_main_agent"] = enhanced_prompt
+
+            self.set_prompt(["voice_enhanced_main_agent", "general_agent_prompt"])
+
+            if self._get_verbose_level() >= 1:
+                print(f"Voice integration enabled using {voice_result['voice_source']}")
+
+        except Exception as e:
+            if self._get_verbose_level() >= 1:
+                print(f"Voice integration failed, falling back to default prompts: {e}")
+            self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
+
+    def _ensure_user_id(self) -> None:
+        """Ensure user_id is set, generate temporary one if needed."""
+        if not self.user_id and self.use_database_memory:
+            import uuid
+
+            self.user_id = str(uuid.uuid4())
+
+    def _setup_memory(self) -> None:
+        """Initialize memory with database or file backend based on configuration."""
+        if not self.memory:
+            from langchain_openai import OpenAIEmbeddings
+
+            from talos.core.memory import Memory
+
+            embeddings_model = OpenAIEmbeddings()
+
+            if self.use_database_memory:
+                from talos.database.session import init_database
+
+                init_database()
+
+                session_id = self.session_id or "cli-session"
+
+                self.memory = Memory(
+                    embeddings_model=embeddings_model,
+                    user_id=self.user_id,
+                    session_id=session_id,
+                    use_database=True,
+                    auto_save=True,
+                    verbose=self.verbose,
+                )
+            else:
+                from pathlib import Path
+
+                memory_dir = Path("memory")
+                memory_dir.mkdir(exist_ok=True)
+
+                self.memory = Memory(
+                    file_path=memory_dir / "memories.json",
+                    embeddings_model=embeddings_model,
+                    history_file_path=memory_dir / "history.json",
+                    use_database=False,
+                    auto_save=True,
+                    verbose=self.verbose,
+                )
+
+    def _setup_skills_and_services(self) -> None:
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
         services: list[Service] = []
+        devin_service = None
         skills: list[Skill] = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
-            TwitterSentimentSkill(prompt_manager=self.prompt_manager),
             CryptographySkill(),
-            TwitterInfluenceSkill(llm=self.model, prompt_manager=self.prompt_manager),
+            CodebaseEvaluationSkill(llm=self.model, prompt_manager=self.prompt_manager),
         ]
-        if not self.router:
-            self.router = Router(services=services, skills=skills)
+
+        try:
+            import os
+
+            from talos.services.implementations.devin import DevinService
+
+            devin_api_key = os.getenv("DEVIN_API_KEY")
+            if devin_api_key:
+                devin_service = DevinService(api_key=devin_api_key)
+                services.append(devin_service)
+        except (ImportError, ValueError):
+            pass  # Devin API key not available, skip Devin service
+
+        github_tools = None
+        try:
+            github_settings = GitHubSettings()
+            github_token = github_settings.GITHUB_API_TOKEN
+            if github_token:
+                github_tools = GithubTools(token=github_token)
+                skills.append(
+                    PRReviewSkill(llm=self.model, prompt_manager=self.prompt_manager, github_tools=github_tools)
+                )
+        except ValueError:
+            pass  # GitHub token not available, skip GitHub-dependent skills
+
+        if devin_service:
+            skills.append(
+                CodebaseImplementationSkill(
+                    llm=self.model,
+                    prompt_manager=self.prompt_manager,
+                    devin_service=devin_service,
+                    github_tools=github_tools,
+                )
+            )
+
+        try:
+            from talos.tools.twitter_client import TwitterConfig
+
+            TwitterConfig()  # This will raise ValueError if TWITTER_BEARER_TOKEN is not set
+            skills.extend(
+                [
+                    TwitterSentimentSkill(prompt_manager=self.prompt_manager),
+                    TwitterInfluenceSkill(llm=self.model, prompt_manager=self.prompt_manager),
+                ]
+            )
+        except ValueError:
+            pass  # Twitter token not available, skip Twitter-dependent skills
+
+        self.skills = skills
+        self.services = services
 
     def _setup_hypervisor(self) -> None:
         if not self.prompt_manager:
@@ -82,12 +236,23 @@ class MainAgent(Agent):
 
     def _setup_dataset_manager(self) -> None:
         if not self.dataset_manager:
-            self.dataset_manager = DatasetManager()
+            if self.use_database_memory:
+                from talos.database.session import init_database
+
+                init_database()
+
+                self.dataset_manager = DatasetManager(
+                    verbose=self.verbose,
+                    user_id=self.user_id,
+                    session_id=self.session_id or "cli-session",
+                    use_database=True,
+                )
+            else:
+                self.dataset_manager = DatasetManager(verbose=self.verbose)
 
     def _setup_tool_manager(self) -> None:
-        assert self.router is not None
         tool_manager = ToolManager()
-        for skill in self.router.skills:
+        for skill in self.skills:
             tool_manager.register_tool(skill.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
         tool_manager.register_tool(self._add_memory_tool())
@@ -95,6 +260,15 @@ class MainAgent(Agent):
         if self.dataset_manager:
             tool_manager.register_tool(DocumentLoaderTool(self.dataset_manager))
             tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
+        else:
+            from langchain_openai import OpenAIEmbeddings
+
+            basic_dataset_manager = DatasetManager(verbose=self.verbose, embeddings=OpenAIEmbeddings())
+            tool_manager.register_tool(DocumentLoaderTool(basic_dataset_manager))
+            tool_manager.register_tool(DatasetSearchTool(basic_dataset_manager))
+
+        tool_manager.register_tool(ArbiScanSourceCodeTool())
+        tool_manager.register_tool(ArbiScanABITool())
 
         self.tool_manager = tool_manager
 
@@ -107,6 +281,15 @@ class MainAgent(Agent):
             self.job_scheduler.register_job(job)
 
         self.job_scheduler.start()
+
+    def _setup_startup_task_manager(self) -> None:
+        """Initialize the startup task manager and discover tasks from files."""
+        if not self.startup_task_manager:
+            self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
+        
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks")
 
     def add_scheduled_job(self, job: ScheduledJob) -> None:
         """
@@ -177,7 +360,7 @@ class MainAgent(Agent):
             """
             if self.memory:
                 self.memory.add_memory(description, metadata)
-                return "Memory added successfully."
+                return f"Added to memory: {description}"
             return "Memory not configured for this agent."
 
         return add_memory
@@ -195,8 +378,11 @@ class MainAgent(Agent):
             Returns:
                 The ticket object.
             """
-            assert self.router is not None
-            skill = self.router.get_skill(service_name)
+            skill = None
+            for s in self.skills:
+                if s.name == service_name:
+                    skill = s
+                    break
             if not skill:
                 raise ValueError(f"Skill '{service_name}' not found.")
             ticket = skill.get_ticket_status(ticket_id)
@@ -207,16 +393,16 @@ class MainAgent(Agent):
         return get_ticket_status
 
     def _build_context(self, query: str, **kwargs) -> dict:
-        assert self.router is not None
-
         base_context = super()._build_context(query, **kwargs)
 
-        active_tickets = self.router.get_all_tickets()
+        active_tickets = []
+        for skill in self.skills:
+            active_tickets.extend(skill.get_all_tickets())
         ticket_info = [f"- {ticket.ticket_id}: last updated at {ticket.updated_at}" for ticket in active_tickets]
 
         main_agent_context = {
             "time": datetime.now().isoformat(),
-            "available_services": ", ".join([service.name for service in self.router.services]),
+            "available_services": ", ".join([service.name for service in self.services]),
             "active_tickets": " ".join(ticket_info),
         }
 

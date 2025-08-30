@@ -1,8 +1,21 @@
+<div align="center">
+
+![Talos Header](./assets/talos-header.jpeg)
+
 # Talos: An AI Protocol Owner
 
-This repository contains the code for Talos, an AI agent designed to act as an owner for decentralized protocols. Talos is not just a chatbot; it is a sophisticated AI system that can manage and govern a protocol, ensuring its integrity and security.
+[![Documentation](https://img.shields.io/badge/docs-talos.is-blue?style=for-the-badge&logo=gitbook)](https://docs.talos.is/)
+[![Version](https://img.shields.io/badge/version-0.1.0-green?style=for-the-badge)](https://github.com/talos-agent/talos/releases)
+[![Python](https://img.shields.io/badge/python-3.12+-blue?style=for-the-badge&logo=python)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 
-The official documentation for the Talos project can be found at [docs.talos.is](https://docs.talos.is/).
+**🤖 An AI agent designed to act as an autonomous owner for decentralized protocols**
+
+Talos is not just a chatbot; it is a sophisticated AI system that can manage and govern a protocol, ensuring its integrity and security through advanced supervision and governance capabilities.
+
+📖 **[Read the Documentation](https://docs.talos.is/)** | 🚀 **[Quick Start](#usage)** | 🛠️ **[Development](#development)**
+
+</div>
 
 ## What is Talos?
 
@@ -47,7 +60,7 @@ Talos provides a set of services for interacting with various platforms:
 
 ## Development
 
-This project uses `uv` for dependency management.
+This project uses `uv` for dependency management and requires Python 3.12+.
 
 1.  Create a virtual environment:
 
@@ -81,6 +94,127 @@ uv run talos
 ```
 
 You can then interact with the agent in a continuous conversation. To exit, type `exit`.
+
+### Non-Interactive Mode
+
+Run a single query and exit:
+
+```bash
+uv run talos "your query here"
+```
+
+### Daemon Mode
+
+To run the agent in daemon mode for continuous operation with scheduled jobs:
+
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+export GITHUB_API_TOKEN="your-github-token"
+export TWITTER_BEARER_TOKEN="your-twitter-bearer-token"
+export PINATA_API_KEY="your-pinata-api-key"
+export PINATA_SECRET_API_KEY="your-pinata-secret-api-key"
+uv run talos daemon
+```
+
+The daemon will run continuously, executing scheduled jobs and can be gracefully shutdown with SIGTERM or SIGINT.
+
+### Available CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `twitter` | Twitter-related operations and sentiment analysis |
+| `github` | GitHub repository management and PR reviews |
+| `proposals` | Governance proposal evaluation |
+| `memory` | Memory management and search operations |
+| `arbiscan` | Arbitrum blockchain contract source code retrieval |
+| `generate-keys` | Generate RSA key pairs for encryption |
+| `get-public-key` | Retrieve the current public key |
+| `encrypt` | Encrypt data using public key |
+| `decrypt` | Decrypt data using private key |
+| `daemon` | Run in continuous daemon mode |
+| `cleanup-users` | Clean up temporary users and conversation data |
+| `db-stats` | Show database statistics |
+
+For detailed command usage, see the [CLI Documentation](https://docs.talos.is/cli/overview/).
+
+### Docker Usage
+
+#### Building and Running with Docker
+
+1. Build the Docker image:
+   ```bash
+   docker build -t talos-agent .
+   ```
+
+2. Run the container with environment variables:
+   ```bash
+   docker run -d \
+     -e OPENAI_API_KEY="your-openai-api-key" \
+     -e GITHUB_API_TOKEN="your-github-token" \
+     -e TWITTER_BEARER_TOKEN="your-twitter-bearer-token" \
+     -e PINATA_API_KEY="your-pinata-api-key" \
+     -e PINATA_SECRET_API_KEY="your-pinata-secret-api-key" \
+     --name talos-agent \
+     talos-agent
+   ```
+
+3. View logs:
+   ```bash
+   docker logs -f talos-agent
+   ```
+
+4. Graceful shutdown:
+   ```bash
+   docker stop talos-agent
+   ```
+
+#### Using Docker Compose
+
+1. Create a `.env` file with your API keys:
+   ```bash
+   OPENAI_API_KEY=your-openai-api-key
+   GITHUB_API_TOKEN=your-github-token
+   TWITTER_BEARER_TOKEN=your-twitter-bearer-token
+   PINATA_API_KEY=your-pinata-api-key
+   PINATA_SECRET_API_KEY=your-pinata-secret-api-key
+   ```
+
+2. Start the service:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. View logs:
+   ```bash
+   docker-compose logs -f
+   ```
+
+4. Stop the service:
+   ```bash
+   docker-compose down
+   ```
+
+#### Required Environment Variables
+
+- `OPENAI_API_KEY`: Required for AI functionality
+- `PINATA_API_KEY`: Required for IPFS operations
+- `PINATA_SECRET_API_KEY`: Required for IPFS operations
+
+#### Optional Environment Variables
+
+- `GITHUB_API_TOKEN`: Required for GitHub operations
+- `TWITTER_BEARER_TOKEN`: Required for Twitter functionality
+- `ARBISCAN_API_KEY`: Optional for higher rate limits when accessing Arbitrum contract data
+
+#### Graceful Shutdown
+
+The Docker container supports graceful shutdown. When you run `docker stop`, it sends a SIGTERM signal to the process, which triggers:
+
+1. Stopping the job scheduler
+2. Completing any running jobs
+3. Clean shutdown of all services
+
+The container will wait up to 10 seconds for graceful shutdown before forcing termination.
 
 ### Proposal Evaluation Example
 

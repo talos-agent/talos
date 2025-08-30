@@ -63,7 +63,7 @@ class DailyReportJob(ScheduledJob):
         report_data = {"date": current_date, "tasks_completed": 0, "skills_used": [], "memory_entries": 0}
 
         logger.info(f"Daily report generated: {report_data}")
-        return f"Daily report for {current_date} generated successfully"
+        return f"Daily report for {current_date} completed with {report_data['tasks_completed']} tasks and {report_data['memory_entries']} memory entries"
 
 
 class OneTimeMaintenanceJob(ScheduledJob):

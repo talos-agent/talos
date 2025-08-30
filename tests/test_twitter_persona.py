@@ -38,6 +38,9 @@ class MockTwitterClient(TwitterClient):
 class MockPromptManager(PromptManager):
     def get_prompt(self, name: str) -> Prompt | None:
         return Prompt(name="test_prompt", template="This is a test prompt.", input_variables=[])
+    
+    def get_prompt_with_config(self, config, context):
+        return Prompt(name="test_prompt", template="This is a test prompt.", input_variables=[])
 
 
 class TestTwitterPersona(unittest.TestCase):
@@ -47,21 +50,23 @@ class TestTwitterPersona(unittest.TestCase):
         mock_twitter_client = MockTwitterClient()
         mock_prompt_manager = MockPromptManager()
         mock_llm = MockChatOpenAI.return_value
-        mock_llm.invoke.return_value.content = "This is a persona description."
+        
+        from talos.models.twitter import TwitterPersonaResponse
+        mock_structured_llm = MagicMock()
+        mock_structured_llm.invoke.return_value = TwitterPersonaResponse(
+            report="This is a persona description.",
+            topics=["technology", "startups"],
+            style=["analytical", "technical"]
+        )
+        mock_llm.with_structured_output.return_value = mock_structured_llm
 
         # Mock the API responses
         mock_tweet = MagicMock()
         mock_tweet.text = "This is a test tweet."
-        mock_tweet.in_reply_to_screen_name = "testuser"
-        mock_tweet.in_reply_to_status_id = "12345"
-
-        mock_original_tweet = MagicMock()
-        mock_original_tweet.text = "This is the original tweet."
-        mock_original_tweet.user.screen_name = "original_user"
+        mock_tweet.get_replied_to_id.return_value = None
 
         mock_twitter_client.get_user_timeline = MagicMock(return_value=[mock_tweet])
         mock_twitter_client.get_user_mentions = MagicMock(return_value=[mock_tweet])
-        mock_twitter_client.get_tweet = MagicMock(return_value=mock_original_tweet)
 
         # Create the TwitterPersonaSkill with the mock client
         persona_skill = TwitterPersonaSkill(
@@ -74,26 +79,15 @@ class TestTwitterPersona(unittest.TestCase):
         response = persona_skill.run(username="testuser")
 
         # Check the output
-        self.assertEqual(response.answers[0], "This is a persona description.")
-        mock_llm.invoke.assert_called_once()
+        self.assertIsInstance(response, TwitterPersonaResponse)
+        self.assertEqual(response.report, "This is a persona description.")
+        self.assertEqual(response.topics, ["technology", "startups"])
+        self.assertEqual(response.style, ["analytical", "technical"])
+        mock_llm.with_structured_output.assert_called_once_with(TwitterPersonaResponse)
 
     def test_twitter_tool_generate_persona_prompt(self):
         # Create a mock Twitter client
         mock_twitter_client = MockTwitterClient()
-
-        # Mock the API responses
-        mock_tweet = MagicMock()
-        mock_tweet.text = "This is a test tweet."
-        mock_tweet.in_reply_to_screen_name = "testuser"
-        mock_tweet.in_reply_to_status_id = "12345"
-
-        mock_original_tweet = MagicMock()
-        mock_original_tweet.text = "This is the original tweet."
-        mock_original_tweet.user.screen_name = "original_user"
-
-        mock_twitter_client.get_user_timeline = MagicMock(return_value=[mock_tweet])
-        mock_twitter_client.get_user_mentions = MagicMock(return_value=[mock_tweet])
-        mock_twitter_client.get_tweet = MagicMock(return_value=mock_original_tweet)
 
         # Create the TwitterTool with the mock client
         twitter_tool = TwitterTool(twitter_client=mock_twitter_client)
@@ -102,11 +96,16 @@ class TestTwitterPersona(unittest.TestCase):
         with patch(
             "talos.tools.twitter.TwitterPersonaSkill",
         ) as MockTwitterPersonaSkill:
+            from talos.models.twitter import TwitterPersonaResponse
             mock_persona_skill = MockTwitterPersonaSkill.return_value
-            mock_persona_skill.run.return_value.answers = ["This is a rendered prompt."]
+            mock_persona_skill.run.return_value = TwitterPersonaResponse(
+                report="This is a rendered prompt.",
+                topics=["crypto", "trading"],
+                style=["confident", "data-driven"]
+            )
             response = twitter_tool._run(tool_name=TwitterToolName.GENERATE_PERSONA_PROMPT, username="testuser")
 
-        # Check the output
+        # Check the output - should return just the report
         self.assertEqual(response, "This is a rendered prompt.")
 
 

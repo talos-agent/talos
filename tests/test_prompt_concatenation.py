@@ -4,7 +4,6 @@ import pytest
 from langchain_core.language_models import BaseChatModel
 
 from talos.core.main_agent import MainAgent
-from talos.core.router import Router
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.prompts.prompt import Prompt
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
@@ -28,7 +27,6 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         patch.dict(
             "os.environ",
             {
-                "GITHUB_TOKEN": "test_token",
                 "GITHUB_API_TOKEN": "test_token",
                 "OPENAI_API_KEY": "test_key",
                 "TWITTER_BEARER_TOKEN": "test_twitter_token",
@@ -40,7 +38,6 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         patch("langchain_openai.ChatOpenAI"),
     ):
         mock_os_get.side_effect = lambda key, default=None: {
-            "GITHUB_TOKEN": "test_token",
             "GITHUB_API_TOKEN": "test_token",
             "OPENAI_API_KEY": "test_key",
             "TWITTER_BEARER_TOKEN": "test_twitter_token",
@@ -67,15 +64,43 @@ def test_prompt_concatenation(mock_model: BaseChatModel) -> None:
         mock_file_prompt_manager.return_value = mock_prompt_manager
         mock_hypervisor.return_value = MagicMock(spec=Hypervisor)
 
-        from talos.skills.proposals import ProposalsSkill
-
         MainAgent(
             model=mock_model,
             prompts_dir="",
             prompt_manager=mock_prompt_manager,
             schema=None,
-            router=Router(
-                services=[],
-                skills=[ProposalsSkill(llm=mock_model)],
-            ),
         )
+
+
+def test_prompt_node_backward_compatibility(mock_model: BaseChatModel) -> None:
+    """Test that PromptNode still works with legacy prompt_names."""
+    from talos.dag.nodes import PromptNode, GraphState
+    from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
+    
+    PromptNode.model_rebuild()
+    
+    with patch("os.listdir", return_value=[]):
+        mock_prompt_manager = FilePromptManager(prompts_dir="dummy_dir")
+    
+    mock_prompt_manager.prompts = {
+        "test_prompt": Prompt(
+            name="test_prompt",
+            template="Test template",
+            input_variables=[],
+        )
+    }
+    
+    node = PromptNode(
+        node_id="test_node",
+        name="Test Node",
+        prompt_manager=mock_prompt_manager,
+        prompt_names=["test_prompt"]
+    )
+    
+    state: GraphState = {
+        "messages": [], "context": {}, "current_query": "test", 
+        "results": {}, "metadata": {}
+    }
+    
+    result = node.execute(state)
+    assert "Applied prompt using prompt names" in result["results"]["test_node"]

@@ -161,15 +161,15 @@ class TestMainAgentIntegration:
     @pytest.fixture
     def main_agent(self):
         """Create a MainAgent instance for testing."""
-        with patch.dict(
-            "os.environ",
-            {
-                "GITHUB_TOKEN": "test_token",
-                "TWITTER_BEARER_TOKEN": "test_twitter_token",
-                "OPENAI_API_KEY": "test_openai_key",
-            },
-        ):
-            agent = MainAgent(model=ChatOpenAI(model="gpt-4o", api_key="test_key"), prompts_dir="src/talos/prompts")
+        with patch.dict('os.environ', {
+            'GITHUB_API_TOKEN': 'test_token',
+            'TWITTER_BEARER_TOKEN': 'test_twitter_token',
+            'OPENAI_API_KEY': 'test_openai_key'
+        }):
+            agent = MainAgent(
+                model=ChatOpenAI(model="gpt-5", api_key="test_key"),
+                prompts_dir="src/talos/prompts"
+            )
             if agent.job_scheduler:
                 agent.job_scheduler.stop()
             return agent
@@ -207,17 +207,14 @@ class TestMainAgentIntegration:
     def test_predefined_jobs_registration(self):
         """Test that predefined jobs are registered during initialization."""
         job = MockScheduledJob(name="predefined_job")
-
-        with patch.dict(
-            "os.environ",
-            {
-                "GITHUB_TOKEN": "test_token",
-                "TWITTER_BEARER_TOKEN": "test_twitter_token",
-                "OPENAI_API_KEY": "test_openai_key",
-            },
-        ):
+        
+        with patch.dict('os.environ', {
+            'GITHUB_API_TOKEN': 'test_token',
+            'TWITTER_BEARER_TOKEN': 'test_twitter_token',
+            'OPENAI_API_KEY': 'test_openai_key'
+        }):
             agent = MainAgent(
-                model=ChatOpenAI(model="gpt-4o", api_key="test_key"),
+                model=ChatOpenAI(model="gpt-5", api_key="test_key"),
                 prompts_dir="src/talos/prompts",
                 scheduled_jobs=[job],
             )

@@ -1,0 +1,6 @@
+{
+    "name": "voice_enhanced_agent_prompt",
+    "description": "Main agent prompt enhanced with Twitter voice analysis",
+    "template": "{voice_prompt}\n\n{main_agent_content}",
+    "input_variables": ["voice_prompt", "main_agent_content"]
+}
