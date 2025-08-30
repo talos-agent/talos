@@ -49,11 +49,11 @@ class Agent(BaseModel):
     def set_prompt(self, name: str | list[str]):
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
-        
+
         prompt_names = name if isinstance(name, list) else [name]
         if self.dataset_manager:
             prompt_names.append("relevant_documents_prompt")
-        
+
         prompt = self.prompt_manager.get_prompt(prompt_names)
         if not prompt:
             raise ValueError(f"The prompt '{prompt_names}' is not defined.")
@@ -92,11 +92,11 @@ class Agent(BaseModel):
         A base method for adding context to the query.
         """
         context = {}
-        
+
         if self.dataset_manager:
             relevant_documents = self.dataset_manager.search(query, k=5)
             context["relevant_documents"] = relevant_documents
-            
+
         return context
 
     def run(self, message: str, history: list[BaseMessage] | None = None, **kwargs) -> BaseModel:

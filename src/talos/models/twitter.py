@@ -40,16 +40,13 @@ class Tweet(BaseModel):
     referenced_tweets: Optional[list[ReferencedTweet]] = None
     in_reply_to_user_id: Optional[str] = None
     edit_history_tweet_ids: Optional[list[str]] = None
-    
+
     def is_reply_to(self, tweet_id: str) -> bool:
         """Check if this tweet is a reply to the specified tweet ID."""
         if not self.referenced_tweets:
             return False
-        return any(
-            ref.type == "replied_to" and ref.id == tweet_id 
-            for ref in self.referenced_tweets
-        )
-    
+        return any(ref.type == "replied_to" and ref.id == tweet_id for ref in self.referenced_tweets)
+
     def get_replied_to_id(self) -> Optional[int]:
         """Get the ID of the tweet this is replying to, if any."""
         if not self.referenced_tweets:

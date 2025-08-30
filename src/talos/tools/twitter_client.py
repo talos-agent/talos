@@ -6,7 +6,7 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings
 from textblob import TextBlob
 
-from talos.models.twitter import TwitterUser, Tweet, ReferencedTweet
+from talos.models.twitter import ReferencedTweet, Tweet, TwitterUser
 
 
 class PaginatedTwitterResponse:
@@ -91,6 +91,7 @@ class TweepyClient(TwitterClient):
             ],
         )
         from talos.models.twitter import TwitterPublicMetrics
+
         user_data = response.data
         return TwitterUser(
             id=int(user_data.id),
@@ -101,7 +102,7 @@ class TweepyClient(TwitterClient):
             public_metrics=TwitterPublicMetrics(**user_data.public_metrics),
             description=user_data.description,
             url=user_data.url,
-            verified=getattr(user_data, 'verified', False)
+            verified=getattr(user_data, "verified", False),
         )
 
     def search_tweets(
@@ -148,7 +149,15 @@ class TweepyClient(TwitterClient):
             return []
         response = self.client.get_users_tweets(
             id=user.id,
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"],
+            tweet_fields=[
+                "author_id",
+                "in_reply_to_user_id",
+                "public_metrics",
+                "referenced_tweets",
+                "conversation_id",
+                "created_at",
+                "edit_history_tweet_ids",
+            ],
             user_fields=[
                 "created_at",
                 "public_metrics",
@@ -167,7 +176,15 @@ class TweepyClient(TwitterClient):
             return []
         response = self.client.get_users_mentions(
             id=user.id,
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"],
+            tweet_fields=[
+                "author_id",
+                "in_reply_to_user_id",
+                "public_metrics",
+                "referenced_tweets",
+                "conversation_id",
+                "created_at",
+                "edit_history_tweet_ids",
+            ],
             user_fields=[
                 "created_at",
                 "public_metrics",
@@ -183,7 +200,15 @@ class TweepyClient(TwitterClient):
     def get_tweet(self, tweet_id: int) -> Tweet:
         response = self.client.get_tweet(
             str(tweet_id),
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"]
+            tweet_fields=[
+                "author_id",
+                "in_reply_to_user_id",
+                "public_metrics",
+                "referenced_tweets",
+                "conversation_id",
+                "created_at",
+                "edit_history_tweet_ids",
+            ],
         )
         return self._convert_to_tweet_model(response.data)
 
@@ -209,27 +234,31 @@ class TweepyClient(TwitterClient):
     def _convert_to_tweet_model(self, tweet_data: Any) -> Tweet:
         """Convert raw tweepy tweet data to Tweet BaseModel"""
         referenced_tweets = []
-        if hasattr(tweet_data, 'referenced_tweets') and tweet_data.referenced_tweets:
+        if hasattr(tweet_data, "referenced_tweets") and tweet_data.referenced_tweets:
             for ref in tweet_data.referenced_tweets:
                 if isinstance(ref, dict):
-                    referenced_tweets.append(ReferencedTweet(
-                        type=ref.get('type', ''),
-                        id=ref.get('id', 0)
-                    ))
+                    referenced_tweets.append(ReferencedTweet(type=ref.get("type", ""), id=ref.get("id", 0)))
                 else:
-                    referenced_tweets.append(ReferencedTweet(
-                        type=getattr(ref, 'type', ''),
-                        id=getattr(ref, 'id', 0)
-                    ))
-        
+                    referenced_tweets.append(ReferencedTweet(type=getattr(ref, "type", ""), id=getattr(ref, "id", 0)))
+
         return Tweet(
             id=int(tweet_data.id),
             text=tweet_data.text,
             author_id=str(tweet_data.author_id),
-            created_at=str(tweet_data.created_at) if hasattr(tweet_data, 'created_at') and tweet_data.created_at else None,
-            conversation_id=str(tweet_data.conversation_id) if hasattr(tweet_data, 'conversation_id') and tweet_data.conversation_id else None,
-            public_metrics=dict(tweet_data.public_metrics) if hasattr(tweet_data, 'public_metrics') and tweet_data.public_metrics else {},
+            created_at=str(tweet_data.created_at)
+            if hasattr(tweet_data, "created_at") and tweet_data.created_at
+            else None,
+            conversation_id=str(tweet_data.conversation_id)
+            if hasattr(tweet_data, "conversation_id") and tweet_data.conversation_id
+            else None,
+            public_metrics=dict(tweet_data.public_metrics)
+            if hasattr(tweet_data, "public_metrics") and tweet_data.public_metrics
+            else {},
             referenced_tweets=referenced_tweets if referenced_tweets else None,
-            in_reply_to_user_id=str(tweet_data.in_reply_to_user_id) if hasattr(tweet_data, 'in_reply_to_user_id') and tweet_data.in_reply_to_user_id else None,
-            edit_history_tweet_ids=[str(id) for id in tweet_data.edit_history_tweet_ids] if hasattr(tweet_data, 'edit_history_tweet_ids') and tweet_data.edit_history_tweet_ids else None
+            in_reply_to_user_id=str(tweet_data.in_reply_to_user_id)
+            if hasattr(tweet_data, "in_reply_to_user_id") and tweet_data.in_reply_to_user_id
+            else None,
+            edit_history_tweet_ids=[str(id) for id in tweet_data.edit_history_tweet_ids]
+            if hasattr(tweet_data, "edit_history_tweet_ids") and tweet_data.edit_history_tweet_ids
+            else None,
         )

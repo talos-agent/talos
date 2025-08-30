@@ -34,7 +34,11 @@ class TwitterInfluenceSkill(Skill):
             self.memory = Memory(file_path=memory_path, embeddings_model=embeddings, auto_save=True)
 
         if self.evaluator is None:
-            file_prompt_manager = self.prompt_manager if isinstance(self.prompt_manager, FilePromptManager) else FilePromptManager("src/talos/prompts")
+            file_prompt_manager = (
+                self.prompt_manager
+                if isinstance(self.prompt_manager, FilePromptManager)
+                else FilePromptManager("src/talos/prompts")
+            )
             self.evaluator = GeneralInfluenceEvaluator(self.twitter_client, self.llm, file_prompt_manager)
 
     @property
