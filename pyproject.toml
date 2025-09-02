@@ -26,6 +26,9 @@ dependencies = [
     "instructor==1.10.0",
     "google-api-python-client>=2.176.0",
     "apscheduler==3.10.4",
+    "fastapi==0.115.6",
+    "uvicorn==0.32.1",
+    
 ]
 
 [build-system]

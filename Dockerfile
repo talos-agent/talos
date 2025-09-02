@@ -63,4 +63,4 @@ USER talos
 
 EXPOSE 8000
 
-CMD ["python", "-m", "talos.cli.daemon"]
+CMD ["python", "-m", "talos.cli.server"]

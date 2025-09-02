@@ -36,8 +36,8 @@ deployments:
           min_tcb_evaluation_data_number: 18
           tdx: {}
       enclaves:
-        - id: 5BGllKuT9kVqHlnNbEZ9xHzP3Jt18lnyYjTUDxF/SzgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-        - id: E2d50zXzTEWkdLuurO6h1qAjAFVdDbU78+EMbmQKzu8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: 0lKE9veEqSXq8I9bc1M0SfBj91wMNrgFgCDnoC8Y+XAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: qN3NFN/CjxNud9VwVVPVzdtPcRejN8Qj2guRtCE7dWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
       endorsements:
         - and:
             - provider: oasis1qzc8pldvm8vm3duvdrj63wgvkw34y9ucfcxzetqr
@@ -46,6 +46,9 @@ deployments:
                 - provider_instance_admin: oasis1qz2lty9v4glt5ts8ljhfpnd05dy3cwmtnyshws8q
       fees: endorsing_node
       max_expiration: 3
+    secrets:
+      - name: OPENAI_API_KEY
+        value: pGJwa1ggCl1w9SjAdDuo+xMXJKvefcJWA3SlsqqhSA57dJ4EKz1kbmFtZVgedNT8MJJ4I3ifwPjostUP2FMijDvi09YXHgiOBYerZW5vbmNlTx6x8KHbmS6ZXJbPpGUlcGV2YWx1ZVhwIhFMFiJuAc9I7Z6d5GnX6aO5H/RPbSKOgRzUnmUQvIMZKCLASiT4yAmR7PF+UbH8ojPZHnq7kErzLMjM72Sbo5jHWmNiBB+Xu85+h7jhjqy11NNYByT2AaPfyyyKWL3ldtB+zVHo3GJHBc9Gs4L9cg==
     machines:
       default:
         provider: oasis1qzc8pldvm8vm3duvdrj63wgvkw34y9ucfcxzetqr
