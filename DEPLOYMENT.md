@@ -57,9 +57,9 @@ After the pull request is merged, tag a new release and push it by running:
 
 ```bash
 VERSION=0.1.0
-git fetch origin
-git merge --ff-only origin/main
-git tag v$VERSION main
+git fetch origin && \
+git merge --ff-only origin/main && \
+git tag v$VERSION main && \
 git push -u origin v$VERSION
 ```
 

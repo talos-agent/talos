@@ -38,8 +38,23 @@ class RoflClient:
 
         Raises:
             httpx.HTTPStatusError: If the request fails
+            PermissionError: If unable to access the ROFL socket
         """
+        import os
+
         transport: httpx.AsyncHTTPTransport | None = None
+        socket_path = self.url if self.url and not self.url.startswith("http") else self.ROFL_SOCKET_PATH
+
+        # Check if socket exists and is accessible
+        if not os.path.exists(socket_path):
+            raise PermissionError(
+                f"ROFL socket not found at {socket_path}. Ensure ROFL daemon is running and socket is mounted."
+            )
+
+        if not os.access(socket_path, os.R_OK | os.W_OK):
+            raise PermissionError(
+                f"Permission denied accessing ROFL socket at {socket_path}. Check socket permissions."
+            )
 
         if self.url and not self.url.startswith("http"):
             transport = httpx.AsyncHTTPTransport(uds=self.url)

@@ -44,17 +44,16 @@ WORKDIR /app
 
 ARG SOURCE_DATE_EPOCH
 
-# NOTE: Use a deterministic "password age" for reproducibility.
-RUN useradd --system talos && chage -d "$((SOURCE_DATE_EPOCH / (24*3600)))" talos
-
-# Create data directory for database and other persistent data
-RUN mkdir -p /app/data && chown talos:talos /app/data
+# Create data directory
+RUN mkdir -p /app/data
 
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 COPY --from=builder /app/pyproject.toml /app/pyproject.toml
 COPY --from=builder /app/alembic.ini /app/alembic.ini
 COPY --from=builder /app/alembic /app/alembic
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH="/app/src"
@@ -65,10 +64,7 @@ ENV PYTHONPATH="/app/src"
 # - TWITTER_BEARER_TOKEN: Twitter API bearer token for social media features
 # - PINATA_API_KEY: Pinata API key for IPFS operations
 # - PINATA_SECRET_API_KEY: Pinata secret key for IPFS operations
-# - DATABASE_URL: Database connection URL (optional, defaults to SQLite)
 
-USER talos
-
-EXPOSE 8000
+EXPOSE 7000
 
 CMD ["python", "-m", "talos.cli.server"]

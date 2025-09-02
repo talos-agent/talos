@@ -2,7 +2,7 @@ services:
   talos-agent:
     build: .
     # NOTE: Run ./scripts/build_and_push_container_image.sh to retrieve the digest.
-    image: ghcr.io/talos-agent/talos:latest-agent@sha256:31199c88e56202bb6bc12c309f360f3f01d21debe5c085bc6b931da9329e4d0b
+    image: ghcr.io/talos-agent/talos:latest-agent@sha256:daa520574d7431c678c064848ef541cb8725dc39b9e2ecff0d04280fd90ca937
     container_name: talos-agent
     restart: unless-stopped
     environment:
@@ -11,12 +11,11 @@ services:
       - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
       - PINATA_API_KEY=${PINATA_API_KEY}
       - PINATA_SECRET_API_KEY=${PINATA_SECRET_API_KEY}
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///app/data/talos_data.db}
     volumes:
       - talos_data:/app/data
       - /run/rofl-appd.sock:/run/rofl-appd.sock
     ports:
-      - "8000:8000"
+      - "7000:7000"
 
 volumes:
   talos_data:

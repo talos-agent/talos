@@ -3,16 +3,16 @@ services:
     build: .
     container_name: talos-agent
     restart: unless-stopped
+    ports:
+      - "7000:7000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
       - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
       - PINATA_API_KEY=${PINATA_API_KEY}
       - PINATA_SECRET_API_KEY=${PINATA_SECRET_API_KEY}
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///app/data/talos_data.db}
     volumes:
       - talos_data:/app/data
-      - /run/rofl-appd.sock:/run/rofl-appd.sock
 
 volumes:
   talos_data:
