@@ -2,7 +2,7 @@ services:
   talos-agent:
     build: .
     # NOTE: Run ./scripts/build_and_push_container_image.sh to retrieve the digest.
-    image: ghcr.io/talos-agent/talos:latest-agent@sha256:fc76d1cffa9f33e8536be447ec79f2acd1a60b3eaf79200be2c10c93a689ded8
+    image: ghcr.io/talos-agent/talos:latest-agent@sha256:3c4010e66bbc475a6ee2932713791e40a27e8740bde0591b9e6f0586efc2988b
     container_name: talos-agent
     restart: unless-stopped
     environment:
@@ -20,3 +20,9 @@ services:
 
 volumes:
   talos_data:
+
+VERSION=0.1.2post2
+git fetch origin && \
+git merge --ff-only origin/main && \
+git tag v$VERSION main && \
+git push -u origin v$VERSION
