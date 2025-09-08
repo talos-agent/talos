@@ -20,9 +20,3 @@ services:
 
 volumes:
   talos_data:
-
-VERSION=0.1.2post2
-git fetch origin && \
-git merge --ff-only origin/main && \
-git tag v$VERSION main && \
-git push -u origin v$VERSION
