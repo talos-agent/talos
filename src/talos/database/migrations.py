@@ -47,7 +47,7 @@ def get_current_revision(engine: Engine) -> Optional[str]:
         return context.get_current_revision()
 
 
-def get_head_revision() -> str:
+def get_head_revision() -> str | None:
     """Get the head revision from the migration scripts."""
     config = get_alembic_config()
     script_dir = ScriptDirectory.from_config(config)
