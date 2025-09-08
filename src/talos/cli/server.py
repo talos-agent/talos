@@ -6,148 +6,111 @@ Runs on port 8000 with basic CRUD endpoints.
 
 from __future__ import annotations
 
+import logging
+from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict
+from eth_rpc import PrivateKeyWallet
+from eth_typing import HexStr
+from fastapi import FastAPI
+from sqlalchemy import create_engine
 
-# In-memory storage for testing
-items_db: List[Dict] = []
-next_id = 1
+from talos.database import check_migration_status, init_database, run_migrations
+from talos.utils import RoflClient
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan with startup and shutdown events."""
+    # Startup
+    try:
+        # Initialize database connection
+        init_database()
+
+        # Get database engine for migration checks
+        from talos.database.session import get_database_url
+
+        database_url = get_database_url()
+        engine = create_engine(database_url)
+
+        # Check migration status
+        migration_status = check_migration_status(engine)
+        logger.info(f"Database migration status: {migration_status}")
+
+        if migration_status["needs_migration"]:
+            logger.info("Running database migrations...")
+            run_migrations(engine)
+            logger.info("Database migrations completed successfully")
+        else:
+            logger.info("Database is up to date")
+
+    except Exception as e:
+        logger.error(f"Failed to run database migrations: {e}")
+        raise
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down Talos API server")
+
 
 app = FastAPI(
     title="Talos Test API",
     description="A simple REST API for testing purposes",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
-class ItemCreate(BaseModel):
-    """Model for creating a new item."""
-    name: str
-    description: Optional[str] = None
-    price: Optional[float] = None
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
-class ItemUpdate(BaseModel):
-    """Model for updating an existing item."""
-    name: Optional[str] = None
-    description: Optional[str] = None
-    price: Optional[float] = None
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
-class Item(BaseModel):
-    """Model for item response."""
-    id: int
-    name: str
-    description: Optional[str] = None
-    price: Optional[float] = None
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
 @app.get("/")
-async def root() -> Dict[str, str]:
+async def root() -> dict[str, str]:
     """Root endpoint with API information."""
-    return {
-        "message": "Talos Test API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "status": "running"
-    }
+    return {"message": "Talos API", "version": "1.0.0", "docs": "/docs", "status": "running"}
 
 
 @app.get("/health")
-async def health_check() -> Dict[str, str]:
+async def health_check() -> dict[str, str]:
     """Health check endpoint."""
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
-@app.get("/items", response_model=List[Item])
-async def get_items() -> List[Item]:
-    """Get all items."""
-    return [Item.model_validate(item) for item in items_db]
+@app.get("/keys/generate/test")
+async def generate_key_test() -> dict[str, str]:
+    """Generate a key for testing purposes."""
+    rofl_client = RoflClient()
+    key = await rofl_client.generate_key("test")
+    wallet = PrivateKeyWallet(private_key=HexStr(key))
+    return {"wallet": wallet.address}
 
 
-@app.get("/items/{item_id}", response_model=Item)
-async def get_item(item_id: int) -> Item:
-    """Get a specific item by ID."""
-    for item in items_db:
-        if item["id"] == item_id:
-            return Item.model_validate(item)
-    raise HTTPException(status_code=404, detail="Item not found")
+@app.get("/migrations/status")
+async def migration_status() -> dict[str, Optional[str | bool]]:
+    """Get database migration status."""
+    from talos.database.session import get_database_url
+
+    database_url = get_database_url()
+    engine = create_engine(database_url)
+    return check_migration_status(engine)
 
 
-@app.post("/items", response_model=Item)
-async def create_item(item: ItemCreate) -> Item:
-    """Create a new item."""
-    global next_id
+@app.get("/tables")
+async def tables_in_database() -> dict[str, list[str]]:
+    """Get list of tables in the database."""
+    from sqlalchemy import inspect
 
-    new_item = {
-        "id": next_id,
-        "name": item.name,
-        "description": item.description,
-        "price": item.price,
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
-    }
+    from talos.database.session import get_database_url
 
-    items_db.append(new_item)
-    next_id += 1
-
-    return Item.model_validate(new_item)
-
-
-@app.put("/items/{item_id}", response_model=Item)
-async def update_item(item_id: int, item_update: ItemUpdate) -> Item:
-    """Update an existing item."""
-    for i, item in enumerate(items_db):
-        if item["id"] == item_id:
-            # Update only provided fields
-            update_data = item_update.model_dump(exclude_unset=True)
-            for key, value in update_data.items():
-                item[key] = value
-            item["updated_at"] = datetime.now()
-
-            return Item.model_validate(item)
-
-    raise HTTPException(status_code=404, detail="Item not found")
-
-
-@app.delete("/items/{item_id}")
-async def delete_item(item_id: int) -> Dict[str, str]:
-    """Delete an item."""
-    for i, item in enumerate(items_db):
-        if item["id"] == item_id:
-            del items_db[i]
-            return {"message": f"Item {item_id} deleted successfully"}
-
-    raise HTTPException(status_code=404, detail="Item not found")
-
-
-@app.get("/items/search/{query}")
-async def search_items(query: str) -> List[Item]:
-    """Search items by name or description."""
-    results = []
-    query_lower = query.lower()
-
-    for item in items_db:
-        name = str(item["name"])
-        description = str(item["description"]) if item["description"] else ""
-        if (query_lower in name.lower() or
-                (description and query_lower in description.lower())):
-            results.append(Item.model_validate(item))
-
-    return results
+    database_url = get_database_url()
+    engine = create_engine(database_url)
+    inspector = inspect(engine)
+    tables = inspector.get_table_names()
+    return {"tables": tables}
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

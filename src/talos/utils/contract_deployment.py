@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from eth_account import Account
+from eth_typing import HexStr
 from web3 import Web3
 
 from talos.models.contract_deployment import ContractDeploymentRequest, ContractDeploymentResult
@@ -60,7 +61,7 @@ def deploy_contract(request: ContractDeploymentRequest, private_key: str) -> Con
     gas_limit = request.gas_limit
     if not gas_limit:
         try:
-            gas_limit = w3.eth.estimate_gas({"data": deployment_bytecode, "from": account.address})
+            gas_limit = w3.eth.estimate_gas({"data": HexStr(deployment_bytecode), "from": account.address})
         except Exception:
             gas_limit = 3000000
 
@@ -78,10 +79,10 @@ def deploy_contract(request: ContractDeploymentRequest, private_key: str) -> Con
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
     return ContractDeploymentResult(
-        contract_address=receipt.contractAddress,
+        contract_address=str(receipt["contractAddress"]),
         transaction_hash=tx_hash.hex(),
         contract_signature=signature,
         chain_id=request.chain_id,
-        gas_used=receipt.gasUsed,
+        gas_used=receipt["gasUsed"],
         was_duplicate=False,
     )
