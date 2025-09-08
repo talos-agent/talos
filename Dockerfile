@@ -47,9 +47,6 @@ ARG SOURCE_DATE_EPOCH
 # NOTE: Use a deterministic "password age" for reproducibility.
 RUN useradd --system talos && chage -d "$((SOURCE_DATE_EPOCH / (24*3600)))" talos
 
-# Create data directory for database and other persistent data
-RUN mkdir -p /app/data && chown talos:talos /app/data
-
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 COPY --from=builder /app/pyproject.toml /app/pyproject.toml
