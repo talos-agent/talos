@@ -51,7 +51,7 @@ class TestYieldManagerService(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             YieldManagerService(dexscreener_client, gecko_terminal_client, llm_client, min_yield=-0.01)
-        
+
         with self.assertRaises(ValueError):
             YieldManagerService(dexscreener_client, gecko_terminal_client, llm_client, min_yield=0.2, max_yield=0.1)
 
@@ -67,20 +67,18 @@ class TestYieldManagerService(unittest.TestCase):
             volume=1000000,
         )
         gecko_terminal_client.get_ohlcv_data.return_value = GeckoTerminalOHLCVData(ohlcv_list=[])
-        
-        llm_client.reasoning.return_value = json.dumps(
-            {"apr": 0.25, "explanation": "High APR recommendation"}
-        )
 
-        yield_manager = YieldManagerService(dexscreener_client, gecko_terminal_client, llm_client, min_yield=0.05, max_yield=0.20)
+        llm_client.reasoning.return_value = json.dumps({"apr": 0.25, "explanation": "High APR recommendation"})
+
+        yield_manager = YieldManagerService(
+            dexscreener_client, gecko_terminal_client, llm_client, min_yield=0.05, max_yield=0.20
+        )
         yield_manager.get_staked_supply_percentage = MagicMock(return_value=0.5)
 
         new_apr = yield_manager.update_staking_apr(75.0, "A report")
         self.assertEqual(new_apr, 0.20)
 
-        llm_client.reasoning.return_value = json.dumps(
-            {"apr": 0.01, "explanation": "Low APR recommendation"}
-        )
+        llm_client.reasoning.return_value = json.dumps({"apr": 0.01, "explanation": "Low APR recommendation"})
 
         new_apr = yield_manager.update_staking_apr(75.0, "A report")
         self.assertEqual(new_apr, 0.05)
