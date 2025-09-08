@@ -26,6 +26,8 @@ RUN pip install uv==${UV_VERSION}
 # Create virtualenv and install Python dependencies.
 COPY pyproject.toml uv.lock README.md ./
 COPY src/ ./src/
+COPY alembic.ini ./
+COPY alembic/ ./alembic/
 # Ensure all source files have fixed timestamps, permissions and owners.
 RUN find -exec touch -d @${SOURCE_DATE_EPOCH} "{}" \; && \
     find -type f -exec chmod 644 "{}" \; && \
@@ -45,9 +47,14 @@ ARG SOURCE_DATE_EPOCH
 # NOTE: Use a deterministic "password age" for reproducibility.
 RUN useradd --system talos && chage -d "$((SOURCE_DATE_EPOCH / (24*3600)))" talos
 
+# Create data directory for database and other persistent data
+RUN mkdir -p /app/data && chown talos:talos /app/data
+
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 COPY --from=builder /app/pyproject.toml /app/pyproject.toml
+COPY --from=builder /app/alembic.ini /app/alembic.ini
+COPY --from=builder /app/alembic /app/alembic
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH="/app/src"
@@ -58,6 +65,7 @@ ENV PYTHONPATH="/app/src"
 # - TWITTER_BEARER_TOKEN: Twitter API bearer token for social media features
 # - PINATA_API_KEY: Pinata API key for IPFS operations
 # - PINATA_SECRET_API_KEY: Pinata secret key for IPFS operations
+# - DATABASE_URL: Database connection URL (optional, defaults to SQLite)
 
 USER talos
 
