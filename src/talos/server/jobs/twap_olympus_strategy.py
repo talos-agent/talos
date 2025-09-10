@@ -2,6 +2,7 @@ from typing import Any, ClassVar
 
 from eth_rpc.networks import Arbitrum
 from eth_rpc.types import primitives
+from pydantic import PrivateAttr
 
 from talos.constants import OHM, WETH
 from talos.contracts.camelot_swap import CamelotYakSwap
@@ -12,9 +13,9 @@ from talos.utils import RoflClient
 
 
 class TwapOHMJob(ScheduledJob):
-    STRATEGY_ID: ClassVar[str] = "ohm_buyer"
-    WALLET_ID: ClassVar[str] = "Talos.ohm_strategy"
-    client: RoflClient
+    STRATEGY_ID: ClassVar[str] = "talos.ohm_buyer"
+    WALLET_ID: ClassVar[str] = "talos.ohm_buyer"
+    _client: RoflClient = PrivateAttr(default_factory=RoflClient)
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
@@ -22,10 +23,9 @@ class TwapOHMJob(ScheduledJob):
             description="Olympus strategy",
             cron_expression="*/15 * * * *",
         )
-        self.client = RoflClient()
 
     async def run(self, **kwargs: Any) -> Any:
-        wallet = await self.client.get_wallet(self.WALLET_ID)
+        wallet = await self._client.get_wallet(self.WALLET_ID)
         wallet_balance = await wallet.balance()
         swap_amount = min(wallet_balance, int(1e14))
         if wallet_balance < int(1e14):
