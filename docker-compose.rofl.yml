@@ -2,7 +2,7 @@ services:
   talos-agent:
     build: .
     # NOTE: Run ./scripts/build_and_push_container_image.sh to retrieve the digest.
-    image: ghcr.io/talos-agent/talos:latest-agent@sha256:ce125788e5d1fc7248307376fc644b44a7f1380bbd5f48a0181cfe665601c96b
+    image: ghcr.io/talos-agent/talos:latest-agent@sha256:68a3a9d69ddcadab9d5657b17e033836b78169ce07e2537d9d54fb2ad4e958c5
     container_name: talos-agent
     restart: unless-stopped
     environment:
@@ -15,7 +15,7 @@ services:
       - talos_data:/app/data
       - /run/rofl-appd.sock:/run/rofl-appd.sock
     ports:
-      - "7010:7010"
+      - "7011:8000"
 
 volumes:
   talos_data:
