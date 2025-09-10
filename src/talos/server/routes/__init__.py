@@ -1,9 +1,6 @@
-import os
 from datetime import datetime
 from typing import Any, Optional
 
-from eth_rpc import PrivateKeyWallet
-from eth_typing import HexStr
 from fastapi import APIRouter, Request
 from sqlalchemy import create_engine
 
@@ -12,7 +9,10 @@ from talos.database import check_migration_status, get_session
 from talos.database.models import Counter
 from talos.utils import RoflClient
 
+from .ohm_strategy import ohm_strategy_router
+
 routes = APIRouter()
+routes.include_router(ohm_strategy_router)
 
 
 @routes.get("/")
@@ -32,8 +32,7 @@ async def generate_key_test() -> dict[str, str]:
     """Generate a key for testing purposes.  address should be 0x1eB5305647d0998C3373696629b2fE8E21eb10B9"""
     try:
         rofl_client = RoflClient()
-        key = await rofl_client.generate_key("test")
-        wallet = PrivateKeyWallet(private_key=HexStr(key))
+        wallet = await rofl_client.get_wallet("test")
         return {"wallet": wallet.address}
     except PermissionError as pe:
         return {

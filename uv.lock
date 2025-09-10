@@ -611,6 +611,18 @@ wheels = [
 ]
 
 [[package]]
+name = "eth-typeshed-py"
+version = "0.1.33.post2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "eth-rpc-py" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3b/90/28fcf9022d7e75effd0236ac63a2dd67c41da42e1c28b79789653143eb30/eth_typeshed_py-0.1.33.post2.tar.gz", hash = "sha256:67f5596c3089819086556da43ec1cd20816b57a984fe2084e7e30132edb2c9f5", size = 27845, upload-time = "2025-09-01T20:40:34.938Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/79/d55f6bd8ff60ffadc50db035f3b97e02603658fe182bd01f2156871245a4/eth_typeshed_py-0.1.33.post2-py3-none-any.whl", hash = "sha256:f265ee52eac357101b10163a0892fe67bdf6be9b13fdb0f60f082dfbd70f5d1f", size = 49551, upload-time = "2025-09-01T20:40:31.057Z" },
+]
+
+[[package]]
 name = "eth-typing"
 version = "5.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2342,6 +2354,7 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "duckduckgo-search" },
     { name = "eth-rpc-py" },
+    { name = "eth-typeshed-py" },
     { name = "eth-typing" },
     { name = "fastapi" },
     { name = "google-api-python-client" },
@@ -2381,6 +2394,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = "==4.13.4" },
     { name = "duckduckgo-search", specifier = "==8.1.1" },
     { name = "eth-rpc-py", specifier = "==0.1.33.post2" },
+    { name = "eth-typeshed-py", specifier = ">=0.1.33.post2" },
     { name = "eth-typing", specifier = "==5.2.1" },
     { name = "fastapi", specifier = "==0.115.6" },
     { name = "google-api-python-client", specifier = ">=2.176.0" },

@@ -1,13 +1,22 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 
 class Base(DeclarativeBase):
-    pass
+    def to_dict(self) -> dict[str, Any]:
+        """Convert SQLAlchemy model instance to dictionary for JSON serialization."""
+        result = {}
+        for column in self.__table__.columns:
+            value = getattr(self, column.name)
+            if isinstance(value, datetime):
+                result[column.name] = value.isoformat()
+            else:
+                result[column.name] = value
+        return result
 
 
 class Counter(Base):
@@ -17,6 +26,21 @@ class Counter(Base):
     value: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+
+
+class Swap(Base):
+    __tablename__ = "swaps"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    strategy_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    wallet_address: Mapped[str] = mapped_column(String(42), nullable=False)
+    amount_in: Mapped[int] = mapped_column(Numeric(78), nullable=False)
+    token_in: Mapped[str] = mapped_column(String(42), nullable=False)
+    amount_out: Mapped[int] = mapped_column(
+        Numeric(78), nullable=False
+    )  # uint256 max is 2^256-1, needs 78 decimal digits
+    token_out: Mapped[str] = mapped_column(String(42), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
 
 
 class User(Base):

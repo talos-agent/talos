@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 
 from talos.core.job_scheduler import JobScheduler
 from talos.database import check_migration_status, init_database, run_migrations
-from talos.server.jobs import IncrementCounterJob
+from talos.server.jobs import IncrementCounterJob, TwapOHMJob
 
 from .routes import routes
 
@@ -58,6 +58,10 @@ async def lifespan(app: FastAPI):
         scheduler.register_job(increment_counter_job)
         logger.info(f"Registered job: {increment_counter_job.name}")
 
+        twap_ohm_job = TwapOHMJob()
+        scheduler.register_job(twap_ohm_job)
+        logger.info(f"Registered job: {twap_ohm_job.name}")
+
         # Start the scheduler
         scheduler.start()
         logger.info("Job scheduler started successfully")
@@ -79,7 +83,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Talos Test API",
     description="A simple REST API for testing purposes",
-    version="1.0.0",
+    version="0.1.3",
     lifespan=lifespan,
 )
 
