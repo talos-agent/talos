@@ -33,6 +33,8 @@ class Swap(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     strategy_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    transaction_hash: Mapped[str] = mapped_column(String(66), nullable=False)
+    chain_id: Mapped[int] = mapped_column(Integer, nullable=False)
     wallet_address: Mapped[str] = mapped_column(String(42), nullable=False)
     amount_in: Mapped[int] = mapped_column(Numeric(78), nullable=False)
     token_in: Mapped[str] = mapped_column(String(42), nullable=False)
