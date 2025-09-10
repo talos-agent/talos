@@ -57,7 +57,6 @@ deployments:
         permissions:
           log.view:
             - oasis1qpx5xq4kwtuawjdc0wty0d0mz08ha62jrc2c236j
-            - 0xF548a58DB6d86d466acd00Fc0F6De3b39Ea129D7
   testnet:
     app_id: rofl1qz8c57nvrru0rdtv7242rzwv269a87zh6c8auqr3
     network: testnet
