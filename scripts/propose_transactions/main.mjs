@@ -141,12 +141,37 @@ const safeTransaction = await safeProposer.createTransaction({
 const safeTxHash = await safeProposer.getTransactionHash(safeTransaction);
 const signature = await safeProposer.signHash(safeTxHash);
 
-await safeClient.proposeTransaction({
-  safeAddress: await safeProposer.getAddress(),
-  safeTransactionData: safeTransaction.data,
-  safeTxHash,
-  senderAddress: signature.signer,
-  senderSignature: signature.data,
-});
+// Retry logic for proposeTransaction
+let retryCount = 0;
+const maxRetries = 2;
 
-console.log("Proposed transaction hash", safeTxHash);
+while (retryCount <= maxRetries) {
+  try {
+    console.log(`Proposing transaction - Attempt ${retryCount + 1}/${maxRetries + 1}`);
+
+    await safeClient.proposeTransaction({
+      safeAddress: await safeProposer.getAddress(),
+      safeTransactionData: safeTransaction.data,
+      safeTxHash,
+      senderAddress: signature.signer,
+      senderSignature: signature.data,
+    });
+
+    console.log("Proposed transaction hash", safeTxHash);
+    break; // Success, exit retry loop
+
+  } catch (error) {
+    retryCount++;
+    console.error(`Transaction proposal failed on attempt ${retryCount}:`, error.message);
+
+    if (retryCount > maxRetries) {
+      console.error(`Transaction proposal failed after ${maxRetries + 1} attempts`);
+      throw error;
+    }
+
+    // Wait before retry (1s, 2s)
+    const delay = 1000 * retryCount;
+    console.log(`Retrying in ${delay}ms...`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+}
