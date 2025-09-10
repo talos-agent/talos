@@ -19,7 +19,7 @@ async def get_twap_ohm() -> dict[str, str]:
 @ohm_strategy_router.get("/wallet")
 async def get_twap_ohm_wallet() -> dict[str, str]:
     """Get the twap ohm wallet."""
-    wallet = await RoflClient().get_wallet(TwapOHMJob().WALLET_ID)
+    wallet = await RoflClient().get_wallet(TwapOHMJob.WALLET_ID)
     return {"wallet": wallet.address}
 
 
