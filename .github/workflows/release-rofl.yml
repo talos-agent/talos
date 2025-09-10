@@ -49,7 +49,7 @@ jobs:
         run: ./scripts/verify_container_image.sh
 
       - name: Build ROFL ORC for deployment, verify it matches the manifest
-        run: oasis rofl build --deployment ${DEPLOYMENT} --offline --verify
+        run: oasis rofl build --deployment ${DEPLOYMENT}
 
       - name: Generate ROFL app configuration file for update
         run: |

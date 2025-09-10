@@ -12,7 +12,8 @@ from eth_typing import HexStr
 from fastapi import FastAPI
 from sqlalchemy import create_engine
 
-from talos.database import check_migration_status
+from talos.database import check_migration_status, get_session, init_database, run_migrations
+from talos.database.models import Counter
 from talos.utils import RoflClient
 
 logger = logging.getLogger(__name__)
@@ -22,30 +23,30 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Manage application lifespan with startup and shutdown events."""
     # Startup
-    # try:
-    #     # Initialize database connection
-    #     init_database()
+    try:
+        # Initialize database connection
+        init_database()
 
-    #     # Get database engine for migration checks
-    #     from talos.database.session import get_database_url
+        # Get database engine for migration checks
+        from talos.database.session import get_database_url
 
-    #     database_url = get_database_url()
-    #     engine = create_engine(database_url)
+        database_url = get_database_url()
+        engine = create_engine(database_url)
 
-    #     # Check migration status
-    #     migration_status = check_migration_status(engine)
-    #     logger.info(f"Database migration status: {migration_status}")
+        # Check migration status
+        migration_status = check_migration_status(engine)
+        logger.info(f"Database migration status: {migration_status}")
 
-    #     if migration_status["needs_migration"]:
-    #         logger.info("Running database migrations...")
-    #         run_migrations(engine)
-    #         logger.info("Database migrations completed successfully")
-    #     else:
-    #         logger.info("Database is up to date")
+        if migration_status["needs_migration"]:
+            logger.info("Running database migrations...")
+            run_migrations(engine)
+            logger.info("Database migrations completed successfully")
+        else:
+            logger.info("Database is up to date")
 
-    # except Exception as e:
-    #     logger.error(f"Failed to run database migrations: {e}")
-    #     raise
+    except Exception as e:
+        logger.error(f"Failed to run database migrations: {e}")
+        raise
 
     yield
 
@@ -194,6 +195,21 @@ async def tables_in_database() -> dict[str, list[str]]:
         inspector = inspect(engine)
         tables = inspector.get_table_names()
         return {"tables": tables}
+    except Exception as e:
+        import traceback
+
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
+
+@app.post("/counter")
+async def increment_counter() -> dict[str, int]:
+    """Increment counter."""
+    try:
+        with get_session() as session:
+            counter = session.query(Counter).filter(Counter.name == "test").first()
+            counter.value += 1
+            session.commit()
+            return counter.value
     except Exception as e:
         import traceback
 
