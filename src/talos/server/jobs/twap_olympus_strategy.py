@@ -39,7 +39,7 @@ class TwapOHMJob(ScheduledJob):
         with get_session() as session:
             swap = Swap(
                 strategy_id=self.STRATEGY_ID,
-                tx_hash=tx_hash,
+                transaction_hash=tx_hash,
                 chain_id=Arbitrum.chain_id,
                 wallet_address=wallet.address,
                 amount_in=swap_amount,
