@@ -65,6 +65,6 @@ ENV PYTHONPATH="/app/src"
 # - PINATA_API_KEY: Pinata API key for IPFS operations
 # - PINATA_SECRET_API_KEY: Pinata secret key for IPFS operations
 
-EXPOSE 7000
+EXPOSE 7010
 
 CMD ["python", "-m", "talos.cli.server"]
