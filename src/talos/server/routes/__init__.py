@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from fastapi import APIRouter, Request
 from sqlalchemy import create_engine
@@ -115,7 +115,7 @@ async def increment_counter() -> dict[str, int | str]:
 
 def _get_scheduler(request: Request) -> JobScheduler | None:
     """Get the scheduler instance from the app state."""
-    return request.app.state.get_scheduler()
+    return cast(JobScheduler | None, request.app.state.get_scheduler())
 
 
 @routes.get("/scheduler/status")

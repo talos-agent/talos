@@ -74,7 +74,7 @@ class RoflClient:
             response.raise_for_status()
             return response.json()
 
-    async def generate_key(self, key_id: str) -> str:
+    async def generate_key(self, key_id: str) -> HexStr:
         """Fetch or generate a cryptographic key from ROFL.
 
         Args:
@@ -90,7 +90,7 @@ class RoflClient:
 
         path: str = "/rofl/v1/keys/generate"
         response: dict[str, Any] = await self._appd_post(path, payload)
-        return response["key"]
+        return HexStr(response["key"])
 
     async def get_wallet(self, wallet_id: str) -> PrivateKeyWallet:
         """Get a wallet from ROFL.
@@ -101,6 +101,5 @@ class RoflClient:
         Returns:
             The wallet as a PrivateKeyWallet
         """
-        path: str = f"/rofl/v1/wallets/{wallet_id}"
-        response: dict[str, Any] = await self._appd_post(path, {})
-        return PrivateKeyWallet[Arbitrum](private_key=HexStr(response["private_key"]))
+        key = await self.generate_key(wallet_id)
+        return PrivateKeyWallet[Arbitrum](private_key=key)  # type: ignore
