@@ -48,6 +48,7 @@ jobs:
       - name: Verify image digest matches the compose file
         run: ./scripts/verify_container_image.sh
 
+      # run: oasis rofl build --deployment ${DEPLOYMENT} --offline --verify
       - name: Build ROFL ORC for deployment, verify it matches the manifest
         run: oasis rofl build --deployment ${DEPLOYMENT}
 

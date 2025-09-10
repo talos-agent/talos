@@ -17,11 +17,12 @@ def get_database_url() -> str:
     db_url = os.getenv("DATABASE_URL")
     if db_url:
         # For SQLite URLs, ensure the directory exists
-        if db_url.startswith("sqlite:///"):
+        if db_url.startswith("sqlite:////"):
             db_path = db_url[10:]  # Remove "sqlite:///" prefix
             # Make path absolute if it's not already
             if not os.path.isabs(db_path):
                 db_path = f"/{db_path}"  # Add leading slash for absolute path
+            print("DB PATH:", db_path)
             db_dir = os.path.dirname(db_path)
             if db_dir and not os.path.exists(db_dir):
                 os.makedirs(db_dir, exist_ok=True)
