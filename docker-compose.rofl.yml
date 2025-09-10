@@ -15,7 +15,7 @@ services:
       - talos_data:/app/data
       - /run/rofl-appd.sock:/run/rofl-appd.sock
     ports:
-      - "7000:7000"
+      - "7010:7010"
 
 volumes:
   talos_data:
