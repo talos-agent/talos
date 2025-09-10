@@ -26,7 +26,7 @@ class JobScheduler(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    supervisor: Optional[Supervisor] = Field(None, description="Supervisor for approving job executions")
+    supervisor: Optional[Supervisor] = Field(default=None, description="Supervisor for approving job executions")
     timezone: str = Field("UTC", description="Timezone for job scheduling")
 
     _scheduler: AsyncIOScheduler = PrivateAttr()

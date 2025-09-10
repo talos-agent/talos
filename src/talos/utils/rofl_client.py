@@ -3,6 +3,9 @@ import logging
 from typing import Any
 
 import httpx
+from eth_rpc import PrivateKeyWallet
+from eth_rpc.networks import Arbitrum
+from eth_typing import HexStr
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -88,3 +91,16 @@ class RoflClient:
         path: str = "/rofl/v1/keys/generate"
         response: dict[str, Any] = await self._appd_post(path, payload)
         return response["key"]
+
+    async def get_wallet(self, wallet_id: str) -> PrivateKeyWallet:
+        """Get a wallet from ROFL.
+
+        Args:
+            wallet_id: Identifier for the wallet
+
+        Returns:
+            The wallet as a PrivateKeyWallet
+        """
+        path: str = f"/rofl/v1/wallets/{wallet_id}"
+        response: dict[str, Any] = await self._appd_post(path, {})
+        return PrivateKeyWallet[Arbitrum](private_key=HexStr(response["private_key"]))
