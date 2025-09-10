@@ -4,7 +4,7 @@ services:
     container_name: talos-agent
     restart: unless-stopped
     ports:
-      - "7011:8000"
+      - "8080:8080"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}

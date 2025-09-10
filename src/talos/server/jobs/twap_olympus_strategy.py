@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 from eth_rpc.networks import Arbitrum
 from eth_rpc.types import primitives
@@ -12,8 +12,8 @@ from talos.utils import RoflClient
 
 
 class TwapOHMJob(ScheduledJob):
-    STRATEGY_ID: str = "ohm_buyer"
-    WALLET_ID: str = "Talos.ohm_strategy"
+    STRATEGY_ID: ClassVar[str] = "ohm_buyer"
+    WALLET_ID: ClassVar[str] = "Talos.ohm_strategy"
     client: RoflClient
 
     def __init__(self, **kwargs: Any) -> None:
