@@ -6,7 +6,7 @@ from talos.database.session import get_session
 
 
 class IncrementCounterJob(ScheduledJob):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             name="increment_counter",
             description="Increment the counter",

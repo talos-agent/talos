@@ -1,6 +1,7 @@
 from typing import Any
 
 from eth_rpc.networks import Arbitrum
+from eth_rpc.types import primitives
 
 from talos.constants import OHM, WETH
 from talos.contracts.camelot_swap import CamelotYakSwap
@@ -11,11 +12,11 @@ from talos.utils import RoflClient
 
 
 class TwapOHMJob(ScheduledJob):
-    STRATEGY_ID = "ohm_buyer"
-    WALLET_ID = "Talos.ohm_strategy"
+    STRATEGY_ID: str = "ohm_buyer"
+    WALLET_ID: str = "Talos.ohm_strategy"
     client: RoflClient
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             name="olympus_strategy",
             description="Olympus strategy",
@@ -31,7 +32,7 @@ class TwapOHMJob(ScheduledJob):
             return
 
         tx_hash, transfer_event = await CamelotYakSwap.swap_for_ohm(
-            amount_in=swap_amount,
+            amount_in=primitives.uint256(swap_amount),
             wallet=wallet,
         )
 

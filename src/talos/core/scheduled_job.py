@@ -26,9 +26,9 @@ class ScheduledJob(BaseModel, ABC):
     cron_expression: Optional[str] = Field(
         None, description="Cron expression for recurring jobs (e.g., '0 9 * * *' for daily at 9 AM)"
     )
-    execute_at: Optional[datetime] = Field(None, description="Specific datetime for one-time execution")
-    enabled: bool = Field(True, description="Whether this job is enabled for execution")
-    max_instances: int = Field(1, description="Maximum number of concurrent instances of this job")
+    execute_at: Optional[datetime] = Field(default=None, description="Specific datetime for one-time execution")
+    enabled: bool = Field(default=True, description="Whether this job is enabled for execution")
+    max_instances: int = Field(default=1, description="Maximum number of concurrent instances of this job")
 
     def model_post_init(self, __context: Any) -> None:
         if not self.cron_expression and not self.execute_at:

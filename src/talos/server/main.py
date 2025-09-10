@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from sqlalchemy import create_engine
@@ -25,7 +26,7 @@ def get_scheduler() -> JobScheduler | None:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Manage application lifespan with startup and shutdown events."""
     # Startup
     global scheduler
