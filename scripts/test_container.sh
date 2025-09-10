@@ -4,7 +4,7 @@
 set -e
 
 # Configuration
-TALOS_PORT=${TALOS_PORT:-7010}
+TALOS_PORT=${TALOS_PORT:-8080}
 
 echo "Testing Talos Docker container on port $TALOS_PORT..."
 
