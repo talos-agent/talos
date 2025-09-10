@@ -61,7 +61,7 @@ async def migration_status() -> dict[str, Optional[str | bool]]:
 
 
 @routes.get("/tables")
-async def tables_in_database() -> dict[str, list[str]]:
+async def tables_in_database() -> dict[str, list[str] | str]:
     """Get list of tables in the database."""
     from sqlalchemy import inspect
 

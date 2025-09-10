@@ -25,7 +25,7 @@ class TwapOHMJob(ScheduledJob):
 
     async def run(self, **kwargs: Any) -> Any:
         wallet = await self.client.get_wallet(self.WALLET_ID)
-        wallet_balance = await wallet.get_balance()
+        wallet_balance = await wallet.balance()
         swap_amount = min(wallet_balance, int(1e14))
         if wallet_balance < int(1e14):
             return
