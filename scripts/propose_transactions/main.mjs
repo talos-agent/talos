@@ -8,12 +8,11 @@ import xhr2 from "xhr2";
 import { readFileSync } from "node:fs";
 global.XMLHttpRequest = xhr2;
 
-/** @type {{oci_reference: string, manifest_hash: string}} */
-const DEPLOYMENT_INFO = JSON.parse(process.env["DEPLOYMENT_INFO"]);
 const DEPLOYMENT = process.env["DEPLOYMENT"];
 const PROPOSER_PRIVATE_KEY = process.env["PROPOSER_PRIVATE_KEY"];
 const SAFE_ADDRESS = process.env["SAFE_ADDRESS"];
 const APP_CONFIG_UPDATE_FILE = process.env["APP_CONFIG_UPDATE_FILE"];
+const DEPLOY_FILE = process.env["DEPLOY_FILE"];
 
 // Parse and load the ROFL app manifest.
 const roflAppManifest = yaml.parse(readFileSync("rofl.yaml", "utf8"));
@@ -23,6 +22,7 @@ const roflMachine = roflAppDeployment.machines["default"];
 const roflAppConfigUpdate = oasis.misc.fromCBOR(
   readFileSync(APP_CONFIG_UPDATE_FILE),
 );
+const roflDeploy = oasis.misc.fromCBOR(readFileSync(DEPLOY_FILE));
 
 const networks = {
   // Sapphire Mainnet.
@@ -45,8 +45,6 @@ const networks = {
   },
 };
 const networkInfo = networks[roflAppDeployment.network];
-
-console.log("Going to deploy", DEPLOYMENT_INFO);
 
 async function generateTransactions() {
   const sapphireRuntimeId = oasis.misc.fromHex(networkInfo.runtimeId);
@@ -88,26 +86,7 @@ async function generateTransactions() {
 
   const txUpdateMachine = roflmarket
     .callInstanceExecuteCmds()
-    .setBody({
-      provider: oasis.staking.addressFromBech32(roflMachine.provider),
-      id: oasis.misc.fromHex(roflMachine.id),
-      cmds: [
-        oasis.misc.toCBOR({
-          // https://github.com/oasisprotocol/cli/blob/b6894a1bb6ea7918a9b2ba3efe30b1911388e2f6/build/rofl/scheduler/commands.go#L9-L42
-          method: "Deploy",
-          args: {
-            wipe_storage: false,
-            deployment: {
-              app_id: oasisRT.rofl.fromBech32(roflAppId),
-              metadata: {
-                "net.oasis.deployment.orc.ref": DEPLOYMENT_INFO.oci_reference,
-              },
-              manifest_hash: oasis.misc.fromHex(DEPLOYMENT_INFO.manifest_hash),
-            },
-          },
-        }),
-      ],
-    })
+    .setBody(roflDeploy.call.body)
     .toSubcall();
 
   const transactions = [txUpdateEnclaves, txUpdateMachine];
@@ -147,7 +126,9 @@ const maxRetries = 2;
 
 while (retryCount <= maxRetries) {
   try {
-    console.log(`Proposing transaction - Attempt ${retryCount + 1}/${maxRetries + 1}`);
+    console.log(
+      `Proposing transaction - Attempt ${retryCount + 1}/${maxRetries + 1}`,
+    );
 
     await safeClient.proposeTransaction({
       safeAddress: await safeProposer.getAddress(),
@@ -159,19 +140,23 @@ while (retryCount <= maxRetries) {
 
     console.log("Proposed transaction hash", safeTxHash);
     break; // Success, exit retry loop
-
   } catch (error) {
     retryCount++;
-    console.error(`Transaction proposal failed on attempt ${retryCount}:`, error.message);
+    console.error(
+      `Transaction proposal failed on attempt ${retryCount}:`,
+      error.message,
+    );
 
     if (retryCount > maxRetries) {
-      console.error(`Transaction proposal failed after ${maxRetries + 1} attempts`);
+      console.error(
+        `Transaction proposal failed after ${maxRetries + 1} attempts`,
+      );
       throw error;
     }
 
     // Wait before retry (1s, 2s)
     const delay = 1000 * retryCount;
     console.log(`Retrying in ${delay}ms...`);
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 }

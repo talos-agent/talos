@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v[0-9]+.[0-9]+*"
+    branches:
+      - kostko/feature/rofl-logs-permissions # XXX
   workflow_dispatch:
 
 jobs:
@@ -22,7 +24,7 @@ jobs:
       # TODO: Move this to dedicated GitHub Action for CLI install.
       - name: Install Oasis CLI
         env:
-          CLI_VERSION: 0.15.2
+          CLI_VERSION: 0.15.5
         run: |
           mkdir -p /tmp/oasis-cli
           cd /tmp/oasis-cli
@@ -52,15 +54,15 @@ jobs:
       - name: Build ROFL ORC for deployment, verify it matches the manifest
         run: oasis rofl build --deployment ${DEPLOYMENT}
 
-      - name: Generate ROFL app configuration file for update
+      - name: Generate ROFL app configuration update call
         run: |
-          oasis rofl update --deployment ${DEPLOYMENT} --format cbor --unsigned --account test:alice > update.cbor
+          oasis rofl update --deployment ${DEPLOYMENT} --format cbor --unsigned --account test:alice -o update.cbor
           echo "APP_CONFIG_UPDATE_FILE=update.cbor" >> $GITHUB_ENV
 
-      - name: Push ROFL ORC to OCI repository
+      - name: Push ROFL ORC to OCI repository and generate deploy call
         run: |
-          DEPLOYMENT_INFO=$(oasis rofl push --deployment ${DEPLOYMENT} --format json)
-          echo "DEPLOYMENT_INFO=${DEPLOYMENT_INFO//$'\n'/}" >> $GITHUB_ENV
+          oasis rofl deploy --deployment ${DEPLOYMENT} --format cbor --unsigned --account test:alice -o deploy.cbor
+          echo "DEPLOY_FILE=deploy.cbor" >> $GITHUB_ENV
 
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
