@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from eth_typing import HexAddress
-from eth_rpc import ProtocolBase, ContractFunc
+from eth_rpc import ContractFunc, ProtocolBase
 from eth_rpc.networks import Arbitrum
-from eth_rpc.types import primitives, Name, NoArgs, Struct
+from eth_rpc.types import Name, NoArgs, Struct, primitives
+from eth_typing import HexAddress
 
 from ..constants import EXCHANGE_ROUTER_ADDRESS
+
 
 class Props(Struct):
     min: primitives.uint256
@@ -24,18 +25,18 @@ class CreateOrderParamsNumbers(Struct):
 
 
 class CreateOrderParamsAddresses(Struct):
-    receiver: primitives.address
-    cancellation_receiver: Annotated[primitives.address, Name("cancellationReceiver")]
-    callback_contract: Annotated[primitives.address, Name("callbackContract")]
-    ui_fee_receiver: Annotated[primitives.address, Name("uiFeeReceiver")]
-    market: primitives.address
-    initial_collateral_token: Annotated[primitives.address, Name("initialCollateralToken")]
-    swap_path: Annotated[list[primitives.address], Name("swapPath")]
+    receiver: HexAddress
+    cancellation_receiver: Annotated[HexAddress, Name("cancellationReceiver")]
+    callback_contract: Annotated[HexAddress, Name("callbackContract")]
+    ui_fee_receiver: Annotated[HexAddress, Name("uiFeeReceiver")]
+    market: HexAddress
+    initial_collateral_token: Annotated[HexAddress, Name("initialCollateralToken")]
+    swap_path: Annotated[list[HexAddress], Name("swapPath")]
 
 
 class SimulatePricesParams(Struct):
     primary_tokens: Annotated[list[primitives.address], Name("primaryTokens")]
-    primary_prices: Annotated[list['Props'], Name("primaryPrices")]
+    primary_prices: Annotated[list["Props"], Name("primaryPrices")]
     min_timestamp: Annotated[primitives.uint256, Name("minTimestamp")]
     max_timestamp: Annotated[primitives.uint256, Name("maxTimestamp")]
 
@@ -43,7 +44,7 @@ class SimulatePricesParams(Struct):
 class SetPricesParams(Struct):
     tokens: list[primitives.address]
     providers: list[primitives.address]
-    data: list['bytes']
+    data: list["bytes"]
 
 
 class CreateWithdrawalParams(Struct):
@@ -100,41 +101,28 @@ class CreateDepositParams(Struct):
 
 class ExchangeRouter(ProtocolBase):
     cancel_deposit: Annotated[
-        ContractFunc[
-            primitives.bytes32,
-            None
-        ],
+        ContractFunc[primitives.bytes32, None],
         Name("cancelDeposit"),
     ]
 
     cancel_order: Annotated[
-        ContractFunc[
-            primitives.bytes32,
-            None
-        ],
+        ContractFunc[primitives.bytes32, None],
         Name("cancelOrder"),
     ]
 
     cancel_shift: Annotated[
-        ContractFunc[
-            primitives.bytes32,
-            None
-        ],
+        ContractFunc[primitives.bytes32, None],
         Name("cancelShift"),
     ]
 
     cancel_withdrawal: Annotated[
-        ContractFunc[
-            primitives.bytes32,
-            None
-        ],
+        ContractFunc[primitives.bytes32, None],
         Name("cancelWithdrawal"),
     ]
 
     claim_affiliate_rewards: Annotated[
         ContractFunc[
-            tuple[list[primitives.address], list[primitives.address], primitives.address],
-            list[primitives.uint256]
+            tuple[list[primitives.address], list[primitives.address], primitives.address], list[primitives.uint256]
         ],
         Name("claimAffiliateRewards"),
     ]
@@ -142,228 +130,158 @@ class ExchangeRouter(ProtocolBase):
     claim_collateral: Annotated[
         ContractFunc[
             tuple[list[primitives.address], list[primitives.address], list[primitives.uint256], primitives.address],
-            list[primitives.uint256]
+            list[primitives.uint256],
         ],
         Name("claimCollateral"),
     ]
 
     claim_funding_fees: Annotated[
         ContractFunc[
-            tuple[list[primitives.address], list[primitives.address], primitives.address],
-            list[primitives.uint256]
+            tuple[list[primitives.address], list[primitives.address], primitives.address], list[primitives.uint256]
         ],
         Name("claimFundingFees"),
     ]
 
     claim_ui_fees: Annotated[
         ContractFunc[
-            tuple[list[primitives.address], list[primitives.address], primitives.address],
-            list[primitives.uint256]
+            tuple[list[primitives.address], list[primitives.address], primitives.address], list[primitives.uint256]
         ],
         Name("claimUiFees"),
     ]
 
     create_deposit: Annotated[
-        ContractFunc[
-            CreateDepositParams,
-            primitives.bytes32
-        ],
+        ContractFunc[CreateDepositParams, primitives.bytes32],
         Name("createDeposit"),
     ]
 
     create_order: Annotated[
-        ContractFunc[
-            CreateOrderParams,
-            primitives.bytes32
-        ],
+        ContractFunc[CreateOrderParams, primitives.bytes32],
         Name("createOrder"),
     ]
 
     create_shift: Annotated[
-        ContractFunc[
-            CreateShiftParams,
-            primitives.bytes32
-        ],
+        ContractFunc[CreateShiftParams, primitives.bytes32],
         Name("createShift"),
     ]
 
     create_withdrawal: Annotated[
-        ContractFunc[
-            CreateWithdrawalParams,
-            primitives.bytes32
-        ],
+        ContractFunc[CreateWithdrawalParams, primitives.bytes32],
         Name("createWithdrawal"),
     ]
 
     data_store: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("dataStore"),
     ]
 
     deposit_handler: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("depositHandler"),
     ]
 
     event_emitter: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("eventEmitter"),
     ]
 
     execute_atomic_withdrawal: Annotated[
-        ContractFunc[
-            tuple[CreateWithdrawalParams, SetPricesParams],
-            None
-        ],
+        ContractFunc[tuple[CreateWithdrawalParams, SetPricesParams], None],
         Name("executeAtomicWithdrawal"),
     ]
 
     external_handler: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("externalHandler"),
     ]
 
     make_external_calls: Annotated[
         ContractFunc[
-            tuple[list[primitives.address], list[bytes], list[primitives.address], list[primitives.address]],
-            None
+            tuple[list[primitives.address], list[bytes], list[primitives.address], list[primitives.address]], None
         ],
         Name("makeExternalCalls"),
     ]
 
     multicall: ContractFunc[  # type: ignore
-        list[bytes],
-        list[bytes]
+        list[bytes], list[bytes]
     ]
 
     order_handler: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("orderHandler"),
     ]
 
     role_store: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("roleStore"),
     ]
 
-    router: ContractFunc[
-        NoArgs,
-        primitives.address
-    ]
+    router: ContractFunc[NoArgs, primitives.address]
 
     send_native_token: Annotated[
-        ContractFunc[
-            tuple[primitives.address, primitives.uint256],
-            None
-        ],
+        ContractFunc[tuple[primitives.address, primitives.uint256], None],
         Name("sendNativeToken"),
     ]
 
     send_tokens: Annotated[
-        ContractFunc[
-            tuple[HexAddress, HexAddress, primitives.uint256],
-            None
-        ],
+        ContractFunc[tuple[HexAddress, HexAddress, primitives.uint256], None],
         Name("sendTokens"),
     ]
 
     send_wnt: Annotated[
-        ContractFunc[
-            tuple[primitives.address, primitives.uint256],
-            None
-        ],
+        ContractFunc[tuple[HexAddress, primitives.uint256], None],
         Name("sendWnt"),
     ]
 
     set_saved_callback_contract: Annotated[
-        ContractFunc[
-            tuple[primitives.address, primitives.address],
-            None
-        ],
+        ContractFunc[tuple[primitives.address, primitives.address], None],
         Name("setSavedCallbackContract"),
     ]
 
     set_ui_fee_factor: Annotated[
-        ContractFunc[
-            primitives.uint256,
-            None
-        ],
+        ContractFunc[primitives.uint256, None],
         Name("setUiFeeFactor"),
     ]
 
     shift_handler: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("shiftHandler"),
     ]
 
     simulate_execute_deposit: Annotated[
-        ContractFunc[
-            tuple[primitives.bytes32, SimulatePricesParams],
-            None
-        ],
+        ContractFunc[tuple[primitives.bytes32, SimulatePricesParams], None],
         Name("simulateExecuteDeposit"),
     ]
 
     simulate_execute_order: Annotated[
-        ContractFunc[
-            tuple[primitives.bytes32, SimulatePricesParams],
-            None
-        ],
+        ContractFunc[tuple[primitives.bytes32, SimulatePricesParams], None],
         Name("simulateExecuteOrder"),
     ]
 
     simulate_execute_shift: Annotated[
-        ContractFunc[
-            tuple[primitives.bytes32, SimulatePricesParams],
-            None
-        ],
+        ContractFunc[tuple[primitives.bytes32, SimulatePricesParams], None],
         Name("simulateExecuteShift"),
     ]
 
     simulate_execute_withdrawal: Annotated[
-        ContractFunc[
-            tuple[primitives.bytes32, SimulatePricesParams, primitives.uint8],
-            None
-        ],
+        ContractFunc[tuple[primitives.bytes32, SimulatePricesParams, primitives.uint8], None],
         Name("simulateExecuteWithdrawal"),
     ]
 
     update_order: Annotated[
         ContractFunc[
-            tuple[primitives.bytes32, primitives.uint256, primitives.uint256, primitives.uint256, primitives.uint256, bool],
-            None
+            tuple[
+                primitives.bytes32, primitives.uint256, primitives.uint256, primitives.uint256, primitives.uint256, bool
+            ],
+            None,
         ],
         Name("updateOrder"),
     ]
 
     withdrawal_handler: Annotated[
-        ContractFunc[
-            NoArgs,
-            primitives.address
-        ],
+        ContractFunc[NoArgs, primitives.address],
         Name("withdrawalHandler"),
     ]
 
 
+exchange_router = ExchangeRouter[Arbitrum](address=EXCHANGE_ROUTER_ADDRESS)
 exchange_router = ExchangeRouter[Arbitrum](address=EXCHANGE_ROUTER_ADDRESS)

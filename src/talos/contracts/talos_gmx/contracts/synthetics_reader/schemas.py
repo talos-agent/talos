@@ -1,16 +1,16 @@
 from typing import Annotated
 
+from eth_rpc.types import Name, primitives
 from eth_typing import HexAddress
 from pydantic import BaseModel
 
-from eth_rpc.types import primitives, Name
 from .enums import SwapPricingType
-from .types import MarketProps, MarketUtilsMarketPrices, MarketPoolValueInfoProps, PriceProps, SwapPricingUtilsSwapFees
+from .types import MarketPoolValueInfoProps, MarketProps, MarketUtilsMarketPrices, PriceProps, SwapPricingUtilsSwapFees
 
 
 class ExecutionPriceParams(BaseModel):
-    data_store: Annotated[primitives.address, Name("dataStore")]
-    market_key: Annotated[primitives.address, Name("marketKey")]
+    data_store: Annotated[HexAddress, Name("dataStore")]
+    market_key: Annotated[HexAddress, Name("marketKey")]
     index_token_price: Annotated[PriceProps, Name("indexTokenPrice")]
     position_size_in_usd: Annotated[primitives.uint256, Name("positionSizeInUsd")]
     position_size_in_tokens: Annotated[primitives.uint256, Name("positionSizeInTokens")]
