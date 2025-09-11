@@ -5,7 +5,7 @@ from eth_rpc.networks import Arbitrum
 from eth_rpc.types import METHOD, Name, Struct, primitives
 from eth_rpc.utils import EventReceiptUtility
 from eth_typeshed.erc20 import TransferEvent, TransferEventType
-from eth_typing import HexStr
+from eth_typing import HexAddress, HexStr
 from pydantic import BaseModel
 
 from talos.constants import OHM, WETH, CamelotYakSwapConstants
@@ -14,27 +14,27 @@ from talos.constants import OHM, WETH, CamelotYakSwapConstants
 class Trade(Struct):
     amount_in: primitives.uint256
     amount_out: primitives.uint256
-    path: list[primitives.address]
-    adapters: list[primitives.address]
-    recipients: list[primitives.address]
+    path: list[HexAddress]
+    adapters: list[HexAddress]
+    recipients: list[HexAddress]
 
 
 class Request(BaseModel):
     trade: Trade
     fee: primitives.uint256
-    to: primitives.address
+    to: HexAddress
 
 
 class QueryAdapterArgs(BaseModel):
     amount_in: primitives.uint256
-    token_in: primitives.address
-    token_out: primitives.address
+    token_in: HexAddress
+    token_out: HexAddress
     index: primitives.uint8
 
 
 class QueryAdapterResponse(BaseModel):
     amount_out: primitives.uint256
-    pool_address: primitives.address
+    pool_address: HexAddress
 
 
 class CamelotYakSwap(ProtocolBase):
@@ -43,7 +43,7 @@ class CamelotYakSwap(ProtocolBase):
     query_adapter: Annotated[ContractFunc[QueryAdapterArgs, QueryAdapterResponse], Name("queryAdapter")] = METHOD
 
     @classmethod
-    def OHM_PATH(cls) -> list[primitives.address]:
+    def OHM_PATH(cls) -> list[HexAddress]:
         return [WETH.ARBITRUM, OHM.ARBITRUM]
 
     @classmethod
@@ -59,7 +59,7 @@ class CamelotYakSwap(ProtocolBase):
                 amount_in=amount_in,
                 token_in=WETH.ARBITRUM,
                 token_out=OHM.ARBITRUM,
-                index=0,
+                index=primitives.uint8(0),
             )
         ).get()
 
@@ -69,12 +69,12 @@ class CamelotYakSwap(ProtocolBase):
         request = Request(
             trade=Trade(
                 amount_in=amount_in,
-                amount_out=int(query_response.amount_out * 99 / 100),
+                amount_out=primitives.uint256(int(query_response.amount_out * 99 / 100)),
                 path=path,
                 adapters=adapters,
                 recipients=recipients,
             ),
-            fee=0,
+            fee=primitives.uint256(0),
             to=wallet.address,
         )
 
@@ -83,6 +83,8 @@ class CamelotYakSwap(ProtocolBase):
         await TransactionReceipt[Arbitrum].wait_until_finalized(tx_hash, timeout=10)
 
         receipt = await TransactionReceipt[Arbitrum].get_by_hash(tx_hash)
+
+        assert receipt is not None
         transfers = await EventReceiptUtility.get_events_from_receipt([TransferEvent], receipt)
 
         received_events: list[TransferEventType] = []

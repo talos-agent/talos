@@ -284,4 +284,3 @@ class ExchangeRouter(ProtocolBase):
 
 
 exchange_router = ExchangeRouter[Arbitrum](address=EXCHANGE_ROUTER_ADDRESS)
-exchange_router = ExchangeRouter[Arbitrum](address=EXCHANGE_ROUTER_ADDRESS)

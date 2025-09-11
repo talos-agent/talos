@@ -110,7 +110,7 @@ class Markets(BaseModel):
                 if raw_market.long_token == raw_market.short_token:
                     market_symbol = f"{market_symbol}2"
                 decoded_markets[to_checksum(raw_market.market_token)] = Market(
-                    gmx_market_address=to_checksum(raw_market.market_token),
+                    address=to_checksum(raw_market.market_token),
                     market_symbol=market_symbol,
                     index_token_address=to_checksum(raw_market.index_token),
                     market_metadata=token_address_dict[to_checksum(raw_market.index_token)],
@@ -129,7 +129,7 @@ class Markets(BaseModel):
             # swap market
             except KeyError:
                 decoded_markets[to_checksum(raw_market.market_token)] = Market(
-                    gmx_market_address=to_checksum(raw_market.market_token),
+                    address=to_checksum(raw_market.market_token),
                     market_symbol="SWAP {}-{}".format(
                         token_address_dict[to_checksum(raw_market.long_token)].symbol,
                         token_address_dict[to_checksum(raw_market.short_token)].symbol,

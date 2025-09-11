@@ -3,11 +3,11 @@ import logging
 from typing import Awaitable
 
 from eth_rpc.types.primitives import address, int256, uint256
-from numerize import numerize
 
 from ..contracts.synthetics_reader import MarketProps, PriceProps
 from .get import GetData
 from .prices import OraclePrices
+from ..utils import numerize
 
 
 class OpenInterest(GetData):

@@ -16,7 +16,7 @@ class LongTokenMetadata(BaseModel):
 
 
 class Market(BaseModel):
-    gmx_market_address: ChecksumAddress
+    address: ChecksumAddress
     market_symbol: str
     index_token_address: ChecksumAddress
     market_metadata: TokenMetadata | MarketMetadata

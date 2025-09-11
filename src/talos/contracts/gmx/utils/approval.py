@@ -26,7 +26,7 @@ async def check_if_approved(
     balance_of = await token.balance_of(user_checksum_address).get()
 
     if balance_of < amount_of_tokens_to_spend:
-        raise Exception("Insufficient balance!")
+        raise Exception("Insufficient balance")
 
     amount_approved = await token.allowance(
         OwnerSpenderRequest(owner=user_checksum_address, spender=spender_checksum_address)

@@ -1,11 +1,14 @@
-from typing import Any, ClassVar
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import httpx
 from eth_rpc.utils import to_checksum
 from eth_typing import ChecksumAddress
 from pydantic import BaseModel
 
-from ..types import OraclePriceData
+if TYPE_CHECKING:
+    from ..types import OraclePriceData
 
 
 class OraclePrices(BaseModel):
@@ -55,8 +58,9 @@ class OraclePrices(BaseModel):
         -------
         processed : TYPE
             DESCRIPTION.
-
         """
+        from ..types import OraclePriceData
+
         processed = {}
         for i in output["signedPrices"]:
             processed[to_checksum(i["tokenAddress"])] = OraclePriceData.model_validate(i)

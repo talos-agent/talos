@@ -29,7 +29,7 @@ RESERVE_FACTOR = create_hash_string("RESERVE_FACTOR")
 SINGLE_SWAP_GAS_LIMIT = create_hash_string("SINGLE_SWAP_GAS_LIMIT")
 SWAP_ORDER_GAS_LIMIT = create_hash_string("SWAP_ORDER_GAS_LIMIT")
 VIRTUAL_TOKEN_ID = create_hash_string("VIRTUAL_TOKEN_ID")
-
+CLAIMABLE_FUNDING_AMOUNT = create_hash_string("CLAIMABLE_FUNDING_AMOUNT")
 
 def accountPositionListKey(account: str) -> primitives.bytes32:
     return create_hash(["bytes32", "address"], [ACCOUNT_POSITION_LIST, account])
@@ -37,6 +37,10 @@ def accountPositionListKey(account: str) -> primitives.bytes32:
 
 def claimable_fee_amount_key(market: str, token: str) -> primitives.bytes32:
     return create_hash(["bytes32", "address", "address"], [CLAIMABLE_FEE_AMOUNT, market, token])
+
+
+def claimable_funding_amount_key(market: str, token: str, account: str) -> primitives.bytes32:
+    return create_hash(["bytes32", "address", "address", "address"], [CLAIMABLE_FUNDING_AMOUNT, market, token, account])
 
 
 def decrease_order_gas_limit_key() -> primitives.bytes32:

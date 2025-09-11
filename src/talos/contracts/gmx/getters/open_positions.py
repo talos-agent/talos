@@ -1,7 +1,6 @@
 import logging
 from typing import Annotated
 
-import numpy as np
 from eth_rpc.utils import to_checksum
 from eth_typing import ChecksumAddress
 from pydantic import BeforeValidator
@@ -10,7 +9,7 @@ from ..constants import DATASTORE_ADDRESS
 from ..contracts import synthetics_reader
 from ..contracts.synthetics_reader import PositionProps
 from ..types import Position
-from ..utils import get_tokens_address_dict
+from ..utils import get_tokens_address_dict, median
 from .get import GetData
 from .prices import OraclePrices
 
@@ -65,6 +64,7 @@ class GetOpenPositions(GetData):
         dict
             a processed dictionary containing info on the positions.
         """
+        await self.markets.load_info()
         market_info = self.markets.info[to_checksum(raw_position.addresses.market)]
 
         chain_tokens = await get_tokens_address_dict()
@@ -73,32 +73,40 @@ class GetOpenPositions(GetData):
             30 - chain_tokens[to_checksum(market_info.index_token_address)].decimals
         )
 
-        leverage = (raw_position.numbers.size_in_usd / 10**30) / (
-            raw_position.numbers.collateral_amount
-            / 10 ** chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals
-        )
         prices = await OraclePrices().get_recent_prices()
-        mark_price = np.median(
+        mark_price = median(
             [
                 float(prices[market_info.index_token_address].max_price_full),
                 float(prices[market_info.index_token_address].min_price_full),
             ]
         ) / 10 ** (30 - chain_tokens[market_info.index_token_address].decimals)
 
+        collateral_price = median(
+            [
+                float(prices[to_checksum(raw_position.addresses.collateral_token)].max_price_full),
+                float(prices[to_checksum(raw_position.addresses.collateral_token)].min_price_full),
+            ]
+        ) / 10 ** (30 - chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals)
+
+        leverage = (raw_position.numbers.size_in_usd / 10**30) / (
+            raw_position.numbers.collateral_amount * collateral_price
+            / 10 ** chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals
+        )
+
         return Position(
             account=to_checksum(raw_position.addresses.account),
-            market=to_checksum(raw_position.addresses.market),
+            market=market_info,
             market_symbol=self.markets.info[to_checksum(raw_position.addresses.market)].market_symbol,
-            collateral_token=chain_tokens[to_checksum(raw_position.addresses.collateral_token)].symbol,
+            collateral_token=chain_tokens[to_checksum(raw_position.addresses.collateral_token)].address,
             position_size=raw_position.numbers.size_in_usd / 10**30,
             size_in_tokens=raw_position.numbers.size_in_tokens,
             entry_price=(
                 (raw_position.numbers.size_in_usd / raw_position.numbers.size_in_tokens)
                 / 10 ** (30 - chain_tokens[market_info.index_token_address].decimals)
             ),
-            inital_collateral_amount=raw_position.numbers.collateral_amount,
-            inital_collateral_amount_usd=(
-                raw_position.numbers.collateral_amount
+            initial_collateral_amount=raw_position.numbers.collateral_amount,
+            initial_collateral_amount_usd=(
+                raw_position.numbers.collateral_amount * collateral_price
                 / 10 ** chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals
             ),
             leverage=leverage,

@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-import numpy as np
 from eth_rpc import Block, PrivateKeyWallet
 from eth_rpc.networks import Arbitrum
 from eth_rpc.types import primitives
@@ -33,6 +32,7 @@ from ..types.gas_limits import GasLimits
 from ..utils.approval import check_if_approved
 from ..utils.gas import get_execution_fee
 from ..utils.price import get_execution_price_and_price_impact
+from ..utils import median
 
 
 class Order(BaseModel):
@@ -43,8 +43,8 @@ class Order(BaseModel):
     is_long: bool
     size_delta: int
     initial_collateral_delta: int
-    slippage_percent: float
-    swap_path: list[HexAddress]
+    slippage_percent: float = Field(default=0.003)
+    swap_path: list[HexAddress] = Field(default_factory=list)
     max_fee_per_gas: int | None = Field(default=None)
     auto_cancel: bool = Field(default=False)
     debug_mode: bool = Field(default=False)
@@ -110,7 +110,7 @@ class Order(BaseModel):
         Get Prices
         """
         logging.info("Getting prices...")
-        price = np.median(
+        price = median(
             [
                 float(prices[self.index_token_address].max_price_full),
                 float(prices[self.index_token_address].min_price_full),
@@ -141,10 +141,14 @@ class Order(BaseModel):
 
         return float(price), int(slippage), acceptable_price_in_usd
 
-    async def execute_order(self, is_open: bool = False, is_close: bool = False, is_swap: bool = False) -> HexStr:
+    async def execute_order(self, order_type: OrderType = OrderType.MarketIncrease) -> HexStr:
         """
         Create Order
         """
+        is_close = order_type == OrderType.MarketDecrease
+        is_open = order_type == OrderType.MarketIncrease
+        is_swap = order_type == OrderType.MarketSwap
+
         # Prepare order execution
         execution_fee, market_info, prices, size_delta_price_price_impact = await self._prepare_order_execution(
             is_close
@@ -196,7 +200,7 @@ class Order(BaseModel):
         execution_fee = await self._get_execution_fee()
 
         # Don't need to check approval when closing
-        if not is_close and not self.debug_mode:
+        if not is_close and not self.debug_mode and self.collateral_address != WETH_ADDRESS:
             await self.check_for_approval()
 
         await self.markets.load_info()
@@ -276,8 +280,8 @@ class Order(BaseModel):
             data_store=DATASTORE_ADDRESS,
             market_key=self.market_key,
             index_token_price=PriceProps(
-                min=primitives.uint256(int(prices[self.index_token_address].max_price_full)),
-                max=primitives.uint256(int(prices[self.index_token_address].min_price_full)),
+                min=primitives.uint256(int(prices[self.index_token_address].min_price_full)),
+                max=primitives.uint256(int(prices[self.index_token_address].max_price_full)),
             ),
             position_size_in_usd=primitives.uint256(0),
             position_size_in_tokens=primitives.uint256(0),

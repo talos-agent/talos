@@ -1,24 +1,23 @@
-def find_dictionary_by_key_value(outer_dict: dict, key: str, value: str):
+from typing import Any
+
+from eth_typing import ChecksumAddress
+
+from ..types import Market
+
+
+def find_dictionary_by_key_value(outer_dict: dict[str, Any], key: str, value: str) -> Any:
     """
     For a given dictionary, find a value which matches a set of keys
-
-    Parameters
-    ----------
-    outer_dict : dict
-        dictionary to filter through.
-    key : str
-        keys to search for.
-    value : str
-        required key to match.
-
     """
     for inner_dict in outer_dict.values():
-        if key in inner_dict and inner_dict[key] == value:
+        if key in inner_dict and getattr(inner_dict, key) == value:
             return inner_dict
     return None
 
 
-def determine_swap_route(markets: dict, in_token: str, out_token: str):
+def determine_swap_route(
+    markets: dict[ChecksumAddress, Market], in_token: ChecksumAddress, out_token: ChecksumAddress
+) -> tuple[list[ChecksumAddress], bool]:
     """
     Using the available markets, find the list of GMX markets required
     to swap from token in to token out
