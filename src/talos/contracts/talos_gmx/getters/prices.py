@@ -1,15 +1,18 @@
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import httpx
-
+from eth_rpc.utils import to_checksum
+from eth_typing import ChecksumAddress
 from pydantic import BaseModel
+
+from ..types import OraclePriceData
 
 
 class OraclePrices(BaseModel):
     ORACLE_URL: ClassVar[str] = "https://arbitrum-api.gmxinfra.io/signed_prices/latest"
 
     @classmethod
-    async def get_recent_prices(cls) -> dict:
+    async def get_recent_prices(cls) -> dict[ChecksumAddress, OraclePriceData]:
         """
         Get raw output of the GMX rest v2 api for signed prices
 
@@ -23,7 +26,7 @@ class OraclePrices(BaseModel):
         return cls._process_output(raw_output)
 
     @classmethod
-    async def _make_query(cls) -> dict:
+    async def _make_query(cls) -> Any:
         """
         Make request using oracle url
 
@@ -38,7 +41,7 @@ class OraclePrices(BaseModel):
         return response.json()
 
     @classmethod
-    def _process_output(cls, output: dict) -> dict:  # noqa: ANN102
+    def _process_output(cls, output: Any) -> dict[ChecksumAddress, OraclePriceData]:
         """
         Take the API response and create a new dictionary where the index token
         addresses are the keys
@@ -55,7 +58,7 @@ class OraclePrices(BaseModel):
 
         """
         processed = {}
-        for i in output['signedPrices']:
-            processed[i['tokenAddress']] = i
+        for i in output["signedPrices"]:
+            processed[to_checksum(i["tokenAddress"])] = OraclePriceData.model_validate(i)
 
         return processed

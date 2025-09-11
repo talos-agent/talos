@@ -19,5 +19,8 @@
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
         }
-    }
+    },
+    "ruff.lint.ignore": [
+        "E704"
+    ]
 }

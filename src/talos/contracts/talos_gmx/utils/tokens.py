@@ -1,7 +1,11 @@
 import httpx
+from eth_rpc.utils import to_checksum
+from eth_typing import ChecksumAddress
+
+from ..types.tokens import TokenMetadata
 
 
-async def get_tokens_address_dict() -> dict:
+async def get_tokens_address_dict() -> dict[ChecksumAddress, TokenMetadata]:
     """
     Query the GMX infra api for to generate dictionary of tokens available on v2
 
@@ -25,7 +29,7 @@ async def get_tokens_address_dict() -> dict:
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
             # Parse the JSON response
-            token_infos = response.json()['tokens']
+            token_infos = response.json()["tokens"]
         else:
             print(f"Error: {response.status_code}")
     except httpx.RequestError as e:
@@ -34,7 +38,7 @@ async def get_tokens_address_dict() -> dict:
     token_address_dict = {}
 
     for token_info in token_infos:
-        token_address_dict[token_info['address']] = token_info
+        token_address_dict[to_checksum(token_info["address"])] = TokenMetadata(**token_info)
 
     return token_address_dict
 

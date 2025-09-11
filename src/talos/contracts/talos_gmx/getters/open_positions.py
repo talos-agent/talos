@@ -1,50 +1,29 @@
 import logging
+from typing import Annotated
+
 import numpy as np
-
 from eth_rpc.utils import to_checksum
-from eth_typing import HexAddress
+from eth_typing import ChecksumAddress
+from pydantic import BeforeValidator
 
-from ..contracts import synthetics_reader
 from ..constants import DATASTORE_ADDRESS
+from ..contracts import synthetics_reader
 from ..contracts.synthetics_reader import PositionProps
 from ..types import Position
+from ..utils import get_tokens_address_dict
 from .get import GetData
 from .prices import OraclePrices
 
-from ..utils import get_tokens_address_dict
-
-chain = 'arbitrum'
-
 
 class GetOpenPositions(GetData):
-    address: HexAddress
+    address: Annotated[ChecksumAddress, BeforeValidator(to_checksum)]
 
-    def __init__(self, address: HexAddress, **kwargs):
-        super().__init__(address=to_checksum(address), **kwargs)
-
-    async def get_data(self) -> dict[str, Position]:
+    async def get_data(self) -> dict[str, Position]:  # type: ignore
         """
         Get all open positions for a given address on the chain defined in
         class init
-
-        Parameters
-        ----------
-        address : str
-            evm address .
-
-        Returns
-        -------
-        processed_positions : dict
-            a dictionary containing the open positions, where asset and
-            direction are the keys.
-
         """
-        raw_positions = await synthetics_reader.get_account_positions(
-            DATASTORE_ADDRESS,
-            self.address,
-            0,
-            10
-        ).get()
+        raw_positions = await synthetics_reader.get_account_positions(DATASTORE_ADDRESS, self.address, 0, 10).get()
 
         if len(raw_positions) == 0:
             logging.info(
@@ -60,21 +39,18 @@ class GetOpenPositions(GetData):
 
                 # TODO - maybe a better way of building the key?
                 if processed_position.is_long:
-                    direction = 'long'
+                    direction = "long"
                 else:
-                    direction = 'short'
+                    direction = "short"
 
-                key = "{}_{}".format(
-                    processed_position.market_symbol,
-                    direction
-                )
+                key = "{}_{}".format(processed_position.market_symbol, direction)
                 processed_positions[key] = processed_position
             except KeyError as e:
                 logging.error(f"Incompatible market: {e}")
 
         return processed_positions
 
-    async def _get_data_processing(self, raw_position: PositionProps) -> Position:
+    async def _get_data_processing(self, raw_position: PositionProps) -> Position:  # type: ignore
         """
         A tuple containing the raw information return from the reader contract
         query GetAccountPositions
@@ -89,57 +65,41 @@ class GetOpenPositions(GetData):
         dict
             a processed dictionary containing info on the positions.
         """
-        market_info = self.markets.info[raw_position.addresses.market]
+        market_info = self.markets.info[to_checksum(raw_position.addresses.market)]
 
         chain_tokens = await get_tokens_address_dict()
 
-        entry_price = (
-            raw_position.numbers.size_in_usd / raw_position.numbers.size_in_tokens
-        ) / 10 ** (
-            30 - chain_tokens[market_info['index_token_address']]['decimals']
+        entry_price = (raw_position.numbers.size_in_usd / raw_position.numbers.size_in_tokens) / 10 ** (
+            30 - chain_tokens[to_checksum(market_info.index_token_address)].decimals
         )
 
-        leverage = (
-            raw_position.numbers.size_in_usd / 10 ** 30
-        ) / (
-            raw_position.numbers.collateral_amount / 10 ** chain_tokens[
-                raw_position.addresses.collateral_token
-            ]['decimals']
+        leverage = (raw_position.numbers.size_in_usd / 10**30) / (
+            raw_position.numbers.collateral_amount
+            / 10 ** chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals
         )
         prices = await OraclePrices().get_recent_prices()
         mark_price = np.median(
             [
-                float(
-                    prices[market_info['index_token_address']]['maxPriceFull']
-                ),
-                float(
-                    prices[market_info['index_token_address']]['minPriceFull']
-                )
+                float(prices[market_info.index_token_address].max_price_full),
+                float(prices[market_info.index_token_address].min_price_full),
             ]
-        ) / 10 ** (
-            30 - chain_tokens[market_info['index_token_address']]['decimals']
-        )
+        ) / 10 ** (30 - chain_tokens[market_info.index_token_address].decimals)
 
         return Position(
-            account=raw_position.addresses.account,
-            market=raw_position.addresses.market,
-            market_symbol=self.markets.info[raw_position.addresses.market]['market_symbol'],
-            collateral_token=chain_tokens[raw_position.addresses.collateral_token]['symbol'],
+            account=to_checksum(raw_position.addresses.account),
+            market=to_checksum(raw_position.addresses.market),
+            market_symbol=self.markets.info[to_checksum(raw_position.addresses.market)].market_symbol,
+            collateral_token=chain_tokens[to_checksum(raw_position.addresses.collateral_token)].symbol,
             position_size=raw_position.numbers.size_in_usd / 10**30,
             size_in_tokens=raw_position.numbers.size_in_tokens,
             entry_price=(
-                (
-                    raw_position.numbers.size_in_usd / raw_position.numbers.size_in_tokens
-                ) / 10 ** (
-                    30 - chain_tokens[
-                        market_info['index_token_address']
-                    ]['decimals']
-                )
+                (raw_position.numbers.size_in_usd / raw_position.numbers.size_in_tokens)
+                / 10 ** (30 - chain_tokens[market_info.index_token_address].decimals)
             ),
             inital_collateral_amount=raw_position.numbers.collateral_amount,
             inital_collateral_amount_usd=(
                 raw_position.numbers.collateral_amount
-                / 10 ** chain_tokens[raw_position.addresses.collateral_token]['decimals']
+                / 10 ** chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals
             ),
             leverage=leverage,
             borrowing_factor=raw_position.numbers.borrowing_factor,
@@ -148,10 +108,6 @@ class GetOpenPositions(GetData):
             short_token_claimable_funding_amount_per_size=raw_position.numbers.short_token_claimable_funding_amount_per_size,
             position_modified_at="",
             is_long=raw_position.flags.is_long,
-            percent_profit=(
-                (
-                    1 - (mark_price / entry_price)
-                ) * leverage
-            ) * 100,
+            percent_profit=((1 - (mark_price / entry_price)) * leverage) * 100,
             mark_price=mark_price,
         )

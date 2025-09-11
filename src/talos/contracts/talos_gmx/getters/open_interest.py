@@ -1,16 +1,17 @@
 import asyncio
 import logging
-from numerize import numerize
 from typing import Awaitable
 
-from eth_rpc.types.primitives import int256
+from eth_rpc.types.primitives import address, int256, uint256
+from numerize import numerize
 
+from ..contracts.synthetics_reader import MarketProps, PriceProps
 from .get import GetData
 from .prices import OraclePrices
-from ..contracts.synthetics_reader.schemas import MarketProps, PriceProps
+
 
 class OpenInterest(GetData):
-    async def _get_data_processing(self):
+    async def _get_data_processing(self) -> dict[str, dict[str, str | float] | str]:
         """
         Generate the dictionary of open interest data
 
@@ -28,30 +29,27 @@ class OpenInterest(GetData):
         long_pnl_output_list: list[Awaitable[int256]] = []
         short_pnl_output_list: list[Awaitable[int256]] = []
         mapper = []
-        long_precision_list = []
+        long_precision_list: list[int] = []
 
         for market_key in self.markets.info:
             self._filter_swap_markets()
             self._get_token_addresses(market_key)
 
-            index_token_address = self.markets.get_index_token_address(
-                market_key
-            )
+            index_token_address = self.markets.get_index_token_address(market_key)
+
+            assert self._short_token_address is not None
+            assert self._long_token_address is not None
 
             market = MarketProps(
-                market_token=market_key,
-                index_token=index_token_address,
-                long_token=self._long_token_address,
-                short_token=self._short_token_address
+                market_token=address(market_key),
+                index_token=address(index_token_address),
+                long_token=address(self._long_token_address),
+                short_token=address(self._short_token_address),
             )
 
-            min_price = int(
-                oracle_prices_dict[index_token_address]['minPriceFull']
-            )
-            max_price = int(
-                oracle_prices_dict[index_token_address]['maxPriceFull']
-            )
-            price_props = PriceProps(min=min_price, max=max_price)
+            min_price = int(oracle_prices_dict[index_token_address].min_price_full)
+            max_price = int(oracle_prices_dict[index_token_address].max_price_full)
+            price_props = PriceProps(min=uint256(min_price), max=uint256(max_price))
 
             # If the market is a synthetic one we need to use the decimals
             # from the index token
@@ -61,31 +59,17 @@ class OpenInterest(GetData):
                         market_key,
                     )
                 else:
-                    decimal_factor = self.markets.get_decimal_factor(
-                        market_key,
-                        long=True
-                    )
+                    decimal_factor = self.markets.get_decimal_factor(market_key, long=True)
             except KeyError:
-                decimal_factor = self.markets.get_decimal_factor(
-                    market_key,
-                    long=True
-                )
+                decimal_factor = self.markets.get_decimal_factor(market_key, long=True)
 
-            oracle_factor = (30 - decimal_factor)
+            oracle_factor = 30 - decimal_factor
             precision = 10 ** (decimal_factor + oracle_factor)
             long_precision_list = long_precision_list + [precision]
 
-            long_oi_with_pnl, long_pnl = self._get_pnl(
-                market,
-                price_props,
-                is_long=True
-            )
+            long_oi_with_pnl, long_pnl = self._get_pnl(market, price_props, is_long=True)
 
-            short_oi_with_pnl, short_pnl = self._get_pnl(
-                market,
-                price_props,
-                is_long=False
-            )
+            short_oi_with_pnl, short_pnl = self._get_pnl(market, price_props, is_long=False)
 
             long_oi_output_list.append(long_oi_with_pnl)
             short_oi_output_list.append(short_oi_with_pnl)
@@ -103,39 +87,28 @@ class OpenInterest(GetData):
         await asyncio.sleep(2)
         short_pnl_threaded_output = await asyncio.gather(*short_pnl_output_list)
 
-        for (
-            market_symbol,
-            long_oi,
-            short_oi,
-            long_pnl,
-            short_pnl,
-            long_precision
-        ) in zip(
+        for market_symbol, long_oi, short_oi, long_pnl, short_pnl, long_precision in zip(
             mapper,
             long_oi_threaded_output,
             short_oi_threaded_output,
             long_pnl_threaded_output,
             short_pnl_threaded_output,
-            long_precision_list
+            long_precision_list,
         ):
-            precision = 10 ** 30
+            precision = 10**30
             long_value = (long_oi - long_pnl) / long_precision
             short_value = (short_oi - short_pnl) / precision
 
-            logging.info(
-                f"{market_symbol} Long: ${numerize.numerize(long_value)}"
-            )
-            logging.info(
-                f"{market_symbol} Short: ${numerize.numerize(short_value)}"
-            )
+            logging.info(f"{market_symbol} Long: ${numerize.numerize(long_value)}")
+            logging.info(f"{market_symbol} Short: ${numerize.numerize(short_value)}")
 
-            self.output['long'][market_symbol] = long_value
-            self.output['short'][market_symbol] = short_value
-        self.output['parameter'] = "open_interest"
+            self.output["long"][market_symbol] = long_value  # type: ignore
+            self.output["short"][market_symbol] = short_value  # type: ignore
+        self.output["parameter"] = "open_interest"
 
         return self.output
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     data = OpenInterest().get_data(to_csv=False)
     print(data)

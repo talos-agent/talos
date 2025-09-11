@@ -48,28 +48,24 @@ def determine_swap_route(markets: dict, in_token: str, out_token: str):
         out_token = "0x47904963fc8b2340414262125aF798B9655E58Cd"
 
     if in_token == "0xaf88d065e77c8cC2239327C5EDb3A432268e5831":
-        gmx_market_address = find_dictionary_by_key_value(
-            markets,
-            "index_token_address",
-            out_token
-        )['gmx_market_address']
+        gmx_market_address = find_dictionary_by_key_value(markets, "index_token_address", out_token)[
+            "gmx_market_address"
+        ]
     else:
-        gmx_market_address = find_dictionary_by_key_value(
-            markets,
-            "index_token_address",
-            in_token
-        )['gmx_market_address']
+        gmx_market_address = find_dictionary_by_key_value(markets, "index_token_address", in_token)[
+            "gmx_market_address"
+        ]
 
     is_requires_multi_swap = False
 
-    if out_token != "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" and \
-            in_token != "0xaf88d065e77c8cC2239327C5EDb3A432268e5831":
+    if (
+        out_token != "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+        and in_token != "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+    ):
         is_requires_multi_swap = True
-        second_gmx_market_address = find_dictionary_by_key_value(
-            markets,
-            "index_token_address",
-            out_token
-        )['gmx_market_address']
+        second_gmx_market_address = find_dictionary_by_key_value(markets, "index_token_address", out_token)[
+            "gmx_market_address"
+        ]
 
         return [gmx_market_address, second_gmx_market_address], is_requires_multi_swap
 

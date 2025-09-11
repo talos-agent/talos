@@ -1,13 +1,16 @@
 import asyncio
+from typing import Any
 
 import numpy as np
 
-from .getters.prices import OraclePrices
 from .getters.markets import Markets
-from .utils import get_tokens_address_dict, determine_swap_route
+from .getters.prices import OraclePrices
+from .utils import determine_swap_route, get_tokens_address_dict
 
 
 class OrderArgumentParser:
+    parameters_dict: dict[str, Any] | None
+
     def __init__(self, is_increase: bool = False, is_decrease: bool = False, is_swap: bool = False):
         self.parameters_dict = None
         self.is_increase = is_increase
@@ -28,7 +31,7 @@ class OrderArgumentParser:
                 "is_long",
                 "size_delta_usd",
                 "initial_collateral_delta",
-                "slippage_percent"
+                "slippage_percent",
             ]
 
         if is_decrease:
@@ -41,7 +44,7 @@ class OrderArgumentParser:
                 "is_long",
                 "size_delta_usd",
                 "initial_collateral_delta",
-                "slippage_percent"
+                "slippage_percent",
             ]
 
         if is_swap:
@@ -51,7 +54,7 @@ class OrderArgumentParser:
                 "out_token_address",
                 "initial_collateral_delta",
                 "swap_path",
-                "slippage_percent"
+                "slippage_percent",
             ]
 
         self.missing_base_key_methods = {
@@ -62,14 +65,14 @@ class OrderArgumentParser:
             "collateral_address": self._handle_missing_collateral_address,
             "swap_path": self._handle_missing_swap_path,
             "is_long": self._handle_missing_is_long,
-            "slippage_percent": self._handle_missing_slippage_percent
+            "slippage_percent": self._handle_missing_slippage_percent,
         }
 
-    async def load_markets(self):
+    async def load_markets(self) -> None:
         await self._markets.load_info()
         self.market_info = self._markets.info
 
-    async def process_parameters_dictionary(self, parameters_dict) -> dict:
+    async def process_parameters_dictionary(self, parameters_dict: dict[str, Any]) -> dict[str, Any]:
         missing_keys = self._determine_missing_keys(parameters_dict)
 
         self.parameters_dict = parameters_dict
@@ -93,7 +96,7 @@ class OrderArgumentParser:
 
         return self.parameters_dict
 
-    def _determine_missing_keys(self, parameters_dict) -> list[str]:
+    def _determine_missing_keys(self, parameters_dict: dict) -> list[str]:
         """
         Compare keys in the supposed dictionary to a list of keys which are required to create an
         order
@@ -113,7 +116,7 @@ class OrderArgumentParser:
         """
 
         try:
-            token_symbol = self.parameters_dict['index_token_symbol']
+            token_symbol = self.parameters_dict["index_token_symbol"]
 
             # Exception for tickers api
             if token_symbol == "BTC":
@@ -121,9 +124,8 @@ class OrderArgumentParser:
         except KeyError:
             raise Exception("Index Token Address and Symbol not provided!")
 
-        self.parameters_dict['index_token_address'] = self.find_key_by_symbol(
-            await get_tokens_address_dict(),
-            token_symbol
+        self.parameters_dict["index_token_address"] = self.find_key_by_symbol(
+            await get_tokens_address_dict(), token_symbol
         )
 
     def _handle_missing_market_key(self):
@@ -131,15 +133,14 @@ class OrderArgumentParser:
         Will trigger if market key is missing. Can be determined from index token address.
         """
 
-        index_token_address = self.parameters_dict['index_token_address']
+        index_token_address = self.parameters_dict["index_token_address"]
 
         if index_token_address == "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f":
             index_token_address = "0x47904963fc8b2340414262125aF798B9655E58Cd"
 
         # use the index token address to find the market key from get_available_markets
-        self.parameters_dict['market_key'] = self.find_market_key_by_index_address(
-            self.market_info,
-            index_token_address
+        self.parameters_dict["market_key"] = self.find_market_key_by_index_address(
+            self.market_info, index_token_address
         )
 
     async def _handle_missing_start_token_address(self):
@@ -149,20 +150,18 @@ class OrderArgumentParser:
         """
 
         try:
-            start_token_symbol = self.parameters_dict['start_token_symbol']
+            start_token_symbol = self.parameters_dict["start_token_symbol"]
 
             # Exception for tickers api
             if start_token_symbol == "BTC":
-                self.parameters_dict[
-                    'start_token_address'
-                ] = "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
+                self.parameters_dict["start_token_address"] = "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
                 return
 
         except KeyError:
             raise Exception("Start Token Address and Symbol not provided!")
 
         # search the known tokens for a contract address using the user supplied symbol
-        self.parameters_dict['start_token_address'] = self.find_key_by_symbol(
+        self.parameters_dict["start_token_address"] = self.find_key_by_symbol(
             await get_tokens_address_dict(),
             start_token_symbol,
         )
@@ -174,14 +173,13 @@ class OrderArgumentParser:
         """
 
         try:
-            start_token_symbol = self.parameters_dict['out_token_symbol']
+            start_token_symbol = self.parameters_dict["out_token_symbol"]
         except KeyError:
             raise Exception("Out Token Address and Symbol not provided!")
 
         # search the known tokens for a contract address using the user supplied symbol
-        self.parameters_dict['out_token_address'] = self.find_key_by_symbol(
-            await get_tokens_address_dict(),
-            start_token_symbol
+        self.parameters_dict["out_token_address"] = self.find_key_by_symbol(
+            await get_tokens_address_dict(), start_token_symbol
         )
 
     async def _handle_missing_collateral_address(self):
@@ -191,26 +189,21 @@ class OrderArgumentParser:
         """
 
         try:
-            collateral_token_symbol = self.parameters_dict['collateral_token_symbol']
+            collateral_token_symbol = self.parameters_dict["collateral_token_symbol"]
 
             # Exception for tickers api
             if collateral_token_symbol == "BTC":
-                self.parameters_dict[
-                    'collateral_address'
-                ] = "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
+                self.parameters_dict["collateral_address"] = "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
                 return
         except KeyError:
             raise Exception("Collateral Token Address and Symbol not provided!")
 
         # search the known tokens for a contract address using the user supplied symbol
-        collateral_address = self.find_key_by_symbol(
-            await get_tokens_address_dict(),
-            collateral_token_symbol
-        )
+        collateral_address = self.find_key_by_symbol(await get_tokens_address_dict(), collateral_token_symbol)
 
         # check if the collateral token address can be used in the requested market
         if self._check_if_valid_collateral_for_market(collateral_address) and not self.is_swap:
-            self.parameters_dict['collateral_address'] = collateral_address
+            self.parameters_dict["collateral_address"] = collateral_address
 
     def _handle_missing_swap_path(self):
         """
@@ -224,27 +217,21 @@ class OrderArgumentParser:
             markets = self.market_info
 
             # function returns swap route as a list [0] and a bool if there is a multi swap [1]
-            self.parameters_dict['swap_path'] = determine_swap_route(
-                markets,
-                self.parameters_dict['start_token_address'],
-                self.parameters_dict['out_token_address']
+            self.parameters_dict["swap_path"] = determine_swap_route(
+                markets, self.parameters_dict["start_token_address"], self.parameters_dict["out_token_address"]
             )[0]
 
         # No Swap Path required to map
-        elif self.parameters_dict['start_token_address'] == \
-                self.parameters_dict['collateral_address']:
-            self.parameters_dict['swap_path'] = []
+        elif self.parameters_dict["start_token_address"] == self.parameters_dict["collateral_address"]:
+            self.parameters_dict["swap_path"] = []
 
         else:
-
             # first get markets to supply to determine_swap_route
             markets = self.market_info
 
             # function returns swap route as a list [0] and a bool if there is a multi swap [1]
-            self.parameters_dict['swap_path'] = determine_swap_route(
-                markets,
-                self.parameters_dict['start_token_address'],
-                self.parameters_dict['collateral_address']
+            self.parameters_dict["swap_path"] = determine_swap_route(
+                markets, self.parameters_dict["start_token_address"], self.parameters_dict["collateral_address"]
             )[0]
 
     def _handle_missing_is_long(self):
@@ -273,16 +260,15 @@ class OrderArgumentParser:
             address of collateral token.
         """
 
-        market_key = self.parameters_dict['market_key']
+        market_key = self.parameters_dict["market_key"]
 
-        if self.parameters_dict['market_key'] == "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f":
+        if self.parameters_dict["market_key"] == "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f":
             market_key = "0x47c031236e19d024b42f8AE6780E44A573170703"
 
         market = self.market_info[market_key]
 
         # if collateral address doesnt match long or short token address, no bueno
-        if collateral_address == market['long_token_address'] or \
-                collateral_address == market['short_token_address']:
+        if collateral_address == market["long_token_address"] or collateral_address == market["short_token_address"]:
             return True
         else:
             raise Exception("Not a valid collateral for selected market!")
@@ -302,7 +288,7 @@ class OrderArgumentParser:
         """
 
         for key, value in input_dict.items():
-            if value.get('symbol') == search_symbol:
+            if value.get("symbol") == search_symbol:
                 return key
         raise Exception('"{}" not a known token for GMX v2!'.format(search_symbol))
 
@@ -321,7 +307,7 @@ class OrderArgumentParser:
         """
 
         for key, value in input_dict.items():
-            if value.get('index_token_address') == index_token_address:
+            if value.get("index_token_address") == index_token_address:
                 return key
         return None
 
@@ -332,41 +318,38 @@ class OrderArgumentParser:
         """
 
         # Both size_delta_usd and initial_collateral_delta have been suppled, no issue
-        if "size_delta_usd" in self.parameters_dict and \
-                "initial_collateral_delta" in self.parameters_dict:
+        if "size_delta_usd" in self.parameters_dict and "initial_collateral_delta" in self.parameters_dict:
             return self.parameters_dict
 
         # leverage and initial_collateral_delta supplied, we can calculate size_delta_usd if missing
-        elif "leverage" in self.parameters_dict and \
-                "initial_collateral_delta" in self.parameters_dict and \
-                "size_delta_usd" not in self.parameters_dict:
-
+        elif (
+            "leverage" in self.parameters_dict
+            and "initial_collateral_delta" in self.parameters_dict
+            and "size_delta_usd" not in self.parameters_dict
+        ):
             initial_collateral_delta_usd = await self._calculate_initial_collateral_usd()
 
-            self.parameters_dict["size_delta_usd"] = (
-                self.parameters_dict["leverage"] * initial_collateral_delta_usd
-            )
+            self.parameters_dict["size_delta_usd"] = self.parameters_dict["leverage"] * initial_collateral_delta_usd
             return self.parameters_dict
 
         # size_delta_usd and leverage supplied, we can calculate initial_collateral_delta if missing
-        elif "size_delta_usd" in self.parameters_dict and "leverage" in self.parameters_dict and \
-                "initial_collateral_delta" not in self.parameters_dict:
+        elif (
+            "size_delta_usd" in self.parameters_dict
+            and "leverage" in self.parameters_dict
+            and "initial_collateral_delta" not in self.parameters_dict
+        ):
+            collateral_usd = self.parameters_dict["size_delta_usd"] / self.parameters_dict["leverage"]
 
-            collateral_usd = self.parameters_dict["size_delta_usd"] / \
-                self.parameters_dict["leverage"]
-
-            self.parameters_dict[
-                "initial_collateral_delta"
-            ] = await self._calculate_initial_collateral_tokens(collateral_usd)
+            self.parameters_dict["initial_collateral_delta"] = await self._calculate_initial_collateral_tokens(
+                collateral_usd
+            )
 
             return self.parameters_dict
 
         else:
             potential_missing_keys = '"size_delta_usd", "initial_collateral_delta", or "leverage"!'
             raise Exception(
-                "Required keys are missing or provided incorrectly, please check: {}".format(
-                    potential_missing_keys
-                )
+                "Required keys are missing or provided incorrectly, please check: {}".format(potential_missing_keys)
             )
 
     async def _calculate_initial_collateral_usd(self) -> float:
@@ -374,16 +357,18 @@ class OrderArgumentParser:
         Calculate the USD value of the number of tokens supplied in initial collateral delta
         """
 
-        initial_collateral_delta_amount = self.parameters_dict['initial_collateral_delta']
+        initial_collateral_delta_amount = self.parameters_dict["initial_collateral_delta"]
         prices = await OraclePrices().get_recent_prices()
         price: float = np.median(
-            [float(prices[self.parameters_dict["start_token_address"]]['maxPriceFull']),
-             float(prices[self.parameters_dict["start_token_address"]]['minPriceFull'])]
+            [
+                float(prices[self.parameters_dict["start_token_address"]]["maxPriceFull"]),
+                float(prices[self.parameters_dict["start_token_address"]]["minPriceFull"]),
+            ]
         )
         address_dict = await get_tokens_address_dict()
-        oracle_factor: int = address_dict[self.parameters_dict["start_token_address"]]['decimals'] - 30
+        oracle_factor: int = address_dict[self.parameters_dict["start_token_address"]]["decimals"] - 30
 
-        return (price * 10 ** oracle_factor) * initial_collateral_delta_amount
+        return (price * 10**oracle_factor) * initial_collateral_delta_amount
 
     async def _calculate_initial_collateral_tokens(self, collateral_usd: float):
         """
@@ -397,13 +382,15 @@ class OrderArgumentParser:
 
         prices = await OraclePrices().get_recent_prices()
         price = np.median(
-            [float(prices[self.parameters_dict["start_token_address"]]['maxPriceFull']),
-             float(prices[self.parameters_dict["start_token_address"]]['minPriceFull'])]
+            [
+                float(prices[self.parameters_dict["start_token_address"]]["maxPriceFull"]),
+                float(prices[self.parameters_dict["start_token_address"]]["minPriceFull"]),
+            ]
         )
         address_dict = await get_tokens_address_dict()
-        oracle_factor = address_dict[self.parameters_dict["start_token_address"]]['decimals'] - 30
+        oracle_factor = address_dict[self.parameters_dict["start_token_address"]]["decimals"] - 30
 
-        return collateral_usd / (price * 10 ** oracle_factor)
+        return collateral_usd / (price * 10**oracle_factor)
 
     async def _format_size_info(self) -> None:
         """
@@ -413,12 +400,11 @@ class OrderArgumentParser:
 
         if not self.is_swap:
             # All USD numbers need to be 10**30
-            self.parameters_dict["size_delta"] = int(
-                self.parameters_dict["size_delta_usd"] * 10**30)
+            self.parameters_dict["size_delta"] = int(self.parameters_dict["size_delta_usd"] * 10**30)
 
         # Each token has its a specific decimal factor that needs to be applied
         token_address_dict = await get_tokens_address_dict()
-        decimal = token_address_dict[self.parameters_dict["start_token_address"]]['decimals']
+        decimal = token_address_dict[self.parameters_dict["start_token_address"]]["decimals"]
         self.parameters_dict["initial_collateral_delta"] = int(
             self.parameters_dict["initial_collateral_delta"] * 10**decimal
         )
@@ -431,12 +417,9 @@ class OrderArgumentParser:
         """
 
         collateral_usd_value = await self._calculate_initial_collateral_usd()
-        leverage_requested = self.parameters_dict["size_delta_usd"] / \
-            collateral_usd_value
+        leverage_requested = self.parameters_dict["size_delta_usd"] / collateral_usd_value
 
         # TODO - leverage is now a contract parameter and needs to be queried
         max_leverage = 100
         if leverage_requested > max_leverage:
-            raise Exception('Leverage requested "x{:.2f}" can not exceed x100!'.format(
-                leverage_requested
-            ))
+            raise Exception('Leverage requested "x{:.2f}" can not exceed x100!'.format(leverage_requested))

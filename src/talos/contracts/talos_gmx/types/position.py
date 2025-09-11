@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from eth_typing import HexAddress
+from pydantic import BaseModel
+
 
 class Position(BaseModel):
     account: HexAddress

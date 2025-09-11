@@ -5,11 +5,18 @@ from ..contracts.datastore import datastore
 from ..types.gas_limits import GasLimits
 from .funding import apply_factor
 from .keys import (
-    deposit_gas_limit_key, withdraw_gas_limit_key, single_swap_gas_limit_key, swap_order_gas_limit_key,
-    increase_order_gas_limit_key, decrease_order_gas_limit_key, execution_gas_fee_base_amount_key, execution_gas_fee_multiplier_key
+    decrease_order_gas_limit_key,
+    deposit_gas_limit_key,
+    execution_gas_fee_base_amount_key,
+    execution_gas_fee_multiplier_key,
+    increase_order_gas_limit_key,
+    single_swap_gas_limit_key,
+    swap_order_gas_limit_key,
+    withdraw_gas_limit_key,
 )
 
-def get_execution_fee(gas_limits: GasLimits, estimated_gas_limit, gas_price: int):
+
+def get_execution_fee(gas_limits: GasLimits, estimated_gas_limit: int, gas_price: int) -> int:
     """
     Given a dictionary of gas_limits, the uncalled datastore object of a given operation, and the
     latest gas price, calculate the minimum execution fee required to perform an action
@@ -29,7 +36,7 @@ def get_execution_fee(gas_limits: GasLimits, estimated_gas_limit, gas_price: int
     multiplier_factor = gas_limits.estimated_fee_multiplier_factor
     adjusted_gas_limit = base_gas_limit + apply_factor(estimated_gas_limit, multiplier_factor)
 
-    return adjusted_gas_limit * gas_price
+    return int(adjusted_gas_limit * gas_price)
 
 
 async def get_gas_limits() -> GasLimits:

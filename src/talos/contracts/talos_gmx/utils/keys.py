@@ -1,4 +1,6 @@
-from .hash import create_hash_string, create_hash
+from eth_rpc.types import primitives
+
+from .hash import create_hash, create_hash_string
 
 ACCOUNT_POSITION_LIST = create_hash_string("ACCOUNT_POSITION_LIST")
 CLAIMABLE_FEE_AMOUNT = create_hash_string("CLAIMABLE_FEE_AMOUNT")
@@ -8,13 +10,10 @@ DEPOSIT_GAS_LIMIT = create_hash_string("DEPOSIT_GAS_LIMIT")
 WITHDRAWAL_GAS_LIMIT = create_hash_string("WITHDRAWAL_GAS_LIMIT")
 
 EXECUTION_GAS_FEE_BASE_AMOUNT = create_hash_string("EXECUTION_GAS_FEE_BASE_AMOUNT")
-EXECUTION_GAS_FEE_MULTIPLIER_FACTOR = create_hash_string(
-    "EXECUTION_GAS_FEE_MULTIPLIER_FACTOR")
+EXECUTION_GAS_FEE_MULTIPLIER_FACTOR = create_hash_string("EXECUTION_GAS_FEE_MULTIPLIER_FACTOR")
 INCREASE_ORDER_GAS_LIMIT = create_hash_string("INCREASE_ORDER_GAS_LIMIT")
 MAX_OPEN_INTEREST = create_hash_string("MAX_OPEN_INTEREST")
-MAX_POSITION_IMPACT_FACTOR_FOR_LIQUIDATIONS_KEY = create_hash_string(
-    "MAX_POSITION_IMPACT_FACTOR_FOR_LIQUIDATIONS"
-)
+MAX_POSITION_IMPACT_FACTOR_FOR_LIQUIDATIONS_KEY = create_hash_string("MAX_POSITION_IMPACT_FACTOR_FOR_LIQUIDATIONS")
 MAX_PNL_FACTOR_FOR_TRADERS = create_hash_string("MAX_PNL_FACTOR_FOR_TRADERS")
 MAX_PNL_FACTOR_FOR_DEPOSITS = create_hash_string("MAX_PNL_FACTOR_FOR_DEPOSITS")
 MAX_PNL_FACTOR_FOR_WITHDRAWALS = create_hash_string("MAX_PNL_FACTOR_FOR_WITHDRAWALS")
@@ -24,9 +23,7 @@ MIN_COLLATERAL_FACTOR_KEY = create_hash_string("MIN_COLLATERAL_FACTOR")
 MIN_POSITION_SIZE_USD = create_hash_string("MIN_POSITION_SIZE_USD")
 OPEN_INTEREST_IN_TOKENS = create_hash_string("OPEN_INTEREST_IN_TOKENS")
 OPEN_INTEREST = create_hash_string("OPEN_INTEREST")
-OPEN_INTEREST_RESERVE_FACTOR = create_hash_string(
-    "OPEN_INTEREST_RESERVE_FACTOR"
-)
+OPEN_INTEREST_RESERVE_FACTOR = create_hash_string("OPEN_INTEREST_RESERVE_FACTOR")
 POOL_AMOUNT = create_hash_string("POOL_AMOUNT")
 RESERVE_FACTOR = create_hash_string("RESERVE_FACTOR")
 SINGLE_SWAP_GAS_LIMIT = create_hash_string("SINGLE_SWAP_GAS_LIMIT")
@@ -34,131 +31,89 @@ SWAP_ORDER_GAS_LIMIT = create_hash_string("SWAP_ORDER_GAS_LIMIT")
 VIRTUAL_TOKEN_ID = create_hash_string("VIRTUAL_TOKEN_ID")
 
 
-def accountPositionListKey(account):
-    return create_hash(
-        ["bytes32", "address"],
-        [ACCOUNT_POSITION_LIST, account]
-    )
+def accountPositionListKey(account: str) -> primitives.bytes32:
+    return create_hash(["bytes32", "address"], [ACCOUNT_POSITION_LIST, account])
 
 
-def claimable_fee_amount_key(market: str, token: str):
-    return create_hash(
-        ["bytes32", "address", "address"],
-        [CLAIMABLE_FEE_AMOUNT, market, token]
-    )
+def claimable_fee_amount_key(market: str, token: str) -> primitives.bytes32:
+    return create_hash(["bytes32", "address", "address"], [CLAIMABLE_FEE_AMOUNT, market, token])
 
 
-def decrease_order_gas_limit_key():
+def decrease_order_gas_limit_key() -> primitives.bytes32:
     return DECREASE_ORDER_GAS_LIMIT
 
 
-def deposit_gas_limit_key():
+def deposit_gas_limit_key() -> primitives.bytes32:
     return DEPOSIT_GAS_LIMIT
 
 
-def execution_gas_fee_base_amount_key():
+def execution_gas_fee_base_amount_key() -> primitives.bytes32:
     return EXECUTION_GAS_FEE_BASE_AMOUNT
 
 
-def execution_gas_fee_multiplier_key():
+def execution_gas_fee_multiplier_key() -> primitives.bytes32:
     return EXECUTION_GAS_FEE_MULTIPLIER_FACTOR
 
 
-def increase_order_gas_limit_key():
+def increase_order_gas_limit_key() -> primitives.bytes32:
     return INCREASE_ORDER_GAS_LIMIT
 
 
-def min_additional_gas_for_execution_key():
+def min_additional_gas_for_execution_key() -> primitives.bytes32:
     return MIN_ADDITIONAL_GAS_FOR_EXECUTION
 
 
-def min_collateral():
+def min_collateral() -> primitives.bytes32:
     return MIN_COLLATERAL_USD
 
 
-def min_collateral_factor_key(market):
+def min_collateral_factor_key(market: str) -> primitives.bytes32:
     return create_hash(["bytes32", "address"], [MIN_COLLATERAL_FACTOR_KEY, market])
 
 
-def max_open_interest_key(market: str,
-                          is_long: bool):
+def max_open_interest_key(market: str, is_long: bool) -> primitives.bytes32:
+    return create_hash(["bytes32", "address", "bool"], [MAX_OPEN_INTEREST, market, is_long])
 
+
+def max_position_impact_factor_for_liquidations_key(market: str) -> primitives.bytes32:
+    return create_hash(["bytes32", "address"], [MAX_POSITION_IMPACT_FACTOR_FOR_LIQUIDATIONS_KEY, market])
+
+
+def open_interest_in_tokens_key(market: str, collateral_token: str, is_long: bool) -> primitives.bytes32:
     return create_hash(
-        ["bytes32", "address", "bool"],
-        [MAX_OPEN_INTEREST, market, is_long]
+        ["bytes32", "address", "address", "bool"], [OPEN_INTEREST_IN_TOKENS, market, collateral_token, is_long]
     )
 
 
-def max_position_impact_factor_for_liquidations_key(market):
-    return create_hash(["bytes32", "address"],
-                       [MAX_POSITION_IMPACT_FACTOR_FOR_LIQUIDATIONS_KEY, market])
+def open_interest_key(market: str, collateral_token: str, is_long: bool) -> primitives.bytes32:
+    return create_hash(["bytes32", "address", "address", "bool"], [OPEN_INTEREST, market, collateral_token, is_long])
 
 
-def open_interest_in_tokens_key(
-    market: str,
-    collateral_token: str,
-    is_long: bool
-):
-    return create_hash(
-        ["bytes32", "address", "address", "bool"],
-        [OPEN_INTEREST_IN_TOKENS, market, collateral_token, is_long]
-    )
+def open_interest_reserve_factor_key(market: str, is_long: bool) -> primitives.bytes32:
+    return create_hash(["bytes32", "address", "bool"], [OPEN_INTEREST_RESERVE_FACTOR, market, is_long])
 
 
-def open_interest_key(
-    market: str,
-    collateral_token: str,
-    is_long: bool
-):
-    return create_hash(
-        ["bytes32", "address", "address", "bool"],
-        [OPEN_INTEREST, market, collateral_token, is_long]
-    )
+def pool_amount_key(market: str, token: str) -> primitives.bytes32:
+    return create_hash(["bytes32", "address", "address"], [POOL_AMOUNT, market, token])
 
 
-def open_interest_reserve_factor_key(
-    market: str,
-    is_long: bool
-):
-    return create_hash(
-        ["bytes32", "address", "bool"],
-        [OPEN_INTEREST_RESERVE_FACTOR, market, is_long]
-    )
+def reserve_factor_key(market: str, is_long: bool) -> primitives.bytes32:
+    return create_hash(["bytes32", "address", "bool"], [RESERVE_FACTOR, market, is_long])
 
 
-def pool_amount_key(
-    market: str,
-    token: str
-):
-    return create_hash(
-        ["bytes32", "address", "address"],
-        [POOL_AMOUNT, market, token]
-    )
-
-
-def reserve_factor_key(
-    market: str,
-    is_long: bool
-):
-    return create_hash(
-        ["bytes32", "address", "bool"],
-        [RESERVE_FACTOR, market, is_long]
-    )
-
-
-def single_swap_gas_limit_key():
+def single_swap_gas_limit_key() -> primitives.bytes32:
     return SINGLE_SWAP_GAS_LIMIT
 
 
-def swap_order_gas_limit_key():
+def swap_order_gas_limit_key() -> primitives.bytes32:
     return SWAP_ORDER_GAS_LIMIT
 
 
-def virtualTokenIdKey(token: str):
+def virtualTokenIdKey(token: str) -> primitives.bytes32:
     return create_hash(["bytes32", "address"], [VIRTUAL_TOKEN_ID, token])
 
 
-def withdraw_gas_limit_key():
+def withdraw_gas_limit_key() -> primitives.bytes32:
     return WITHDRAWAL_GAS_LIMIT
 
 

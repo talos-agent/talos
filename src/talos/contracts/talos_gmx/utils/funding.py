@@ -14,25 +14,9 @@ def get_funding_factor_per_period(
 ) -> int:
     """
     For a given market, calculate the funding factor for a given period
-
-    Parameters
-    ----------
-    market_info : dict
-        market parameters returned from the reader contract.
-    is_long : bool
-        direction of the position.
-    period_in_seconds : int
-        Want percentage rate we want to output to be in.
-    long_interest_usd : int
-        expanded decimal long interest.
-    short_interest_usd : int
-        expanded decimal short interest.
-
     """
 
-    funding_factor_per_second = (
-        market_info.next_funding.funding_factor_per_second * 10**-28
-    )
+    funding_factor_per_second = market_info.next_funding.funding_factor_per_second * 10**-28
 
     long_pays_shorts = market_info.next_funding.longs_pay_shorts
 

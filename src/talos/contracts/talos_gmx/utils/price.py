@@ -5,7 +5,7 @@ from ..contracts.synthetics_reader import ExecutionPriceParams, synthetics_reade
 async def get_execution_price_and_price_impact(
     params: ExecutionPriceParams,
     decimals: int,
-):
+) -> dict[str, float]:
     """
     Get the execution price and price impact for a position
 
@@ -19,11 +19,9 @@ async def get_execution_price_and_price_impact(
         number of decimals of the token being traded eg ETH == 18.
 
     """
-    output = await synthetics_reader.get_execution_price(
-        params
-    ).get()
+    output = await synthetics_reader.get_execution_price(params).get()
 
     return {
-        'execution_price': output.execution_price / 10**(PRECISION - decimals),
-        'price_impact_usd': output.price_impact_usd / 10**PRECISION,
+        "execution_price": output.execution_price / 10 ** (PRECISION - decimals),
+        "price_impact_usd": output.price_impact_usd / 10**PRECISION,
     }

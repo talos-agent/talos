@@ -1,8 +1,11 @@
-from eth_abi import encode
+from typing import Any
+
+from eth_abi.abi import encode
 from eth_hash.auto import keccak
+from eth_rpc.types import primitives
 
 
-def create_hash(data_type_list: list, data_value_list: list):
+def create_hash(data_type_list: list[str], data_value_list: list[Any]) -> primitives.bytes32:
     """
     Create a keccak hash using a list of strings corresponding to data types
     and a list of the values the data types match
@@ -21,10 +24,10 @@ def create_hash(data_type_list: list, data_value_list: list):
 
     """
     byte_data = encode(data_type_list, data_value_list)
-    return keccak(byte_data)
+    return primitives.bytes32(keccak(byte_data))
 
 
-def create_hash_string(string: str):
+def create_hash_string(string: str) -> primitives.bytes32:
     """
     Value to hash
 
@@ -39,4 +42,5 @@ def create_hash_string(string: str):
         hashed string.
 
     """
+    return create_hash(["string"], [string])
     return create_hash(["string"], [string])

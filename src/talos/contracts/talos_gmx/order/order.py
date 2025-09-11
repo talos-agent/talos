@@ -6,7 +6,7 @@ from eth_rpc import Block, PrivateKeyWallet
 from eth_rpc.networks import Arbitrum
 from eth_rpc.types import primitives
 from eth_rpc.utils import to_checksum
-from eth_typing import HexAddress, HexStr
+from eth_typing import ChecksumAddress, HexAddress, HexStr
 from hexbytes import HexBytes
 from pydantic import BaseModel, Field, PrivateAttr
 
@@ -28,7 +28,7 @@ from ..contracts.exchange_router import (
 from ..contracts.synthetics_reader import ExecutionPriceParams, PriceProps
 from ..getters.markets import Markets
 from ..getters.prices import OraclePrices
-from ..types import DecreasePositionSwapType, OrderType
+from ..types import DecreasePositionSwapType, Market, OraclePriceData, OrderType
 from ..types.gas_limits import GasLimits
 from ..utils.approval import check_if_approved
 from ..utils.gas import get_execution_fee
@@ -37,9 +37,9 @@ from ..utils.price import get_execution_price_and_price_impact
 
 class Order(BaseModel):
     wallet: PrivateKeyWallet
-    market_key: HexAddress
-    collateral_address: HexAddress
-    index_token_address: HexAddress
+    market_key: ChecksumAddress
+    collateral_address: ChecksumAddress
+    index_token_address: ChecksumAddress
     is_long: bool
     size_delta: int
     initial_collateral_delta: int
@@ -62,7 +62,7 @@ class Order(BaseModel):
             assert block.base_fee_per_gas is not None
             self.max_fee_per_gas = int(block.base_fee_per_gas * 1.35)
 
-    async def estimated_swap_output(self, market: dict, in_token: str, in_token_amount: int) -> dict:
+    async def estimated_swap_output(self, market: Market, in_token: HexAddress, in_token_amount: int) -> dict:  # type: ignore
         raise NotImplementedError()
 
     async def determine_gas_limits(self) -> None:
@@ -102,7 +102,7 @@ class Order(BaseModel):
     def _get_prices(
         self,
         decimals: float,
-        prices: dict,
+        prices: dict[ChecksumAddress, OraclePriceData],
         is_open: bool = False,
         is_close: bool = False,
     ) -> tuple[float, int, float]:
@@ -112,8 +112,8 @@ class Order(BaseModel):
         logging.info("Getting prices...")
         price = np.median(
             [
-                float(prices[self.index_token_address]["maxPriceFull"]),
-                float(prices[self.index_token_address]["minPriceFull"]),
+                float(prices[self.index_token_address].max_price_full),
+                float(prices[self.index_token_address].min_price_full),
             ]
         )
 
@@ -184,7 +184,12 @@ class Order(BaseModel):
 
     async def _prepare_order_execution(
         self, is_close: bool
-    ) -> tuple[primitives.uint256, dict, dict, primitives.int256]:
+    ) -> tuple[
+        primitives.uint256,
+        dict[ChecksumAddress, Market],
+        dict[ChecksumAddress, OraclePriceData],
+        primitives.int256,
+    ]:
         """
         Prepare order execution by getting fees, checking approvals, and loading market data
         """
@@ -207,7 +212,12 @@ class Order(BaseModel):
         return execution_fee, market_info, prices, primitives.int256(size_delta_price_price_impact)
 
     async def _determine_order_type_and_swap_logic(
-        self, is_open: bool, is_close: bool, is_swap: bool, market_info: dict, size_delta_price_price_impact: int
+        self,
+        is_open: bool,
+        is_close: bool,
+        is_swap: bool,
+        market_info: dict[ChecksumAddress, Market],
+        size_delta_price_price_impact: int,
     ) -> tuple[OrderType, int]:
         """
         Determine order type and handle swap-specific logic
@@ -224,7 +234,7 @@ class Order(BaseModel):
             # Estimate amount of token out using a reader function, necessary
             # for multi swap
             estimated_output = await self.estimated_swap_output(
-                market_info[self.swap_path[0]], self.collateral_address, self.initial_collateral_delta
+                market_info[to_checksum(self.swap_path[0])], self.collateral_address, self.initial_collateral_delta
             )
 
             # this var will help to calculate the cost gas depending on the
@@ -234,7 +244,7 @@ class Order(BaseModel):
             self._get_limits_order_type = self._gas_limits.single_swap
             if len(self.swap_path) > 1:
                 estimated_output = await self.estimated_swap_output(
-                    market_info[self.swap_path[1]],
+                    market_info[to_checksum(self.swap_path[1])],
                     USDC_ADDRESS,
                     int(
                         estimated_output["out_token_amount"]
@@ -254,8 +264,8 @@ class Order(BaseModel):
         is_open: bool,
         is_close: bool,
         is_swap: bool,
-        market_info: dict,
-        prices: dict,
+        market_info: dict[ChecksumAddress, Market],
+        prices: dict[ChecksumAddress, OraclePriceData],
         size_delta_price_price_impact: int,
     ) -> tuple[float, int, float, int, HexAddress]:
         """
@@ -266,15 +276,15 @@ class Order(BaseModel):
             data_store=DATASTORE_ADDRESS,
             market_key=self.market_key,
             index_token_price=PriceProps(
-                min=primitives.uint256(int(prices[self.index_token_address]["maxPriceFull"])),
-                max=primitives.uint256(int(prices[self.index_token_address]["minPriceFull"])),
+                min=primitives.uint256(int(prices[self.index_token_address].max_price_full)),
+                max=primitives.uint256(int(prices[self.index_token_address].min_price_full)),
             ),
             position_size_in_usd=primitives.uint256(0),
             position_size_in_tokens=primitives.uint256(0),
             size_delta_usd=primitives.int256(size_delta_price_price_impact),
             is_long=self.is_long,
         )
-        decimals = market_info[self.market_key]["market_metadata"]["decimals"]
+        decimals = market_info[self.market_key].market_metadata.decimals
 
         price, acceptable_price, acceptable_price_in_usd = self._get_prices(
             decimals,
@@ -309,7 +319,7 @@ class Order(BaseModel):
         return price, acceptable_price, acceptable_price_in_usd, mark_price, gmx_market_address
 
     def _validate_execution_price(
-        self, is_open: bool, is_close: bool, execution_price_dict: dict, acceptable_price_in_usd: float
+        self, is_open: bool, is_close: bool, execution_price_dict: dict[str, float], acceptable_price_in_usd: float
     ) -> None:
         """
         Validate that execution price falls within acceptable range
@@ -443,6 +453,8 @@ class Order(BaseModel):
         gas_price = block.base_fee_per_gas
         assert self._gas_limits is not None
         assert gas_price is not None
-        execution_fee = int(get_execution_fee(self._gas_limits, self._gas_limits_order_type, gas_price))
+
+        assert self._gas_limits_order_type is not None
+        execution_fee = get_execution_fee(self._gas_limits, self._gas_limits_order_type, gas_price)
 
         return primitives.uint256(int(execution_fee * self.execution_buffer))

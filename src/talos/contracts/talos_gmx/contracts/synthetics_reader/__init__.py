@@ -1,18 +1,26 @@
 from eth_rpc.networks import Arbitrum
 
-from .schemas import DepositAmountOutParams, ExecutionPriceParams, GetMarketsParams, GetOpenInterestParams, GetPnlParams
 from .reader import SyntheticsReader
+from .schemas import (
+    DepositAmountOutParams,
+    ExecutionPriceParams,
+    GetMarketParams,
+    GetMarketsParams,
+    GetOpenInterestParams,
+    GetPnlParams,
+)
 from .types import (
     MarketProps,
+    MarketUtilsMarketPrices,
     OrderProps,
-    PriceProps,
     PositionProps,
+    PriceProps,
+    ReaderPricingUtilsExecutionPriceResult,
     ReaderUtilsMarketInfo,
     ReaderUtilsPositionInfo,
-    ReaderPricingUtilsExecutionPriceResult,
 )
 
-synthetics_reader = SyntheticsReader[Arbitrum](address='0x5Ca84c34a381434786738735265b9f3FD814b824')
+synthetics_reader = SyntheticsReader[Arbitrum](address="0x5Ca84c34a381434786738735265b9f3FD814b824")
 
 
 __all__ = [
@@ -24,6 +32,15 @@ __all__ = [
     "MarketProps",
     "ReaderUtilsMarketInfo",
     "SyntheticsReader",
+    "PositionProps",
+    "OrderProps",
+    "PriceProps",
+    "ReaderUtilsPositionInfo",
+    "ReaderPricingUtilsExecutionPriceResult",
+    "reader_contract",
+    "SyntheticsReader",
+    "GetMarketParams",
+    "MarketUtilsMarketPrices",
     "PositionProps",
     "OrderProps",
     "PriceProps",

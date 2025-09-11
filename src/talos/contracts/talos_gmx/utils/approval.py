@@ -1,8 +1,8 @@
-from eth_typing import HexAddress, HexStr
 from eth_rpc import PrivateKeyWallet
-from eth_rpc.utils import to_checksum
 from eth_rpc.networks import Arbitrum
-from eth_typeshed.erc20 import ERC20, OwnerSpenderRequest, ApproveRequest
+from eth_rpc.utils import to_checksum
+from eth_typeshed.erc20 import ERC20, ApproveRequest, OwnerSpenderRequest
+from eth_typing import HexAddress, HexStr
 
 
 async def check_if_approved(
@@ -29,23 +29,19 @@ async def check_if_approved(
         raise Exception("Insufficient balance!")
 
     amount_approved = await token.allowance(
-        OwnerSpenderRequest(
-            owner=user_checksum_address,
-            spender=spender_checksum_address
-        )
+        OwnerSpenderRequest(owner=user_checksum_address, spender=spender_checksum_address)
     ).get()
 
     print("Checking coins for approval..")
     if amount_approved < amount_of_tokens_to_spend and approve:
-
-        print('Approving contract "{}" to spend {} tokens belonging to token address: {}'.format(
-            spender_checksum_address, amount_of_tokens_to_spend, token_checksum_address))
+        print(
+            'Approving contract "{}" to spend {} tokens belonging to token address: {}'.format(
+                spender_checksum_address, amount_of_tokens_to_spend, token_checksum_address
+            )
+        )
 
         tx_hash = token.approve(
-            ApproveRequest(
-                spender=spender_checksum_address,
-                amount=amount_of_tokens_to_spend
-            )
+            ApproveRequest(spender=spender_checksum_address, amount=amount_of_tokens_to_spend)
         ).execute(wallet)
 
         print("Txn submitted!")
@@ -54,6 +50,9 @@ async def check_if_approved(
     if amount_approved < amount_of_tokens_to_spend and not approve:
         raise Exception("Token not approved for spend, please allow first!")
 
-    print('Contract "{}" approved to spend {} tokens belonging to token address: {}'.format(
-        spender_checksum_address, amount_of_tokens_to_spend, token_checksum_address))
+    print(
+        'Contract "{}" approved to spend {} tokens belonging to token address: {}'.format(
+            spender_checksum_address, amount_of_tokens_to_spend, token_checksum_address
+        )
+    )
     print("Coins Approved for spend!")
