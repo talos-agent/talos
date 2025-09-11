@@ -121,18 +121,18 @@ class Order(BaseModel):
         # slippage in a different way
         if is_open:
             if self.is_long:
-                slippage = str(int(float(price) + float(price) * self.slippage_percent))
+                slippage = int(float(price) + float(price) * self.slippage_percent)
             else:
-                slippage = str(int(float(price) - float(price) * self.slippage_percent))
+                slippage = int(float(price) - float(price) * self.slippage_percent)
         elif is_close:
             if self.is_long:
-                slippage = str(int(float(price) - float(price) * self.slippage_percent))
+                slippage = int(float(price) - float(price) * self.slippage_percent)
             else:
-                slippage = str(int(float(price) + float(price) * self.slippage_percent))
+                slippage = int(float(price) + float(price) * self.slippage_percent)
         else:
             slippage = 0
 
-        acceptable_price_in_usd = int(slippage) * 10 ** (decimals - PRECISION)
+        acceptable_price_in_usd = slippage * 10 ** (decimals - PRECISION)
 
         logging.info("Mark Price: ${:.4f}".format(float(price * 10 ** (decimals - PRECISION))))
 
@@ -179,10 +179,12 @@ class Order(BaseModel):
         return await self._submit_transaction(
             self.wallet,
             value_amount,
-            multicall_args,
+            multicall_args,  # type: ignore
         )
 
-    async def _prepare_order_execution(self, is_close: bool) -> tuple[int, dict, dict, int]:
+    async def _prepare_order_execution(
+        self, is_close: bool
+    ) -> tuple[primitives.uint256, dict, dict, primitives.int256]:
         """
         Prepare order execution by getting fees, checking approvals, and loading market data
         """
@@ -202,7 +204,7 @@ class Order(BaseModel):
         if is_close:
             size_delta_price_price_impact = size_delta_price_price_impact * -1
 
-        return execution_fee, market_info, prices, size_delta_price_price_impact
+        return execution_fee, market_info, prices, primitives.int256(size_delta_price_price_impact)
 
     async def _determine_order_type_and_swap_logic(
         self, is_open: bool, is_close: bool, is_swap: bool, market_info: dict, size_delta_price_price_impact: int
@@ -255,7 +257,7 @@ class Order(BaseModel):
         market_info: dict,
         prices: dict,
         size_delta_price_price_impact: int,
-    ) -> tuple[float, int, float, int, str]:
+    ) -> tuple[float, int, float, int, HexAddress]:
         """
         Calculate prices and validate execution price
         """
@@ -440,6 +442,7 @@ class Order(BaseModel):
         block = await Block[Arbitrum].latest()
         gas_price = block.base_fee_per_gas
         assert self._gas_limits is not None
+        assert gas_price is not None
         execution_fee = int(get_execution_fee(self._gas_limits, self._gas_limits_order_type, gas_price))
 
         return primitives.uint256(int(execution_fee * self.execution_buffer))
