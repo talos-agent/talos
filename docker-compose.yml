@@ -16,4 +16,3 @@ services:
 
 volumes:
   talos_data:
-
