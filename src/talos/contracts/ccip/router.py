@@ -92,8 +92,6 @@ class CCIPRouter(ProtocolBase):
     def _encode_gas_limit(self, gas_limit: primitives.uint256) -> bytes:
         prefix = EVM_EXTRA_ARGS_V1_TAG[2:]
         gas_limit_bytes = gas_limit.to_bytes(32, "big").hex()
-        # missing_bytes = 128 - (len(prefix) + len(gas_limit_bytes))
-        # struct_padding = "0" * missing_bytes
         return bytes.fromhex(f"{prefix}{gas_limit_bytes}")
 
     async def bridge_native(
