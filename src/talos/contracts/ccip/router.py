@@ -162,8 +162,6 @@ class CCIPRouter(ProtocolBase):
     async def check_status(self, tx_hash: HexStr) -> CCIPMessageResponse:
         CCIP_EXPLORER_URL = "https://ccip.chain.link/api/h/atlas/message/"
 
-        print(f"{CCIP_EXPLORER_URL}{tx_hash}")
-
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{CCIP_EXPLORER_URL}{tx_hash}")
         if response.status_code != 200:
