@@ -1,22 +1,12 @@
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-
-class Base(DeclarativeBase):
-    def to_dict(self) -> dict[str, Any]:
-        """Convert SQLAlchemy model instance to dictionary for JSON serialization."""
-        result = {}
-        for column in self.__table__.columns:
-            value = getattr(self, column.name)
-            if isinstance(value, datetime):
-                result[column.name] = value.isoformat()
-            else:
-                result[column.name] = value
-        return result
+from .base import Base
+from .chainlink import ChainlinkBridge
 
 
 class Counter(Base):
@@ -149,3 +139,18 @@ class ContractDeployment(Base):
     user: Mapped["User"] = relationship("User")
 
     __table_args__ = (Index("idx_signature_chain", "contract_signature", "chain_id", unique=True),)
+
+
+__all__ = [
+    "Base",
+    "Counter",
+    "Swap",
+    "User",
+    "ConversationHistory",
+    "Message",
+    "Memory",
+    "Dataset",
+    "DatasetChunk",
+    "ContractDeployment",
+    "ChainlinkBridge",
+]
