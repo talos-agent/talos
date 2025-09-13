@@ -157,3 +157,7 @@ test_memory.json
 # ROFL ORCs
 *.orc
 data/
+
+
+scratch.py
+tmp.py
