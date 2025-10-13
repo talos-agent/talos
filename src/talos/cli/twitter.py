@@ -1,21 +1,23 @@
 from typing import Optional
+
 import typer
 
 from talos.skills.twitter_persona import TwitterPersonaSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
 from talos.skills.twitter_voice import TwitterVoiceSkill
+from talos.tools.twitter import TwitterTool
 
 twitter_app = typer.Typer()
 
 
 @twitter_app.command()
-def get_user_prompt(username: str):
+def get_user_prompt(username: str) -> None:
     """
     Gets the general voice of a user as a structured persona analysis.
     """
     skill = TwitterPersonaSkill()
     response = skill.run(username=username)
-    
+
     print(f"=== Twitter Persona Analysis for @{username} ===\n")
     print(f"Report:\n{response.report}\n")
     print(f"Topics: {', '.join(response.topics)}\n")
@@ -23,7 +25,7 @@ def get_user_prompt(username: str):
 
 
 @twitter_app.command()
-def get_query_sentiment(query: str, start_time: Optional[str] = None):
+def get_query_sentiment(query: str, start_time: Optional[str] = None) -> None:
     """
     Gets the general sentiment/report on a specific query.
 
@@ -40,19 +42,29 @@ def get_query_sentiment(query: str, start_time: Optional[str] = None):
 
 
 @twitter_app.command()
-def integrate_voice(username: str = "talos_is"):
+def integrate_voice(username: str = "talos_is") -> None:
     """
     Integrate Twitter voice analysis into agent communication.
-    
+
     Args:
         username: Twitter username to analyze (defaults to talos_is)
     """
     skill = TwitterVoiceSkill()
     result = skill.run(username=username)
-    
+
     print(f"=== Voice Integration for @{username} ===\n")
     print(f"Voice Source: {result['voice_source']}")
     print(f"Voice Prompt Generated:\n{result['voice_prompt']}")
     print("\nPersona Analysis:")
     print(f"Topics: {', '.join(result['persona_analysis'].topics)}")
     print(f"Style: {', '.join(result['persona_analysis'].style)}")
+
+
+@twitter_app.command()
+def post_tweet(tweet: str) -> None:
+    """
+    Posts a tweet to Twitter.
+    """
+    tool = TwitterTool()
+    result = tool.post_tweet(tweet)
+    print(result)

@@ -6,8 +6,8 @@ from typing import Any
 import requests
 from pydantic import BaseModel, Field, PrivateAttr
 
-from .base import SupervisedTool
 from ..settings import GitBookSettings
+from .base import SupervisedTool
 
 
 class GitBookToolName(str, Enum):
