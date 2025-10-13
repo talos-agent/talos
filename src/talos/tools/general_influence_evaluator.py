@@ -132,7 +132,7 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
 
         total_length = sum(len(tweet.text) for tweet in tweets)
         avg_length = total_length / len(tweets)
-        
+
         if avg_length >= 200:
             length_score = 80
         elif avg_length >= 100:
@@ -144,7 +144,7 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
 
         original_tweets = [tweet for tweet in tweets if not tweet.text.startswith("RT @")]
         originality_ratio = len(original_tweets) / len(tweets) if tweets else 0
-        
+
         if originality_ratio >= 0.8:
             originality_score = 80
         elif originality_ratio >= 0.6:
@@ -189,46 +189,43 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
         """Calculate enhanced authenticity score with advanced bot detection (0-100)"""
         if tweets is None:
             tweets = []
-        
+
         base_score = self._calculate_base_authenticity(user)
-        
+
         engagement_score = self._calculate_engagement_authenticity(user, tweets)
-        
+
         content_score = self._calculate_content_authenticity(tweets)
-        
+
         temporal_score = self._calculate_temporal_authenticity(tweets)
-        
+
         composite_score = int(
-            base_score * 0.40 +
-            engagement_score * 0.25 +
-            content_score * 0.20 +
-            temporal_score * 0.15
+            base_score * 0.40 + engagement_score * 0.25 + content_score * 0.20 + temporal_score * 0.15
         )
-        
+
         return min(100, max(0, composite_score))
 
     def _calculate_base_authenticity(self, user: Any) -> int:
         """Calculate base authenticity score from account indicators (0-100)"""
         score = 0
-        
+
         account_age_days = (datetime.now(timezone.utc) - user.created_at).days
         if account_age_days > 1825:  # 5+ years
             score += 35
-        elif account_age_days > 1095:  # 3+ years  
+        elif account_age_days > 1095:  # 3+ years
             score += 30
-        elif account_age_days > 730:   # 2+ years
+        elif account_age_days > 730:  # 2+ years
             score += 25
-        elif account_age_days > 365:   # 1+ year
+        elif account_age_days > 365:  # 1+ year
             score += 20
-        elif account_age_days > 180:   # 6+ months
+        elif account_age_days > 180:  # 6+ months
             score += 10
-        elif account_age_days < 30:    # Suspicious new accounts
+        elif account_age_days < 30:  # Suspicious new accounts
             score -= 10
-        
+
         if user.verified:
             score += 25
-        
-        if user.profile_image_url and not user.profile_image_url.endswith('default_profile_images/'):
+
+        if user.profile_image_url and not user.profile_image_url.endswith("default_profile_images/"):
             score += 15
         if user.description and len(user.description) > 20:
             score += 10
@@ -236,77 +233,77 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
             score += 5
         if user.url:
             score += 5
-        
+
         following = user.public_metrics.get("following_count", 0)
-        
+
         if following > 50000:
             score -= 15
         elif following > 10000:
             score -= 5
-            
+
         return min(100, max(0, score))
 
     def _calculate_engagement_authenticity(self, user: Any, tweets: List[Any]) -> int:
         """Analyze engagement patterns for authenticity indicators (0-100)"""
         if not tweets:
             return 50  # Neutral score when no data available
-        
+
         score = 50  # Start with neutral
         followers = user.public_metrics.get("followers_count", 0)
-        
+
         if followers == 0:
             return 20  # Very suspicious
-        
+
         engagement_rates = []
         for tweet in tweets[:20]:  # Analyze recent tweets
             engagement = (
-                tweet.public_metrics.get("like_count", 0) +
-                tweet.public_metrics.get("retweet_count", 0) +
-                tweet.public_metrics.get("reply_count", 0)
+                tweet.public_metrics.get("like_count", 0)
+                + tweet.public_metrics.get("retweet_count", 0)
+                + tweet.public_metrics.get("reply_count", 0)
             )
             rate = (engagement / followers) * 100
             engagement_rates.append(rate)
-        
+
         if engagement_rates:
             avg_rate = sum(engagement_rates) / len(engagement_rates)
             rate_variance = sum((r - avg_rate) ** 2 for r in engagement_rates) / len(engagement_rates)
-            
+
             if rate_variance < 0.1:  # Very consistent
                 score += 20
             elif rate_variance < 1.0:  # Reasonably consistent
                 score += 10
             elif rate_variance > 10.0:  # Highly inconsistent (suspicious)
                 score -= 15
-            
+
             if avg_rate > 10:  # >10% engagement rate is unusual
                 score -= 20
             elif avg_rate > 5:
                 score -= 10
             elif avg_rate < 0.1:  # Very low engagement also suspicious
                 score -= 10
-        
+
         like_counts = [t.public_metrics.get("like_count", 0) for t in tweets[:10]]
         retweet_counts = [t.public_metrics.get("retweet_count", 0) for t in tweets[:10]]
-        
+
         if sum(like_counts) > 0 and sum(retweet_counts) > 0:
             like_rt_ratio = sum(like_counts) / sum(retweet_counts)
             if 2 <= like_rt_ratio <= 20:  # Normal range
                 score += 15
             else:  # Unusual ratios
                 score -= 10
-        
+
         return min(100, max(0, score))
 
     def _calculate_content_authenticity(self, tweets: List[Any]) -> int:
         """Analyze content patterns for authenticity indicators (0-100)"""
         if not tweets:
             return 50  # Neutral score when no data available
-        
+
         score = 50  # Start with neutral
-        
+
         tweet_texts = [tweet.text for tweet in tweets[:20]]
         unique_texts = set(tweet_texts)
-        
+
         if len(tweet_texts) > 0:
             uniqueness_ratio = len(unique_texts) / len(tweet_texts)
             if uniqueness_ratio > 0.9:  # High uniqueness
@@ -315,97 +312,97 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
                 score += 15
             elif uniqueness_ratio < 0.5:  # Low uniqueness (suspicious)
                 score -= 20
-        
+
         original_tweets = [t for t in tweets if not t.text.startswith("RT @")]
-        
+
         if len(tweets) > 0:
             original_ratio = len(original_tweets) / len(tweets)
             if original_ratio > 0.7:  # Mostly original content
                 score += 20
             elif original_ratio < 0.3:  # Mostly retweets (suspicious)
                 score -= 15
-        
+
         hashtag_counts = []
         for tweet in tweets[:10]:
-            hashtag_count = tweet.text.count('#')
+            hashtag_count = tweet.text.count("#")
             hashtag_counts.append(hashtag_count)
-        
+
         if hashtag_counts:
             avg_hashtags = sum(hashtag_counts) / len(hashtag_counts)
             if avg_hashtags > 5:  # Excessive hashtag use
                 score -= 15
             elif 1 <= avg_hashtags <= 3:  # Normal hashtag use
                 score += 10
-        
+
         if original_tweets:
             avg_length = sum(len(t.text) for t in original_tweets) / len(original_tweets)
             if avg_length > 100:  # Longer, more thoughtful tweets
                 score += 15
             elif avg_length < 30:  # Very short tweets (suspicious)
                 score -= 10
-        
+
         return min(100, max(0, score))
 
     def _calculate_temporal_authenticity(self, tweets: List[Any]) -> int:
         """Analyze temporal posting patterns for authenticity indicators (0-100)"""
         if not tweets:
             return 50  # Neutral score when no data available
-        
+
         score = 50  # Start with neutral
-        
+
         # Analyze posting frequency
         tweets_with_dates = [t for t in tweets if t.created_at]
         if len(tweets_with_dates) < 2:
             return score
-        
+
         timestamps = []
         for tweet in tweets_with_dates[:20]:
             try:
                 if isinstance(tweet.created_at, str):
-                    timestamp = datetime.fromisoformat(tweet.created_at.replace('Z', '+00:00'))
+                    timestamp = datetime.fromisoformat(tweet.created_at.replace("Z", "+00:00"))
                 else:
                     timestamp = tweet.created_at
                 timestamps.append(timestamp)
             except (ValueError, AttributeError, TypeError):
                 continue
-        
+
         if len(timestamps) < 2:
             return score
-        
+
         timestamps.sort()
         intervals = []
         for i in range(1, len(timestamps)):
-            interval = (timestamps[i] - timestamps[i-1]).total_seconds()
+            interval = (timestamps[i] - timestamps[i - 1]).total_seconds()
             intervals.append(interval)
-        
+
         if intervals:
             avg_interval = sum(intervals) / len(intervals)
             interval_variance = sum((i - avg_interval) ** 2 for i in intervals) / len(intervals)
-            
+
             if interval_variance < (avg_interval * 0.1) ** 2 and len(intervals) > 5:
                 score -= 20  # Too regular
             elif interval_variance > (avg_interval * 2) ** 2:
-                score += 10   # Natural variance
-            
+                score += 10  # Natural variance
+
             if avg_interval < 300:  # Less than 5 minutes average
                 score -= 25
             elif avg_interval < 3600:  # Less than 1 hour average
                 score -= 10
-        
+
         return min(100, max(0, score))
 
     def _calculate_influence_score(self, user: Any) -> int:
         """Calculate influence score based on follower metrics (0-100)"""
         followers = user.public_metrics.get("followers_count", 0)
         following = user.public_metrics.get("following_count", 0)
-        
+
         if followers >= 1000000:  # 1M+
             follower_score = 100
         elif followers >= 100000:  # 100K+
             follower_score = 80
-        elif followers >= 10000:   # 10K+
+        elif followers >= 10000:  # 10K+
             follower_score = 60
-        elif followers >= 1000:    # 1K+
+        elif followers >= 1000:  # 1K+
             follower_score = 40
         else:
             follower_score = 20
@@ -444,7 +441,7 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
         if tweets:
             tweet_count = user.public_metrics.get("tweet_count", 0)
             account_age_days = (datetime.now(timezone.utc) - user.created_at).days
-            
+
             if account_age_days > 0:
                 tweets_per_day = tweet_count / account_age_days
                 if 0.5 <= tweets_per_day <= 10:  # Reasonable posting frequency
@@ -454,7 +451,7 @@ class GeneralInfluenceEvaluator(TwitterAccountEvaluator):
                 else:  # Too much or too little posting
                     score += 5
 
-        if user.url and any(domain in user.url for domain in ['.com', '.org', '.edu', '.gov']):
+        if user.url and any(domain in user.url for domain in [".com", ".org", ".edu", ".gov"]):
             score += 10
 
         return min(100, score)
