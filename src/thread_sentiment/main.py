@@ -17,7 +17,7 @@ def post_question():
     The tweet ID is saved to a file to be used by the analysis function.
     """
     settings = TwitterOAuthSettings()
-    
+
     auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
     auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
