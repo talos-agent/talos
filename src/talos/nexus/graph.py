@@ -6,6 +6,7 @@ from .state import NexusState
 
 from typing import List
 
+
 # Define the nodes for the graph
 def node_a(state: NexusState) -> dict[str, List[str]]:
     print("Executing Node A")

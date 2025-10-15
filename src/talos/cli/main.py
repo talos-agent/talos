@@ -22,6 +22,7 @@ from talos.cli.twitter import twitter_app
 from talos.core.main_agent import MainAgent
 from talos.database.utils import cleanup_temporary_users, get_user_stats
 from talos.nexus.service import NexusService
+from talos.reports.psyche_seismograph import PsycheSeismograph
 from talos.services.key_management import KeyManagement
 from talos.settings import OpenAISettings
 
@@ -220,6 +221,15 @@ def db_stats() -> None:
     if stats["total_users"] > 0:
         temp_percentage = (stats["temporary_users"] / stats["total_users"]) * 100
         print(f"  Temporary user percentage: {temp_percentage:.1f}%")
+
+
+@app.command()
+def gerar_relatorio() -> None:
+    """
+    Generates the final report for the Aletheia Mission.
+    """
+    report = PsycheSeismograph.generate_report()
+    print(report)
 
 
 if __name__ == "__main__":
