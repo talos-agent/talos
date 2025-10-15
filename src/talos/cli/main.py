@@ -21,6 +21,7 @@ from talos.cli.proposals import proposals_app
 from talos.cli.twitter import twitter_app
 from talos.core.main_agent import MainAgent
 from talos.database.utils import cleanup_temporary_users, get_user_stats
+from talos.aurum.grid import AurumGrid
 from talos.nexus.service import NexusService
 from talos.reports.psyche_seismograph import PsycheSeismograph
 from talos.services.key_management import KeyManagement
@@ -28,6 +29,7 @@ from talos.settings import OpenAISettings
 
 app = typer.Typer()
 nexus_app = typer.Typer()
+aurum_app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
 app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
@@ -37,6 +39,19 @@ app.add_typer(arbiscan_app, name="arbiscan")
 app.add_typer(contracts_app, name="contracts")
 app.add_typer(migrations_app, name="migrations")
 app.add_typer(nexus_app, name="nexus")
+app.add_typer(aurum_app, name="aurum")
+
+
+@aurum_app.command("status")
+def aurum_status() -> None:
+    """
+    Displays the current status of the Aurum Grid.
+    """
+    grid = AurumGrid()
+    print(f"Φ: {grid.phi}")
+    print(f"Ψ: {grid.psi}")
+    print(f"Ω: {grid.omega}")
+    print(f"C²: {grid.coherence}")
 
 
 @nexus_app.command("run")
