@@ -9,11 +9,11 @@ jobs:
   post_question:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.12'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -26,7 +26,7 @@ jobs:
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
         run: python -c "from src.thread_sentiment.main import post_question; post_question()"
       - name: Upload tweet ID
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tweet_id
           path: tweet_id.txt
@@ -35,17 +35,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: post_question
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.12'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install tweepy
       - name: Download tweet ID
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tweet_id
       - name: Analyze and post sentiment
