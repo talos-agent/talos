@@ -25,11 +25,13 @@ from talos.aurum.grid import AurumGrid
 from talos.nexus.service import NexusService
 from talos.reports.psyche_seismograph import PsycheSeismograph
 from talos.services.key_management import KeyManagement
+from talos.services.morph import MorphService
 from talos.settings import OpenAISettings
 
 app = typer.Typer()
 nexus_app = typer.Typer()
 aurum_app = typer.Typer()
+morph_app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
 app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
@@ -40,6 +42,19 @@ app.add_typer(contracts_app, name="contracts")
 app.add_typer(migrations_app, name="migrations")
 app.add_typer(nexus_app, name="nexus")
 app.add_typer(aurum_app, name="aurum")
+app.add_typer(morph_app, name="morph")
+
+
+@morph_app.command("get-block-number")
+def morph_get_block_number(
+    provider_url: str = typer.Option("http://localhost:8545", help="The URL of the Morph node provider."),
+) -> None:
+    """
+    Gets the latest block number from the Morph network.
+    """
+    morph_service = MorphService(provider_url)
+    block_number = morph_service.get_latest_block_number()
+    print(f"Latest block number: {block_number}")
 
 
 @aurum_app.command("status")
