@@ -37,11 +37,7 @@ class TwitterPersonaSkill(Skill):
         user_mentions = self.twitter_client.get_user_mentions(username)
 
         if not user_timeline:
-            return TwitterPersonaResponse(
-                report=f"Could not find any tweets for user {username}",
-                topics=[],
-                style=[]
-            )
+            return TwitterPersonaResponse(report=f"Could not find any tweets for user {username}", topics=[], style=[])
 
         tweets = ""
         for tweet in random.sample(user_timeline, min(len(user_timeline), 20)):

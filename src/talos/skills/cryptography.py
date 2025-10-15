@@ -32,20 +32,20 @@ class CryptographySkill(Skill):
         Encrypts data using the public key and returns it as a base64 encoded string.
         """
         from talos.utils.validation import sanitize_user_input
-        
+
         if not data or not public_key:
             raise ValueError("Data and public key are required for encryption")
-        
+
         data = sanitize_user_input(data, max_length=10000)
-        
+
         try:
             decoded_public_key = base64.b64decode(public_key, validate=True)
         except Exception as e:
             raise ValueError(f"Invalid base64 public key: {e}")
-        
+
         if len(decoded_public_key) != 32:
             raise ValueError("Invalid public key length")
-        
+
         encrypted_data = self.key_management.encrypt(data, decoded_public_key)
         return base64.b64encode(encrypted_data).decode()
 
@@ -55,12 +55,12 @@ class CryptographySkill(Skill):
         """
         if not data:
             raise ValueError("Data is required for decryption")
-        
+
         try:
             decoded_data = base64.b64decode(data, validate=True)
         except Exception as e:
             raise ValueError(f"Invalid base64 encrypted data: {e}")
-        
+
         return self.key_management.decrypt(decoded_data)
 
     def run(self, **kwargs) -> str:
