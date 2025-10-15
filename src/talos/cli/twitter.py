@@ -15,7 +15,7 @@ def get_user_prompt(username: str):
     """
     skill = TwitterPersonaSkill()
     response = skill.run(username=username)
-    
+
     print(f"=== Twitter Persona Analysis for @{username} ===\n")
     print(f"Report:\n{response.report}\n")
     print(f"Topics: {', '.join(response.topics)}\n")
@@ -43,13 +43,13 @@ def get_query_sentiment(query: str, start_time: Optional[str] = None):
 def integrate_voice(username: str = "talos_is"):
     """
     Integrate Twitter voice analysis into agent communication.
-    
+
     Args:
         username: Twitter username to analyze (defaults to talos_is)
     """
     skill = TwitterVoiceSkill()
     result = skill.run(username=username)
-    
+
     print(f"=== Voice Integration for @{username} ===\n")
     print(f"Voice Source: {result['voice_source']}")
     print(f"Voice Prompt Generated:\n{result['voice_prompt']}")

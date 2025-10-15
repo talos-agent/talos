@@ -1,4 +1,3 @@
-
 from talos.models.dexscreener import DexscreenerData
 from talos.utils.http_client import SecureHTTPClient
 
@@ -6,6 +5,7 @@ from talos.utils.http_client import SecureHTTPClient
 class DexscreenerClient:
     def __init__(self, pair_address: str = "0xdaae914e4bae2aae4f536006c353117b90fb37e3"):
         from talos.utils.validation import sanitize_user_input
+
         self.pair_address = sanitize_user_input(pair_address, max_length=100)
 
     def get_talos_data(self) -> DexscreenerData:

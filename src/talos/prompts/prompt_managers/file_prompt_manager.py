@@ -30,10 +30,10 @@ class FilePromptManager(PromptManager):
             if filename.endswith(".json"):
                 filepath = os.path.join(self.prompts_dir, filename)
                 current_mtime = os.path.getmtime(filepath)
-                
+
                 if filename in self._file_mtimes and self._file_mtimes[filename] == current_mtime:
                     continue
-                
+
                 with open(filepath) as f:
                     prompt_data = json.load(f)
                     prompt = Prompt(
@@ -71,28 +71,26 @@ class FilePromptManager(PromptManager):
         """
         Gets prompts using declarative configuration and context.
         """
-        
+
         prompt_names = config.get_prompt_names(context)
         if not prompt_names:
             return None
-            
+
         base_prompt = self.get_prompt(prompt_names)
         if not base_prompt:
             return None
-            
+
         enhanced_template = base_prompt.template
         if config.variables or config.transformations:
             try:
                 enhanced_template = self.apply_variable_transformations(
-                    base_prompt.template, 
-                    {**context, **config.variables}, 
-                    config.transformations
+                    base_prompt.template, {**context, **config.variables}, config.transformations
                 )
             except KeyError:
                 pass
-                
+
         return Prompt(
             name=f"configured_{base_prompt.name}",
             template=enhanced_template,
-            input_variables=base_prompt.input_variables
+            input_variables=base_prompt.input_variables,
         )

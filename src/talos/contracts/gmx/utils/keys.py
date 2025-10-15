@@ -31,6 +31,7 @@ SWAP_ORDER_GAS_LIMIT = create_hash_string("SWAP_ORDER_GAS_LIMIT")
 VIRTUAL_TOKEN_ID = create_hash_string("VIRTUAL_TOKEN_ID")
 CLAIMABLE_FUNDING_AMOUNT = create_hash_string("CLAIMABLE_FUNDING_AMOUNT")
 
+
 def accountPositionListKey(account: str) -> primitives.bytes32:
     return create_hash(["bytes32", "address"], [ACCOUNT_POSITION_LIST, account])
 

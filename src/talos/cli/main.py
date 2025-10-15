@@ -21,10 +21,12 @@ from talos.cli.proposals import proposals_app
 from talos.cli.twitter import twitter_app
 from talos.core.main_agent import MainAgent
 from talos.database.utils import cleanup_temporary_users, get_user_stats
+from talos.nexus.service import NexusService
 from talos.services.key_management import KeyManagement
 from talos.settings import OpenAISettings
 
 app = typer.Typer()
+nexus_app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
 app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
@@ -33,6 +35,19 @@ app.add_typer(dataset_app, name="dataset")
 app.add_typer(arbiscan_app, name="arbiscan")
 app.add_typer(contracts_app, name="contracts")
 app.add_typer(migrations_app, name="migrations")
+app.add_typer(nexus_app, name="nexus")
+
+
+@nexus_app.command("run")
+def run_nexus(
+    message: str = typer.Argument(..., help="The message to send to the Nexus"),
+) -> None:
+    """
+    Run the Nexus graph.
+    """
+    nexus_service = NexusService()
+    result = nexus_service.run([message])
+    print(result)
 
 
 @app.callback()

@@ -25,7 +25,9 @@ class ContractABI(BaseModel):
 class ArbiScanResponse(BaseModel):
     status: str = Field(..., description="Response status")
     message: str = Field(..., description="Response message")
-    result: Union[List[ContractSourceCode], str] = Field(..., description="List of contract source code data or error message")
+    result: Union[List[ContractSourceCode], str] = Field(
+        ..., description="List of contract source code data or error message"
+    )
 
 
 class ArbiScanABIResponse(BaseModel):

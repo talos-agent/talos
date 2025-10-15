@@ -286,10 +286,13 @@ class MainAgent(Agent):
         """Initialize the startup task manager and discover tasks from files."""
         if not self.startup_task_manager:
             self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
-        
+
         import logging
+
         logger = logging.getLogger(__name__)
-        logger.info(f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks")
+        logger.info(
+            f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks"
+        )
 
     def add_scheduled_job(self, job: ScheduledJob) -> None:
         """

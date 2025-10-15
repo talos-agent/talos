@@ -27,11 +27,11 @@ class GithubTools(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         if not self.token:
             raise ValueError("Github token not provided.")
-        
+
         self._github = Github(auth=Auth.Token(self.token))
         self._http_client = SecureHTTPClient()
         self._headers = {"Authorization": f"token {self.token}"}
-        
+
         masked_token = mask_sensitive_data(self.token)
         logger.info(f"GitHub client initialized with token: {masked_token}")
 
@@ -45,12 +45,12 @@ class GithubTools(BaseModel):
     def _get_repo_cached(self, repo_key: str):
         """Get repository with caching to avoid repeated API calls."""
         current_time = time.time()
-        
+
         if repo_key in self._repo_cache:
             repo, cached_time = self._repo_cache[repo_key]
             if current_time - cached_time < self._cache_ttl:
                 return repo
-        
+
         repo = self._github.get_repo(repo_key)
         self._repo_cache[repo_key] = (repo, current_time)
         return repo
@@ -127,6 +127,7 @@ class GithubTools(BaseModel):
         if not comment or not comment.strip():
             raise ValueError("Comment cannot be empty")
         from ...utils.validation import sanitize_user_input
+
         comment = sanitize_user_input(comment, max_length=65536)
         repo = self._get_repo_cached(f"{user}/{project}")
         issue = repo.get_issue(number=issue_number)
@@ -161,6 +162,7 @@ class GithubTools(BaseModel):
         """
         self._validate_repo_params(user, project)
         from ...utils.validation import sanitize_user_input
+
         path = sanitize_user_input(path, max_length=255)
         repo = self._get_repo_cached(f"{user}/{project}")
         contents = repo.get_contents(path)
@@ -176,6 +178,7 @@ class GithubTools(BaseModel):
         if not filepath or not filepath.strip():
             raise ValueError("Filepath cannot be empty")
         from ...utils.validation import sanitize_user_input
+
         filepath = sanitize_user_input(filepath, max_length=255)
         repo = self._get_repo_cached(f"{user}/{project}")
         content = repo.get_contents(filepath)
@@ -204,6 +207,7 @@ class GithubTools(BaseModel):
         if not feedback or not feedback.strip():
             raise ValueError("Feedback cannot be empty")
         from ...utils.validation import sanitize_user_input
+
         feedback = sanitize_user_input(feedback, max_length=65536)
         repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
@@ -219,6 +223,7 @@ class GithubTools(BaseModel):
         if not comment or not comment.strip():
             raise ValueError("Comment cannot be empty")
         from ...utils.validation import sanitize_user_input
+
         comment = sanitize_user_input(comment, max_length=65536)
         repo = self._get_repo_cached(f"{user}/{project}")
         pr = repo.get_pull(number=pr_number)
@@ -245,6 +250,7 @@ class GithubTools(BaseModel):
         if not body or not body.strip():
             raise ValueError("Issue body cannot be empty")
         from ...utils.validation import sanitize_user_input
+
         title = sanitize_user_input(title, max_length=256)
         body = sanitize_user_input(body, max_length=65536)
         repo = self._get_repo_cached(f"{user}/{project}")
