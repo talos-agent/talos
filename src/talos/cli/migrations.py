@@ -4,11 +4,11 @@ import typer
 from sqlalchemy import create_engine
 
 from talos.database import (
-    run_migrations,
     check_migration_status,
     create_migration,
     get_current_revision,
     get_head_revision,
+    run_migrations,
 )
 from talos.database.session import get_database_url
 
@@ -20,9 +20,9 @@ def status() -> None:
     """Check the current migration status."""
     database_url = get_database_url()
     engine = create_engine(database_url)
-    
+
     status_info = check_migration_status(engine)
-    
+
     typer.echo("Database Migration Status:")
     typer.echo(f"  Current revision: {status_info['current_revision']}")
     typer.echo(f"  Head revision: {status_info['head_revision']}")
@@ -35,7 +35,7 @@ def upgrade() -> None:
     """Run all pending migrations."""
     database_url = get_database_url()
     engine = create_engine(database_url)
-    
+
     typer.echo("Running database migrations...")
     run_migrations(engine)
     typer.echo("Migrations completed successfully!")
@@ -54,7 +54,7 @@ def current() -> None:
     """Show the current database revision."""
     database_url = get_database_url()
     engine = create_engine(database_url)
-    
+
     current_rev = get_current_revision(engine)
     typer.echo(f"Current database revision: {current_rev}")
 

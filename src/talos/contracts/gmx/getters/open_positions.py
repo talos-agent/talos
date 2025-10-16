@@ -89,7 +89,8 @@ class GetOpenPositions(GetData):
         ) / 10 ** (30 - chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals)
 
         leverage = (raw_position.numbers.size_in_usd / 10**30) / (
-            raw_position.numbers.collateral_amount * collateral_price
+            raw_position.numbers.collateral_amount
+            * collateral_price
             / 10 ** chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals
         )
 
@@ -106,7 +107,8 @@ class GetOpenPositions(GetData):
             ),
             initial_collateral_amount=raw_position.numbers.collateral_amount,
             initial_collateral_amount_usd=(
-                raw_position.numbers.collateral_amount * collateral_price
+                raw_position.numbers.collateral_amount
+                * collateral_price
                 / 10 ** chain_tokens[to_checksum(raw_position.addresses.collateral_token)].decimals
             ),
             leverage=leverage,

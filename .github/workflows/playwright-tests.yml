@@ -1,0 +1,63 @@
+name: Testes de Sanidade com Playwright
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Garantir permissão de execução do launcher
+        run: chmod +x ./agi-launcher-universal-v3.sh
+
+      - name: Iniciar app em background
+        run: |
+          ./agi-launcher-universal-v3.sh --Debug &
+          sleep 10  # Tempo para inicialização do app
+
+      - name: Rodar testes Playwright
+        run: npx playwright test
+
+  test-on-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Iniciar app via launcher
+        run: |
+          .\agi-launcher-universal-v3.sh --Debug
+          sleep 10  # Tempo para inicialização do app
+
+      - name: Rodar testes Playwright
+        run: npx playwright test
