@@ -1,5 +1,7 @@
-# This is a minimal torrc file for the privacy-preserving data pipeline.
+# This is a minimal torrc file for the UniaoLives platform.
 # It is configured to listen on port 9050 for SOCKS connections.
 SocksPort 9050
-HiddenServiceDir /var/lib/tor/parallax123.onion
+HiddenServiceDir /var/lib/tor/uniaolives.onion
+HiddenServicePort 80 127.0.0.1:80
+HiddenServiceDir /var/lib/tor/nexus123.onion
 HiddenServicePort 4001 127.0.0.1:4001

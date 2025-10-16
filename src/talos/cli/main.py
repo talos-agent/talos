@@ -33,6 +33,7 @@ nexus_app = typer.Typer()
 aurum_app = typer.Typer()
 morph_app = typer.Typer()
 privacy_app = typer.Typer()
+uniaolives_app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
 app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
@@ -45,6 +46,15 @@ app.add_typer(nexus_app, name="nexus")
 app.add_typer(aurum_app, name="aurum")
 app.add_typer(morph_app, name="morph")
 app.add_typer(privacy_app, name="privacy")
+app.add_typer(uniaolives_app, name="uniaolives")
+
+
+@uniaolives_app.command("deploy")
+def uniaolives_deploy() -> None:
+    """
+    Deploys the UniaoLives platform.
+    """
+    os.system("./deploy.sh")
 
 
 @privacy_app.command("run-checklist")
