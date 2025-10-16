@@ -21,6 +21,8 @@ from talos.cli.proposals import proposals_app
 from talos.cli.twitter import twitter_app
 from talos.core.main_agent import MainAgent
 from talos.database.utils import cleanup_temporary_users, get_user_stats
+from talos.anchor.decoder import decode_csv_line
+from talos.anchor.processor import csv_anchor_reward
 from talos.aurum.grid import AurumGrid
 from talos.nexus.service import NexusService
 from talos.reports.psyche_seismograph import PsycheSeismograph
@@ -34,6 +36,7 @@ aurum_app = typer.Typer()
 morph_app = typer.Typer()
 privacy_app = typer.Typer()
 uniaolives_app = typer.Typer()
+anchor_app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
 app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
@@ -47,6 +50,23 @@ app.add_typer(aurum_app, name="aurum")
 app.add_typer(morph_app, name="morph")
 app.add_typer(privacy_app, name="privacy")
 app.add_typer(uniaolives_app, name="uniaolives")
+app.add_typer(anchor_app, name="anchor")
+
+
+@anchor_app.command("csv")
+def anchor_csv(
+    csv_line: str = typer.Argument(..., help="The CSV line to anchor."),
+    decode: bool = typer.Option(False, "--decode", "-d", help="Decode the CSV line into a human-readable format."),
+) -> None:
+    """
+    Anchors a CSV line to Bitcoin and mints a TimeChain token.
+    """
+    if decode:
+        decoded_line = decode_csv_line(csv_line)
+        print(decoded_line)
+    else:
+        result = csv_anchor_reward(csv_line)
+        print(result)
 
 
 @uniaolives_app.command("deploy")
