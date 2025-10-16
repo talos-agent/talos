@@ -1,0 +1,67 @@
+# docker-compose.privacy.yml
+version: "3.9"
+services:
+  tor-daemon:
+    image: dperson/tor
+    container_name: tor
+    restart: unless-stopped
+    volumes:
+      - ./torrc:/etc/tor/torrc:ro
+      - tor-keys:/var/lib/tor
+    networks:
+      - privnet
+
+  parallax:
+    image: gradient/parallax:0.9.3
+    container_name: parallax
+    environment:
+      LIBP2P_TRANSPORT: "tcp,tor"
+      LIBP2P_ANNOUNCE: "/onion/parallax123.onion/tcp/4001/p2p/QmNodeId"
+      TOR_SOCKS: "tor-daemon:9050"
+    depends_on:
+      - tor-daemon
+    networks:
+      - privnet
+    volumes:
+      - ./parallax-config.toml:/etc/parallax/config.toml:ro
+
+  nexus-depin:
+    image: nexuslabs/depin-client:1.4
+    container_name: nexus
+    environment:
+      TURN_ONLY: "1"
+      TOR_SOCKS: "tor-daemon:9050"
+      STUN_DISABLED: "1"
+    networks:
+      - privnet
+
+  bitcoin-tx:
+    image: lncm/bitcoind:v25
+    container_name: bitcoin
+    command: >
+      -proxy=tor-daemon:9050
+      -listen=0
+      -dnsseed=0
+      -rpcbind=0.0.0.0
+      -rpcallowip=privnet
+    networks:
+      - privnet
+
+  arweave-uploader:
+    image: akord/akord-cli:latest
+    container_name: arweave
+    environment:
+      HTTPS_PROXY: "socks5://tor-daemon:9050"
+      AKORD_WALLET_JSON: "/run/secrets/arweave-wallet.json"
+    volumes:
+      - ./payloads:/data
+      - ./wallet.json:/run/secrets/arweave-wallet.json:ro
+    networks:
+      - privnet
+
+networks:
+  privnet:
+    internal: true
+
+volumes:
+  tor-keys:
