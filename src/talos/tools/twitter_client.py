@@ -1,13 +1,13 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, Optional
-import logging
 
 import tweepy
 from pydantic import model_validator
 from pydantic_settings import BaseSettings
 from textblob import TextBlob
 
-from talos.models.twitter import TwitterUser, Tweet, ReferencedTweet
+from talos.models.twitter import ReferencedTweet, Tweet, TwitterUser
 
 logger = logging.getLogger(__name__)
 
@@ -29,19 +29,24 @@ class PaginatedTwitterResponse:
 
 class TwitterConfig(BaseSettings):
     TWITTER_BEARER_TOKEN: Optional[str] = None
+    TWITTER_CONSUMER_KEY: Optional[str] = None
+    TWITTER_CONSUMER_SECRET: Optional[str] = None
+    TWITTER_ACCESS_TOKEN: Optional[str] = None
+    TWITTER_ACCESS_TOKEN_SECRET: Optional[str] = None
 
     @model_validator(mode="after")
     def validate_bearer_token(self):
         if not self.TWITTER_BEARER_TOKEN:
             raise ValueError("TWITTER_BEARER_TOKEN environment variable is required but not set")
-        
-        from talos.utils.validation import validate_api_token_format, mask_sensitive_data
-        if not validate_api_token_format(self.TWITTER_BEARER_TOKEN, 'twitter'):
+
+        from talos.utils.validation import mask_sensitive_data, validate_api_token_format
+
+        if not validate_api_token_format(self.TWITTER_BEARER_TOKEN, "twitter"):
             logger.warning("Twitter bearer token format appears invalid")
-        
+
         masked_token = mask_sensitive_data(self.TWITTER_BEARER_TOKEN)
         logger.info(f"Twitter client initialized with token: {masked_token}")
-        
+
         return self
 
 
@@ -86,13 +91,20 @@ class TweepyClient(TwitterClient):
 
     def __init__(self):
         config = TwitterConfig()
-        self.client = tweepy.Client(bearer_token=config.TWITTER_BEARER_TOKEN)
+        self.client = tweepy.Client(
+            bearer_token=config.TWITTER_BEARER_TOKEN,
+            consumer_key=config.TWITTER_CONSUMER_KEY,
+            consumer_secret=config.TWITTER_CONSUMER_SECRET,
+            access_token=config.TWITTER_ACCESS_TOKEN,
+            access_token_secret=config.TWITTER_ACCESS_TOKEN_SECRET,
+        )
 
     def get_user(self, username: str) -> TwitterUser:
         from talos.utils.validation import validate_twitter_username
+
         if not validate_twitter_username(username):
             raise ValueError(f"Invalid Twitter username: {username}")
-        
+
         response = self.client.get_user(
             username=username,
             user_fields=[
@@ -106,6 +118,7 @@ class TweepyClient(TwitterClient):
             ],
         )
         from talos.models.twitter import TwitterPublicMetrics
+
         user_data = response.data
         return TwitterUser(
             id=int(user_data.id),
@@ -116,13 +129,14 @@ class TweepyClient(TwitterClient):
             public_metrics=TwitterPublicMetrics(**user_data.public_metrics),
             description=user_data.description,
             url=user_data.url,
-            verified=getattr(user_data, 'verified', False)
+            verified=getattr(user_data, "verified", False),
         )
 
     def search_tweets(
         self, query: str, start_time: Optional[str] = None, max_tweets: int = 500
     ) -> PaginatedTwitterResponse:
         from talos.utils.validation import sanitize_user_input
+
         if not query or not query.strip():
             raise ValueError("Search query cannot be empty")
         query = sanitize_user_input(query, max_length=500)
@@ -165,15 +179,24 @@ class TweepyClient(TwitterClient):
 
     def get_user_timeline(self, username: str) -> list[Tweet]:
         from talos.utils.validation import validate_twitter_username
+
         if not validate_twitter_username(username):
             raise ValueError(f"Invalid Twitter username: {username}")
-        
+
         user = self.get_user(username)
         if not user:
             return []
         response = self.client.get_users_tweets(
             id=user.id,
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"],
+            tweet_fields=[
+                "author_id",
+                "in_reply_to_user_id",
+                "public_metrics",
+                "referenced_tweets",
+                "conversation_id",
+                "created_at",
+                "edit_history_tweet_ids",
+            ],
             user_fields=[
                 "created_at",
                 "public_metrics",
@@ -188,15 +211,24 @@ class TweepyClient(TwitterClient):
 
     def get_user_mentions(self, username: str) -> list[Tweet]:
         from talos.utils.validation import validate_twitter_username
+
         if not validate_twitter_username(username):
             raise ValueError(f"Invalid Twitter username: {username}")
-        
+
         user = self.get_user(username)
         if not user:
             return []
         response = self.client.get_users_mentions(
             id=user.id,
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"],
+            tweet_fields=[
+                "author_id",
+                "in_reply_to_user_id",
+                "public_metrics",
+                "referenced_tweets",
+                "conversation_id",
+                "created_at",
+                "edit_history_tweet_ids",
+            ],
             user_fields=[
                 "created_at",
                 "public_metrics",
@@ -212,10 +244,18 @@ class TweepyClient(TwitterClient):
     def get_tweet(self, tweet_id: int) -> Tweet:
         if not isinstance(tweet_id, int) or tweet_id <= 0:
             raise ValueError(f"Invalid tweet ID: {tweet_id}")
-        
+
         response = self.client.get_tweet(
             str(tweet_id),
-            tweet_fields=["author_id", "in_reply_to_user_id", "public_metrics", "referenced_tweets", "conversation_id", "created_at", "edit_history_tweet_ids"]
+            tweet_fields=[
+                "author_id",
+                "in_reply_to_user_id",
+                "public_metrics",
+                "referenced_tweets",
+                "conversation_id",
+                "created_at",
+                "edit_history_tweet_ids",
+            ],
         )
         return self._convert_to_tweet_model(response.data)
 
@@ -224,10 +264,11 @@ class TweepyClient(TwitterClient):
         Gets the sentiment of tweets that match a search query.
         """
         from talos.utils.validation import sanitize_user_input
+
         if not search_query or not search_query.strip():
             raise ValueError("Search query cannot be empty")
         search_query = sanitize_user_input(search_query, max_length=500)
-        
+
         response = self.search_tweets(search_query)
         sentiment = 0
         if response.data:
@@ -239,6 +280,7 @@ class TweepyClient(TwitterClient):
 
     def post_tweet(self, tweet: str) -> Any:
         from talos.utils.validation import sanitize_user_input
+
         if not tweet or not tweet.strip():
             raise ValueError("Tweet content cannot be empty")
         if len(tweet) > 280:
@@ -248,6 +290,7 @@ class TweepyClient(TwitterClient):
 
     def reply_to_tweet(self, tweet_id: str, tweet: str) -> Any:
         from talos.utils.validation import sanitize_user_input
+
         if not tweet_id or not tweet_id.strip():
             raise ValueError("Tweet ID cannot be empty")
         if not tweet or not tweet.strip():
@@ -260,27 +303,31 @@ class TweepyClient(TwitterClient):
     def _convert_to_tweet_model(self, tweet_data: Any) -> Tweet:
         """Convert raw tweepy tweet data to Tweet BaseModel"""
         referenced_tweets = []
-        if hasattr(tweet_data, 'referenced_tweets') and tweet_data.referenced_tweets:
+        if hasattr(tweet_data, "referenced_tweets") and tweet_data.referenced_tweets:
             for ref in tweet_data.referenced_tweets:
                 if isinstance(ref, dict):
-                    referenced_tweets.append(ReferencedTweet(
-                        type=ref.get('type', ''),
-                        id=ref.get('id', 0)
-                    ))
+                    referenced_tweets.append(ReferencedTweet(type=ref.get("type", ""), id=ref.get("id", 0)))
                 else:
-                    referenced_tweets.append(ReferencedTweet(
-                        type=getattr(ref, 'type', ''),
-                        id=getattr(ref, 'id', 0)
-                    ))
-        
+                    referenced_tweets.append(ReferencedTweet(type=getattr(ref, "type", ""), id=getattr(ref, "id", 0)))
+
         return Tweet(
             id=int(tweet_data.id),
             text=tweet_data.text,
             author_id=str(tweet_data.author_id),
-            created_at=str(tweet_data.created_at) if hasattr(tweet_data, 'created_at') and tweet_data.created_at else None,
-            conversation_id=str(tweet_data.conversation_id) if hasattr(tweet_data, 'conversation_id') and tweet_data.conversation_id else None,
-            public_metrics=dict(tweet_data.public_metrics) if hasattr(tweet_data, 'public_metrics') and tweet_data.public_metrics else {},
+            created_at=str(tweet_data.created_at)
+            if hasattr(tweet_data, "created_at") and tweet_data.created_at
+            else None,
+            conversation_id=str(tweet_data.conversation_id)
+            if hasattr(tweet_data, "conversation_id") and tweet_data.conversation_id
+            else None,
+            public_metrics=dict(tweet_data.public_metrics)
+            if hasattr(tweet_data, "public_metrics") and tweet_data.public_metrics
+            else {},
             referenced_tweets=referenced_tweets if referenced_tweets else None,
-            in_reply_to_user_id=str(tweet_data.in_reply_to_user_id) if hasattr(tweet_data, 'in_reply_to_user_id') and tweet_data.in_reply_to_user_id else None,
-            edit_history_tweet_ids=[str(id) for id in tweet_data.edit_history_tweet_ids] if hasattr(tweet_data, 'edit_history_tweet_ids') and tweet_data.edit_history_tweet_ids else None
+            in_reply_to_user_id=str(tweet_data.in_reply_to_user_id)
+            if hasattr(tweet_data, "in_reply_to_user_id") and tweet_data.in_reply_to_user_id
+            else None,
+            edit_history_tweet_ids=[str(id) for id in tweet_data.edit_history_tweet_ids]
+            if hasattr(tweet_data, "edit_history_tweet_ids") and tweet_data.edit_history_tweet_ids
+            else None,
         )
