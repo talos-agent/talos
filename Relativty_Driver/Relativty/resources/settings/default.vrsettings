@@ -1,0 +1,23 @@
+{
+  "Relativty_hmd": {
+    "hmdPid": 32823,
+    "hmdVid": 9025,
+    "hmdIMUdmpPackets": false,
+    "IPDmeters": 0.063
+  },
+  "Relativty_extendedDisplay": {
+    "windowX": 3440,
+    "windowY": 0,
+    "windowWidth": 1920,
+    "windowHeight": 1080,
+    "renderWidth": 1920,
+    "renderHeight": 1080,
+    "DistortionK1": 0.4,
+    "DistortionK2": 0.5,
+    "ZoomWidth": 1,
+    "ZoomHeight": 1,
+    "EyeGapOffsetPx": 0,
+    "IsDisplayRealDisplay": true,
+    "IsDisplayOnDesktop": true
+  }
+}
