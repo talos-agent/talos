@@ -1,0 +1,84 @@
+{
+  "playbook_version": "1.0",
+  "campaign_stages": {
+    "announcement": {
+      "name": "Anúncio da Votação (Início)",
+      "email": {
+        "subject": "🚀 Vote agora – sua decisão vai moldar o futuro da nossa DAO!",
+        "body": "Olá, {{member_name}}!\n\nA nova proposta **{{proposal_title}}** já está no ar e precisamos do seu voto.\n\n🗳️ **Como votar?** Acesse {{vote_link}} → Clique em “Vote”.\n⏰ **Prazo:** {{deadline}} (faltam {{time_remaining}}).\n\n⚙️ **Dúvidas?** Pergunte ao bot Z.ai no Discord/Telegram: `@Z.ai como voto?`\n\nContamos com sua participação para garantir decisões transparentes e alinhadas à comunidade.\n\nAbraço,\nEquipe de Governança DAO"
+      },
+      "telegram_discord": {
+        "message": "📢 **VOTAÇÃO EM ABERTO**\nProposta: *{{proposal_title}}*\n🔗 Vote aqui: {{vote_link}}\n⏳ Encerramento: {{deadline}} ({{time_remaining}})\n\n❓ Dúvidas? Pergunte ao bot **@Z.ai** (`como voto?`).\n\n#Vote #DAOGovernance"
+      },
+      "twitter_x": {
+        "message": "🚀 A proposta **{{proposal_title}}** está viva! Seu voto define o próximo passo da DAO.\n🗳️ Vote agora → {{vote_link}}\n⏰ Faltam {{time_remaining}}.\n\n#DAO #Governança #VoteAgora"
+      },
+      "linkedin_carousel": [
+        { "slide": 1, "text": "Problema: Precisamos de X" },
+        { "slide": 2, "text": "Proposta: A solução Y" },
+        { "slide": 3, "text": "Benefícios: +30% de eficiência" },
+        { "slide": 4, "text": "Como votar: passo-a-passo" },
+        { "slide": 5, "text": "CTA: Clique e vote" }
+      ],
+      "instagram_post": {
+        "caption": "🗳️ **VOTAÇÃO ABERTA!** A proposta '{{proposal_title}}' está no ar e sua participação é fundamental. Vote através do link na nossa bio!\n\nEncerramento: {{deadline}}.\n\n#DAO #Governança #Web3 #Vote"
+      },
+      "instagram_story": {
+        "text_overlay": "VOTAÇÃO ABERTA\nProposta: {{proposal_title}}\nArraste para cima para votar!",
+        "sticker": "poll"
+      },
+      "reddit": {
+        "subreddit": "r/{{dao_subreddit}}",
+        "title": "[VOTAÇÃO OFICIAL] Proposta: {{proposal_title}}",
+        "body": "Olá comunidade,\n\nA votação para a proposta **{{proposal_title}}** está oficialmente aberta.\n\n**Link para Votar:** {{vote_link}}\n**Link para Discussão no Fórum:** {{discussion_link}}\n**Prazo Final:** {{deadline}}\n\nPor favor, leiam a proposta completa e participem da discussão antes de votar. Todo feedback é bem-vindo.\n\nContamos com vocês!"
+      },
+      "medium_blog": {
+        "title": "Análise da Proposta: {{proposal_title}} – Por que seu voto é crucial",
+        "body_template": "<h1>Análise da Proposta: {{proposal_title}}</h1><p>A comunidade da DAO está diante de uma decisão importante... [elaborar sobre o problema e a solução proposta]...</p><h2>Como Votar</h2><p>A votação está aberta até {{deadline}}. Acesse o link a seguir para registrar seu voto: <a href='{{vote_link}}'>Página de Votação</a>.</p>"
+      }
+    },
+    "reminder": {
+      "name": "Lembrete (Meio do Período)",
+      "telegram_discord": {
+        "message": "⏰ **LEMBRETE DE VOTAÇÃO**\nAinda dá tempo de votar na proposta *{{proposal_title}}*.\n🔗 Vote aqui: {{vote_link}}\n⏳ Encerramento: {{deadline}}\n\nSua voz é importante!"
+      },
+      "twitter_x": {
+        "message": "⏰ Ainda não votou? A proposta **{{proposal_title}}** precisa da sua opinião. Não deixe para a última hora!\n🗳️ Vote aqui → {{vote_link}}\n\n#DAO #Governança"
+      }
+    },
+    "last_call": {
+      "name": "Última Chamada (Fim do Período)",
+      "email": {
+        "subject": "⚡ Última chamada – a votação para {{proposal_title}} termina em breve!",
+        "body": "Olá, {{member_name}}!\n\nEsta é a última chamada para votar na proposta **{{proposal_title}}**. A votação encerra em {{time_remaining}}.\n\nNão perca a chance de influenciar esta decisão.\n\n🗳️ **Vote agora:** {{vote_link}}\n\nAbraço,\nEquipe de Governança DAO"
+      },
+      "telegram_discord": {
+        "message": "🚨 **ÚLTIMA CHAMADA - ENCERRAMENTO EM {{time_remaining}}!**\nNão perca a chance de votar na proposta *{{proposal_title}}*.\n🔗 Vote agora: {{vote_link}}"
+      },
+      "twitter_x": {
+        "message": "🚨 **Última chamada!** A votação para **{{proposal_title}}** encerra em {{time_remaining}}. Este é o seu último momento para votar!\n🗳️ Vote JÁ → {{vote_link}}\n\n#DAO #LastCall"
+      },
+      "instagram_story": {
+        "text_overlay": "ÚLTIMA CHAMADA!\nVOTAÇÃO ENCERRA EM {{time_remaining}}",
+        "sticker": "countdown"
+      }
+    },
+    "results": {
+      "name": "Resultados da Votação",
+      "email": {
+        "subject": "📊 Resultados da votação: {{proposal_title}}",
+        "body": "Olá, {{member_name}}!\n\nA votação para a proposta **{{proposal_title}}** foi concluída.\n\n**Resultado:** {{result_summary}}\n\n**Detalhes:**\n- Votos 'Sim': {{yes_votes}} ({{yes_percentage}}%)\n- Votos 'Não': {{no_votes}} ({{no_percentage}}%)\n- Participação total: {{total_votes}}\n\nObrigado a todos que participaram!\n\nAbraço,\nEquipe de Governança DAO"
+      },
+      "telegram_discord": {
+        "message": "📊 **RESULTADO DA VOTAÇÃO**\nProposta: *{{proposal_title}}*\n\n**Aprovada:** {{result_status}}\n- ✅ Sim: {{yes_percentage}}%\n- ❌ Não: {{no_percentage}}%\n\nObrigado a todos pela participação!"
+      },
+      "twitter_x": {
+        "message": "📊 Resultados da votação para **{{proposal_title}}**:\n\n✅ Aprovada: {{result_status}}\n\nObrigado à comunidade pela participação ativa na governança. Vamos construir juntos!\n\n#DAO #Governança #Resultados"
+      },
+      "medium_blog": {
+        "title": "Resultado e Próximos Passos: Proposta {{proposal_title}}",
+        "body_template": "<h1>Resultados da Votação</h1><p>A proposta {{proposal_title}} foi **{{result_status}}** com {{yes_percentage}}% dos votos a favor.</p><h2>O que isso significa para a DAO?</h2><p>[Analisar o impacto da decisão e os próximos passos]...</p><h2>Transparência</h2><p>O registro completo da votação pode ser auditado aqui: {{vote_audit_link}}.</p>"
+      }
+    }
+  }
+}
