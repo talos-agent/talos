@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Self
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings
@@ -105,4 +105,55 @@ class DiscordSettings(BaseSettings):
 
         masked_url = mask_sensitive_data(webhook_url)
         logger.info(f"Discord settings initialized with webhook URL: {masked_url}")
+        return self
+
+
+class SlackSettings(BaseSettings):
+    SLACK_WEBHOOK_URL: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_slack_webhook(self) -> Self:
+        if not self.SLACK_WEBHOOK_URL:
+            raise ValueError("SLACK_WEBHOOK_URL environment variable is required but not set")
+
+        from .utils.validation import mask_sensitive_data
+
+        if "hooks.slack.com" not in self.SLACK_WEBHOOK_URL:
+            logger.warning("Slack webhook URL format appears invalid")
+
+        masked_url = mask_sensitive_data(self.SLACK_WEBHOOK_URL)
+        logger.info(f"Slack settings initialized with webhook URL: {masked_url}")
+        return self
+
+
+class TelegramSettings(BaseSettings):
+    TELEGRAM_BOT_TOKEN: Optional[str] = None
+    TELEGRAM_CHAT_ID: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_telegram_settings(self) -> Self:
+        if not self.TELEGRAM_BOT_TOKEN:
+            raise ValueError("TELEGRAM_BOT_TOKEN environment variable is required but not set")
+        if not self.TELEGRAM_CHAT_ID:
+            raise ValueError("TELEGRAM_CHAT_ID environment variable is required but not set")
+
+        from .utils.validation import mask_sensitive_data
+
+        masked_token = mask_sensitive_data(self.TELEGRAM_BOT_TOKEN)
+        logger.info(f"Telegram settings initialized with bot token: {masked_token}")
+        return self
+
+
+class SendgridSettings(BaseSettings):
+    SENDGRID_API_KEY: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_sendgrid_key(self) -> Self:
+        if not self.SENDGRID_API_KEY:
+            raise ValueError("SENDGRID_API_KEY environment variable is required but not set")
+
+        from .utils.validation import mask_sensitive_data
+
+        masked_key = mask_sensitive_data(self.SENDGRID_API_KEY)
+        logger.info(f"SendGrid settings initialized with key: {masked_key}")
         return self
