@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: frost-scanner
+  tag: latest
+  pullPolicy: IfNotPresent
+
+config:
+  scanPorts: "8000-8100"
+  healthTtl: 30000
+  maxRetries: 3
+  scanDelayMs: 100

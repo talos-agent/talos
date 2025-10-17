@@ -1,0 +1,4 @@
+apiVersion: v2
+name: frost-network-scanner
+description: A Helm chart for the FROST network scanner
+version: 0.1.0

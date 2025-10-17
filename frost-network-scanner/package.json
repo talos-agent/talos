@@ -1,0 +1,23 @@
+{
+  "name": "frost-network-scanner",
+  "version": "1.0.0",
+  "description": "A network scanner for FROST nodes.",
+  "main": "network-scanner.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --testTimeout=15000",
+    "lint": "eslint ."
+  },
+  "author": "Jules",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "express-oas-generator": "^1.0.44",
+    "jest": "^27.0.6",
+    "nock": "^13.1.3"
+  }
+}
