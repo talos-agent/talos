@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Eubio MVP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Eubio MVP – Iris Demo</h1>
+    <form id="predict-form">
+        <label>Sepal length (cm): <input type="number" step="0.1" name="sl" required></label>
+        <label>Sepal width (cm):  <input type="number" step="0.1" name="sw" required></label>
+        <label>Petal length (cm): <input type="number" step="0.1" name="pl" required></label>
+        <label>Petal width (cm):  <input type="number" step="0.1" name="pw" required></label>
+        <button type="submit">Predict</button>
+    </form>
+    <div id="result"></div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

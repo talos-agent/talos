@@ -1,0 +1,39 @@
+body {
+    font-family: system-ui, sans-serif;
+    margin: 2rem;
+    background: #f7f7f7;
+}
+h1 {
+    color: #0a6b8a;
+}
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 400px;
+}
+label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+}
+input {
+    padding: 0.4rem;
+    font-size: 1rem;
+}
+button {
+    grid-column: 1 / -1;
+    padding: 0.6rem;
+    font-size: 1rem;
+    background: #0a6b8a;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #084a63;
+}
+#result {
+    margin-top: 1.5rem;
+    font-weight: 600;
+}
