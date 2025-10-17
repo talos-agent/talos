@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kernel-agi-cli"
+version = "1.0.0"
+authors = [
+  { name="Your Name", email="you@example.com" },
+]
+description = "Um cliente de chat de console interativo para a API OpenRouter."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "aiohttp>=3.9.5",
+    "colorama>=0.4.6",
+]
+
+[project.scripts]
+kernel-chat = "kernel_agi.main:entry_point"
