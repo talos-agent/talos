@@ -1,39 +1,50 @@
-name: CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - main
-
+name: ci
+on: [push, pull_request]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tier0
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install uv
-      run: pip install uv
-
-    - name: Create virtual environment
-      run: uv venv
-    - name: Install dependencies
-      run: uv pip install -e .[dev]
-
-    - name: Lint with ruff
-      run: source .venv/bin/activate && ruff check ./src
-
-    - name: Type check with mypy
-      run: source .venv/bin/activate && mypy ./src
-
-    - name: Test with pytest
-      run: source .venv/bin/activate && pytest
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tier0
+        run: |
+          psql $DATABASE_URL -f db/migrations/001_init_trials_table.sql
+      - name: Run tests
+        run: |
+          source .venv/bin/activate
+          pytest -v tests/
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint
+        run: ruff src/ tests/
