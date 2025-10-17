@@ -232,3 +232,4 @@ To run the test suite, lint, and type-check the code, run the following command:
 ```bash
 ./scripts/run_checks.sh
 ```
+Talos = AGI
