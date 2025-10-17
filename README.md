@@ -134,8 +134,13 @@ The daemon will run continuously, executing scheduled jobs and can be gracefully
 | `daemon` | Run in continuous daemon mode |
 | `cleanup-users` | Clean up temporary users and conversation data |
 | `db-stats` | Show database statistics |
+| `monitoring` | Start the monitoring service |
 
 For detailed command usage, see the [CLI Documentation](https://docs.talos.is/cli/overview/).
+
+### Monitoring
+
+The `monitoring` command uses the [Sampler](https://github.com/sqshq/sampler) tool to provide real-time monitoring of the Talos agent. To use this feature, you must have Sampler installed and available in your system's PATH.
 
 ### Docker Usage
 

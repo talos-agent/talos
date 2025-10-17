@@ -1,0 +1,10 @@
+barcharts:
+  - title: Database Stats
+    rate-ms: 5000
+    items:
+      - label: Total Users
+        sample: uv run talos db-stats | grep "Total users" | awk '{print $3}'
+      - label: Permanent Users
+        sample: uv run talos db-stats | grep "Permanent users" | awk '{print $3}'
+      - label: Temporary Users
+        sample: uv run talos db-stats | grep "Temporary users" | awk '{print $3}'

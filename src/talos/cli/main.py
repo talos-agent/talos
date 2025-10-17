@@ -17,6 +17,7 @@ from talos.cli.dataset import dataset_app
 from talos.cli.github import github_app
 from talos.cli.memory import memory_app
 from talos.cli.migrations import app as migrations_app
+from talos.cli.monitoring import app as monitoring_app
 from talos.cli.proposals import proposals_app
 from talos.cli.twitter import twitter_app
 from talos.core.main_agent import MainAgent
@@ -33,6 +34,7 @@ app.add_typer(dataset_app, name="dataset")
 app.add_typer(arbiscan_app, name="arbiscan")
 app.add_typer(contracts_app, name="contracts")
 app.add_typer(migrations_app, name="migrations")
+app.add_typer(monitoring_app, name="monitoring")
 
 
 @app.callback()
