@@ -2,19 +2,18 @@
 # ----------------------------------------------------------------------
 # Interactive Console Chat Interface (OpenRouter API) - Otimizado e Final
 #
-# Adiciona: Cores, Comandos, Persistência de Histórico e Relatórios
-# de Performance (Tokens, Latência e Custo Estimado).
+# Adiciona: Módulo de Degradação da Autoridade (PoAD) e novo comando /vpa_decay
 # ----------------------------------------------------------------------
 import aiohttp
 import asyncio
 import json
 import sys
 import os
-import time # Adicionado para medição de latência
-import argparse # Adicionado para parsing de argumentos
+import time
+import math
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple # Adicionado Tuple para tipo de retorno
+from typing import List, Dict, Optional, Tuple
 
 # Tenta importar colorama para cores no console
 try:
@@ -50,17 +49,6 @@ TYPING_DELAY = 0.025
 MAX_HISTORY_MESSAGES = 20
 SAVE_DIR = Path.home() / ".openrouter_chat"
 
-# CUSTO POR 1M DE TOKENS (USD - Valores de Referência OpenRouter/API)
-# Usados para cálculo estimado de custo por requisição
-MODEL_PRICING = {
-    "openai/gpt-4o-mini": {"input": 0.15, "output": 0.60},
-    "openai/gpt-4o": {"input": 5.00, "output": 15.00},
-    "anthropic/claude-3.5-sonnet": {"input": 3.00, "output": 15.00},
-    "anthropic/claude-3-haiku": {"input": 0.25, "output": 1.25},
-    "google/gemini-pro-1.5": {"input": 3.50, "output": 7.00},
-    "meta-llama/llama-3.1-70b-instruct": {"input": 0.50, "output": 0.70},
-}
-
 # Modelos disponíveis (exemplos populares)
 AVAILABLE_MODELS = {
     "1": ("openai/gpt-4o-mini", "GPT-4 Omni Mini - Rápido e eficiente"),
@@ -77,13 +65,59 @@ current_model = DEFAULT_MODEL
 is_streaming = False
 
 # ======================================================================
+# 🎯 FUNÇÕES CHAVE: AUTORIDADE (PoA) E VOTO ($ALE-V)
+# ======================================================================
+
+# CUSTO POR 1M DE TOKENS (USD - Valores de Referência OpenRouter/API)
+MODEL_PRICING = {
+    "openai/gpt-4o-mini": {"input": 0.15, "output": 0.60},
+    "openai/gpt-4o": {"input": 5.00, "output": 15.00},
+    "anthropic/claude-3.5-sonnet": {"input": 3.00, "output": 15.00},
+    "anthropic/claude-3-haiku": {"input": 0.25, "output": 1.25},
+    "google/gemini-pro-1.5": {"input": 3.50, "output": 7.00},
+    "meta-llama/llama-3.1-70b-instruct": {"input": 0.50, "output": 0.70},
+}
+
+def get_reputational_multiplier(h_index: int, citations: int, verification_decay: float = 1.0) -> float:
+    """
+    Calcula o multiplicador de voto baseado em métricas acadêmicas (PoA),
+    aplicando um fator de decaimento se a prova for fraca (verification_decay < 1.0).
+    verification_decay: 1.0 = Prova 100% verificável; 0.5 = Prova falha.
+    """
+    if citations < 0 or h_index < 0:
+        return 1.0
+
+    # 1. Componente PoA Base (sempre >= 1.0)
+    volume_factor = math.log10(citations + 1)
+    quality_factor = h_index / 10.0
+
+    multiplier_base = 1.0 + (volume_factor * quality_factor)
+
+    # 2. Aplicação do Decaimento
+    # O decaimento afeta apenas a parte do multiplicador que excede 1.0 (o voto básico)
+    reputational_gain = multiplier_base - 1.0
+    multiplier = 1.0 + (reputational_gain * verification_decay)
+
+    # Cap em 5x
+    return min(multiplier, 5.0)
+
+def calculate_ale_v_power(staked_ale: float, h_index: int, citations: int, verification_decay: float = 1.0) -> Tuple[float, float]:
+    """
+    Calcula o poder de voto ($ALE-V) combinando stake financeiro e autoridade PoA.
+    Retorna (poder_de_voto, multiplicador_aplicado).
+    """
+    multiplier = get_reputational_multiplier(h_index, citations, verification_decay)
+    vote_power = staked_ale * multiplier
+
+    return vote_power, multiplier
+
+# ======================================================================
 # 🎨 FUNÇÕES DE UTILIDADE E CÁLCULO
 # ======================================================================
 
 def print_colored(text: str, color: str = Fore.CYAN, bright: bool = False, end: str = "\n"):
     """Imprime texto colorido se colorama estiver disponível."""
     style = Style.BRIGHT if bright else ""
-    # Incluído 'end' para permitir que o prompt de streaming não pule linha.
     print(f"{style}{color}{text}{Style.RESET_ALL}", end=end)
 
 def print_separator(char: str = "─", length: int = 70):
@@ -96,7 +130,6 @@ def calculate_estimated_cost(model_id: str, prompt_tokens: int, completion_token
     if not prices:
         return 0.0
 
-    # Preço é por 1 milhão de tokens. Dividimos por 1.000.000
     cost_prompt = (prompt_tokens / 1_000_000) * prices["input"]
     cost_completion = (completion_tokens / 1_000_000) * prices["output"]
 
@@ -104,17 +137,14 @@ def calculate_estimated_cost(model_id: str, prompt_tokens: int, completion_token
 
 def count_tokens_estimate(text: str) -> int:
     """Estimativa simples de tokens (aproximadamente 4 chars = 1 token)."""
-    # Esta função é apenas para o /info, o uso real vem da API
     return len(text) // 4
 
 def truncate_history():
     """Mantém o histórico dentro do limite definido."""
     global conversation_history
 
-    # +1 para a mensagem do sistema
     if len(conversation_history) > MAX_HISTORY_MESSAGES + 1:
         system_msg = conversation_history[0]
-        # Trunca, mantendo o system prompt + o número máximo de mensagens
         conversation_history = [system_msg] + conversation_history[-(MAX_HISTORY_MESSAGES):]
         print_colored("⚠️  Histórico truncado para manter limite de mensagens.", Fore.YELLOW)
 
@@ -241,15 +271,12 @@ async def chat_stream(
                     try:
                         data_json = json.loads(data_str)
 
-                        # Captura metadata de uso que geralmente vem no final do stream
                         if 'usage' in data_json:
-                            # A OpenRouter envia a métrica de uso no último chunk antes do [DONE]
                             usage_metadata = data_json['usage']
 
                         delta = data_json.get("choices", [{}])[0].get("delta", {}).get("content", "")
 
                         if delta:
-                            # Otimização: para deltas grandes, reduz delay
                             delay = TYPING_DELAY if len(delta) < 50 else TYPING_DELAY / 3
 
                             for char in delta:
@@ -289,10 +316,13 @@ def show_help():
         ("/list", "Lista conversas salvas"),
         ("/model", "Troca o modelo de IA"),
         ("/info", "Mostra informações da sessão"),
+        ("/vpa <H-idx> <Citações>", "Calcula Multiplicador de Voto (PoA)"),
+        ("/vpa_decay <H-idx> <Citações> <Decaimento>", "Calcula PoA com Decaimento (0.0 a 1.0)"), # NOVO COMANDO
+        ("/sim_voto <$ALE> <H-idx> <Citações>", "Simula Poder de Voto Reputacional ($ALE-V)"),
         ("/exit, /quit", "Encerra o chat"),
     ]
     for cmd, desc in commands:
-        print(f" {Fore.GREEN}{cmd:20s}{Style.RESET_ALL} - {desc}")
+        print(f" {Fore.GREEN}{cmd:35s}{Style.RESET_ALL} - {desc}")
     print_separator()
 
 def show_info():
@@ -407,9 +437,13 @@ async def main_loop():
 
             # Processa comandos
             if user_input.startswith('/'):
-                cmd_parts = user_input.split(maxsplit=1)
+                cmd_parts = user_input.split(maxsplit=4)
                 cmd = cmd_parts[0].lower()
-                arg = cmd_parts[1] if len(cmd_parts) > 1 else None
+                arg1 = cmd_parts[1] if len(cmd_parts) > 1 else None
+                arg2 = cmd_parts[2] if len(cmd_parts) > 2 else None
+                arg3 = cmd_parts[3] if len(cmd_parts) > 3 else None
+                arg4 = cmd_parts[4] if len(cmd_parts) > 4 else None
+
 
                 if cmd in ['/exit', '/quit']:
                     print_colored("\n👋 Até logo! Busque sempre a verdade (Aletheia).", Fore.CYAN)
@@ -426,11 +460,11 @@ async def main_loop():
                     continue
 
                 elif cmd == '/save':
-                    save_conversation(arg)
+                    save_conversation(arg1)
                     continue
 
                 elif cmd == '/load':
-                    if arg: load_conversation(arg)
+                    if arg1: load_conversation(arg1)
                     else: print_colored("❌ Uso: /load <nome_do_arquivo>", Fore.RED)
                     continue
 
@@ -444,6 +478,70 @@ async def main_loop():
 
                 elif cmd == '/info':
                     show_info()
+                    continue
+
+                elif cmd == '/vpa': # COMANDO VPA - Multiplicador de Autoridade
+                    try:
+                        h_index = int(arg1)
+                        citations = int(arg2)
+                        multiplier = get_reputational_multiplier(h_index, citations)
+
+                        print_separator("┄", 70)
+                        print_colored("🔬 CÁLCULO DE PROVA DE AUTORIDADE (PoA)", Fore.BLUE, bright=True)
+                        print(f"H-Index Verificado: {Fore.YELLOW}{h_index}{Style.RESET_ALL}")
+                        print(f"Citações Totais:   {Fore.YELLOW}{citations}{Style.RESET_ALL}")
+                        print_colored(f"Multiplicador de Voto (PoA): {Fore.GREEN}{multiplier:.2f}x{Style.RESET_ALL}", Fore.GREEN, bright=True)
+                        print_separator("┄", 70)
+                    except (ValueError, TypeError):
+                        print_colored("❌ Uso: /vpa <H-index> <Citações> (ex: /vpa 15 500)", Fore.RED)
+                    continue
+
+                elif cmd == '/vpa_decay': # COMANDO VPA_DECAY - Decaimento da Autoridade
+                    try:
+                        h_index = int(arg1)
+                        citations = int(arg2)
+                        decay = float(arg3)
+
+                        if not (0.0 <= decay <= 1.0):
+                             raise ValueError("Decaimento deve estar entre 0.0 e 1.0.")
+
+                        multiplier = get_reputational_multiplier(h_index, citations, verification_decay=decay)
+
+                        print_separator("┄", 70)
+                        print_colored("📉 CÁLCULO DE PoA COM DECAIMENTO", Fore.YELLOW, bright=True)
+                        print(f"H-Index / Citações: {Fore.YELLOW}{h_index} / {citations}{Style.RESET_ALL}")
+                        print(f"Fator de Decaimento (Prova Fraca): {Fore.RED}{decay:.2f}{Style.RESET_ALL} (0.0 = Nulo, 1.0 = Máximo)")
+                        print_colored(f"Multiplicador Efetivo (PoA): {Fore.GREEN}{multiplier:.2f}x{Style.RESET_ALL}", Fore.GREEN, bright=True)
+                        print_separator("┄", 70)
+                    except (ValueError, TypeError):
+                        print_colored("❌ Uso: /vpa_decay <H-index> <Citações> <Decaimento (0.0 a 1.0)>", Fore.RED)
+                        print_colored("    Ex: /vpa_decay 15 500 0.5", Fore.YELLOW)
+                    continue
+
+
+                elif cmd == '/sim_voto': # NOVO COMANDO - Simulação $ALE-V
+                    try:
+                        staked_ale = float(arg1)
+                        h_index = int(arg2)
+                        citations = int(arg3)
+                        decay = float(arg4) if arg4 else 1.0 # Opcional: Decaimento
+
+                        if not (0.0 <= decay <= 1.0):
+                             raise ValueError("Decaimento deve estar entre 0.0 e 1.0.")
+
+                        vote_power, multiplier = calculate_ale_v_power(staked_ale, h_index, citations, verification_decay=decay)
+
+                        print_separator("┄", 70)
+                        print_colored("🌊 SIMULAÇÃO: PODER DE VOTO REPUTACIONAL ($ALE-V)", Fore.MAGENTA, bright=True)
+                        print(f"Stake Financeiro ($ALE):   {Fore.YELLOW}{staked_ale:,.2f}{Style.RESET_ALL}")
+                        print(f"Multiplicador PoA (H/C): {Fore.YELLOW}{multiplier:.2f}x{Style.RESET_ALL}")
+                        print(f"Decaimento Aplicado: {Fore.RED}{decay:.2f}x{Style.RESET_ALL}")
+                        print_separator("─", 70)
+                        print_colored(f"Total $ALE-V (Poder de Voto): {Fore.GREEN}{vote_power:,.2f}{Style.RESET_ALL}", Fore.GREEN, bright=True)
+                        print_separator("┄", 70)
+                    except (ValueError, TypeError):
+                        print_colored("❌ Uso: /sim_voto <$ALE Stake> <H-index> <Citações> [Decaimento]", Fore.RED)
+                        print_colored("    Ex: /sim_voto 1000 20 1200 0.8 (Decaimento é opcional, default 1.0)", Fore.YELLOW)
                     continue
 
                 elif cmd == '/help':
@@ -495,47 +593,21 @@ async def main_loop():
             break
 
 # ======================================================================
-# 🚀 EXECUÇÃO COM ARGUMENTOS
+# 🚀 EXECUÇÃO
 # ======================================================================
 def entry_point():
-    """Ponto de entrada principal que processa argumentos e inicia o loop."""
-    global current_model
-
-    parser = argparse.ArgumentParser(description="Chat interativo com a API OpenRouter.")
-    parser.add_argument(
-        "--model",
-        type=str,
-        default=DEFAULT_MODEL,
-        help=f"ID do modelo a ser usado (padrão: {DEFAULT_MODEL})."
-    )
-    parser.add_argument(
-        "--load",
-        type=str,
-        metavar="FILENAME",
-        help="Carrega uma conversa salva de um arquivo JSON."
-    )
-
-    args = parser.parse_args()
-
-    # Define o modelo a partir do argumento, se fornecido
-    current_model = args.model
-
-    if not API_KEY:
-        print_colored("❌ ERRO: A chave de API OPENROUTER_API_KEY não está configurada.", Fore.RED, bright=True)
-        print_colored("Por favor, configure-a como uma variável de ambiente.", Fore.YELLOW)
+    if not os.environ.get("OPENROUTER_API_KEY"):
+        print_colored("❌ ERRO: Configure a variável de ambiente OPENROUTER_API_KEY", Fore.RED, bright=True)
+        print_colored("Obtenha sua chave em: https://openrouter.ai/keys", Fore.CYAN)
         sys.exit(1)
 
-    # Carrega a conversa se o argumento --load for usado
-    if args.load:
-        load_conversation(args.load)
-
     try:
+        # Configura loop de eventos (necessário para rodar input() dentro de asyncio)
         asyncio.run(main_loop())
     except KeyboardInterrupt:
-        print_colored("\n\n👋 Chat encerrado.", Fore.CYAN)
         sys.exit(0)
     except Exception as e:
-        print_colored(f"\n❌ Erro crítico: {e}", Fore.RED)
+        print_colored(f"\n❌ Erro crítico no início do programa: {e}", Fore.RED)
         sys.exit(1)
 
 if __name__ == "__main__":

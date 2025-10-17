@@ -1,5 +1,9 @@
 # Kernel AGI - Chat de Console Interativo
 
+<p align="center">
+  <img src="aletheia-icon.svg" alt="Aletheia Icon" width="128"/>
+</p>
+
 Esta é uma ferramenta de linha de comando (CLI) para interagir com a API da OpenRouter. Ela oferece uma experiência de chat rica em recursos, diretamente do seu terminal, incluindo:
 
 -   **Streaming de Respostas:** Veja a resposta do modelo sendo "digitada" em tempo real.
@@ -80,6 +84,14 @@ Dentro do chat, você pode usar os seguintes comandos:
 -   `/info`: Exibe informações sobre a sessão, como o modelo atual e a contagem de tokens.
 -   `/clear`: Limpa o histórico da conversa atual, mantendo o prompt do sistema.
 -   `/exit` ou `/quit`: Encerra a sessão de chat.
+
+### Comandos de Governança ($ALE-V)
+
+Esta ferramenta inclui um módulo para simular o poder de voto reputacional, combinando stake financeiro com Prova de Autoridade (PoA) baseada em métricas acadêmicas.
+
+-   **/vpa `<H-index>` `<Citações>`**: Calcula o seu multiplicador de voto (PoA) com base no seu H-Index e número de citações.
+-   **/vpa_decay `<H-index>` `<Citações>` `<Decaimento>`**: Calcula o multiplicador PoA aplicando um fator de decaimento (de 0.0 a 1.0). Isso é útil para cenários onde a verificação das credenciais é fraca ou auto-relatada.
+-   **/sim_voto `<$ALE>` `<H-idx>` `<Citações>` `[Decaimento]`**: Simula o seu poder de voto final ($ALE-V), combinando seu stake de `$ALE` com seu multiplicador PoA. O fator de decaimento é opcional.
 
 ## Contribuição
 
