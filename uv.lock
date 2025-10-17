@@ -2034,8 +2034,7 @@ name = "pygithub"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "deprecated" },
-    { name = "pyjwt", extra = ["crypto"] },
+    { name = "pyjwt", extras = ["crypto"] },
     { name = "pynacl" },
     { name = "requests" },
     { name = "typing-extensions" },
