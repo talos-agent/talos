@@ -1,0 +1,90 @@
+# docker-compose.uniaolives.yml
+version: "3.9"
+
+services:
+  tor:
+    image: dperson/tor
+    container_name: tor
+    restart: unless-stopped
+    volumes:
+      - ./torrc:/etc/tor/torrc:ro
+      - tor-keys:/var/lib/tor
+    networks:
+      - unnet
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    volumes:
+      - ./nginx.onion.conf:/etc/nginx/nginx.conf:ro
+      - ./pwa:/usr/share/nginx/html
+    networks:
+      - unnet
+    depends_on:
+      - tor
+
+  srs:
+    image: ossrs/srs:5
+    container_name: srs
+    command: >
+      ./objs/srs -c conf/rtmp2hls.conf
+    networks:
+      - unnet
+    depends_on:
+      - tor
+
+  hasura:
+    image: hasura/graphql-engine:v2.35.0
+    container_name: hasura
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@db:5432/uniaolives
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: admin123
+    networks:
+      - unnet
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: db
+    environment:
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - unnet
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  reward-engine:
+    build: ./reward-engine
+    container_name: rewards
+    environment:
+      TOR_SOCKS: tor:9050
+      HASURA_URL: http://hasura:8080/v1/graphql
+      CHAIN_RPC: https://timechain-rpc.onion  # Tor hidden-service RPC
+      EMISSION_CAP: 86400000  # 86.4 M / year
+    networks:
+      - unnet
+    depends_on:
+      - hasura
+      - tor
+
+  nexus-relay:
+    image: nexuslabs/depin-client:1.4
+    container_name: nexus
+    environment:
+      TURN_ONLY: 1
+      TOR_SOCKS: tor:9050
+      RELAY_ONION: nexus123.onion
+    networks:
+      - unnet
+    depends_on:
+      - tor
+
+networks:
+  unnet:
+    internal: true
+
+volumes:
+  tor-keys:
+  pgdata:

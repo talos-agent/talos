@@ -38,7 +38,7 @@ class MockTwitterClient(TwitterClient):
 class MockPromptManager(PromptManager):
     def get_prompt(self, name: str) -> Prompt | None:
         return Prompt(name="test_prompt", template="This is a test prompt.", input_variables=[])
-    
+
     def get_prompt_with_config(self, config, context):
         return Prompt(name="test_prompt", template="This is a test prompt.", input_variables=[])
 
@@ -50,13 +50,14 @@ class TestTwitterPersona(unittest.TestCase):
         mock_twitter_client = MockTwitterClient()
         mock_prompt_manager = MockPromptManager()
         mock_llm = MockChatOpenAI.return_value
-        
+
         from talos.models.twitter import TwitterPersonaResponse
+
         mock_structured_llm = MagicMock()
         mock_structured_llm.invoke.return_value = TwitterPersonaResponse(
             report="This is a persona description.",
             topics=["technology", "startups"],
-            style=["analytical", "technical"]
+            style=["analytical", "technical"],
         )
         mock_llm.with_structured_output.return_value = mock_structured_llm
 
@@ -97,11 +98,10 @@ class TestTwitterPersona(unittest.TestCase):
             "talos.tools.twitter.TwitterPersonaSkill",
         ) as MockTwitterPersonaSkill:
             from talos.models.twitter import TwitterPersonaResponse
+
             mock_persona_skill = MockTwitterPersonaSkill.return_value
             mock_persona_skill.run.return_value = TwitterPersonaResponse(
-                report="This is a rendered prompt.",
-                topics=["crypto", "trading"],
-                style=["confident", "data-driven"]
+                report="This is a rendered prompt.", topics=["crypto", "trading"], style=["confident", "data-driven"]
             )
             response = twitter_tool._run(tool_name=TwitterToolName.GENERATE_PERSONA_PROMPT, username="testuser")
 

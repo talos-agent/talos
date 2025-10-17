@@ -20,7 +20,9 @@ class OrderExecutor(Order):
         self._gas_limits_order_type = self._gas_limits.increase_order
 
     @classmethod
-    async def calculate_initial_collateral_tokens(cls, size_delta_usd: float, leverage: int, start_token_address: HexAddress):
+    async def calculate_initial_collateral_tokens(
+        cls, size_delta_usd: float, leverage: int, start_token_address: HexAddress
+    ):
         """
         Calculate the amount of tokens collateral from the USD value
         """

@@ -21,10 +21,22 @@ from talos.cli.proposals import proposals_app
 from talos.cli.twitter import twitter_app
 from talos.core.main_agent import MainAgent
 from talos.database.utils import cleanup_temporary_users, get_user_stats
+from talos.anchor.decoder import decode_csv_line
+from talos.anchor.processor import csv_anchor_reward
+from talos.aurum.grid import AurumGrid
+from talos.nexus.service import NexusService
+from talos.reports.psyche_seismograph import PsycheSeismograph
 from talos.services.key_management import KeyManagement
+from talos.services.morph import MorphService
 from talos.settings import OpenAISettings
 
 app = typer.Typer()
+nexus_app = typer.Typer()
+aurum_app = typer.Typer()
+morph_app = typer.Typer()
+privacy_app = typer.Typer()
+uniaolives_app = typer.Typer()
+anchor_app = typer.Typer()
 app.add_typer(twitter_app, name="twitter")
 app.add_typer(proposals_app, name="proposals")
 app.add_typer(github_app, name="github")
@@ -33,6 +45,80 @@ app.add_typer(dataset_app, name="dataset")
 app.add_typer(arbiscan_app, name="arbiscan")
 app.add_typer(contracts_app, name="contracts")
 app.add_typer(migrations_app, name="migrations")
+app.add_typer(nexus_app, name="nexus")
+app.add_typer(aurum_app, name="aurum")
+app.add_typer(morph_app, name="morph")
+app.add_typer(privacy_app, name="privacy")
+app.add_typer(uniaolives_app, name="uniaolives")
+app.add_typer(anchor_app, name="anchor")
+
+
+@anchor_app.command("csv")
+def anchor_csv(
+    csv_line: str = typer.Argument(..., help="The CSV line to anchor."),
+    decode: bool = typer.Option(False, "--decode", "-d", help="Decode the CSV line into a human-readable format."),
+) -> None:
+    """
+    Anchors a CSV line to Bitcoin and mints a TimeChain token.
+    """
+    if decode:
+        decoded_line = decode_csv_line(csv_line)
+        print(decoded_line)
+    else:
+        result = csv_anchor_reward(csv_line)
+        print(result)
+
+
+@uniaolives_app.command("deploy")
+def uniaolives_deploy() -> None:
+    """
+    Deploys the UniaoLives platform.
+    """
+    os.system("./deploy.sh")
+
+
+@privacy_app.command("run-checklist")
+def privacy_run_checklist() -> None:
+    """
+    Runs the privacy checklist.
+    """
+    os.system("./run_privacy_checklist.sh")
+
+
+@morph_app.command("get-block-number")
+def morph_get_block_number(
+    provider_url: str = typer.Option("http://localhost:8545", help="The URL of the Morph node provider."),
+) -> None:
+    """
+    Gets the latest block number from the Morph network.
+    """
+    morph_service = MorphService(provider_url)
+    block_number = morph_service.get_latest_block_number()
+    print(f"Latest block number: {block_number}")
+
+
+@aurum_app.command("status")
+def aurum_status() -> None:
+    """
+    Displays the current status of the Aurum Grid.
+    """
+    grid = AurumGrid()
+    print(f"Φ: {grid.phi}")
+    print(f"Ψ: {grid.psi}")
+    print(f"Ω: {grid.omega}")
+    print(f"C²: {grid.coherence}")
+
+
+@nexus_app.command("run")
+def run_nexus(
+    message: str = typer.Argument(..., help="The message to send to the Nexus"),
+) -> None:
+    """
+    Run the Nexus graph.
+    """
+    nexus_service = NexusService()
+    result = nexus_service.run([message])
+    print(result)
 
 
 @app.callback()
@@ -205,6 +291,15 @@ def db_stats() -> None:
     if stats["total_users"] > 0:
         temp_percentage = (stats["temporary_users"] / stats["total_users"]) * 100
         print(f"  Temporary user percentage: {temp_percentage:.1f}%")
+
+
+@app.command()
+def gerar_relatorio() -> None:
+    """
+    Generates the final report for the Aletheia Mission.
+    """
+    report = PsycheSeismograph.generate_report()
+    print(report)
 
 
 if __name__ == "__main__":

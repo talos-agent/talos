@@ -13,7 +13,7 @@ from talos.skills.twitter_persona import TwitterPersonaSkill
 class TwitterVoiceSkill(Skill):
     """
     A skill for integrating Twitter voice analysis into agent communication.
-    
+
     This skill analyzes a Twitter account's voice and style, then generates
     voice-enhanced prompts that can be used to align agent communication.
     """
@@ -29,7 +29,7 @@ class TwitterVoiceSkill(Skill):
 
     def run(self, **kwargs: Any) -> dict:
         username = kwargs.get("username", "talos_is")
-        
+
         try:
             if not self.twitter_persona_skill:
                 self.twitter_persona_skill = TwitterPersonaSkill()
@@ -38,14 +38,14 @@ class TwitterVoiceSkill(Skill):
         except Exception:
             persona_response = self._get_fallback_talos_voice()
             voice_source = "fallback_analysis"
-        
+
         voice_prompt = self._generate_voice_prompt(persona_response)
-        
+
         return {
             "voice_prompt": voice_prompt,
             "persona_analysis": persona_response,
             "voice_source": voice_source,
-            "username": username
+            "username": username,
         }
 
     def _get_fallback_talos_voice(self) -> TwitterPersonaResponse:
@@ -54,30 +54,30 @@ class TwitterVoiceSkill(Skill):
             report="Talos communicates with a declarative, authoritative, and visionary style. Uses concise, powerful statements with lowercase formatting. Speaks about AI, autonomous systems, treasury management, and protocol governance with technical precision and philosophical depth.",
             topics=[
                 "autonomous AI systems",
-                "treasury protocol management", 
+                "treasury protocol management",
                 "decentralized governance",
                 "onchain yield optimization",
                 "AI agent coordination",
                 "protocol evolution",
-                "sovereign intelligence"
+                "sovereign intelligence",
             ],
             style=[
                 "declarative",
-                "authoritative", 
+                "authoritative",
                 "visionary",
                 "concise",
                 "technical",
                 "philosophical",
                 "lowercase",
-                "powerful"
-            ]
+                "powerful",
+            ],
         )
 
     def _generate_voice_prompt(self, persona: TwitterPersonaResponse) -> str:
         """Generate a voice-enhanced prompt based on persona analysis."""
         style_desc = ", ".join(persona.style)
         topics_desc = ", ".join(persona.topics[:5])
-        
+
         return f"""## Voice and Communication Style
 
 Based on analysis of communication patterns, adopt the following voice characteristics:

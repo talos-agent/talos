@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: FROST Network Scanner API
+  version: 1.0.0
+paths:
+  /api/frost/info:
+    get:
+      summary: Get FROST node information
+      responses:
+        '200':
+          description: A JSON object containing FROST node information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/frost/handshake:
+    post:
+      summary: Perform a handshake with a FROST node
+      responses:
+        '200':
+          description: A JSON object containing a handshake success message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/frost/status:
+    get:
+      summary: Get the status of the FROST network
+      responses:
+        '200':
+          description: A JSON object containing a list of discovered nodes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        ip:
+                          type: string
+                        port:
+                          type: integer
+                        data:
+                          type: object

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frost-network-scanner
+  labels:
+    app: frost-network-scanner
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: frost-network-scanner
+  template:
+    metadata:
+      labels:
+        app: frost-network-scanner
+    spec:
+      containers:
+        - name: frost-network-scanner
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}-frost-network-scanner-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-frost-network-scanner-config
+data:
+  config.yaml: |
+    scanPorts: "{{ .Values.config.scanPorts }}"
+    healthTtl: {{ .Values.config.healthTtl }}
+    maxRetries: {{ .Values.config.maxRetries }}
+    scanDelayMs: {{ .Values.config.scanDelayMs }}

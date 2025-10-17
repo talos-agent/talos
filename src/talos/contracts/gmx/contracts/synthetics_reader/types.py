@@ -4,6 +4,7 @@ from eth_rpc.types import primitives, Name, Struct
 from eth_rpc.utils import to_checksum
 from pydantic import BeforeValidator
 
+
 class WithdrawalFlags(Struct):
     should_unwrap_native_token: Annotated[bool, Name("shouldUnwrapNativeToken")]
 
@@ -66,7 +67,9 @@ class MarketUtilsGetNextFundingAmountPerSizeResult(Struct):
     funding_factor_per_second: Annotated[primitives.uint256, Name("fundingFactorPerSecond")]
     next_saved_funding_factor_per_second: Annotated[primitives.int256, Name("nextSavedFundingFactorPerSecond")]
     funding_fee_amount_per_size_delta: Annotated[MarketUtilsPositionType, Name("fundingFeeAmountPerSizeDelta")]
-    claimable_funding_amount_per_size_delta: Annotated[MarketUtilsPositionType, Name("claimableFundingAmountPerSizeDelta")]
+    claimable_funding_amount_per_size_delta: Annotated[
+        MarketUtilsPositionType, Name("claimableFundingAmountPerSizeDelta")
+    ]
 
 
 class ReaderUtilsBaseFundingValues(Struct):
@@ -110,8 +113,12 @@ class PositionNumbers(Struct):
     collateral_amount: Annotated[primitives.uint256, Name("collateralAmount")]
     borrowing_factor: Annotated[primitives.uint256, Name("borrowingFactor")]
     funding_fee_amount_per_size: Annotated[primitives.uint256, Name("fundingFeeAmountPerSize")]
-    long_token_claimable_funding_amount_per_size: Annotated[primitives.uint256, Name("longTokenClaimableFundingAmountPerSize")]
-    short_token_claimable_funding_amount_per_size: Annotated[primitives.uint256, Name("shortTokenClaimableFundingAmountPerSize")]
+    long_token_claimable_funding_amount_per_size: Annotated[
+        primitives.uint256, Name("longTokenClaimableFundingAmountPerSize")
+    ]
+    short_token_claimable_funding_amount_per_size: Annotated[
+        primitives.uint256, Name("shortTokenClaimableFundingAmountPerSize")
+    ]
     increased_at_block: Annotated[primitives.uint256, Name("increasedAtBlock")]
     decreased_at_block: Annotated[primitives.uint256, Name("decreasedAtBlock")]
     increased_at_time: Annotated[primitives.uint256, Name("increasedAtTime")]
@@ -142,8 +149,12 @@ class PositionPricingUtilsPositionFundingFees(Struct):
     claimable_long_token_amount: Annotated[primitives.uint256, Name("claimableLongTokenAmount")]
     claimable_short_token_amount: Annotated[primitives.uint256, Name("claimableShortTokenAmount")]
     latest_funding_fee_amount_per_size: Annotated[primitives.uint256, Name("latestFundingFeeAmountPerSize")]
-    latest_long_token_claimable_funding_amount_per_size: Annotated[primitives.uint256, Name("latestLongTokenClaimableFundingAmountPerSize")]
-    latest_short_token_claimable_funding_amount_per_size: Annotated[primitives.uint256, Name("latestShortTokenClaimableFundingAmountPerSize")]
+    latest_long_token_claimable_funding_amount_per_size: Annotated[
+        primitives.uint256, Name("latestLongTokenClaimableFundingAmountPerSize")
+    ]
+    latest_short_token_claimable_funding_amount_per_size: Annotated[
+        primitives.uint256, Name("latestShortTokenClaimableFundingAmountPerSize")
+    ]
 
 
 class PositionPricingUtilsPositionBorrowingFees(Struct):

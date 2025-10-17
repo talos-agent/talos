@@ -50,18 +50,19 @@ class Agent(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         if self.memory:
             from talos.tools.memory_tool import AddMemoryTool
+
             self.tool_manager.register_tool(AddMemoryTool(agent=self))
 
     def set_prompt(self, name: str | list[str]):
         if not self.prompt_manager:
             raise ValueError("Prompt manager not initialized.")
-        
+
         prompt_names = name if isinstance(name, list) else [name]
         if self.dataset_manager:
             prompt_names.append("relevant_documents_prompt")
         if self.memory:
             prompt_names.append("relevant_memories_prompt")
-        
+
         prompt = self.prompt_manager.get_prompt(prompt_names)
         if not prompt:
             raise ValueError(f"The prompt '{prompt_names}' is not defined.")
@@ -100,14 +101,14 @@ class Agent(BaseModel):
         A base method for adding context to the query.
         """
         context = {}
-        
+
         if self.dataset_manager and query:
             relevant_documents = self.dataset_manager.search(query, k=5, context_search=True)
             context["relevant_documents"] = relevant_documents
-        
+
         if "relevant_memories" in kwargs and kwargs["relevant_memories"]:
             context["relevant_memories"] = kwargs["relevant_memories"]
-            
+
         return context
 
     def _get_verbose_level(self) -> int:
@@ -120,7 +121,7 @@ class Agent(BaseModel):
         if self.memory:
             relevant_memories = self.memory.search(message)
             kwargs["relevant_memories"] = relevant_memories
-            
+
             verbose_level = self._get_verbose_level()
             if verbose_level >= 1 and relevant_memories:
                 print(f"🧠 Found {len(relevant_memories)} relevant memories for context")
@@ -129,10 +130,10 @@ class Agent(BaseModel):
                         print(f"  {i}. {memory.description}")
                     if len(relevant_memories) > 3:
                         print(f"  ... and {len(relevant_memories) - 3} more")
-            
+
             if history is None:
                 history = self.memory.load_history()
-        
+
         self._prepare_run(message, history)
         chain = self._create_chain()
         context = self._build_context(message, **kwargs)
@@ -169,35 +170,31 @@ class Agent(BaseModel):
     def _process_result(self, result: Any) -> BaseModel:
         if isinstance(result, AIMessage):
             self.history.append(result)
-            
-            if hasattr(result, 'tool_calls') and result.tool_calls:
+
+            if hasattr(result, "tool_calls") and result.tool_calls:
                 tool_messages = []
                 for tool_call in result.tool_calls:
                     try:
-                        tool = self.tool_manager.get_tool(tool_call['name'])
+                        tool = self.tool_manager.get_tool(tool_call["name"])
                         if tool:
-                            tool_result = tool.invoke(tool_call['args'])
-                            if tool_call['name'] == 'dataset_search':
-                                display_result = str(tool_result)[:100] + "..." if len(str(tool_result)) > 100 else str(tool_result)
+                            tool_result = tool.invoke(tool_call["args"])
+                            if tool_call["name"] == "dataset_search":
+                                display_result = (
+                                    str(tool_result)[:100] + "..." if len(str(tool_result)) > 100 else str(tool_result)
+                                )
                             else:
                                 display_result = str(tool_result)
                             print(f"🔧 Executed tool '{tool_call['name']}': {display_result}", flush=True)
-                            
-                            tool_message = ToolMessage(
-                                content=str(tool_result),
-                                tool_call_id=tool_call['id']
-                            )
+
+                            tool_message = ToolMessage(content=str(tool_result), tool_call_id=tool_call["id"])
                             tool_messages.append(tool_message)
                     except Exception as e:
                         print(f"❌ Tool execution error for '{tool_call['name']}': {e}", flush=True)
-                        tool_message = ToolMessage(
-                            content=f"Error: {str(e)}",
-                            tool_call_id=tool_call['id']
-                        )
+                        tool_message = ToolMessage(content=f"Error: {str(e)}", tool_call_id=tool_call["id"])
                         tool_messages.append(tool_message)
-                
+
                 self.history.extend(tool_messages)
-                
+
                 chain = self._create_chain()
                 last_human_message = ""
                 for message in reversed(self.history):
@@ -206,9 +203,9 @@ class Agent(BaseModel):
                         break
                 context = self._build_context(last_human_message)
                 new_result = chain.invoke({"messages": self.history, **context})
-                
+
                 return self._process_result(new_result)
-            
+
             return result
         if isinstance(result, BaseModel):
             self.history.append(AIMessage(content=str(result)))

@@ -13,11 +13,12 @@ class GitHubSettings(BaseSettings):
     def validate_github_token(self):
         if not self.GITHUB_API_TOKEN:
             raise ValueError("GITHUB_API_TOKEN environment variable is required but not set")
-        
+
         from .utils.validation import validate_api_token_format, mask_sensitive_data
-        if not validate_api_token_format(self.GITHUB_API_TOKEN, 'github'):
+
+        if not validate_api_token_format(self.GITHUB_API_TOKEN, "github"):
             logger.warning("GitHub API token format appears invalid")
-        
+
         masked_token = mask_sensitive_data(self.GITHUB_API_TOKEN)
         logger.info(f"GitHub settings initialized with token: {masked_token}")
         return self
@@ -30,11 +31,12 @@ class OpenAISettings(BaseSettings):
     def validate_openai_key(self):
         if not self.OPENAI_API_KEY:
             raise ValueError("OPENAI_API_KEY environment variable is required but not set")
-        
+
         from .utils.validation import validate_api_token_format, mask_sensitive_data
-        if not validate_api_token_format(self.OPENAI_API_KEY, 'openai'):
+
+        if not validate_api_token_format(self.OPENAI_API_KEY, "openai"):
             logger.warning("OpenAI API key format appears invalid")
-        
+
         masked_key = mask_sensitive_data(self.OPENAI_API_KEY)
         logger.info(f"OpenAI settings initialized with key: {masked_key}")
         return self
@@ -51,8 +53,9 @@ class GitBookSettings(BaseSettings):
     def validate_gitbook_key(self):
         if not self.GITBOOK_API_KEY:
             raise ValueError("GITBOOK_API_KEY environment variable is required but not set")
-        
+
         from .utils.validation import mask_sensitive_data
+
         masked_key = mask_sensitive_data(self.GITBOOK_API_KEY)
         logger.info(f"GitBook settings initialized with key: {masked_key}")
         return self
@@ -66,11 +69,20 @@ class TwitterOAuthSettings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_twitter_oauth(self):
-        required_fields = [self.TWITTER_CONSUMER_KEY, self.TWITTER_CONSUMER_SECRET, 
-                          self.TWITTER_ACCESS_TOKEN, self.TWITTER_ACCESS_TOKEN_SECRET]
+        required_fields = [
+            self.TWITTER_CONSUMER_KEY,
+            self.TWITTER_CONSUMER_SECRET,
+            self.TWITTER_ACCESS_TOKEN,
+            self.TWITTER_ACCESS_TOKEN_SECRET,
+        ]
         if not all(required_fields):
-            raise ValueError("All Twitter OAuth environment variables are required: TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET")
-        
+            raise ValueError(
+                "All Twitter OAuth environment variables are required: TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET"
+            )
+
         from .utils.validation import mask_sensitive_data
-        logger.info(f"Twitter OAuth settings initialized with consumer key: {mask_sensitive_data(self.TWITTER_CONSUMER_KEY)}")
+
+        logger.info(
+            f"Twitter OAuth settings initialized with consumer key: {mask_sensitive_data(self.TWITTER_CONSUMER_KEY)}"
+        )
         return self
