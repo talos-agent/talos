@@ -47,7 +47,8 @@ class TestAddMemoryToolIntegration(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
 
         from talos.core.agent import Agent
-        AddMemoryTool.model_rebuild(_types_namespace={'Agent': Agent})
+
+        AddMemoryTool.model_rebuild(_types_namespace={"Agent": Agent})
 
         # Create a mock agent with file-based memory (not database)
         self.agent = Agent(
