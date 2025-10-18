@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 from eth_rpc.types import primitives
+from pydantic import BaseModel
 
 
 class GasLimits(BaseModel):

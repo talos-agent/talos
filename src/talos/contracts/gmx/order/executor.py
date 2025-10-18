@@ -1,8 +1,8 @@
-from eth_typing import HexStr, HexAddress
+from eth_typing import HexAddress, HexStr
 
+from ..types.orders import OrderType
 from ..utils.gas import get_gas_limits
 from .order import Order
-from ..types.orders import OrderType
 
 
 class OrderExecutor(Order):
@@ -20,12 +20,14 @@ class OrderExecutor(Order):
         self._gas_limits_order_type = self._gas_limits.increase_order
 
     @classmethod
-    async def calculate_initial_collateral_tokens(cls, size_delta_usd: float, leverage: int, start_token_address: HexAddress):
+    async def calculate_initial_collateral_tokens(
+        cls, size_delta_usd: float, leverage: int, start_token_address: HexAddress
+    ):
         """
         Calculate the amount of tokens collateral from the USD value
         """
         from ..getters.prices import OraclePrices
-        from ..utils import median, get_tokens_address_dict
+        from ..utils import get_tokens_address_dict, median
 
         collateral_usd = size_delta_usd / leverage
 

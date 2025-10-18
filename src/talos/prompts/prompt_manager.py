@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 from langchain_core.messages import BaseMessage
 
@@ -29,8 +29,10 @@ class PromptManager(ABC):
         Gets prompts using declarative configuration and context.
         """
         pass
-    
-    def apply_variable_transformations(self, template: str, variables: Dict[str, Any], transformations: Dict[str, str]) -> str:
+
+    def apply_variable_transformations(
+        self, template: str, variables: Dict[str, Any], transformations: Dict[str, str]
+    ) -> str:
         """
         Apply variable transformations to template.
         """
@@ -41,7 +43,7 @@ class PromptManager(ABC):
                     transformed_vars[var_name] = str(transformed_vars[var_name]).upper()
                 elif transformation == "lowercase":
                     transformed_vars[var_name] = str(transformed_vars[var_name]).lower()
-        
+
         return template.format(**transformed_vars)
 
     def update_prompt_template(self, history: list[BaseMessage]):
