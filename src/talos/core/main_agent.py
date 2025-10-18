@@ -10,7 +10,6 @@ from langchain_core.tools import BaseTool, tool
 from talos.core.agent import Agent
 from talos.core.job_scheduler import JobScheduler
 from talos.core.scheduled_job import ScheduledJob
-
 from talos.core.startup_task_manager import StartupTaskManager
 from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.hypervisor import Hypervisor
@@ -28,6 +27,7 @@ from talos.skills.proposals import ProposalsSkill
 from talos.skills.twitter_influence import TwitterInfluenceSkill
 from talos.skills.twitter_sentiment import TwitterSentimentSkill
 from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
+from talos.tools.archive_ph import ArchivePhTool
 from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
 from talos.tools.github.tools import GithubTools
 from talos.tools.tool_manager import ToolManager
@@ -269,6 +269,7 @@ class MainAgent(Agent):
 
         tool_manager.register_tool(ArbiScanSourceCodeTool())
         tool_manager.register_tool(ArbiScanABITool())
+        tool_manager.register_tool(ArchivePhTool())
 
         self.tool_manager = tool_manager
 
@@ -286,10 +287,13 @@ class MainAgent(Agent):
         """Initialize the startup task manager and discover tasks from files."""
         if not self.startup_task_manager:
             self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
-        
+
         import logging
+
         logger = logging.getLogger(__name__)
-        logger.info(f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks")
+        logger.info(
+            f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks"
+        )
 
     def add_scheduled_job(self, job: ScheduledJob) -> None:
         """

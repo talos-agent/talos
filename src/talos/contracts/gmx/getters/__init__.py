@@ -4,4 +4,4 @@ from .get import GetData
 from .open_interest import OpenInterest
 from .prices import OraclePrices
 
-__all__ = ['GetClaimableFees', 'GetFundingFee', 'GetData', 'OpenInterest', 'OraclePrices']
+__all__ = ["GetClaimableFees", "GetFundingFee", "GetData", "OpenInterest", "OraclePrices"]
