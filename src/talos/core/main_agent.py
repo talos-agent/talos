@@ -10,7 +10,6 @@ from langchain_core.tools import BaseTool, tool
 from talos.core.agent import Agent
 from talos.core.job_scheduler import JobScheduler
 from talos.core.scheduled_job import ScheduledJob
-
 from talos.core.startup_task_manager import StartupTaskManager
 from talos.data.dataset_manager import DatasetManager
 from talos.hypervisor.hypervisor import Hypervisor
@@ -251,26 +250,24 @@ class MainAgent(Agent):
                 self.dataset_manager = DatasetManager(verbose=self.verbose)
 
     def _setup_tool_manager(self) -> None:
-        tool_manager = ToolManager()
+        self.tool_manager = ToolManager()
         for skill in self.skills:
-            tool_manager.register_tool(skill.create_ticket_tool())
-        tool_manager.register_tool(self._get_ticket_status_tool())
-        tool_manager.register_tool(self._add_memory_tool())
+            self.tool_manager.register_tool(skill.create_ticket_tool())
+        self.tool_manager.register_tool(self._get_ticket_status_tool())
+        self.tool_manager.register_tool(self._add_memory_tool())
 
         if self.dataset_manager:
-            tool_manager.register_tool(DocumentLoaderTool(self.dataset_manager))
-            tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
+            self.tool_manager.register_tool(DocumentLoaderTool(self.dataset_manager))
+            self.tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
         else:
             from langchain_openai import OpenAIEmbeddings
 
             basic_dataset_manager = DatasetManager(verbose=self.verbose, embeddings=OpenAIEmbeddings())
-            tool_manager.register_tool(DocumentLoaderTool(basic_dataset_manager))
-            tool_manager.register_tool(DatasetSearchTool(basic_dataset_manager))
+            self.tool_manager.register_tool(DocumentLoaderTool(basic_dataset_manager))
+            self.tool_manager.register_tool(DatasetSearchTool(basic_dataset_manager))
 
-        tool_manager.register_tool(ArbiScanSourceCodeTool())
-        tool_manager.register_tool(ArbiScanABITool())
-
-        self.tool_manager = tool_manager
+        self.tool_manager.register_tool(ArbiScanSourceCodeTool())
+        self.tool_manager.register_tool(ArbiScanABITool())
 
     def _setup_job_scheduler(self) -> None:
         """Initialize the job scheduler and register any predefined scheduled jobs."""
@@ -286,10 +283,13 @@ class MainAgent(Agent):
         """Initialize the startup task manager and discover tasks from files."""
         if not self.startup_task_manager:
             self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
-        
+
         import logging
+
         logger = logging.getLogger(__name__)
-        logger.info(f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks")
+        logger.info(
+            f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks"
+        )
 
     def add_scheduled_job(self, job: ScheduledJob) -> None:
         """
@@ -347,7 +347,7 @@ class MainAgent(Agent):
 
     def _add_memory_tool(self) -> BaseTool:
         @tool
-        def add_memory(description: str, metadata: Optional[dict] = None) -> str:
+        def add_memory(description: str, metadata: Optional[dict[str, Any]] = None) -> str:
             """
             Adds a memory to the agent's long-term memory.
 
@@ -392,7 +392,7 @@ class MainAgent(Agent):
 
         return get_ticket_status
 
-    def _build_context(self, query: str, **kwargs) -> dict:
+    def _build_context(self, query: str, **kwargs: Any) -> dict[str, Any]:
         base_context = super()._build_context(query, **kwargs)
 
         active_tickets = []

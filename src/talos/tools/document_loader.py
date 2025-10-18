@@ -35,7 +35,7 @@ class DocumentLoaderTool(SupervisedTool):
             all_datasets = self._dataset_manager.get_all_datasets()
             if name in all_datasets:
                 return f"Dataset '{name}' already exists. Use dataset_search to query existing content."
-            
+
             if self._is_ipfs_hash(source):
                 self._dataset_manager.add_document_from_ipfs(name, source, chunk_size, chunk_overlap)
                 return f"Successfully loaded document from IPFS hash {source} into dataset '{name}'"
