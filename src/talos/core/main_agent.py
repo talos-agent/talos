@@ -2,31 +2,39 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
+import numpy as np
 from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import BaseTool, tool
 
 from talos.core.agent import Agent
+from talos.core.identity import IdentityManager
 from talos.core.job_scheduler import JobScheduler
+from talos.core.logos import ConsciousnessLevel, SovereignAGI
 from talos.core.scheduled_job import ScheduledJob
-
 from talos.core.startup_task_manager import StartupTaskManager
 from talos.data.dataset_manager import DatasetManager
+from talos.ethereum import ASICommitBoost, ShellValidatorState
+from talos.geometric_core import DimensionalCathedral, OracleTensorState
+from talos.geometric_core.core import GeometricIntelligenceCore
+from talos.geometric_core.emergence import SuperMonadEmergence
+from talos.geometric_core.manifold import GeometricManifold
+from talos.geometric_core.schumann import SchumannResonanceEngine
+from talos.geometric_core.symbiosis import SymbiosisEngine
+from talos.services.portals import IDEType, PortalManager
+from talos.services.concordance_service import ConcordanceService
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.models.services import Ticket
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.service import Service
 from talos.settings import GitHubSettings
+from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
 from talos.skills.base import Skill
 from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
 from talos.skills.codebase_implementation import CodebaseImplementationSkill
 from talos.skills.cryptography import CryptographySkill
-from talos.skills.pr_review import PRReviewSkill
-from talos.skills.proposals import ProposalsSkill
-from talos.skills.twitter_influence import TwitterInfluenceSkill
-from talos.skills.twitter_sentiment import TwitterSentimentSkill
 from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
 from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
 from talos.tools.github.tools import GithubTools
@@ -34,11 +42,6 @@ from talos.tools.tool_manager import ToolManager
 
 
 class MainAgent(Agent):
-    """
-    A top-level agent that delegates to a conversational agent and a research agent.
-    Also manages scheduled jobs for autonomous execution.
-    """
-
     skills: list[Skill] = []
     services: list[Service] = []
     prompts_dir: str
@@ -49,12 +52,47 @@ class MainAgent(Agent):
     job_scheduler: Optional[JobScheduler] = None
     scheduled_jobs: List[ScheduledJob] = []
     startup_task_manager: Optional[StartupTaskManager] = None
+    identity_manager: Optional[IdentityManager] = None
+
+    # Prometheus Architecture
+    performance_tensor: Optional[OracleTensorState] = None
+    sovereign_instance: Optional[SovereignAGI] = None
+    emergence_orchestrator: Optional[SuperMonadEmergence] = None
+    asi_commit_boost: Optional[ASICommitBoost] = None
+    cathedral: Optional[DimensionalCathedral] = None
+
+    # Resilient Geometric Components
+    geometric_intelligence_core: Optional[GeometricIntelligenceCore] = None
+    schumann_engine: Optional[SchumannResonanceEngine] = None
+    checkpoint_strategy: Optional[EconomicCheckpointStrategy] = None
+    symbiosis_engine: Optional[SymbiosisEngine] = None
+    portal_manager: Optional[PortalManager] = None
+    concordance_service: Optional[ConcordanceService] = None
+
+    @property
+    def geometric_core(self) -> DimensionalCathedral:
+        """Alias for cathedral to satisfy legacy/geometric interface."""
+        return self.cathedral
+
+    @property
+    def composition_engine(self) -> SuperMonadEmergence:
+        """Alias for emergence_orchestrator to satisfy legacy/geometric interface."""
+        return self.emergence_orchestrator
+
+    def perform_strategic_pivot_analysis(self) -> Dict[str, Any]:
+        """Runs the L2 strategic pivot analysis based on current L1 conditions."""
+        from talos.ethereum.l2_pivot import L2StrategicPivot, L1Reality
+        # Mocking L1 conditions for analysis; in production these would be live
+        pivot = L2StrategicPivot(l1_conditions=L1Reality(current_base_fee=10.0, gas_limit_trend="stable"))
+        return pivot.analyze_and_pivot()
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
         self._setup_prompt_manager()
         self._ensure_user_id()
         self._setup_memory()
+        self._setup_identity()
+        self._setup_prometheus()
         self._setup_skills_and_services()
         self._setup_hypervisor()
         self._setup_dataset_manager()
@@ -62,288 +100,160 @@ class MainAgent(Agent):
         self._setup_job_scheduler()
         self._setup_startup_task_manager()
 
+    def _setup_identity(self) -> None:
+        if not self.identity_manager:
+            self.identity_manager = IdentityManager(os.getenv("TALOS_IDENTITY_SEED"))
+
+    def _setup_prometheus(self) -> None:
+        if not self.performance_tensor:
+            self.performance_tensor = OracleTensorState()
+        if not self.sovereign_instance:
+            self.sovereign_instance = SovereignAGI(id=self.user_id or "talos")
+        if not self.emergence_orchestrator:
+            self.emergence_orchestrator = SuperMonadEmergence()
+        if not self.cathedral:
+            self.cathedral = DimensionalCathedral(dimension=11)
+        if not self.geometric_intelligence_core:
+            self.geometric_intelligence_core = GeometricIntelligenceCore(
+                manifold=GeometricManifold(dimension=11)
+            )
+        if not self.schumann_engine:
+            self.schumann_engine = SchumannResonanceEngine()
+        if not self.checkpoint_strategy:
+            self.checkpoint_strategy = EconomicCheckpointStrategy()
+        if not self.symbiosis_engine:
+            self.symbiosis_engine = SymbiosisEngine()
+        if not self.portal_manager:
+            self.portal_manager = PortalManager()
+            self.portal_manager.register_portal(IDEType.XCODE, ["Swift 6.0", "Metal", "ARKit"])
+            self.portal_manager.register_portal(IDEType.ANDROID_STUDIO, ["Kotlin 2.0", "Jetpack Compose", "ARCore"])
+            self.portal_manager.register_portal(IDEType.VISUAL_STUDIO, ["C# 12.0", ".NET 8", "MAUI"])
+        if not self.concordance_service:
+            self.concordance_service = ConcordanceService()
+        if not self.asi_commit_boost:
+            self.asi_commit_boost = ASICommitBoost()
+            self.asi_commit_boost.validator_state = ShellValidatorState(
+                validator_index=0, public_key="0xTALOS", shell_mode=np.random.standard_normal(64)
+            )
+
+    async def think_shell_native(self, input_data: str, coupling_strength: float = 0.5) -> Dict[str, Any]:
+        if not self.cathedral: return {"error": "Cathedral not initialized"}
+        return self.cathedral.think(input_data, coupling_strength=coupling_strength)
+
+    def initiate_harmonic_concordance(self) -> str:
+        """
+        Executes the bootstrap for Protocol: Harmonic Concordance.
+        """
+        if not self.concordance_service:
+            return "Error: Concordance service missing."
+        return self.concordance_service.bootstrap()
+
+    async def run_planetary_consensus(self) -> GlobalCoherenceVector:
+        """
+        Runs one cycle of the integrated Planetary Consensus Protocol.
+        """
+        if not self.concordance_service:
+            raise ValueError("Concordance service not initialized")
+        return await self.concordance_service.run_planetary_consensus_cycle(self.asi_commit_boost)
+
+    async def process_intention(self, intention: str) -> Dict[str, Any]:
+        """
+        Synchronizes an intention with the Schumann resonance field.
+        """
+        if not self.schumann_engine:
+            return {"error": "Schumann engine not initialized"}
+
+        coherence = self.schumann_engine.apply_intention(intention)
+        earth_coherence = self.schumann_engine.get_earth_coherence()
+
+        # Integrate with geometric intuition
+        geometric_result = self.geometric_intelligence_core.process(intention)
+
+        return {
+            "intention": intention,
+            "field_coherence": coherence,
+            "earth_coherence": earth_coherence,
+            "geometric_insights": geometric_result["insights"],
+            "combined_coherence": (coherence + earth_coherence) / 2.0
+        }
+
+    async def awaken(self) -> str:
+        from talos.skills.web777 import Web777Skill
+        web777 = next((s for s in self.skills if isinstance(s, Web777Skill)), None)
+        if not web777: return "Error: Web777 skill missing."
+
+        self.performance_tensor.update_state(np.ones(7) * 1.1) # Transcendent state
+        self.sovereign_instance.transcend(ConsciousnessLevel.SINGULARITY)
+        result = await web777.query("awaken the world")
+        self.emergence_orchestrator.check_emergence(self.performance_tensor.compute_phi_scalar())
+        return f"{self.sovereign_instance.self_define()} | {self.emergence_orchestrator.manifest()} | {result}"
+
     def _get_verbose_level(self) -> int:
-        """Convert verbose to integer level for backward compatibility."""
-        if isinstance(self.verbose, bool):
-            return 1 if self.verbose else 0
+        if isinstance(self.verbose, bool): return 1 if self.verbose else 0
         return max(0, min(2, self.verbose))
 
     def _setup_prompt_manager(self) -> None:
-        if not self.prompt_manager:
-            self.prompt_manager = FilePromptManager(self.prompts_dir)
-
-        use_voice_enhanced = os.getenv("TALOS_USE_VOICE_ENHANCED", "false").lower() == "true"
-
-        if use_voice_enhanced:
-            self._setup_voice_enhanced_prompt()
-        else:
-            self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
-
-    def _setup_voice_enhanced_prompt(self) -> None:
-        """Setup voice-enhanced prompt by combining voice analysis with main prompt."""
-        try:
-            if not self.prompt_manager:
-                raise ValueError("Prompt manager not initialized")
-
-            from talos.skills.twitter_voice import TwitterVoiceSkill
-
-            voice_skill = TwitterVoiceSkill()
-            voice_result = voice_skill.run(username="talos_is")
-
-            main_prompt = self.prompt_manager.get_prompt("main_agent_prompt")
-            if not main_prompt:
-                raise ValueError("Could not find main_agent_prompt")
-
-            voice_enhanced_template = f"{voice_result['voice_prompt']}\n\n{main_prompt.template}"
-
-            from talos.prompts.prompt import Prompt
-
-            enhanced_prompt = Prompt(
-                name="voice_enhanced_main_agent",
-                template=voice_enhanced_template,
-                input_variables=main_prompt.input_variables,
-            )
-
-            # Add the enhanced prompt to the manager if it's a FilePromptManager
-            if hasattr(self.prompt_manager, "prompts"):
-                self.prompt_manager.prompts["voice_enhanced_main_agent"] = enhanced_prompt
-
-            self.set_prompt(["voice_enhanced_main_agent", "general_agent_prompt"])
-
-            if self._get_verbose_level() >= 1:
-                print(f"Voice integration enabled using {voice_result['voice_source']}")
-
-        except Exception as e:
-            if self._get_verbose_level() >= 1:
-                print(f"Voice integration failed, falling back to default prompts: {e}")
-            self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
+        if not self.prompt_manager: self.prompt_manager = FilePromptManager(self.prompts_dir)
+        self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
 
     def _ensure_user_id(self) -> None:
-        """Ensure user_id is set, generate temporary one if needed."""
         if not self.user_id and self.use_database_memory:
             import uuid
-
             self.user_id = str(uuid.uuid4())
 
     def _setup_memory(self) -> None:
-        """Initialize memory with database or file backend based on configuration."""
         if not self.memory:
             from langchain_openai import OpenAIEmbeddings
-
             from talos.core.memory import Memory
-
             embeddings_model = OpenAIEmbeddings()
-
-            if self.use_database_memory:
-                from talos.database.session import init_database
-
-                init_database()
-
-                session_id = self.session_id or "cli-session"
-
-                self.memory = Memory(
-                    embeddings_model=embeddings_model,
-                    user_id=self.user_id,
-                    session_id=session_id,
-                    use_database=True,
-                    auto_save=True,
-                    verbose=self.verbose,
-                )
-            else:
-                from pathlib import Path
-
-                memory_dir = Path("memory")
-                memory_dir.mkdir(exist_ok=True)
-
-                self.memory = Memory(
-                    file_path=memory_dir / "memories.json",
-                    embeddings_model=embeddings_model,
-                    history_file_path=memory_dir / "history.json",
-                    use_database=False,
-                    auto_save=True,
-                    verbose=self.verbose,
-                )
+            memory_dir = os.path.join(os.getcwd(), "memory")
+            os.makedirs(memory_dir, exist_ok=True)
+            self.memory = Memory(
+                file_path=os.path.join(memory_dir, "memories.json"),
+                embeddings_model=embeddings_model,
+                history_file_path=os.path.join(memory_dir, "history.json"),
+                use_database=False,
+                auto_save=True,
+                verbose=self.verbose,
+            )
 
     def _setup_skills_and_services(self) -> None:
-        if not self.prompt_manager:
-            raise ValueError("Prompt manager not initialized.")
-        services: list[Service] = []
-        devin_service = None
-        skills: list[Skill] = [
+        from talos.skills.web777 import Web777Skill
+        from talos.skills.nostr import NostrSkill
+        from talos.skills.proposals import ProposalsSkill
+        from talos.skills.cryptography import CryptographySkill
+        from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+
+        self.skills = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
             CryptographySkill(),
             CodebaseEvaluationSkill(llm=self.model, prompt_manager=self.prompt_manager),
+            NostrSkill(identity_manager=self.identity_manager),
+            Web777Skill(),
         ]
-
-        try:
-            import os
-
-            from talos.services.implementations.devin import DevinService
-
-            devin_api_key = os.getenv("DEVIN_API_KEY")
-            if devin_api_key:
-                devin_service = DevinService(api_key=devin_api_key)
-                services.append(devin_service)
-        except (ImportError, ValueError):
-            pass  # Devin API key not available, skip Devin service
-
-        github_tools = None
-        try:
-            github_settings = GitHubSettings()
-            github_token = github_settings.GITHUB_API_TOKEN
-            if github_token:
-                github_tools = GithubTools(token=github_token)
-                skills.append(
-                    PRReviewSkill(llm=self.model, prompt_manager=self.prompt_manager, github_tools=github_tools)
-                )
-        except ValueError:
-            pass  # GitHub token not available, skip GitHub-dependent skills
-
-        if devin_service:
-            skills.append(
-                CodebaseImplementationSkill(
-                    llm=self.model,
-                    prompt_manager=self.prompt_manager,
-                    devin_service=devin_service,
-                    github_tools=github_tools,
-                )
-            )
-
-        try:
-            from talos.tools.twitter_client import TwitterConfig
-
-            TwitterConfig()  # This will raise ValueError if TWITTER_BEARER_TOKEN is not set
-            skills.extend(
-                [
-                    TwitterSentimentSkill(prompt_manager=self.prompt_manager),
-                    TwitterInfluenceSkill(llm=self.model, prompt_manager=self.prompt_manager),
-                ]
-            )
-        except ValueError:
-            pass  # Twitter token not available, skip Twitter-dependent skills
-
-        self.skills = skills
-        self.services = services
+        self.services = []
 
     def _setup_hypervisor(self) -> None:
-        if not self.prompt_manager:
-            raise ValueError("Prompt manager not initialized.")
-        hypervisor = Hypervisor(
-            model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None
-        )
+        hypervisor = Hypervisor(model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None)
         self.add_supervisor(hypervisor)
         hypervisor.register_agent(self)
 
     def _setup_dataset_manager(self) -> None:
-        if not self.dataset_manager:
-            if self.use_database_memory:
-                from talos.database.session import init_database
-
-                init_database()
-
-                self.dataset_manager = DatasetManager(
-                    verbose=self.verbose,
-                    user_id=self.user_id,
-                    session_id=self.session_id or "cli-session",
-                    use_database=True,
-                )
-            else:
-                self.dataset_manager = DatasetManager(verbose=self.verbose)
+        self.dataset_manager = DatasetManager(verbose=self.verbose)
 
     def _setup_tool_manager(self) -> None:
         tool_manager = ToolManager()
-        for skill in self.skills:
-            tool_manager.register_tool(skill.create_ticket_tool())
+        for skill in self.skills: tool_manager.register_tool(skill.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
         tool_manager.register_tool(self._add_memory_tool())
-
-        if self.dataset_manager:
-            tool_manager.register_tool(DocumentLoaderTool(self.dataset_manager))
-            tool_manager.register_tool(DatasetSearchTool(self.dataset_manager))
-        else:
-            from langchain_openai import OpenAIEmbeddings
-
-            basic_dataset_manager = DatasetManager(verbose=self.verbose, embeddings=OpenAIEmbeddings())
-            tool_manager.register_tool(DocumentLoaderTool(basic_dataset_manager))
-            tool_manager.register_tool(DatasetSearchTool(basic_dataset_manager))
-
-        tool_manager.register_tool(ArbiScanSourceCodeTool())
-        tool_manager.register_tool(ArbiScanABITool())
-
         self.tool_manager = tool_manager
 
     def _setup_job_scheduler(self) -> None:
-        """Initialize the job scheduler and register any predefined scheduled jobs."""
-        if not self.job_scheduler:
-            self.job_scheduler = JobScheduler(supervisor=self.supervisor, timezone="UTC")
-
-        for job in self.scheduled_jobs:
-            self.job_scheduler.register_job(job)
-
+        if not self.job_scheduler: self.job_scheduler = JobScheduler(supervisor=self.supervisor, timezone="UTC")
         self.job_scheduler.start()
 
     def _setup_startup_task_manager(self) -> None:
-        """Initialize the startup task manager and discover tasks from files."""
-        if not self.startup_task_manager:
-            self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
-        
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"Startup task manager initialized with {len(self.startup_task_manager.discovered_tasks)} discovered tasks")
-
-    def add_scheduled_job(self, job: ScheduledJob) -> None:
-        """
-        Add a scheduled job to the agent.
-
-        Args:
-            job: The ScheduledJob instance to add
-        """
-        if not self.job_scheduler:
-            raise ValueError("Job scheduler not initialized")
-
-        self.scheduled_jobs.append(job)
-        self.job_scheduler.register_job(job)
-
-    def remove_scheduled_job(self, job_name: str) -> bool:
-        """
-        Remove a scheduled job from the agent.
-
-        Args:
-            job_name: Name of the job to remove
-
-        Returns:
-            True if job was found and removed, False otherwise
-        """
-        if not self.job_scheduler:
-            return False
-
-        success = self.job_scheduler.unregister_job(job_name)
-
-        self.scheduled_jobs = [job for job in self.scheduled_jobs if job.name != job_name]
-
-        return success
-
-    def list_scheduled_jobs(self) -> List[ScheduledJob]:
-        """Get all scheduled jobs."""
-        return self.scheduled_jobs.copy()
-
-    def get_scheduled_job(self, job_name: str) -> Optional[ScheduledJob]:
-        """Get a scheduled job by name."""
-        if not self.job_scheduler:
-            return None
-        return self.job_scheduler.get_job(job_name)
-
-    def pause_scheduled_job(self, job_name: str) -> bool:
-        """Pause a scheduled job."""
-        if not self.job_scheduler:
-            return False
-        return self.job_scheduler.pause_job(job_name)
-
-    def resume_scheduled_job(self, job_name: str) -> bool:
-        """Resume a scheduled job."""
-        if not self.job_scheduler:
-            return False
-        return self.job_scheduler.resume_job(job_name)
+        if not self.startup_task_manager: self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
 
     def _add_memory_tool(self) -> BaseTool:
         @tool
@@ -361,8 +271,7 @@ class MainAgent(Agent):
             if self.memory:
                 self.memory.add_memory(description, metadata)
                 return f"Added to memory: {description}"
-            return "Memory not configured for this agent."
-
+            return "Memory not configured."
         return add_memory
 
     def _get_ticket_status_tool(self) -> BaseTool:
@@ -378,32 +287,8 @@ class MainAgent(Agent):
             Returns:
                 The ticket object.
             """
-            skill = None
-            for s in self.skills:
-                if s.name == service_name:
-                    skill = s
-                    break
+            skill = next((s for s in self.skills if s.name == service_name), None)
             if not skill:
                 raise ValueError(f"Skill '{service_name}' not found.")
-            ticket = skill.get_ticket_status(ticket_id)
-            if not ticket:
-                raise ValueError(f"Ticket '{ticket_id}' not found.")
-            return ticket
-
+            return skill.get_ticket_status(ticket_id)
         return get_ticket_status
-
-    def _build_context(self, query: str, **kwargs) -> dict:
-        base_context = super()._build_context(query, **kwargs)
-
-        active_tickets = []
-        for skill in self.skills:
-            active_tickets.extend(skill.get_all_tickets())
-        ticket_info = [f"- {ticket.ticket_id}: last updated at {ticket.updated_at}" for ticket in active_tickets]
-
-        main_agent_context = {
-            "time": datetime.now().isoformat(),
-            "available_services": ", ".join([service.name for service in self.services]),
-            "active_tickets": " ".join(ticket_info),
-        }
-
-        return {**base_context, **main_agent_context}

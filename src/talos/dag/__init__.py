@@ -22,23 +22,23 @@ Key features:
 """
 
 from talos.dag.dag_agent import DAGAgent
+from talos.dag.extensible_manager import ExtensibleDAGManager
+from talos.dag.extensible_nodes import ConfigurableAgentNode, ExtensibleSkillNode
 from talos.dag.graph import TalosDAG
 from talos.dag.manager import DAGManager
 from talos.dag.nodes import (
-    DAGNode,
     AgentNode,
-    SkillNode,
-    ServiceNode,
-    ToolNode,
+    DAGNode,
     DataSourceNode,
+    GraphState,
     PromptNode,
     RouterNode,
-    GraphState,
+    ServiceNode,
+    SkillNode,
+    ToolNode,
 )
-from talos.dag.extensible_nodes import ExtensibleSkillNode, ConfigurableAgentNode
-from talos.dag.extensible_manager import ExtensibleDAGManager
-from talos.dag.structured_nodes import StructuredSupportAgentNode, StructuredRouterNode, NodeVersion
 from talos.dag.structured_manager import StructuredDAGManager
+from talos.dag.structured_nodes import NodeVersion, StructuredRouterNode, StructuredSupportAgentNode
 
 __all__ = [
     "DAGAgent",
