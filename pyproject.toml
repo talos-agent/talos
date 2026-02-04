@@ -50,6 +50,7 @@ allow-direct-references = true
 
 [project.scripts]
 talos = "talos.cli.main:app"
+sophia = "talos.cli.sophia:app"
 
 [project.optional-dependencies]
 dev = [

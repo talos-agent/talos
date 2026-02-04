@@ -1,0 +1,38 @@
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 295ms
+Audited 168 packages in 0.43ms
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.4.1, pluggy-1.6.0
+rootdir: /app
+configfile: pyproject.toml
+plugins: langsmith-0.6.8, mock-3.14.1, anyio-4.12.1
+collected 1 item
+
+tests/test_intention.py F                                                [100%]
+
+=================================== FAILURES ===================================
+____________________________ test_process_intention ____________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/trustcall/_base.py:46
+  /app/.venv/lib/python3.12/site-packages/trustcall/_base.py:46: LangGraphDeprecatedSinceV10: Importing Send from langgraph.constants is deprecated. Please use 'from langgraph.types import Send' instead. Deprecated in LangGraph V1.0 to be removed in V2.0.
+    from langgraph.constants import Send
+
+.venv/lib/python3.12/site-packages/websockets/legacy/__init__.py:6
+  /app/.venv/lib/python3.12/site-packages/websockets/legacy/__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/test_intention.py:19
+  /app/tests/test_intention.py:19: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_intention.py::test_process_intention - Failed: async def fu...
+======================== 1 failed, 3 warnings in 3.28s =========================

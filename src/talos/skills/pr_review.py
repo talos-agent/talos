@@ -18,7 +18,7 @@ from talos.tools.github.tools import GithubTools
 class PRReviewSkill(Skill):
     """
     A skill for reviewing GitHub pull requests with automated commenting and approval.
-    
+
     This skill analyzes PR diffs, provides security assessments, code quality feedback,
     and can automatically comment on or approve PRs based on the analysis.
     """
@@ -36,7 +36,7 @@ class PRReviewSkill(Skill):
     def run(self, **kwargs: Any) -> PRReviewResponse:
         """
         Review a pull request and optionally comment/approve.
-        
+
         Args:
             user: GitHub username/org
             repo: Repository name
@@ -45,49 +45,50 @@ class PRReviewSkill(Skill):
             auto_approve: Whether to automatically approve if criteria met (default: True)
         """
         user = kwargs.get("user")
-        repo = kwargs.get("repo") 
+        repo = kwargs.get("repo")
         pr_number = kwargs.get("pr_number")
         auto_comment = kwargs.get("auto_comment", True)
         auto_approve = kwargs.get("auto_approve", True)
-        
+
         if not all([user, repo, pr_number]):
             raise ValueError("Missing required arguments: user, repo, pr_number")
-            
+
         if not isinstance(user, str):
             raise ValueError("user must be a string")
         if not isinstance(repo, str):
             raise ValueError("repo must be a string")
         if not isinstance(pr_number, int):
             raise ValueError("pr_number must be an integer")
-            
+
         logger = logging.getLogger(__name__)
         logger.info(f"Reviewing PR {user}/{repo}#{pr_number}")
-        
+
         diff = self.github_tools.get_pr_diff(user, repo, pr_number)
         comments = self.github_tools.get_pr_comments(user, repo, pr_number)
         files = self.github_tools.get_pr_files(user, repo, pr_number)
-        
+
         if self._has_existing_review(comments) and not self._has_new_changes(comments, diff):
             logger.info("Already reviewed and no new changes detected")
-            return PRReviewResponse(
-                answers=["Already reviewed this PR with no new changes"],
-                recommendation="SKIP"
-            )
-        
+            return PRReviewResponse(answers=["Already reviewed this PR with no new changes"], recommendation="SKIP")
+
         review_response = self._analyze_pr(diff, comments, files)
-        
+
         if auto_comment and review_response.recommendation != "SKIP":
             comment_text = self._format_review_comment(review_response)
             self.github_tools.comment_on_pr(user, repo, pr_number, comment_text)
             logger.info("Posted review comment")
-        
-        if (auto_approve and 
-            review_response.recommendation == "APPROVE" and
-            review_response.security_score and review_response.security_score > 80 and
-            review_response.quality_score and review_response.quality_score > 70):
+
+        if (
+            auto_approve
+            and review_response.recommendation == "APPROVE"
+            and review_response.security_score
+            and review_response.security_score > 80
+            and review_response.quality_score
+            and review_response.quality_score > 70
+        ):
             self.github_tools.approve_pr(user, repo, pr_number)
             logger.info("Approved PR")
-            
+
         return review_response
 
     def _analyze_pr(self, diff: str, comments: list, files: list) -> PRReviewResponse:
@@ -95,34 +96,30 @@ class PRReviewSkill(Skill):
         prompt = self.prompt_manager.get_prompt("github_pr_review")
         if not prompt:
             raise ValueError("Prompt 'github_pr_review' not found")
-            
+
         prompt_template = PromptTemplate(
             template=prompt.template,
             input_variables=prompt.input_variables,
         )
         chain = prompt_template | self.llm
-        
+
         comments_str = "\n".join([f"- {c.get('user', 'unknown')}: {c.get('comment', '')}" for c in comments])
         files_str = ", ".join(files)
-        
-        response = chain.invoke({
-            "diff": diff,
-            "comments": comments_str,
-            "files": files_str
-        })
-        
+
+        response = chain.invoke({"diff": diff, "comments": comments_str, "files": files_str})
+
         content = response.content
         security_score = self._extract_score(content, "security")
         quality_score = self._extract_score(content, "quality")
         recommendation = self._extract_recommendation(content)
         reasoning = self._extract_reasoning(content)
-        
+
         return PRReviewResponse(
             answers=[content],
             security_score=security_score,
             quality_score=quality_score,
             recommendation=recommendation,
-            reasoning=reasoning
+            reasoning=reasoning,
         )
 
     def _extract_score(self, content: str, score_type: str) -> float | None:
@@ -162,22 +159,22 @@ class PRReviewSkill(Skill):
     def _format_review_comment(self, review: PRReviewResponse) -> str:
         """Format the review response into a GitHub comment."""
         comment = "## 🤖 Talos PR Review\n\n"
-        
+
         if review.answers:
             comment += review.answers[0] + "\n\n"
-        
+
         if review.security_score is not None:
             comment += f"**Security Score:** {review.security_score}/100\n"
-        
+
         if review.quality_score is not None:
             comment += f"**Quality Score:** {review.quality_score}/100\n"
-        
+
         if review.recommendation:
             comment += f"**Recommendation:** {review.recommendation}\n"
-        
+
         if review.reasoning:
             comment += f"\n**Reasoning:** {review.reasoning}\n"
-        
+
         comment += "\n---\n*This review was generated automatically by Talos AI*"
-        
+
         return comment

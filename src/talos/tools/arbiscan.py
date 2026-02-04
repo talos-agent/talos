@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import os
 from typing import Any, Optional
+
 from pydantic import BaseModel, Field
 
-from ..models.arbiscan import ContractSourceCode, ContractABI
-from ..utils.arbiscan import get_contract_source_code, get_contract_abi
+from ..models.arbiscan import ContractABI, ContractSourceCode
+from ..utils.arbiscan import get_contract_abi, get_contract_source_code
 from .base import SupervisedTool
 
 
@@ -26,7 +27,9 @@ class ArbiScanSourceCodeTool(SupervisedTool):
     description: str = "Gets the source code of a verified smart contract from Arbiscan"
     args_schema: type[BaseModel] = ArbiScanSourceCodeArgs
 
-    def _run_unsupervised(self, contract_address: str, api_key: Optional[str] = None, chain_id: int = 42161, **kwargs: Any) -> ContractSourceCode:
+    def _run_unsupervised(
+        self, contract_address: str, api_key: Optional[str] = None, chain_id: int = 42161, **kwargs: Any
+    ) -> ContractSourceCode:
         """Gets the source code of a verified smart contract from Arbiscan"""
         api_key = api_key or os.getenv("ARBISCAN_API_KEY")
         return get_contract_source_code(contract_address=contract_address, api_key=api_key, chain_id=chain_id)
@@ -37,7 +40,9 @@ class ArbiScanABITool(SupervisedTool):
     description: str = "Gets the ABI of a verified smart contract from Arbiscan"
     args_schema: type[BaseModel] = ArbiScanABIArgs
 
-    def _run_unsupervised(self, contract_address: str, api_key: Optional[str] = None, chain_id: int = 42161, **kwargs: Any) -> ContractABI:
+    def _run_unsupervised(
+        self, contract_address: str, api_key: Optional[str] = None, chain_id: int = 42161, **kwargs: Any
+    ) -> ContractABI:
         """Gets the ABI of a verified smart contract from Arbiscan"""
         api_key = api_key or os.getenv("ARBISCAN_API_KEY")
         return get_contract_abi(contract_address=contract_address, api_key=api_key, chain_id=chain_id)

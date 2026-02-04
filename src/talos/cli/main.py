@@ -39,7 +39,7 @@ app.add_typer(migrations_app, name="migrations")
 def callback(
     ctx: typer.Context,
     verbose: int = typer.Option(
-        0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed."
+        0, "--verbose", "-v", help="Enable verbose output. Use -v for basic, -vv for detailed."
     ),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
     use_database: bool = typer.Option(
@@ -59,7 +59,7 @@ def main_command(
     model_name: str = "gpt-5",
     temperature: float = 0.0,
     verbose: int = typer.Option(
-        0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed."
+        0, "--verbose", "-v", help="Enable verbose output. Use -v for basic, -vv for detailed."
     ),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
     use_database: bool = typer.Option(
