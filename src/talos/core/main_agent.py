@@ -24,6 +24,7 @@ from talos.geometric_core.manifold import GeometricManifold
 from talos.geometric_core.merkabah import EnhancedMerkabahOrchestrator
 from talos.geometric_core.schumann import SchumannResonanceEngine
 from talos.geometric_core.symbiosis import SymbiosisEngine
+from talos.harmonia.engine import HarmoniaEngine
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.models.services import Ticket
 from talos.prompts.prompt_manager import PromptManager
@@ -67,6 +68,7 @@ class MainAgent(Agent):
 
     # Resilient Geometric Components
     geometric_intelligence_core: Optional[GeometricIntelligenceCore] = None
+    harmonia_engine: Optional[HarmoniaEngine] = None
     schumann_engine: Optional[SchumannResonanceEngine] = None
     checkpoint_strategy: Optional[EconomicCheckpointStrategy] = None
     symbiosis_engine: Optional[SymbiosisEngine] = None
@@ -124,6 +126,8 @@ class MainAgent(Agent):
             self.merkabah_orchestrator = EnhancedMerkabahOrchestrator()
         if not self.geometric_intelligence_core:
             self.geometric_intelligence_core = GeometricIntelligenceCore(manifold=GeometricManifold(dimension=11))
+        if not self.harmonia_engine:
+            self.harmonia_engine = HarmoniaEngine()
         if not self.schumann_engine:
             self.schumann_engine = SchumannResonanceEngine()
         if not self.checkpoint_strategy:
@@ -272,6 +276,7 @@ class MainAgent(Agent):
             tool_manager.register_tool(skill.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
         tool_manager.register_tool(self._add_memory_tool())
+        tool_manager.register_tool(self._analyze_geometric_resonance_tool())
         self.tool_manager = tool_manager
 
     def _setup_job_scheduler(self) -> None:
@@ -282,6 +287,20 @@ class MainAgent(Agent):
     def _setup_startup_task_manager(self) -> None:
         if not self.startup_task_manager:
             self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
+
+    def _analyze_geometric_resonance_tool(self) -> BaseTool:
+        @tool
+        def analyze_geometric_resonance(concept_id: str, strength: float = 1.0) -> Dict[str, Any]:
+            """
+            Analyzes the geometric resonance of a concept within the HARMONIA 2.0 ontology.
+            Useful for understanding how ecological, legal, or social changes propagate.
+            Default concepts include: 'amazon_forest', 'brazil_const_225', 'forest_peoples_assembly'.
+            """
+            if not self.harmonia_engine:
+                return {"error": "Harmonia engine not initialized"}
+            return self.harmonia_engine.analyze_resonance(concept_id, strength)
+
+        return analyze_geometric_resonance
 
     def _add_memory_tool(self) -> BaseTool:
         @tool
