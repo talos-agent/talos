@@ -1,0 +1,28 @@
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 324ms
+Audited 168 packages in 0.64ms
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.4.1, pluggy-1.6.0
+rootdir: /app
+configfile: pyproject.toml
+plugins: asyncio-1.3.0, langsmith-0.6.8, mock-3.14.1, anyio-4.12.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests/test_portals.py .                                                  [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/trustcall/_base.py:46
+  /app/.venv/lib/python3.12/site-packages/trustcall/_base.py:46: LangGraphDeprecatedSinceV10: Importing Send from langgraph.constants is deprecated. Please use 'from langgraph.types import Send' instead. Deprecated in LangGraph V1.0 to be removed in V2.0.
+    from langgraph.constants import Send
+
+.venv/lib/python3.12/site-packages/websockets/legacy/__init__.py:6
+  /app/.venv/lib/python3.12/site-packages/websockets/legacy/__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/test_portals.py::test_portal_integration
+  /app/.venv/lib/python3.12/site-packages/apscheduler/schedulers/asyncio.py:35: DeprecationWarning: There is no current event loop
+    self._eventloop = asyncio.get_event_loop()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 1 passed, 3 warnings in 4.23s =========================

@@ -29,10 +29,10 @@ from ..getters.markets import Markets
 from ..getters.prices import OraclePrices
 from ..types import DecreasePositionSwapType, Market, OraclePriceData, OrderType
 from ..types.gas_limits import GasLimits
+from ..utils import median
 from ..utils.approval import check_if_approved
 from ..utils.gas import get_execution_fee
 from ..utils.price import get_execution_price_and_price_impact
-from ..utils import median
 
 
 class Order(BaseModel):
