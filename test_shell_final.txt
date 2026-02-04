@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.4.1, pluggy-1.6.0 -- /app/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: langsmith-0.6.8, mock-3.14.1, anyio-4.12.1
+collecting ... ERROR: file or directory not found: tests/test_resilient_geometric_agent.py
+
+collected 0 items
+
+============================ no tests ran in 0.01s =============================

@@ -1,4 +1,5 @@
 import os
+
 import typer
 from langchain_openai import ChatOpenAI
 
