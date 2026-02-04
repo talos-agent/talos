@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 import numpy as np
-from typing import Dict, List, Optional, Tuple, Any, Set
-from .schema import Vertex, Edge, Simplex, ContextDomain
+
 from .geometric_algebra import GeometricAlgebra
+from .schema import ContextDomain, Edge, Simplex, Vertex
+
 
 class UnifiedSemanticNetwork:
     """
@@ -36,7 +39,7 @@ class UnifiedSemanticNetwork:
             target=target_id,
             relation_type=relation_type,
             weight=weight,
-            transformation=transformation
+            transformation=transformation,
         )
         self.edges.append(edge)
         self.adjacency[source_id].append(edge)
@@ -54,13 +57,7 @@ class UnifiedSemanticNetwork:
         verts = [self.vertices[vid] for vid in vertex_ids]
         stability = GeometricAlgebra.calculate_stability(verts)
 
-        simplex = Simplex(
-            id=id,
-            name=name,
-            vertices=vertex_ids,
-            stability=stability,
-            semantic_type=semantic_type
-        )
+        simplex = Simplex(id=id, name=name, vertices=vertex_ids, stability=stability, semantic_type=semantic_type)
         self.simplexes[id] = simplex
         return simplex
 

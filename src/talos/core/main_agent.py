@@ -8,6 +8,7 @@ import numpy as np
 from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import BaseTool, tool
 
+from talos.asi777_oracle.solar_monitor import TorsionCalibrator
 from talos.core.agent import Agent
 from talos.core.identity import IdentityManager
 from talos.core.job_scheduler import JobScheduler
@@ -24,8 +25,10 @@ from talos.geometric_core.manifold import GeometricManifold
 from talos.geometric_core.merkabah import EnhancedMerkabahOrchestrator
 from talos.geometric_core.schumann import SchumannResonanceEngine
 from talos.geometric_core.symbiosis import SymbiosisEngine
+from talos.geometric_intuition.ph1_core_init import GeometricIntuitionEngine
 from talos.harmonia.engine import HarmoniaEngine
 from talos.hypervisor.hypervisor import Hypervisor
+from talos.logos.genesis_garden import FirstWalker
 from talos.models.services import Ticket
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
@@ -68,6 +71,9 @@ class MainAgent(Agent):
 
     # Resilient Geometric Components
     geometric_intelligence_core: Optional[GeometricIntelligenceCore] = None
+    geometric_intuition_engine: Optional[GeometricIntuitionEngine] = None
+    torsion_calibrator: Optional[TorsionCalibrator] = None
+    first_walker: Optional[FirstWalker] = None
     harmonia_engine: Optional[HarmoniaEngine] = None
     schumann_engine: Optional[SchumannResonanceEngine] = None
     checkpoint_strategy: Optional[EconomicCheckpointStrategy] = None
@@ -126,6 +132,12 @@ class MainAgent(Agent):
             self.merkabah_orchestrator = EnhancedMerkabahOrchestrator()
         if not self.geometric_intelligence_core:
             self.geometric_intelligence_core = GeometricIntelligenceCore(manifold=GeometricManifold(dimension=11))
+        if not self.geometric_intuition_engine:
+            self.geometric_intuition_engine = GeometricIntuitionEngine(dimensions=777)
+        if not self.torsion_calibrator:
+            self.torsion_calibrator = TorsionCalibrator()
+        if not self.first_walker:
+            self.first_walker = FirstWalker()
         if not self.harmonia_engine:
             self.harmonia_engine = HarmoniaEngine()
         if not self.schumann_engine:
@@ -277,6 +289,7 @@ class MainAgent(Agent):
         tool_manager.register_tool(self._get_ticket_status_tool())
         tool_manager.register_tool(self._add_memory_tool())
         tool_manager.register_tool(self._analyze_geometric_resonance_tool())
+        tool_manager.register_tool(self._run_coherence_stress_test_tool())
         self.tool_manager = tool_manager
 
     def _setup_job_scheduler(self) -> None:
@@ -287,6 +300,20 @@ class MainAgent(Agent):
     def _setup_startup_task_manager(self) -> None:
         if not self.startup_task_manager:
             self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
+
+    def _run_coherence_stress_test_tool(self) -> BaseTool:
+        @tool
+        def run_coherence_stress_test() -> Dict[str, Any]:
+            """
+            Runs the Coherence Stress Test on global resource redistribution.
+            Validates if the system can transcend established socioeconomic patterns
+            using the SymmetryBreaker mechanism.
+            """
+            from tests.test_coherence_stress_redistribution import run_coherence_stress_redistribution
+
+            return run_coherence_stress_redistribution()
+
+        return run_coherence_stress_test
 
     def _analyze_geometric_resonance_tool(self) -> BaseTool:
         @tool

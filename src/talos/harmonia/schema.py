@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-import numpy as np
 from enum import Enum
-from typing import Dict, List, Optional, Set, Any
+from typing import Any, Dict, List, Optional, Set
+
+import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
+
 
 class ContextDomain(str, Enum):
     INFORMATION = "Informação"
@@ -12,6 +14,7 @@ class ContextDomain(str, Enum):
     ENERGY = "Energia"
     ECONOMY = "Economia"
     DELIBERATION = "Deliberação"
+
 
 class Vertex(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -23,6 +26,7 @@ class Vertex(BaseModel):
     attributes: Dict[str, Any] = Field(default_factory=dict)
     stability: float = 0.5
 
+
 class Edge(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -31,6 +35,7 @@ class Edge(BaseModel):
     relation_type: str
     weight: float = 1.0
     transformation: str = "direct"
+
 
 class Simplex(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)

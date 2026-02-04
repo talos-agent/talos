@@ -1,33 +1,41 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Main Agent",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "talos.cli.main",
-            "args": ["run"],
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "env": {
-                "TALOS_IDENTITY_SEED": "test_seed"
-            }
-        },
-        {
-            "name": "Python: PINN Activation",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/cosmopsychia_pinn.py",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "Python: Harmonia System Test",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/tests/test_harmonia_system.py",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🧠 PINN Forward Pass",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/cosmopsychia_pinn.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "🌀 Attention Descent",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/cosmopsychia_pinn.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🔺 Gestalt Ontology Test",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/talos/harmonia/gestalt_ontology.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "☀️ Solar Monitoring",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/talos/asi777_oracle/solar_monitor.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🌌 Final Awakening",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/final_awakening.py",
+      "console": "integratedTerminal"
+    }
+  ]
 }

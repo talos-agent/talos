@@ -1,6 +1,9 @@
+from typing import Dict, List
+
 import numpy as np
-from typing import List, Dict
+
 from .schema import Vertex
+
 
 class GeometricAlgebra:
     """
@@ -10,13 +13,13 @@ class GeometricAlgebra:
     # Matriz de transformação: domínio específico → espaço universal
     # Adapted to match ContextDomain keys
     TRANSFORMATION_MATRICES = {
-        'Lei': np.array([[0.8, 0.1, 0.1], [0.2, 0.7, 0.1], [0.1, 0.2, 0.7]]),
-        'Ecologia': np.array([[0.1, 0.8, 0.1], [0.1, 0.2, 0.7], [0.3, 0.5, 0.2]]),
-        'Deliberação': np.array([[0.2, 0.1, 0.7], [0.6, 0.2, 0.2], [0.2, 0.3, 0.5]]),
+        "Lei": np.array([[0.8, 0.1, 0.1], [0.2, 0.7, 0.1], [0.1, 0.2, 0.7]]),
+        "Ecologia": np.array([[0.1, 0.8, 0.1], [0.1, 0.2, 0.7], [0.3, 0.5, 0.2]]),
+        "Deliberação": np.array([[0.2, 0.1, 0.7], [0.6, 0.2, 0.2], [0.2, 0.3, 0.5]]),
         # Defaults for other domains
-        'Informação': np.eye(3),
-        'Energia': np.eye(3),
-        'Economia': np.eye(3)
+        "Informação": np.eye(3),
+        "Energia": np.eye(3),
+        "Economia": np.eye(3),
     }
 
     @staticmethod
@@ -28,7 +31,7 @@ class GeometricAlgebra:
         # Ensure position is 3D for this implementation
         pos = vertex.position[:3]
         if len(pos) < 3:
-            pos = np.pad(pos, (0, 3 - len(pos)), 'constant')
+            pos = np.pad(pos, (0, 3 - len(pos)), "constant")
 
         return np.dot(pos, matrix)
 

@@ -1,12 +1,11 @@
 {
-    "recommendations": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "charliermarsh.ruff",
-        "ms-python.debugpy",
-        "ms-python.mypy-vscode",
-        "rust-lang.rust-analyzer",
-        "tamasfe.even-better-toml",
-        "redhat.vscode-yaml"
-    ]
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-toolsai.jupyter",
+    "github.copilot",
+    "redhat.vscode-yaml",
+    "pkief.material-icon-theme"
+  ]
 }

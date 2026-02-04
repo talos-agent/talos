@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from typing import Dict, List, Any, Optional
-from .semantic_network import UnifiedSemanticNetwork
+from typing import Any, Dict, List, Optional
+
 from .factory import create_forest_simplex
+from .semantic_network import UnifiedSemanticNetwork
+
 
 class HarmoniaEngine:
     """
@@ -25,15 +27,10 @@ class HarmoniaEngine:
         results = []
         for cid, weight in effects.items():
             vertex = self.network.vertices[cid]
-            results.append({
-                "id": cid,
-                "name": vertex.name,
-                "domain": vertex.domain.value,
-                "resonance": weight
-            })
+            results.append({"id": cid, "name": vertex.name, "domain": vertex.domain.value, "resonance": weight})
 
         return {
             "origin": self.network.vertices[start_concept_id].name,
             "resonance_field": sorted(results, key=lambda x: x["resonance"], reverse=True),
-            "global_coherence": self.initial_simplex.stability
+            "global_coherence": self.initial_simplex.stability,
         }

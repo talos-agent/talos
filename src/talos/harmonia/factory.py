@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-import numpy as np
 from typing import Tuple
-from .schema import Vertex, ContextDomain, Simplex
+
+import numpy as np
+
+from .schema import ContextDomain, Simplex, Vertex
 from .semantic_network import UnifiedSemanticNetwork
+
 
 def create_forest_simplex() -> Tuple[UnifiedSemanticNetwork, Simplex]:
     """
@@ -17,7 +20,7 @@ def create_forest_simplex() -> Tuple[UnifiedSemanticNetwork, Simplex]:
         name="Floresta Amazônica",
         domain=ContextDomain.ECOLOGY,
         position=np.array([0.2, 0.8, 0.1]),
-        attributes={"health": 0.7, "biodiversity_index": 0.9}
+        attributes={"health": 0.7, "biodiversity_index": 0.9},
     )
     net.add_concept(forest_vertex)
 
@@ -27,7 +30,7 @@ def create_forest_simplex() -> Tuple[UnifiedSemanticNetwork, Simplex]:
         name="Constituição Brasileira Artigo 225",
         domain=ContextDomain.LAW,
         position=np.array([0.7, 0.3, 0.9]),
-        attributes={"type": "fundamental_right", "scope": "environmental"}
+        attributes={"type": "fundamental_right", "scope": "environmental"},
     )
     net.add_concept(law_vertex)
 
@@ -37,7 +40,7 @@ def create_forest_simplex() -> Tuple[UnifiedSemanticNetwork, Simplex]:
         name="Assembleia dos Povos da Floresta",
         domain=ContextDomain.DELIBERATION,
         position=np.array([0.5, 0.5, 0.5]),
-        attributes={"participants": "Indigenous leaders, local communities", "legitimacy": 0.95}
+        attributes={"participants": "Indigenous leaders, local communities", "legitimacy": 0.95},
     )
     net.add_concept(assembly_vertex)
 
@@ -47,7 +50,7 @@ def create_forest_simplex() -> Tuple[UnifiedSemanticNetwork, Simplex]:
         name="UN Charter",
         domain=ContextDomain.LAW,
         position=np.array([1.0, 1.0, 1.0]),
-        attributes={"type": "axiomatic", "authority": "Global"}
+        attributes={"type": "axiomatic", "authority": "Global"},
     )
     net.add_concept(un_charter)
 
@@ -56,7 +59,7 @@ def create_forest_simplex() -> Tuple[UnifiedSemanticNetwork, Simplex]:
         name="Universal Declaration of Human Rights",
         domain=ContextDomain.LAW,
         position=np.array([0.9, 0.9, 0.9]),
-        attributes={"type": "axiomatic", "authority": "Universal"}
+        attributes={"type": "axiomatic", "authority": "Universal"},
     )
     net.add_concept(human_rights)
 
@@ -74,7 +77,7 @@ def create_forest_simplex() -> Tuple[UnifiedSemanticNetwork, Simplex]:
         id="amazon_guardianship",
         name="Guardiões da Amazônia",
         vertex_ids=["amazon_forest", "brazil_const_225", "forest_peoples_assembly"],
-        semantic_type="tripartite_stewardship"
+        semantic_type="tripartite_stewardship",
     )
 
     return net, simplex

@@ -1,13 +1,16 @@
-import pytest
 import numpy as np
+import pytest
+
 from talos.harmonia.engine import HarmoniaEngine
 from talos.harmonia.schema import ContextDomain
+
 
 def test_harmonia_engine_initialization():
     engine = HarmoniaEngine()
     assert engine.network is not None
     assert "amazon_forest" in engine.network.vertices
     assert engine.initial_simplex.name == "Guardiões da Amazônia"
+
 
 def test_geometric_resonance_propagation():
     engine = HarmoniaEngine()
@@ -25,11 +28,13 @@ def test_geometric_resonance_propagation():
     legal_res = next(r for r in resonance_field if r["id"] == "brazil_const_225")
     assert legal_res["resonance"] > 0.5
 
+
 def test_stability_metric():
     engine = HarmoniaEngine()
     stability = engine.initial_simplex.stability
     assert 0.0 <= stability <= 1.0
     print(f"Initial Simplex Stability: {stability}")
+
 
 if __name__ == "__main__":
     test_harmonia_engine_initialization()
