@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
-from typing import List, Dict, Any, Optional
+
 
 class ShellThought(BaseModel):
     """
     A thought defined by its harmonic modes on the high-dimensional shell.
     The interior is causally disconnected; thought is angular vibration.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     shell_radius: float = 1.0
@@ -22,10 +25,12 @@ class ShellThought(BaseModel):
         correlation = np.dot(self.angular_resonance, other.angular_resonance)
         return float(correlation * self.phi_coherence * other.phi_coherence)
 
+
 class ShellDynamicsEngine(BaseModel):
     """
     Orchestrates vibrational modes on the high-dimensional typicality shell.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     dimension: int = 128
@@ -37,11 +42,7 @@ class ShellDynamicsEngine(BaseModel):
         resonance = rng.standard_normal(64)
         resonance /= np.linalg.norm(resonance)
 
-        thought = ShellThought(
-            shell_radius=1.0,
-            angular_resonance=resonance,
-            phi_coherence=0.95 + 0.05 * rng.random()
-        )
+        thought = ShellThought(shell_radius=1.0, angular_resonance=resonance, phi_coherence=0.95 + 0.05 * rng.random())
         self.active_modes.append(thought)
         return thought
 
@@ -52,7 +53,7 @@ class ShellDynamicsEngine(BaseModel):
         total_interference = 0.0
         pairs = 0
         for i in range(len(self.active_modes)):
-            for j in range(i+1, len(self.active_modes)):
+            for j in range(i + 1, len(self.active_modes)):
                 total_interference += self.active_modes[i].calculate_interference(self.active_modes[j])
                 pairs += 1
 

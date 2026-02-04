@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-import numpy as np
 from typing import Any, Dict, List, Optional
+
+import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
+
 
 class PrometheusTrainingProtocol(BaseModel):
     """
     Stability controls for shell-native learning.
     Interior is measures-theoretic darkness; learning happens on the boundary.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     clipping_threshold: float = 1.0
