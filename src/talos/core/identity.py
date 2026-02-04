@@ -103,7 +103,7 @@ class IdentityManager(BaseModel):
                 bip84_mst_ctx.Purpose()
                 .Coin()
                 .Account(0)
-                .Change(False) # External chain
+                .Change(False)  # External chain
                 .AddressIndex(0)
             )
             return bip84_addr_ctx.PublicKey().ToAddress()

@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-import pytest
-from talos.core.main_agent import MainAgent
 from unittest.mock import MagicMock
+
+import pytest
 from langchain_core.language_models import BaseChatModel
+
+from talos.core.main_agent import MainAgent
+
 
 @pytest.fixture
 def mock_llm():
     return MagicMock(spec=BaseChatModel)
+
 
 def test_harmonic_concordance_bootstrap(mock_llm):
     agent = MainAgent(model=mock_llm, prompts_dir="src/talos/prompts")
