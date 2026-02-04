@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Ruff Check",
+            "type": "shell",
+            "command": "uv run ruff check ./src",
+            "problemMatcher": "$ruff",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Ruff Format",
+            "type": "shell",
+            "command": "uv run ruff format ./src",
+            "problemMatcher": []
+        },
+        {
+            "label": "Mypy Type Check",
+            "type": "shell",
+            "command": "uv run mypy ./src",
+            "problemMatcher": "$mypy"
+        },
+        {
+            "label": "Pytest All",
+            "type": "shell",
+            "command": "uv run pytest",
+            "group": "test"
+        }
+    ]
+}

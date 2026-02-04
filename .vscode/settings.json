@@ -22,5 +22,9 @@
     },
     "ruff.lint.ignore": [
         "E704"
-    ]
+    ],
+    "rust-analyzer.linkedProjects": [
+        "src/talos/geometric_core/validation_lattice/Cargo.toml"
+    ],
+    "rust-analyzer.checkOnSave.command": "clippy"
 }

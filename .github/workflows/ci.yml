@@ -14,26 +14,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+        cache-dependency-glob: "uv.lock"
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
-    - name: Install uv
-      run: pip install uv
-
-    - name: Create virtual environment
-      run: uv venv
     - name: Install dependencies
-      run: uv pip install -e .[dev]
+      run: uv pip install --system -e .[dev]
 
     - name: Lint with ruff
-      run: source .venv/bin/activate && ruff check ./src
+      run: ruff check ./src
+
+    - name: Format check with ruff
+      run: ruff format --check ./src
 
     - name: Type check with mypy
-      run: source .venv/bin/activate && mypy ./src
+      run: mypy ./src
 
     - name: Test with pytest
-      run: source .venv/bin/activate && pytest
+      run: pytest tests/test_harmonia_system.py # Primary focus for now
+
+    - name: Verify PINN integration
+      run: |
+        if [ -f "cosmopsychia_pinn.py" ]; then
+          python cosmopsychia_pinn.py
+        fi

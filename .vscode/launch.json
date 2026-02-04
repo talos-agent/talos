@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Main Agent",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "talos.cli.main",
+            "args": ["run"],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "TALOS_IDENTITY_SEED": "test_seed"
+            }
+        },
+        {
+            "name": "Python: PINN Activation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cosmopsychia_pinn.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Harmonia System Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/test_harmonia_system.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
