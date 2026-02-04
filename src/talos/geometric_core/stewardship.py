@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+from typing import Any, Dict, List
+
 from pydantic import BaseModel, ConfigDict
-from typing import List, Dict, Any
+
 
 class Steward(BaseModel):
     """
     Ethics and Governance Steward for AGI-Geometric.
     Ensures that discovery geodesics remain within constitutional boundaries.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
     policy_history: List[Dict[str, Any]] = []
 

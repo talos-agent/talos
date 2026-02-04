@@ -36,6 +36,7 @@ class Web777Skill(Skill):
 
     def run(self, **kwargs: Any) -> Any:
         import asyncio
+
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:

@@ -20,9 +20,7 @@ class GeometricIntelligenceCore(BaseModel):
     manifold: GeometricManifold
     knowledge: SimplicialComplexSnapshot = Field(default_factory=SimplicialComplexSnapshot)
 
-    def process(
-        self, input_data: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    def process(self, input_data: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Process input by mapping it to the manifold and inferring relations.
         """
@@ -31,11 +29,18 @@ class GeometricIntelligenceCore(BaseModel):
 
         # 2. Simulated geodesic inference
         # In a full implementation, this would find the shortest path to existing concepts
-        geodesic_length = float(np.linalg.norm(point) * 0.1)
+        geodesic_displacement = point * 0.1
+        geodesic_length = float(np.linalg.norm(geodesic_displacement))
 
-        # 3. Simulated insights extraction
+        # 3. Curvature Learning
+        self.manifold.update_curvature(geodesic_displacement)
+
+        # 4. Topological update hooks
+        self.update_topology()
+
+        # 5. Simulated insights extraction
         insights = ["Geometric resonance detected on shell surface."]
-        if geodesic_length > 0.8:
+        if geodesic_length > 0.08:
             insights.append("Significant semantic distance; new manifold domain explored.")
 
         return {

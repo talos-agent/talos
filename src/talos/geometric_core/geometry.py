@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+from typing import Any
+
 import jax
 import jax.numpy as jnp
 from pydantic import BaseModel, ConfigDict
-from typing import Any
+
 
 class GeometricMotor(BaseModel):
     """
     Geometric optimization engine.
     Implements natural gradient descent on the parameter manifold.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
     learning_rate: float = 0.01
 

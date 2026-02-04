@@ -1,14 +1,18 @@
 from __future__ import annotations
 
-import pytest
 import asyncio
-from talos.core.main_agent import MainAgent
 from unittest.mock import MagicMock
+
+import pytest
 from langchain_core.language_models import BaseChatModel
+
+from talos.core.main_agent import MainAgent
+
 
 @pytest.fixture
 def mock_llm():
     return MagicMock(spec=BaseChatModel)
+
 
 @pytest.mark.asyncio
 async def test_planetary_consensus_integration(mock_llm):

@@ -26,13 +26,18 @@ class CGEInvariant(BaseModel):
     validator: Callable[[Any], InvariantResult]
 
 
+import numpy as np
+
+
 def validate_ricci_curvature(state: Any) -> InvariantResult:
     """
     G1: Ricci curvature must be bounded to prevent singularities.
     """
-    # In a full implementation, this would compute the Ricci tensor norm
-    # from the learned metric in the state.
-    ricci_norm = 0.5  # Placeholder
+    ricci_norm = 0.0
+    if hasattr(state, "manifold") and state.manifold.learned_curvature is not None:
+        # Using Frobenius norm as a proxy for Ricci tensor norm
+        ricci_norm = float(np.linalg.norm(state.manifold.learned_curvature))
+
     max_curvature = 10.0
 
     return InvariantResult(

@@ -2,25 +2,30 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 logger = logging.getLogger(__name__)
+
 
 class Commitment(BaseModel):
     """
     Represents a proposer commitment in Commit-Boost.
     """
+
     proposer_pubkey: str
     slot: int
     commitment_type: str
     data: Dict[str, Any]
     signature: Optional[str] = None
 
+
 class CommitBoostSidecar(BaseModel):
     """
     Simulated Commit-Boost validator sidecar.
     Standardizes communication between validators and third-party protocols.
     """
+
     validator_pubkeys: List[str] = Field(default_factory=list)
     active_commitments: Dict[int, List[Commitment]] = Field(default_factory=dict)
 

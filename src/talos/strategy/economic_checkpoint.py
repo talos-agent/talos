@@ -34,9 +34,7 @@ class EconomicCheckpointStrategy(BaseModel):
         # Simple estimate: 1 Winston per byte for paid Arweave
         return data_size_bytes
 
-    async def select_persistence_layer(
-        self, data_size_bytes: int, urgency: Urgency
-    ) -> PersistenceDecision:
+    async def select_persistence_layer(self, data_size_bytes: int, urgency: Urgency) -> PersistenceDecision:
         """
         Logic to select the best persistence layer.
         """

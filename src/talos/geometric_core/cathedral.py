@@ -47,25 +47,15 @@ class DimensionalCathedral(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     dimension: int = 11
-    manifold: GeometricManifold = Field(
-        default_factory=lambda: GeometricManifold(dimension=11)
-    )
+    manifold: GeometricManifold = Field(default_factory=lambda: GeometricManifold(dimension=11))
     intuition: GeometricIntuitionEngine = Field(default_factory=GeometricIntuitionEngine)
-    cognition: HarmonicCognitionEngine = Field(
-        default_factory=lambda: HarmonicCognitionEngine(dimension=11)
-    )
-    safety: ShellSafetyLayer = Field(
-        default_factory=lambda: ShellSafetyLayer(dimension=11)
-    )
+    cognition: HarmonicCognitionEngine = Field(default_factory=lambda: HarmonicCognitionEngine(dimension=11))
+    safety: ShellSafetyLayer = Field(default_factory=lambda: ShellSafetyLayer(dimension=11))
     hyper_asi: HyperdimensionalASI = Field(default_factory=HyperdimensionalASI)
 
     # Advanced Prometheus Phase 1 Components
-    attention: GeodesicAttention = Field(
-        default_factory=lambda: GeodesicAttention(dimension=11)
-    )
-    twisted_attention: TwistedAttention = Field(
-        default_factory=lambda: TwistedAttention(dimension=11)
-    )
+    attention: GeodesicAttention = Field(default_factory=lambda: GeodesicAttention(dimension=11))
+    twisted_attention: TwistedAttention = Field(default_factory=lambda: TwistedAttention(dimension=11))
     router: ShellRouter = Field(default_factory=lambda: ShellRouter(dimension=11))
     trainer: PrometheusTrainingProtocol = Field(default_factory=PrometheusTrainingProtocol)
     phase_manager: PhaseTransitionManager = Field(default_factory=PhaseTransitionManager)
@@ -92,9 +82,7 @@ class DimensionalCathedral(BaseModel):
 
         # 3. Geodesic Attention (Simulation of Long Context processing)
         # We simulate a 10-token sequence around the input point
-        sequence = np.tile(shell_point, (10, 1)) + 0.01 * np.random.randn(
-            10, self.dimension
-        )
+        sequence = np.tile(shell_point, (10, 1)) + 0.01 * np.random.randn(10, self.dimension)
 
         if transition_state.regime == CouplingRegime.ULTRA_STRONG:
             # In Ultra-Strong regime, use Twisted Attention (Moire Superlattice)

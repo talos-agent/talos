@@ -30,9 +30,7 @@ class IntentionRepeater(BaseModel):
 
     active_intentions: List[ActiveIntention] = Field(default_factory=list)
 
-    def repeat_intention(
-        self, intention: str, duration_secs: float, base_frequency: float
-    ) -> float:
+    def repeat_intention(self, intention: str, duration_secs: float, base_frequency: float) -> float:
         # Simulate coherence calculation
         coherence = 0.85 + (0.1 * math.sin(time.time()))
         self.active_intentions.append(
@@ -76,6 +74,4 @@ class SchumannResonanceEngine(BaseModel):
         return 1.0 - min(deviation, 1.0)
 
     def apply_intention(self, intention: str, duration_secs: float = 60.0) -> float:
-        return self.repeater.repeat_intention(
-            intention, duration_secs, self.fundamental
-        )
+        return self.repeater.repeat_intention(intention, duration_secs, self.fundamental)
