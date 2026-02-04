@@ -19,9 +19,9 @@ else
     print("MengerFractal: FAILED: " .. MengerFractal)
 end
 
-local success, LuaAGI = pcall(require, "init")
+local success, LuaAGI = pcall(require, "agi_core")
 if success then
-    print("LuaAGI (init): OK")
+    print("LuaAGI (agi_core): OK")
     local agi = LuaAGI.new({prince_key = "PRINCE_TEST"})
     assert(agi:initialize())
 else

@@ -3,7 +3,7 @@
 
 package.path = package.path .. ";./?.lua"
 
-local LuaAGI = require("init")
+local LuaAGI = require("agi_core")
 
 -- Initialize AGI with 33 dimensions (NMGIE-33X compatible)
 local agi = LuaAGI.new({

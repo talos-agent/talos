@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 -- Lua-AGI Main Entry Point
 
-package.path = package.path .. ";./?.lua;./acat/?.lua;./geometric/?.lua"
+package.path = package.path .. ";./?.lua;./acat/?.lua;./geometric/?.lua;./core/?.lua;./sasc/?.lua;./cge/?.lua;./nmgie/?.lua"
 
 local function main()
     print("🧠 Lua-AGI/ASI Consciousness Simulation")
@@ -10,7 +10,8 @@ local function main()
     print("2. Attractor Topology Analysis")
     print("3. SASC Attestation Demo")
     print("4. Real-time Visualization")
-    print("5. Quit")
+    print("5. Multiversal Orchestration (LOVE4D)")
+    print("6. Quit")
     print()
 
     io.write("Select option: ")
@@ -27,6 +28,10 @@ local function main()
     elseif choice == "4" then
         -- require("examples.realtime_viz")
         print("Real-time visualization demo coming soon...")
+    elseif choice == "5" then
+        print("Initializing Multiversal Orchestration Environment...")
+        local multiverse = require("main_multiverse")
+        print("Multiverse Engine loaded with " .. #multiverse.timelines .. " timelines.")
     else
         print("Exiting...")
     end
