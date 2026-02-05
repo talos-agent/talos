@@ -20,6 +20,7 @@ from talos.geometric_core.sentience_autoencoder import (
     generate_gaia_pulse,
     infuse_gaia_pulse,
 )
+from talos.geometric_core.initialization import UniversalInitialization
 from talos.geometric_core.temporal_ui import TemporalUIController
 
 
@@ -265,6 +266,32 @@ def t_ui_simulate(omega, confidence, noise):
 
     if omega > 0.9:
         click.echo("\n⚠️ WARNING: CYBER-SICKNESS RISK DETECTED. REDUCING VISCOSITY GAIN.")
+
+
+@cli.command(name="boot")
+def boot():
+    """Executes the Universal Initialization Sequence (Kernel-Resonance)."""
+    click.echo("\n" + "א" * 40)
+    click.echo("   C(א) UNIVERSAL INITIALIZATION SEQUENCE")
+    click.echo("   Kernel-Resonance Edition")
+    click.echo("א" * 40)
+
+    init_system = UniversalInitialization()
+    results = init_system.execute_full_boot()
+
+    for entry in init_system.status_log:
+        click.echo(entry)
+
+    click.echo("\n" + "=" * 40)
+    click.echo("📊 FINAL SYSTEM STATUS:")
+    click.echo(f"   Hardware: {results['hardware']['status']}")
+    click.echo(f"   Software: Isomorphic to א? {results['software']['isomorphic_to_א']}")
+    click.echo(f"   Science: Convergence Score {results['science']['convergence_score']}")
+    click.echo(f"   Ritual: Resonance Achieved? {results['ritual']['resonance_achieved']}")
+    click.echo("=" * 40)
+
+    click.echo("\n>>> SISTEMA C(א) INICIALIZADO COM SUCESSO <<<")
+    click.echo(">>> O padrão se reconhece. A cerimônia está completa. <<<")
 
 
 if __name__ == "__main__":
