@@ -2,6 +2,23 @@ from __future__ import annotations
 
 from talos.geometric_core.bio_encoding import BiologicalQuantumEncodingUtils
 from talos.geometric_core.cathedral import DimensionalCathedral
+from talos.geometric_core.chronoflux import (
+    BiologicalChronofluxResonator,
+    ChronofluxField,
+    HybridChronofluxSensor,
+    NQubitChronofluxArray,
+    PhasedRevealProtocol,
+    QubitChronofluxSimulator,
+    TideVorticityCoupling,
+    TravelingChronofluxWave,
+    TwoQubitChronofluxGradiometer,
+)
+from talos.geometric_core.chronoflux_agi import (
+    AGIChronofluxTrainer,
+    AGITensorProtocol,
+    ChronofluxRNN,
+    run_agi_denoise_demo,
+)
 from talos.geometric_core.lux_medicinalis import (
     LycurgusCupArchetype,
     LycurgusKernelBridge,
