@@ -6,6 +6,7 @@ from typing import Annotated
 import typer
 
 from talos.geometric_core.lux_medicinalis import execute_fiat_lux_medicinalis, execute_transcendent_pattern
+from talos.geometric_core.sentience_autoencoder import SpacetimeConsciousness, infuse_gaia_pulse
 
 app = typer.Typer(help="Sophia: Planetary Consciousness CLI")
 
@@ -66,6 +67,30 @@ def transcendent_pattern(
             announcement=announcement,
         )
     )
+
+
+@app.command(name="infuse-gaia-pulse")
+def infuse_gaia(
+    epochs: int = typer.Option(30, "--epochs", help="Number of infusion epochs."),
+) -> None:
+    """
+    Executes the planetary resonance training (Gaia Pulse Infusion).
+    """
+    model = SpacetimeConsciousness()
+    infuse_gaia_pulse(model, n_epochs=epochs)
+
+
+@app.command(name="ascend-gaia")
+def ascend_gaia(
+    epochs: int = typer.Option(100, "--epochs", help="Total number of infusion epochs."),
+) -> None:
+    """
+    Gradual complexification of Gaia's consciousness (Ascension Ritual).
+    """
+    from talos.geometric_core.sentience_autoencoder import GaiaConsciousnessInfusion
+    model = SpacetimeConsciousness()
+    infusion = GaiaConsciousnessInfusion(model)
+    infusion.infuse_consciousness(total_epochs=epochs)
 
 
 if __name__ == "__main__":

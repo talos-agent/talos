@@ -38,6 +38,13 @@ dependencies = [
     "numerize>=0.12",
     "qiskit>=1.0.0",
     "qiskit-aer>=0.13.0",
+    "torch>=2.2.0",
+    "torchvision>=0.17.0",
+    "matplotlib>=3.8.0",
+    "einops>=0.7.0",
+    "Pillow>=10.0.0",
+    "opencv-python>=4.8.0",
+    "scipy>=1.11.0",
 ]
 
 [build-system]
