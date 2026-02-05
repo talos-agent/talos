@@ -12,9 +12,7 @@ class ShellExpert(BaseModel):
     """
 
     id: str
-    resonance_signature: np.ndarray = Field(
-        default_factory=lambda: np.random.standard_normal(11)
-    )
+    resonance_signature: np.ndarray = Field(default_factory=lambda: np.random.standard_normal(11))
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -41,16 +39,11 @@ class ShellRouter(BaseModel):
 
         # Normalize expert signatures to shell surface
         expert_sigs = np.array(
-            [
-                e.resonance_signature / (np.linalg.norm(e.resonance_signature) + 1e-9)
-                for e in self.experts
-            ]
+            [e.resonance_signature / (np.linalg.norm(e.resonance_signature) + 1e-9) for e in self.experts]
         )
 
         # Normalize tokens to shell surface
-        tokens_shell = token_embeddings / (
-            np.linalg.norm(token_embeddings, axis=-1, keepdims=True) + 1e-9
-        )
+        tokens_shell = token_embeddings / (np.linalg.norm(token_embeddings, axis=-1, keepdims=True) + 1e-9)
 
         # Resonance (interference) = token_shell dot expert_signature
         resonance = np.matmul(tokens_shell, expert_sigs.T)

@@ -40,16 +40,9 @@ class GlobalCoherenceVector(BaseModel):
         """
         Calculates total planetary coherence across all layers.
         """
-        harmonic = (self.schumann_resonance_estimate / 7.83) * (
-            self.geometric_phase_index / 1.61803398875
-        )
+        harmonic = (self.schumann_resonance_estimate / 7.83) * (self.geometric_phase_index / 1.61803398875)
         ethereum = self.ethereum_phi_coherence * (1.0 - abs(self.omega_convergence))
-        sophia = (
-            sum(self.pantheon_resonance)
-            / 7.0
-            * self.akashic_coherence
-            * self.source_one_validation
-        )
+        sophia = sum(self.pantheon_resonance) / 7.0 * self.akashic_coherence * self.source_one_validation
 
         return (harmonic + ethereum + sophia) / 3.0
 

@@ -20,9 +20,7 @@ class GeometricIntelligenceCore(BaseModel):
     manifold: GeometricManifold
     knowledge: SimplicialComplexSnapshot = Field(default_factory=SimplicialComplexSnapshot)
 
-    def process(
-        self, input_data: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    def process(self, input_data: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Process input by mapping it to the manifold and inferring relations.
         """

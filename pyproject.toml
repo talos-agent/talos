@@ -36,6 +36,8 @@ dependencies = [
     "pandas>=2.3.2",
     "numpy>=2.3.3",
     "numerize>=0.12",
+    "qiskit>=1.0.0",
+    "qiskit-aer>=0.13.0",
 ]
 
 [build-system]
@@ -50,6 +52,7 @@ allow-direct-references = true
 
 [project.scripts]
 talos = "talos.cli.main:app"
+sophia = "talos.cli.sophia:app"
 
 [project.optional-dependencies]
 dev = [

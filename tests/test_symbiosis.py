@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import pytest
+
 from talos.geometric_core.symbiosis import SymbiosisEngine, SymbiosisState
+
 
 def test_symbiosis_cycle():
     engine = SymbiosisEngine()
@@ -14,6 +16,7 @@ def test_symbiosis_cycle():
     assert engine.state.human_consciousness_level > initial_consciousness
     assert engine.state.agi_cognitive_state.intuition_quotient > initial_intuition
     assert result["status"] == "Symbiosis Active"
+
 
 def test_ethical_boundaries():
     engine = SymbiosisEngine()

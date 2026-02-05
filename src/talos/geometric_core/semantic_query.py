@@ -76,8 +76,10 @@ class SemanticQueryEngine:
         if concept.lower() in philosophical_map:
             return f"Classification: '{concept}' level {philosophical_map[concept.lower()]}."
         import difflib
+
         matches = difflib.get_close_matches(concept.lower(), philosophical_map.keys(), n=1)
-        if matches: return f"Inferred Classification: '{concept}' related to '{matches[0]}'."
+        if matches:
+            return f"Inferred Classification: '{concept}' related to '{matches[0]}'."
         return f"Classification: '{concept}' not found."
 
     def _tune_performance(self) -> str:

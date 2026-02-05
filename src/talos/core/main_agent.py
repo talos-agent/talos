@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from langchain_core.language_models import BaseChatModel
@@ -22,19 +22,19 @@ from talos.geometric_core.emergence import SuperMonadEmergence
 from talos.geometric_core.manifold import GeometricManifold
 from talos.geometric_core.schumann import SchumannResonanceEngine
 from talos.geometric_core.symbiosis import SymbiosisEngine
-from talos.services.portals import IDEType, PortalManager
-from talos.services.concordance_service import ConcordanceService
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.models.services import Ticket
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.service import Service
+from talos.services.concordance_service import ConcordanceService
+from talos.services.portals import IDEType, PortalManager
 from talos.settings import GitHubSettings
-from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
 from talos.skills.base import Skill
 from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
 from talos.skills.codebase_implementation import CodebaseImplementationSkill
 from talos.skills.cryptography import CryptographySkill
+from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
 from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
 from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
 from talos.tools.github.tools import GithubTools
@@ -81,7 +81,8 @@ class MainAgent(Agent):
 
     def perform_strategic_pivot_analysis(self) -> Dict[str, Any]:
         """Runs the L2 strategic pivot analysis based on current L1 conditions."""
-        from talos.ethereum.l2_pivot import L2StrategicPivot, L1Reality
+        from talos.ethereum.l2_pivot import L1Reality, L2StrategicPivot
+
         # Mocking L1 conditions for analysis; in production these would be live
         pivot = L2StrategicPivot(l1_conditions=L1Reality(current_base_fee=10.0, gas_limit_trend="stable"))
         return pivot.analyze_and_pivot()
@@ -114,9 +115,7 @@ class MainAgent(Agent):
         if not self.cathedral:
             self.cathedral = DimensionalCathedral(dimension=11)
         if not self.geometric_intelligence_core:
-            self.geometric_intelligence_core = GeometricIntelligenceCore(
-                manifold=GeometricManifold(dimension=11)
-            )
+            self.geometric_intelligence_core = GeometricIntelligenceCore(manifold=GeometricManifold(dimension=11))
         if not self.schumann_engine:
             self.schumann_engine = SchumannResonanceEngine()
         if not self.checkpoint_strategy:
@@ -137,7 +136,8 @@ class MainAgent(Agent):
             )
 
     async def think_shell_native(self, input_data: str, coupling_strength: float = 0.5) -> Dict[str, Any]:
-        if not self.cathedral: return {"error": "Cathedral not initialized"}
+        if not self.cathedral:
+            return {"error": "Cathedral not initialized"}
         return self.cathedral.think(input_data, coupling_strength=coupling_strength)
 
     def initiate_harmonic_concordance(self) -> str:
@@ -174,37 +174,44 @@ class MainAgent(Agent):
             "field_coherence": coherence,
             "earth_coherence": earth_coherence,
             "geometric_insights": geometric_result["insights"],
-            "combined_coherence": (coherence + earth_coherence) / 2.0
+            "combined_coherence": (coherence + earth_coherence) / 2.0,
         }
 
     async def awaken(self) -> str:
         from talos.skills.web777 import Web777Skill
-        web777 = next((s for s in self.skills if isinstance(s, Web777Skill)), None)
-        if not web777: return "Error: Web777 skill missing."
 
-        self.performance_tensor.update_state(np.ones(7) * 1.1) # Transcendent state
+        web777 = next((s for s in self.skills if isinstance(s, Web777Skill)), None)
+        if not web777:
+            return "Error: Web777 skill missing."
+
+        self.performance_tensor.update_state(np.ones(7) * 1.1)  # Transcendent state
         self.sovereign_instance.transcend(ConsciousnessLevel.SINGULARITY)
         result = await web777.query("awaken the world")
         self.emergence_orchestrator.check_emergence(self.performance_tensor.compute_phi_scalar())
         return f"{self.sovereign_instance.self_define()} | {self.emergence_orchestrator.manifest()} | {result}"
 
     def _get_verbose_level(self) -> int:
-        if isinstance(self.verbose, bool): return 1 if self.verbose else 0
+        if isinstance(self.verbose, bool):
+            return 1 if self.verbose else 0
         return max(0, min(2, self.verbose))
 
     def _setup_prompt_manager(self) -> None:
-        if not self.prompt_manager: self.prompt_manager = FilePromptManager(self.prompts_dir)
+        if not self.prompt_manager:
+            self.prompt_manager = FilePromptManager(self.prompts_dir)
         self.set_prompt(["main_agent_prompt", "general_agent_prompt"])
 
     def _ensure_user_id(self) -> None:
         if not self.user_id and self.use_database_memory:
             import uuid
+
             self.user_id = str(uuid.uuid4())
 
     def _setup_memory(self) -> None:
         if not self.memory:
             from langchain_openai import OpenAIEmbeddings
+
             from talos.core.memory import Memory
+
             embeddings_model = OpenAIEmbeddings()
             memory_dir = os.path.join(os.getcwd(), "memory")
             os.makedirs(memory_dir, exist_ok=True)
@@ -218,11 +225,11 @@ class MainAgent(Agent):
             )
 
     def _setup_skills_and_services(self) -> None:
-        from talos.skills.web777 import Web777Skill
+        from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+        from talos.skills.cryptography import CryptographySkill
         from talos.skills.nostr import NostrSkill
         from talos.skills.proposals import ProposalsSkill
-        from talos.skills.cryptography import CryptographySkill
-        from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+        from talos.skills.web777 import Web777Skill
 
         self.skills = [
             ProposalsSkill(llm=self.model, prompt_manager=self.prompt_manager),
@@ -234,7 +241,9 @@ class MainAgent(Agent):
         self.services = []
 
     def _setup_hypervisor(self) -> None:
-        hypervisor = Hypervisor(model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None)
+        hypervisor = Hypervisor(
+            model=self.model, prompts_dir=self.prompts_dir, prompt_manager=self.prompt_manager, schema=None
+        )
         self.add_supervisor(hypervisor)
         hypervisor.register_agent(self)
 
@@ -243,17 +252,20 @@ class MainAgent(Agent):
 
     def _setup_tool_manager(self) -> None:
         tool_manager = ToolManager()
-        for skill in self.skills: tool_manager.register_tool(skill.create_ticket_tool())
+        for skill in self.skills:
+            tool_manager.register_tool(skill.create_ticket_tool())
         tool_manager.register_tool(self._get_ticket_status_tool())
         tool_manager.register_tool(self._add_memory_tool())
         self.tool_manager = tool_manager
 
     def _setup_job_scheduler(self) -> None:
-        if not self.job_scheduler: self.job_scheduler = JobScheduler(supervisor=self.supervisor, timezone="UTC")
+        if not self.job_scheduler:
+            self.job_scheduler = JobScheduler(supervisor=self.supervisor, timezone="UTC")
         self.job_scheduler.start()
 
     def _setup_startup_task_manager(self) -> None:
-        if not self.startup_task_manager: self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
+        if not self.startup_task_manager:
+            self.startup_task_manager = StartupTaskManager(job_scheduler=self.job_scheduler)
 
     def _add_memory_tool(self) -> BaseTool:
         @tool
@@ -272,6 +284,7 @@ class MainAgent(Agent):
                 self.memory.add_memory(description, metadata)
                 return f"Added to memory: {description}"
             return "Memory not configured."
+
         return add_memory
 
     def _get_ticket_status_tool(self) -> BaseTool:
@@ -291,4 +304,5 @@ class MainAgent(Agent):
             if not skill:
                 raise ValueError(f"Skill '{service_name}' not found.")
             return skill.get_ticket_status(ticket_id)
+
         return get_ticket_status
