@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-import numpy as np
+from typing import Dict, List, Set, Tuple
 
 from .geometric_algebra import GeometricAlgebra
 from .schema import ContextDomain, Edge, Simplex, Vertex

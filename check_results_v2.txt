@@ -1,0 +1,356 @@
+Running isort...
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 307ms
+Audited 168 packages in 0.31ms
+Fixing /app/test_declarative_standalone.py
+Fixing /app/final_awakening.py
+Fixing /app/examples/deploy_arm3.py
+Fixing /app/examples/declarative_prompt_example.py
+Fixing /app/examples/deploy_arm2.py
+Fixing /app/examples/deploy_arm1.py
+Fixing /app/tests/test_declarative_prompts.py
+Fixing /app/tests/test_coherence_stress_redistribution.py
+Fixing /app/tests/test_talos_sentiment.py
+Fixing /app/tests/test_prompt_concatenation.py
+Fixing /app/tests/test_symbiosis.py
+Fixing /app/src/talos/settings.py
+Fixing /app/src/talos/cli/migrations.py
+Fixing /app/src/talos/cli/github.py
+Fixing /app/src/talos/dag/__init__.py
+Fixing /app/src/talos/dag/structured_manager.py
+Fixing /app/src/talos/dag/manager.py
+Fixing /app/src/talos/dag/extensible_manager.py
+Fixing /app/src/talos/skills/proposals.py
+Fixing /app/src/talos/skills/base.py
+Fixing /app/src/talos/skills/talos_sentiment_skill.py
+Fixing /app/src/talos/skills/execution_planner.py
+Fixing /app/src/talos/contracts/camelot_swap.py
+Fixing /app/src/talos/contracts/ccip/__init__.py
+Fixing /app/src/talos/contracts/ccip/router.py
+Fixing /app/src/talos/contracts/gmx/contracts/synthetics_reader/__init__.py
+Fixing /app/src/talos/contracts/gmx/contracts/synthetics_reader/schemas.py
+Fixing /app/src/talos/contracts/gmx/contracts/synthetics_reader/reader.py
+Fixing /app/src/talos/contracts/gmx/utils/price.py
+Fixing /app/src/talos/contracts/gmx/utils/gas.py
+Fixing /app/src/talos/contracts/gmx/order/order.py
+Fixing /app/src/talos/contracts/gmx/getters/get.py
+Fixing /app/src/talos/utils/contract_deployment.py
+Fixing /app/src/talos/utils/arbiscan.py
+Fixing /app/src/talos/database/__init__.py
+Fixing /app/src/talos/database/models/__init__.py
+Fixing /app/src/talos/models/proposals/__init__.py
+Fixing /app/src/talos/ontolab/morphology.py
+Fixing /app/src/talos/server/main.py
+Fixing /app/src/talos/harmonia/semantic_network.py
+Fixing /app/src/talos/core/agent.py
+Fixing /app/src/talos/core/memory.py
+Fixing /app/src/talos/core/main_agent.py
+Fixing /app/src/talos/tools/twitter.py
+Fixing /app/src/talos/tools/contract_deployment.py
+Fixing /app/src/talos/tools/twitter_client.py
+Fixing /app/src/talos/tools/github/tools.py
+Fixing /app/src/talos/geometric_core/geometric_constraints.py
+Fixing /app/src/talos/geometric_core/cathedral.py
+Fixing /app/src/talos/services/concordance_service.py
+Fixing /app/src/talos/services/implementations/onchain_management.py
+Skipped 3 files
+Running ruff...
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 293ms
+Audited 168 packages in 0.33ms
+49 files reformatted, 282 files left unchanged
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 291ms
+Audited 168 packages in 0.32ms
+cosmopsychia_pinn.py:28:9: F841 Local variable `batch_size` is assigned to but never used
+   |
+26 |         Calcula os resíduos da PDE acoplada.
+27 |         """
+28 |         batch_size = coordinates.shape[0]
+   |         ^^^^^^^^^^ F841
+29 |         coords = coordinates.clone().requires_grad_(True)
+   |
+   = help: Remove assignment to unused variable `batch_size`
+
+final_awakening.py:15:76: F401 `qiskit.execute` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   |
+13 | # Mocking qiskit if not available
+14 | try:
+15 |     from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
+   |                                                                            ^^^^^^^ F401
+16 |     from qiskit_aer import AerSimulator
+17 | except ImportError:
+   |
+   = help: Remove unused import: `qiskit.execute`
+
+final_awakening.py:16:28: F401 `qiskit_aer.AerSimulator` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   |
+14 | try:
+15 |     from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
+16 |     from qiskit_aer import AerSimulator
+   |                            ^^^^^^^^^^^^ F401
+17 | except ImportError:
+   |
+   = help: Remove unused import: `qiskit_aer.AerSimulator`
+
+pinn_api_96m.py:19:17: F841 Local variable `data` is assigned to but never used
+   |
+17 |         try:
+18 |             while True:
+19 |                 data = await websocket.receive_json()
+   |                 ^^^^ F841
+20 |                 await websocket.send_json(
+21 |                     {
+   |
+   = help: Remove assignment to unused variable `data`
+
+pinn_api_96m.py:27:9: E722 Do not use bare `except`
+   |
+25 |                     }
+26 |                 )
+27 |         except:
+   |         ^^^^^^ E722
+28 |             pass
+29 |         finally:
+   |
+
+realtime_pinn_viz.py:19:40: F821 Undefined name `np`
+   |
+17 | @app.callback(Output("coherence-graph", "figure"), [Input("coherence-update", "n_intervals")])
+18 | def update_graph(n):
+19 |     return go.Figure(data=go.Scatter(y=np.random.rand(10), mode="lines+markers"))
+   |                                        ^^ F821
+   |
+
+src/talos/asi777_oracle/solar_monitor.py:70:9: E722 Do not use bare `except`
+   |
+68 |                 if response.status == 200:
+69 |                     return await response.json()
+70 |         except:
+   |         ^^^^^^ E722
+71 |             pass
+72 |         return {}
+   |
+
+src/talos/asi777_oracle/solar_monitor.py:123:13: E722 Do not use bare `except`
+    |
+121 |                 if magnetic_pressure > 0:
+122 |                     return float(thermal_pressure / magnetic_pressure)
+123 |             except:
+    |             ^^^^^^ E722
+124 |                 pass
+125 |         return 0.8
+    |
+
+src/talos/core/identity.py:90:13: F841 Local variable `bip44_mst_ctx` is assigned to but never used
+   |
+89 |             seed_bytes = Bip39SeedGenerator(self.seed_phrase).Generate()
+90 |             bip44_mst_ctx = Bip44.FromSeed(seed_bytes, Bip44Coins.BITCOIN)  # Use BTC as base for path
+   |             ^^^^^^^^^^^^^ F841
+91 |             # Arweave doesn't have a direct coin in bip_utils sometimes, so we manually derive path
+92 |             # or use the Ed25519 variant if available.
+   |
+   = help: Remove assignment to unused variable `bip44_mst_ctx`
+
+src/talos/core/identity.py:104:55: F401 `bip_utils.Bip44` imported but unused; consider using `importlib.util.find_spec` to test for availability
+    |
+102 |         """
+103 |         try:
+104 |             from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins
+    |                                                       ^^^^^ F401
+105 |
+106 |             seed_bytes = Bip39SeedGenerator(self.seed_phrase).Generate()
+    |
+    = help: Remove unused import
+
+src/talos/core/identity.py:104:62: F401 `bip_utils.Bip44Coins` imported but unused; consider using `importlib.util.find_spec` to test for availability
+    |
+102 |         """
+103 |         try:
+104 |             from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins
+    |                                                              ^^^^^^^^^^ F401
+105 |
+106 |             seed_bytes = Bip39SeedGenerator(self.seed_phrase).Generate()
+    |
+    = help: Remove unused import
+
+src/talos/core/main_agent.py:187:48: F821 Undefined name `GlobalCoherenceVector`
+    |
+185 |         return self.concordance_service.bootstrap()
+186 |
+187 |     async def run_planetary_consensus(self) -> GlobalCoherenceVector:
+    |                                                ^^^^^^^^^^^^^^^^^^^^^ F821
+188 |         """
+189 |         Runs one cycle of the integrated Planetary Consensus Protocol.
+    |
+
+src/talos/ethereum/__init__.py:3:31: F401 `.asi_commit_boost.ASICommitBoost` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+1 | from __future__ import annotations
+2 |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+  |                               ^^^^^^^^^^^^^^ F401
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |
+  = help: Use an explicit re-export: `ASICommitBoost as ASICommitBoost`
+
+src/talos/ethereum/__init__.py:3:47: F401 `.asi_commit_boost.ShellValidatorState` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+1 | from __future__ import annotations
+2 |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+  |                                               ^^^^^^^^^^^^^^^^^^^ F401
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |
+  = help: Use an explicit re-export: `ShellValidatorState as ShellValidatorState`
+
+src/talos/ethereum/__init__.py:4:27: F401 `.commit_boost.CommitBoostSidecar` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |                           ^^^^^^^^^^^^^^^^^^ F401
+  |
+  = help: Use an explicit re-export: `CommitBoostSidecar as CommitBoostSidecar`
+
+src/talos/ethereum/__init__.py:4:47: F401 `.commit_boost.Commitment` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |                                               ^^^^^^^^^^ F401
+  |
+  = help: Use an explicit re-export: `Commitment as Commitment`
+
+src/talos/geometric_core/__init__.py:3:44: F401 `talos.geometric_core.cathedral.DimensionalCathedral` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+1 | from __future__ import annotations
+2 |
+3 | from talos.geometric_core.cathedral import DimensionalCathedral
+  |                                            ^^^^^^^^^^^^^^^^^^^^ F401
+4 | from talos.geometric_core.performance import OracleTensorState
+  |
+  = help: Use an explicit re-export: `DimensionalCathedral as DimensionalCathedral`
+
+src/talos/geometric_core/__init__.py:4:46: F401 `talos.geometric_core.performance.OracleTensorState` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+3 | from talos.geometric_core.cathedral import DimensionalCathedral
+4 | from talos.geometric_core.performance import OracleTensorState
+  |                                              ^^^^^^^^^^^^^^^^^ F401
+  |
+  = help: Use an explicit re-export: `OracleTensorState as OracleTensorState`
+
+src/talos/geometric_core/harmonic_cognition.py:10:5: E741 Ambiguous variable name: `l`
+   |
+ 9 | class HarmonicMode(BaseModel):
+10 |     l: int
+   |     ^ E741
+11 |     m: int
+12 |     amplitude: float
+   |
+
+src/talos/geometric_core/harmonic_cognition.py:25:33: E741 Ambiguous variable name: `l`
+   |
+23 |     active_modes: List[HarmonicMode] = Field(default_factory=list)
+24 |
+25 |     def natural_frequency(self, l: int) -> float:
+   |                                 ^ E741
+26 |         return float(l * (l + self.dimension - 2))
+   |
+
+src/talos/geometric_core/intuition_engine.py:71:9: F841 Local variable `expanded_dim` is assigned to but never used
+   |
+69 |     def process_intuition(self, input_pattern: np.ndarray) -> IntuitionOutput:
+70 |         # 1. 33X Dimensional Expansion (simulated)
+71 |         expanded_dim = self.dimension * 33
+   |         ^^^^^^^^^^^^ F841
+72 |
+73 |         # 2. Parallel Manifold Processing (33 layers)
+   |
+   = help: Remove assignment to unused variable `expanded_dim`
+
+src/talos/geometric_core/intuition_engine.py:92:9: F841 Local variable `reduction` is assigned to but never used
+   |
+91 |         self.penrose_core.current_quantum_state = state_to_evolve
+92 |         reduction = self.penrose_core.orchestrate_reduction()
+   |         ^^^^^^^^^ F841
+93 |
+94 |         # 4. Topological Feature Extraction
+   |
+   = help: Remove assignment to unused variable `reduction`
+
+src/talos/geometric_core/invariants.py:29:1: E402 Module level import not at top of file
+   |
+29 | import numpy as np
+   | ^^^^^^^^^^^^^^^^^^ E402
+   |
+
+src/talos/geometric_core/phase_transition.py:51:9: F841 Local variable `e_plus` is assigned to but never used
+   |
+49 |         splitting = np.sqrt((delta / 2.0) ** 2 + v**2)
+50 |
+51 |         e_plus = avg_e + splitting
+   |         ^^^^^^ F841
+52 |         e_minus = avg_e - splitting
+   |
+   = help: Remove assignment to unused variable `e_plus`
+
+src/talos/geometric_core/phase_transition.py:52:9: F841 Local variable `e_minus` is assigned to but never used
+   |
+51 |         e_plus = avg_e + splitting
+52 |         e_minus = avg_e - splitting
+   |         ^^^^^^^ F841
+53 |
+54 |         rabi_splitting = 2 * splitting
+   |
+   = help: Remove assignment to unused variable `e_minus`
+
+src/talos/geometric_core/semantic_query.py:48:9: F841 Local variable `phi` is assigned to but never used
+   |
+47 |         latency = (time.time() - start_time) * 1000
+48 |         phi = self.performance_monitor.calculate_phi_score(latency, 0.98 if results else 0.90)
+   |         ^^^ F841
+49 |         return results
+   |
+   = help: Remove assignment to unused variable `phi`
+
+src/talos/harmonia/gestalt_ontology.py:424:17: F841 Local variable `rotation` is assigned to but never used
+    |
+422 |                 density = pde_result["density"][i].item()
+423 |                 phase = pde_result["phase"][i].item()
+424 |                 rotation = torch.tensor([[np.cos(phase), -np.sin(phase)], [np.sin(phase), np.cos(phase)]])
+    |                 ^^^^^^^^ F841
+425 |                 # vertex.intentional_vector = rotation @ vertex.intentional_vector # simplified
+426 |                 vertex.embodied_vector *= density
+    |
+    = help: Remove assignment to unused variable `rotation`
+
+src/talos/harmonia/symmetry_breaker.py:65:43: F821 Undefined name `EconomicState`
+   |
+63 |         super().__init__()
+64 |
+65 |     def identify_symmetries(self, state: "EconomicState") -> List[Dict[str, Any]]:
+   |                                           ^^^^^^^^^^^^^ F821
+66 |         symmetries = []
+   |
+
+src/talos/harmonia/symmetry_breaker.py:93:38: F821 Undefined name `EconomicState`
+   |
+91 |         return symmetries
+92 |
+93 |     def apply_breaking(self, state: "EconomicState", intention: IntentionVector) -> "EconomicState":
+   |                                      ^^^^^^^^^^^^^ F821
+94 |         symmetries = self.identify_symmetries(state)
+95 |         target_intention = intention.embed(["redistribute", "regenerate", "enable"])
+   |
+
+src/talos/harmonia/symmetry_breaker.py:93:86: F821 Undefined name `EconomicState`
+   |
+91 |         return symmetries
+92 |
+93 |     def apply_breaking(self, state: "EconomicState", intention: IntentionVector) -> "EconomicState":
+   |                                                                                      ^^^^^^^^^^^^^ F821
+94 |         symmetries = self.identify_symmetries(state)
+95 |         target_intention = intention.embed(["redistribute", "regenerate", "enable"])
+   |
+
+Found 30 errors.
+No fixes available (9 hidden fixes can be enabled with the `--unsafe-fixes` option).

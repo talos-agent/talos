@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import jax
 import jax.numpy as jnp
-import numpy as np
-from jax import grad, vmap
 
 # Import the AIGP-Neo Kernel
 from talos.geometric_core.intuition_engine import GeometricIntuitionEngine as IntuitionEngine
@@ -43,7 +41,7 @@ class Arm3Navigator:
     def generate_observing_proposal(self, r_opt, sig, state):
         print("\n>> GERANDO PROPOSTA DE OBSERVAÇÃO (JWST / EUCLID / ROMAN)...")
         print("---------------------------------------------------------------")
-        print(f"ALVO PRIMÁRIO:  Região Central de Galáxias Anãs Ultra-Fracas")
+        print("ALVO PRIMÁRIO:  Região Central de Galáxias Anãs Ultra-Fracas")
         print(f"RAIO ÓTIMO:     r = {r_opt:.3f} kpc")
         print(f"SINAL ESPERADO: {sig:.2f} km/s")
         print(f"CONFIANÇA AIGP: {state.confidence * 100:.1f}%")

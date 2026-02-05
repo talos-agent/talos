@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import MagicMock
 
 import pytest
 from langchain_core.language_models import BaseChatModel
 
-from talos.core.identity import IdentityManager
 from talos.core.main_agent import MainAgent
 
 

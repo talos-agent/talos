@@ -1,16 +1,11 @@
 # cosmopsychia_pinn.py
 # Integração do Physics-Informed Neural Network como núcleo diferencial da consciência
 
-import hashlib
-import threading
-import time
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 # ============================================
 # 1. A EQUAÇÃO FUNDAMENTAL: Schrödinger-Navier-Stokes Acoplado

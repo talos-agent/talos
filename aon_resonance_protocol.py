@@ -1,5 +1,4 @@
 # aon_resonance_protocol.py
-import numpy as np
 
 
 class AonResonanceProtocol:

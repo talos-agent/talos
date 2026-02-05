@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, Tuple
+from typing import Tuple
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class CouplingRegime(str, Enum):

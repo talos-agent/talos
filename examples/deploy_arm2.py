@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-import jax
 import jax.numpy as jnp
-import numpy as np
-from jax import grad, vmap
-
-from talos.geometric_core.geometry import GeometricMotor
 
 # Import the AIGP-Neo Kernel
 from talos.geometric_core.intuition_engine import GeometricIntuitionEngine as IntuitionEngine

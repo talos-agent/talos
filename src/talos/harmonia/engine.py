@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from .factory import create_forest_simplex
-from .semantic_network import UnifiedSemanticNetwork
 
 
 class HarmoniaEngine:

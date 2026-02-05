@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Dict, List
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 
 class ExperimentDesign(BaseModel):

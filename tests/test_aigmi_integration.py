@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -11,7 +10,6 @@ from talos.core.main_agent import MainAgent
 from talos.geometric_core.aigmi import AIGMIKernel
 from talos.geometric_core.experiments import ValidationRegistry
 from talos.geometric_core.love_gravity import LoveGravityCorrelator
-from talos.geometric_core.merkabah import EnhancedMerkabahOrchestrator
 
 
 @pytest.fixture

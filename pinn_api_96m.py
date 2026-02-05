@@ -1,9 +1,6 @@
 # pinn_api_96m.py
-import asyncio
-import json
 from datetime import datetime
 
-import numpy as np
 from fastapi import FastAPI, WebSocket
 
 app = FastAPI()

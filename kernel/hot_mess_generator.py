@@ -5,7 +5,6 @@ Este código quebra deliberadamente a simetria triuna.
 """
 
 import numpy as np
-import torch
 
 
 class DissonanceInjector:

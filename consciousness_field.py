@@ -1,5 +1,4 @@
 # consciousness_field.py
-import numpy as np
 
 
 class CollectiveField:

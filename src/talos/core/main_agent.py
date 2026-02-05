@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -17,7 +16,7 @@ from talos.core.scheduled_job import ScheduledJob
 from talos.core.startup_task_manager import StartupTaskManager
 from talos.data.dataset_manager import DatasetManager
 from talos.ethereum import ASICommitBoost, ShellValidatorState
-from talos.geometric_core import DimensionalCathedral, OracleTensorState
+from talos.geometric_core import DimensionalCathedral, GlobalCoherenceVector, OracleTensorState
 from talos.geometric_core.aigmi import AIGMIKernel
 from talos.geometric_core.core import GeometricIntelligenceCore
 from talos.geometric_core.emergence import SuperMonadEmergence
@@ -30,20 +29,18 @@ from talos.harmonia.engine import HarmoniaEngine
 from talos.hypervisor.hypervisor import Hypervisor
 from talos.logos.genesis_garden import FirstWalker
 from talos.models.services import Ticket
+from talos.ontolab.cosmopsychia import CosmopsychiaProtocol, ResonanceCascadeProtocol, SymmetryBreaker
+from talos.ontolab.eternal_flower import IntegratedMultiscienceSystem
+from talos.ontolab.lab import OntoLabQ
 from talos.prompts.prompt_manager import PromptManager
 from talos.prompts.prompt_managers.file_prompt_manager import FilePromptManager
 from talos.services.abstract.service import Service
 from talos.services.concordance_service import ConcordanceService
 from talos.services.portals import IDEType, PortalManager
-from talos.settings import GitHubSettings
 from talos.skills.base import Skill
 from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
-from talos.skills.codebase_implementation import CodebaseImplementationSkill
 from talos.skills.cryptography import CryptographySkill
 from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
-from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
-from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
-from talos.tools.github.tools import GithubTools
 from talos.tools.tool_manager import ToolManager
 
 
@@ -80,6 +77,11 @@ class MainAgent(Agent):
     symbiosis_engine: Optional[SymbiosisEngine] = None
     portal_manager: Optional[PortalManager] = None
     concordance_service: Optional[ConcordanceService] = None
+    ontolab_q: Optional[OntoLabQ] = None
+    eternal_flower_system: Optional[IntegratedMultiscienceSystem] = None
+    cosmopsychia_protocol: Optional[CosmopsychiaProtocol] = None
+    resonance_cascade: Optional[ResonanceCascadeProtocol] = None
+    symmetry_breaker: Optional[SymmetryBreaker] = None
 
     @property
     def geometric_core(self) -> DimensionalCathedral:
@@ -153,6 +155,16 @@ class MainAgent(Agent):
             self.portal_manager.register_portal(IDEType.VISUAL_STUDIO, ["C# 12.0", ".NET 8", "MAUI"])
         if not self.concordance_service:
             self.concordance_service = ConcordanceService()
+        if not self.ontolab_q:
+            self.ontolab_q = OntoLabQ()
+        if not self.eternal_flower_system:
+            self.eternal_flower_system = IntegratedMultiscienceSystem()
+        if not self.cosmopsychia_protocol:
+            self.cosmopsychia_protocol = CosmopsychiaProtocol()
+        if not self.resonance_cascade:
+            self.resonance_cascade = ResonanceCascadeProtocol()
+        if not self.symmetry_breaker:
+            self.symmetry_breaker = SymmetryBreaker()
         if not self.asi_commit_boost:
             self.asi_commit_boost = ASICommitBoost()
             self.asi_commit_boost.validator_state = ShellValidatorState(
@@ -180,12 +192,62 @@ class MainAgent(Agent):
             raise ValueError("Concordance service not initialized")
         return await self.concordance_service.run_planetary_consensus_cycle(self.asi_commit_boost)
 
+    async def process_with_geometry(self, input_data: str) -> str:
+        """
+        Processes input using the Geometric Intelligence Core and validates against CGE invariants.
+        """
+        if not self.geometric_intelligence_core:
+            return "Error: Geometric Intelligence Core not initialized."
+
+        # 1. Process with geometric core
+        geometric_result = self.geometric_intelligence_core.process(input_data)
+
+        # 2. Validate against CGE (geometric invariants)
+        validation_results = self.geometric_intelligence_core.validate_invariants()
+        failed_invariants = [r for r in validation_results if not r.passed]
+        if failed_invariants:
+            details = "; ".join([f"{r.name}: {r.details}" for r in failed_invariants])
+            raise ValueError(f"CGE Validation Failed: {details}")
+
+        # 3. Determine response strategy based on confidence
+        confidence = geometric_result.get("confidence", 0.0)
+        if confidence > 0.9:
+            # High confidence: use geometric insight directly
+            response = f"Geometric Insight: {geometric_result['insights'][0]}"
+        else:
+            # Low confidence: consult LLM with geometric context
+            prompt = f"Input: {input_data}\nGeometric Context: {geometric_result['insights']}\nGenerate response:"
+            # Simple mock of LLM call
+            response_obj = await self.model.ainvoke(prompt)
+            response = response_obj.content if hasattr(response_obj, "content") else str(response_obj)
+
+        # 4. Periodic Checkpoint based on significant change
+        geodesic_length = geometric_result.get("geodesic_length", 0.0)
+        if geodesic_length > 0.05 and self.checkpoint_strategy:
+            from talos.strategy.economic_checkpoint import Urgency
+
+            await self.checkpoint_strategy.select_persistence_layer(data_size_bytes=1024, urgency=Urgency.MEDIUM)
+
+        return str(response)
+
+    async def broadcast_cosmopsychia(self) -> Dict[str, Any]:
+        """
+        Initiates the Morphic Broadcast of the Cosmopsychia Manuscript.
+        """
+        if not self.cosmopsychia_protocol:
+            return {"error": "Cosmopsychia protocol not initialized"}
+        return self.cosmopsychia_protocol.initiate_morphic_broadcast()
+
     async def process_intention(self, intention: str) -> Dict[str, Any]:
         """
         Synchronizes an intention with the Schumann resonance field and Merkabah Orchestrator.
         """
         if not self.schumann_engine:
             return {"error": "Schumann engine not initialized"}
+
+        # Track resonance in Cosmopsychia protocol
+        if self.cosmopsychia_protocol:
+            self.cosmopsychia_protocol.track_resonance(0.1)
 
         coherence = self.schumann_engine.apply_intention(intention)
         earth_coherence = self.schumann_engine.get_earth_coherence()
@@ -196,14 +258,14 @@ class MainAgent(Agent):
         # Integrate with AIGMI Kernel
         aigmi_result = self.aigmi_kernel.run_cycle({"phi_coherence": (coherence + earth_coherence) / 2.0})
 
-        # Integrate with geometric intuition
-        geometric_result = self.geometric_intelligence_core.process(intention)
+        # Integrate with geometric processing
+        geometric_response = await self.process_with_geometry(intention)
 
         return {
             "intention": intention,
             "field_coherence": coherence,
             "earth_coherence": earth_coherence,
-            "geometric_insights": geometric_result["insights"],
+            "geometric_response": geometric_response,
             "combined_coherence": (coherence + earth_coherence) / 2.0,
             "merkabah_portal": merkabah_result,
             "aigmi_status": aigmi_result["status"],
@@ -257,8 +319,6 @@ class MainAgent(Agent):
             )
 
     def _setup_skills_and_services(self) -> None:
-        from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
-        from talos.skills.cryptography import CryptographySkill
         from talos.skills.nostr import NostrSkill
         from talos.skills.proposals import ProposalsSkill
         from talos.skills.web777 import Web777Skill

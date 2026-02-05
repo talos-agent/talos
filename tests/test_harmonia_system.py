@@ -1,8 +1,4 @@
-import numpy as np
-import pytest
-
 from talos.harmonia.engine import HarmoniaEngine
-from talos.harmonia.schema import ContextDomain
 
 
 def test_harmonia_engine_initialization():

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 

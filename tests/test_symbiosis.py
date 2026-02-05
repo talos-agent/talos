@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import pytest
-
-from talos.geometric_core.symbiosis import SymbiosisEngine, SymbiosisState
+from talos.geometric_core.symbiosis import SymbiosisEngine
 
 
 def test_symbiosis_cycle():

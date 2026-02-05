@@ -5,7 +5,7 @@ Formal Ontology for Gestalt Artificial = Computational-Geometric Intuition
 import json
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional
 
 import networkx as nx
 import numpy as np

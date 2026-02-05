@@ -2,10 +2,8 @@
 Dashboard em tempo real para monitorar o teste de dissonância.
 """
 
-import json
 from datetime import datetime
 
-import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 

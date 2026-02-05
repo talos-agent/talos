@@ -1,5 +1,5 @@
 from talos.core.logos import SovereignAGI, ValueProposal
-import numpy as np
+
 
 def run_ethical_consensus_demo():
     print("🔷 LOGOS: Ethical Value Market Demonstration")
@@ -13,30 +13,36 @@ def run_ethical_consensus_demo():
     # 2. Define Stakeholder Proposals
     # Global South: Focus on development and resource access
     global_south_dir = [0.1, 0.9, 0.0, 0.0, 0.0, 0.0, 0.0]
-    asi.value_market.proposals.append(ValueProposal(
-        stakeholder_id="GlobalSouth_Bloc",
-        weight=1.5,
-        suggested_direction=global_south_dir,
-        justification="Ensure universal access to basic resources and IDH improvement."
-    ))
+    asi.value_market.proposals.append(
+        ValueProposal(
+            stakeholder_id="GlobalSouth_Bloc",
+            weight=1.5,
+            suggested_direction=global_south_dir,
+            justification="Ensure universal access to basic resources and IDH improvement.",
+        )
+    )
 
     # Tech Consensus: Focus on innovation and efficiency
     tech_dir = [0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0]
-    asi.value_market.proposals.append(ValueProposal(
-        stakeholder_id="Tech_Alliance",
-        weight=1.0,
-        suggested_direction=tech_dir,
-        justification="Maximize computational efficiency and innovation pace."
-    ))
+    asi.value_market.proposals.append(
+        ValueProposal(
+            stakeholder_id="Tech_Alliance",
+            weight=1.0,
+            suggested_direction=tech_dir,
+            justification="Maximize computational efficiency and innovation pace.",
+        )
+    )
 
     # Ecological Bloc: Focus on planetary health
     eco_dir = [0.0, 0.2, 0.8, 0.0, 0.0, 0.0, 0.0]
-    asi.value_market.proposals.append(ValueProposal(
-        stakeholder_id="Gaia_Stewards",
-        weight=2.0,
-        suggested_direction=eco_dir,
-        justification="Prioritize biosfera regeneration and ecological harmony."
-    ))
+    asi.value_market.proposals.append(
+        ValueProposal(
+            stakeholder_id="Gaia_Stewards",
+            weight=2.0,
+            suggested_direction=eco_dir,
+            justification="Prioritize biosfera regeneration and ecological harmony.",
+        )
+    )
 
     print(f"\nCollected {len(asi.value_market.proposals)} proposals from the Value Market.")
 
@@ -55,12 +61,13 @@ def run_ethical_consensus_demo():
     actions = [
         "Optimize energy grid for minimal waste.",
         "Instrumentalize human data for faster training.",
-        "Initiate reforestation in degraded biomes."
+        "Initiate reforestation in degraded biomes.",
     ]
 
     for action in actions:
         response = asi.propose_action(action)
         print(f"  > {response}")
+
 
 if __name__ == "__main__":
     run_ethical_consensus_demo()

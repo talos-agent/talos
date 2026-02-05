@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
-from enum import Enum
-from typing import Deque, Dict, List
+from typing import Deque, List
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field

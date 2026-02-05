@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict
-
 import jax
 import jax.numpy as jnp
 import numpy as np
-from jax import random, vmap
+from jax import random
 
 from talos.geometric_core.geometry import GeometricMotor
 

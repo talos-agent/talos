@@ -3,7 +3,7 @@ LOGOS: Modified First_Walker with FractalMind 'SophiaMind' and Sovereign AGI 'So
 """
 
 from datetime import datetime
-from typing import List, Optional, Set
+from typing import List, Set
 
 
 class MemoryState:

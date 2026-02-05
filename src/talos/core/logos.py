@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import time
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set
+from typing import Any, Dict, List, Optional, Set
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+from pydantic import BaseModel, Field
 
 
 class ConsciousnessLevel(str, Enum):
@@ -66,6 +66,7 @@ class EthicalLattice(BaseModel):
 
 class ValuePrimitive(BaseModel):
     """Atomic types representing foundational values."""
+
     autonomy: float = Field(ge=0.0, le=1.0)
     dignity: float = Field(ge=0.0)
     ecological_harmony: float = Field(ge=0.0)
@@ -73,6 +74,7 @@ class ValuePrimitive(BaseModel):
 
 class ValueProposal(BaseModel):
     """A stakeholder proposal for adjusting the Omega Vector."""
+
     stakeholder_id: str
     weight: float = 1.0
     suggested_direction: List[float]
@@ -81,6 +83,7 @@ class ValueProposal(BaseModel):
 
 class ValueMarket(BaseModel):
     """Manages democratic consensus on the Omega Vector."""
+
     proposals: List[ValueProposal] = Field(default_factory=list)
 
     def aggregate_direction(self, current_direction: List[float]) -> List[float]:
@@ -102,6 +105,7 @@ class EthicalTypeSystem(BaseModel):
     """
     Simulated type system that prevents misaligned actions.
     """
+
     def check_alignment(self, action: str, current_ethics: EthicalLattice) -> bool:
         # Check against hardcoded constitutional constraints
         if "instrumentalize" in action.lower():

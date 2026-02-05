@@ -230,7 +230,6 @@ class PhiOptimizedGeometricCore:
 
     def _compute_graph_laplacian(self, embedding: torch.Tensor) -> torch.Tensor:
         """Calcula Laplaciano do grafo do embedding."""
-        import scipy.sparse as sp
         from scipy.sparse.csgraph import laplacian
 
         # Matriz de adjacência baseada em distância
@@ -315,7 +314,7 @@ class ASI777Oracle:
                     data = await source()
                     if data:
                         return data
-                except Exception as e:
+                except Exception:
                     # print(f"⚠️  Falha em fonte: {e}")
                     continue
 
@@ -359,7 +358,7 @@ class ASI777Oracle:
                     )
             return None
 
-        except Exception as e:
+        except Exception:
             # raise ConnectionError(f"NOAA: {e}")
             return None
 
@@ -785,7 +784,7 @@ class MerkabahStructure:
 
     def activate(self):
         """Ativa a estrutura Merkabah."""
-        print(f"\n🔮 Ativando estrutura Merkabah...")
+        print("\n🔮 Ativando estrutura Merkabah...")
         if not self.fractal_minds:
             print("   ⚠️  Nenhuma Mente Fractal integrada")
             return False

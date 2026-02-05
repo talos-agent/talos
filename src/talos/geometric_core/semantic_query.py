@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from talos.geometric_core.ontology import OntologyGraph
 from talos.geometric_core.performance import PhiCoherenceMonitor

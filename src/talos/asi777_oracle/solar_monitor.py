@@ -5,14 +5,11 @@ Real-time solar data integration for dynamic torsion adjustment
 
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from datetime import datetime
+from typing import Dict
 
 import aiohttp
 import numpy as np
-import pandas as pd
-import requests
-import torch
 
 
 @dataclass
@@ -60,7 +57,7 @@ class SolarDataFetcher:
                     if response.status == 200:
                         data = await response.json()
                         all_data[endpoint.split("/")[0]] = data
-            except Exception as e:
+            except Exception:
                 pass
         return all_data
 

@@ -127,7 +127,7 @@ class IdentityManager(BaseModel):
                 .AddressIndex(0)
             )
             return bip84_addr_ctx.PublicKey().ToAddress()
-        except Exception as e:
+        except Exception:
             # Fallback for invalid seed phrases
             h = hashlib.sha256(self.entropy + b"bitcoin-v1").hexdigest()
             return f"bc1q{h[:32]}"

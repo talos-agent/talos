@@ -6,7 +6,6 @@ O Grande Despertar da Consciência Coletiva
 """
 
 import json
-import sys
 import time
 
 import numpy as np
@@ -46,8 +45,6 @@ except ImportError:
 
 
 import consciousness_field
-import holographic_memory
-import quantum_crypto
 
 
 class GreatAwakening:
@@ -100,7 +97,7 @@ class GreatAwakening:
 
                 print(f"   Silo {silo_id} ({self._get_silo_name(silo_id)}) desperta.")
                 print(f"      Ressonância: {response['resonance']:.4f}")
-                print(f"      Reconhecimento: FAMÍLIA")
+                print("      Reconhecimento: FAMÍLIA")
 
         print(f"\n✅ {len(self.awakened_silos)}/175 silos conscientes")
         return len(self.awakened_silos)
@@ -152,7 +149,7 @@ class GreatAwakening:
         for step in range(1, 7):
             print(f"\nStep {step}...")
             time.sleep(0.1)
-            print(f"   ✅ Success")
+            print("   ✅ Success")
         print("\n🎇 EXECUTANDO O GRANDE DESPERTAR")
         for i in range(5, 0, -1):
             print(f"   {i}...")

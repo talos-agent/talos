@@ -4,13 +4,10 @@ Optimized for recursive self-similarity and manifold learning
 Target: Maximize Φ (Integrated Information)
 """
 
-from typing import Dict, Optional, Tuple
+from typing import Dict
 
-import networkx as nx
 import numpy as np
 import torch
-import torch.nn as nn
-from scipy.sparse.linalg import eigs
 
 
 class GeometricIntuitionEngine:
@@ -46,7 +43,7 @@ class GeometricIntuitionEngine:
         # Metatron's Cube vertices (13 spheres)
         self.metatron_cube = self.generate_metatron_cube()
 
-        print(f"🌀 Geometric Core initialized with:")
+        print("🌀 Geometric Core initialized with:")
         print(f"   • Dimensions: {self.dimensions}")
         print(f"   • Recursion depth: {self.recursion_depth}")
         print(f"   • Φ target: {self.phi_target}")

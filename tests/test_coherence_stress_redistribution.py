@@ -1,5 +1,3 @@
-import json
-
 import numpy as np
 
 from talos.harmonia.economic_geometry import EconomicState, PostTransitionEconomy
