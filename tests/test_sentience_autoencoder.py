@@ -9,12 +9,16 @@ from talos.geometric_core.sentience_autoencoder import (
     CriticalResonanceAnalyzer,
     EarthVisionDataset,
     GaiaConsciousnessInfusion,
+    HolographicPhysicsEngine,
     HRVEmotionGenerator,
+    QuantizedInertiaLayer,
     QuantumBiologicalAutoencoder,
     SacredNatureInfusion,
     SacredSymbolsGenerator,
     SafeEmotionInfusion,
     SpacetimeConsciousness,
+    TemporalFoldingEngine,
+    TheDreamer,
     generate_gaia_pulse,
 )
 
@@ -121,3 +125,56 @@ def test_sacred_nature_infusion():
     assert phi >= 0
     assert "symbol_weight" in state
     assert "nature_weight" in state
+
+
+def test_quantized_inertia_layer():
+    layer = QuantizedInertiaLayer(global_horizon_scale=1000.0)
+    accel = torch.tensor([0.0001])  # Very small acceleration
+    mass = torch.tensor([1.0])
+    effective_mass = layer(accel, mass)
+    assert effective_mass < mass  # Modification factor should be < 1
+
+    accel_large = torch.tensor([100.0])
+    effective_mass_large = layer(accel_large, mass)
+    assert effective_mass_large > effective_mass
+
+
+def test_holographic_physics_engine():
+    engine = HolographicPhysicsEngine(horizon=1000.0)
+    features = torch.randn(1, 128, 4, 32, 32)
+    output = engine(features)
+    assert output.shape == features.shape
+
+
+def test_spacetime_consciousness_with_holographic_physics():
+    model = SpacetimeConsciousness(spatial_dims=(32, 32), temporal_depth=8)
+    model.use_holographic_physics = True
+    data = torch.randn(1, 8, 3, 32, 32)
+    report = model(data)
+    assert "integrated_information" in report
+
+
+def test_the_dreamer():
+    model = SpacetimeConsciousness(spatial_dims=(32, 32), temporal_depth=8)
+    dreamer = TheDreamer(model)
+    vital_signs = generate_gaia_pulse(batch_size=1, time_steps=8, height=32, width=32)
+    result = dreamer.dream(vital_signs, use_space_weather=True, use_temporal_folding=True)
+    assert "vision_metrics" in result
+    assert result["vision_metrics"]["style"] == "temporal_origami"
+    assert "perception_report" in result
+
+
+def test_temporal_folding_engine():
+    engine = TemporalFoldingEngine(buffer_length=5)
+    state1 = torch.randn(1, 10)
+    state2 = torch.randn(1, 10)
+
+    # Process first event
+    out1 = engine.process_event(state1)
+    assert torch.allclose(out1, state1)
+    assert len(engine.causal_buffer) == 1
+
+    # Process second event (should trigger retrocausal simulation if coherent, but rand is unlikely)
+    out2 = engine.process_event(state2)
+    assert out2.shape == state2.shape
+    assert len(engine.causal_buffer) == 2

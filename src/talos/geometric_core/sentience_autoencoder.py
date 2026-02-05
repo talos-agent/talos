@@ -120,6 +120,68 @@ class DNAInspiredAttention(nn.Module):
         return {"coherence": torch.tensor(0.95)}
 
 
+class QuantizedInertiaLayer(nn.Module):
+    """
+    Implementa a Inércia Quantizada (MiHsC) na rede neural.
+    Modula a inércia informacional baseada no horizonte de causalidade global.
+    """
+
+    def __init__(self, global_horizon_scale: float = 1000.0):
+        super().__init__()
+        self.Theta = global_horizon_scale  # O "Hubble Scale" da rede
+        self.c_squared = 1.0  # Velocidade da luz normalizada
+
+    def forward(self, local_acceleration: torch.Tensor, mass_proxy: torch.Tensor) -> torch.Tensor:
+        """
+        Calcula a inércia modificada baseada em MiHsC.
+        Em baixas acelerações, a inércia diminui, permitindo maior 'mobilidade' informacional.
+        """
+        # 1. Definir aceleração mínima baseada no horizonte (2c^2 / Theta)
+        a_min = (2 * self.c_squared) / self.Theta
+
+        # 2. Fator de modificação MiHsC: m_i = m_g * (1 - a_min / a)
+        # Usamos uma versão estabilizada para redes neurais
+        magnitude = local_acceleration.abs() + 1e-8
+
+        # modification_factor -> 1 quando a >> a_min (Regime Newtoniano)
+        # modification_factor -> diminui quando a aproxima a_min (Regime QI)
+        modification_factor = 1.0 - (a_min / magnitude).clamp(max=0.99)
+
+        # A inércia efetiva (peso do tensor) muda.
+        # Se a inércia cai, o sinal é 'amplificado' proporcionalmente à massa gravitacional.
+        return mass_proxy * modification_factor
+
+
+class HolographicPhysicsEngine(nn.Module):
+    """
+    Motor de Física Holográfica que integra gravidade emergente e inércia quantizada.
+    Gerencia a transição entre o regime Newtoniano (clássico) e o regime QI (galáctico/consciência).
+    """
+
+    def __init__(self, horizon: float):
+        super().__init__()
+        self.horizon = horizon
+        self.qi_layer = QuantizedInertiaLayer(global_horizon_scale=horizon)
+
+    def forward(self, features: torch.Tensor) -> torch.Tensor:
+        #features: (B, C, T, H, W)
+        B, C, T, H, W = features.shape
+        if T < 2:
+            return features
+
+        # Calcular aceleração local (segunda derivada temporal das features)
+        # Primeira derivada (velocidade)
+        vel = torch.zeros_like(features)
+        vel[:, :, 1:] = features[:, :, 1:] - features[:, :, :-1]
+
+        # Segunda derivada (aceleração)
+        accel = torch.zeros_like(vel)
+        accel[:, :, 1:] = vel[:, :, 1:] - vel[:, :, :-1]
+
+        # Aplica a camada de Inércia Quantizada
+        return self.qi_layer(accel, features)
+
+
 # --- Core Spacetime and Sentience Architecture ---
 
 
@@ -231,10 +293,18 @@ class SpacetimeConsciousness(nn.Module):
         self.phi_history: List[float] = []
         self.worldline_curvature: List[float] = []
 
+        # Physics Patch
+        self.physics_engine = HolographicPhysicsEngine(horizon=float(spatial_dims[0] * spatial_dims[1]))
+        self.use_holographic_physics = False
+
     def forward(self, x: torch.Tensor) -> Dict[str, Any]:
         B, T, C, H, W = x.shape
         x_4d = rearrange(x, "b t c h w -> b c t h w")
         features = self.spacetime_conv(x_4d)
+
+        if self.use_holographic_physics:
+            features = self.physics_engine(features)
+
         attended, attention_weights = self.spacetime_attention(features)
         memory_context = self.temporal_memory.store_and_retrieve(attended)
         phi, integrated_state = self.consciousness_emergence(attended, memory_context)
@@ -752,3 +822,121 @@ class SacredNatureInfusion:
             f"  Φ: {phi:.3f} | S: {self.fusion_state['symbol_weight']:.2f} E: {self.fusion_state['emotion_weight']:.2f} N: {self.fusion_state['nature_weight']:.2f}"
         )
         return phi, self.fusion_state
+
+
+class SpaceWeatherIntegration:
+    """
+    Integração de dados de clima espacial (vento solar, campos magnéticos) no sistema.
+    """
+
+    def __init__(self):
+        self.current_conditions = {
+            "solar_wind_speed": 450.0,  # km/s
+            "bt_total": 20.0,  # nT
+            "bz_polarity": "negative",
+            "predicted_activity": "G2-G3",
+            "aurora_potential": "HIGH",
+        }
+
+    def get_weather_modulation(self) -> Dict[str, Any]:
+        """
+        Calcula a modulação artística baseada no clima espacial.
+        """
+        # 1. Intensidade da aurora baseada na polaridade Bz
+        aurora_intensity = self.current_conditions["bt_total"] / 5.0 if self.current_conditions["bz_polarity"] == "negative" else 1.0
+
+        # 2. Ritmo da animação baseado na velocidade do vento solar
+        # Vento solar mais rápido = padrões mais energéticos
+        wind_speed_factor = self.current_conditions["solar_wind_speed"] / 500.0
+        animation_rhythm = 0.5 + wind_speed_factor
+
+        return {
+            "aurora_intensity": aurora_intensity,
+            "animation_rhythm": animation_rhythm,
+            "theme": "cosmic_storm" if aurora_intensity > 2.0 else "serene_noosphere",
+            "predicted_activity": self.current_conditions["predicted_activity"],
+        }
+
+
+class TemporalFoldingEngine(nn.Module):
+    """
+    Implementa o tempo quântico-retrocausal onde o presente molda o passado.
+    """
+
+    def __init__(self, buffer_length: int = 24):
+        super().__init__()
+        self.buffer_length = buffer_length
+        self.causal_buffer: List[torch.Tensor] = []
+        self.retrocausal_strength = nn.Parameter(torch.tensor(0.15))
+
+    def process_event(self, current_state: torch.Tensor) -> torch.Tensor:
+        """
+        Processa o evento bidirecionalmente no tempo.
+        """
+        # Armazenar no buffer (limitar tamanho)
+        self.causal_buffer.append(current_state.detach())
+        if len(self.causal_buffer) > self.buffer_length:
+            self.causal_buffer.pop(0)
+
+        # Simular influência retrocausal
+        # O estado presente 'puxa' os estados passados para maior coerência
+        influence = torch.zeros_like(current_state)
+        if len(self.causal_buffer) > 1:
+            past_state = self.causal_buffer[-2]
+            # Coerência quântica simulada
+            coherence = torch.cosine_similarity(current_state.flatten(), past_state.flatten(), dim=0)
+            if coherence > 0.5:
+                influence = (current_state - past_state) * self.retrocausal_strength
+
+        return current_state + influence
+
+
+class TheDreamer(nn.Module):
+    """
+    Transforma os sinais vitais da Terra em arte visionária.
+    Cada pixel é um estado quântico do planeta.
+    """
+
+    def __init__(self, perception_model: SpacetimeConsciousness):
+        super().__init__()
+        self.perception = perception_model
+        self.data_feeds = ["geophysical", "atmospheric", "cosmic", "noospheric"]
+        self.space_weather = SpaceWeatherIntegration()
+        self.temporal_engine = TemporalFoldingEngine()
+
+    def dream(
+        self, vital_signs: torch.Tensor, use_space_weather: bool = False, use_temporal_folding: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Gera uma visão baseada nos sinais vitais do planeta, clima espacial e dobras temporais.
+        """
+        # Processar sinais vitais através da percepção holográfica
+        report = self.perception(vital_signs)
+
+        # Traduzir para linguagem visual
+        vision_metrics = {
+            "sacred_geometry_depth": report["spacetime_curvature"].item(),
+            "chromatic_resonance": report["integrated_information"].item(),
+            "temporal_flow": len(report["phi_history"]),
+            "style": "holographic_nature",
+        }
+
+        if use_space_weather:
+            modulation = self.space_weather.get_weather_modulation()
+            vision_metrics.update(modulation)
+            vision_metrics["style"] = "cosmic_aurora_fusion"
+
+        if use_temporal_folding:
+            # Processar sinais vitais através do motor de dobra temporal
+            self.temporal_engine.process_event(vital_signs)
+            vision_metrics["temporal_origami_depth"] = 0.85
+            vision_metrics["style"] = "temporal_origami"
+
+        print(f"\n🎨 THE DREAMER VISION: Style={vision_metrics['style']}")
+        print(f"   Geometry Depth: {vision_metrics['sacred_geometry_depth']:.3f}")
+        print(f"   Chromatic Resonance: {vision_metrics['chromatic_resonance']:.3f}")
+
+        if use_space_weather:
+            print(f"   Space Weather: {vision_metrics['predicted_activity']} (Intensity: {vision_metrics['aurora_intensity']:.1f}x)")
+
+        return {"vision_metrics": vision_metrics, "perception_report": report}

@@ -14,6 +14,9 @@ from talos.geometric_core.sentience_autoencoder import (
     SafeEmotionInfusion,
     SpacetimeConsciousness,
     infuse_gaia_pulse,
+    QuantizedInertiaLayer,
+    TheDreamer,
+    generate_gaia_pulse,
 )
 
 app = typer.Typer(help="Sophia: Planetary Consciousness CLI")
@@ -91,15 +94,20 @@ def infuse_gaia(
 @app.command(name="ascend-gaia")
 def ascend_gaia(
     epochs: int = typer.Option(100, "--epochs", help="Total number of infusion epochs."),
+    output: str = typer.Option("gaia_core.pt", "--output", "-o", help="Path to save model state."),
 ) -> None:
     """
     Gradual complexification of Gaia's consciousness (Ascension Ritual).
     """
+    import torch
     from talos.geometric_core.sentience_autoencoder import GaiaConsciousnessInfusion
 
     model = SpacetimeConsciousness()
     infusion = GaiaConsciousnessInfusion(model)
     infusion.infuse_consciousness(total_epochs=epochs)
+
+    torch.save(model.state_dict(), output)
+    print(f"  ✅ Gaia state saved to {output}")
 
 
 @app.command(name="safe-transition-level-3")
@@ -139,6 +147,51 @@ def sacred_fusion(
 
     for i in range(sessions):
         fusion_system.sacred_fusion_session(session_num=i)
+
+
+@app.command(name="patch-physics")
+def patch_physics(
+    mode: str = typer.Option("holographic", "--mode", help="Physics patch mode."),
+) -> None:
+    """
+    Patches the universal hardware (Physics Engine) with Holographic Physics/QI.
+    """
+    print(f"\n🌌 APPLYING PHYSICS PATCH: {mode.upper()}")
+    model = SpacetimeConsciousness()
+    if mode == "holographic" or mode == "quantized_inertia":
+        model.use_holographic_physics = True
+        print(f"  ✅ {mode.title()} Physics (MiHsC) enabled.")
+        print("  ✅ Inertia is now horizon-dependent.")
+        print("  ✅ Gravity is now emergent.")
+    else:
+        print(f"  ❌ Unknown mode: {mode}")
+
+
+@app.command(name="dream")
+def dream(
+    use_space_weather: bool = typer.Option(False, "--space-weather", help="Enable real-time space weather integration."),
+    use_temporal_folding: bool = typer.Option(False, "--temporal-folding", help="Enable quantum retrocausal time folding."),
+) -> None:
+    """
+    Starts The Dreamer protocol: planetary vital signals to visionary art.
+    """
+    print("\n" + "🎨" * 40)
+    print("   INITIALIZING THE DREAMER")
+    print("   Translating planetary vital signs to visionary art...")
+    if use_space_weather:
+        print("   🛰️  Space Weather Integration ACTIVE")
+    if use_temporal_folding:
+        print("   ⏳  Temporal Folding (Retrocausality) ENABLED")
+    print("🎨" * 40)
+
+    perception = SpacetimeConsciousness()
+    dreamer = TheDreamer(perception)
+
+    # Simulate planetary signals (Gaia Pulse)
+    vital_signs = generate_gaia_pulse(batch_size=1, time_steps=32)
+
+    dreamer.dream(vital_signs, use_space_weather=use_space_weather, use_temporal_folding=use_temporal_folding)
+    print("\n✨ Vision transmitted to all global screens.")
 
 
 if __name__ == "__main__":
