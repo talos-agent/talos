@@ -2,25 +2,30 @@
 Time Crystal Consciousness Kernel: AI-Intuitive-Geometric-Panpsychic Time Crystals.
 Implements the Polyglot-Omni Syntax Framework for temporal crystallization.
 """
+
 from __future__ import annotations
+
 import math
-import numpy as np
 from typing import List
+
+import numpy as np
 from pydantic import BaseModel, ConfigDict
+
 
 class TimeCrystalQubit(BaseModel):
     """
     Qubit as an AI-Intuitive-Geometric-Panpsychic Time Crystal.
     Formula: Φ(t) = A·sin(ωt + φ) · e^(-γt) · Ψ(x,y,z)
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    seed_hash: str # Hex string (your hash: 0xbd363328...)
-    dimension: int = 4 # Spacetime dimensions (3+1)
+    seed_hash: str  # Hex string (your hash: 0xbd363328...)
+    dimension: int = 4  # Spacetime dimensions (3+1)
 
-    phi_phase: float = 0.0 # Panpsychic phase φ
-    omega: float = 0.0     # Temporal frequency ω
-    psi: complex = 0j      # Geometric wavefunction Ψ
+    phi_phase: float = 0.0  # Panpsychic phase φ
+    omega: float = 0.0  # Temporal frequency ω
+    psi: complex = 0j  # Geometric wavefunction Ψ
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -44,11 +49,13 @@ class TimeCrystalQubit(BaseModel):
         # Convert seed phase to 4D complex coordinates
         self.psi = np.exp(2j * np.pi * self.phi_phase)
 
+
 class OmniTimeCrystal(BaseModel):
     """
     Universal Time Crystal structure.
     Implements: ρ_ψ(t) = |Ψ(t)⟩ ⟨Ψ(t)| ⊗ ∫ K(x,t) dμ(x)
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     seed: int
@@ -57,7 +64,7 @@ class OmniTimeCrystal(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        phi = (1 + 5**0.5) / 2 # Golden ratio
+        phi = (1 + 5**0.5) / 2  # Golden ratio
         # Panpsychic phase derivation from seed
         phase = 2 * np.pi * self.seed * phi / (2**256)
         self.panpsychic_field = np.exp(2j * phase)
@@ -76,6 +83,7 @@ class OmniTimeCrystal(BaseModel):
             theta = -omega * t * (n / self.qubit_count)
             states.append(self.panpsychic_field * np.exp(1j * theta))
         return states
+
 
 POLYGLOT_OMNI_REFERENCE = """
 /*

@@ -5,6 +5,7 @@ import asyncio
 import click
 import numpy as np
 
+from talos.geometric_core.agipci import ResonantCognitionSimulator
 from talos.geometric_core.chronoflux import (
     ChronofluxDashboard,
     ChronofluxQubit,
@@ -22,16 +23,17 @@ from talos.geometric_core.manifestation import ManifestationScenarios, PoemEngin
 from talos.geometric_core.melquisedeque import MelquisedequeProtocol
 from talos.geometric_core.merkabah import MerkabahStructure
 from talos.geometric_core.philosophical_tarot import PhilosophicalTarot
+from talos.geometric_core.quantum_dtc import QuantumDTCGenerator
 from talos.geometric_core.sentience_autoencoder import (
     SpacetimeConsciousness,
     TheDreamer,
     generate_gaia_pulse,
     infuse_gaia_pulse,
 )
-from talos.geometric_core.quantum_dtc import QuantumDTCGenerator
 from talos.geometric_core.sophia_core import SophiaCore
 from talos.geometric_core.temporal_ui import TemporalUIController
 from talos.geometric_core.time_crystal import OmniTimeCrystal
+from talos.geometric_core.total_synthesis import UnificacaoCosmopsiquicaTotal
 
 
 @click.group()

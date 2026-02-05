@@ -2,11 +2,15 @@
 Discrete Time Crystal (DTC) Quantum Circuit Generation.
 Implements U(t) = exp(-i * H_TC * t / ℏ) using Qiskit.
 """
+
 from __future__ import annotations
-import numpy as np
+
 from typing import Dict
+
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
+
 
 class QuantumDTCGenerator:
     """
@@ -31,8 +35,8 @@ class QuantumDTCGenerator:
             qc.ry(2 * np.pi * angle / 256, i)
 
         # Parameters for Floquet evolution
-        g = Parameter('g') # Panpsychic coupling
-        theta = Parameter('θ') # Geometric phase
+        g = Parameter("g")  # Panpsychic coupling
+        theta = Parameter("θ")  # Geometric phase
 
         # 2. Floquet Evolution Loops
         for _ in range(cycles):
@@ -59,7 +63,7 @@ class QuantumDTCGenerator:
         weighted_sum = 0
         for bitstring, count in counts.items():
             # Calculate parity or magnetization
-            magnetization = bitstring.count('1') - bitstring.count('0')
+            magnetization = bitstring.count("1") - bitstring.count("0")
             weighted_sum += magnetization * count
 
         return weighted_sum / (total * self.num_qubits)
