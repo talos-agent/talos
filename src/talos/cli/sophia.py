@@ -6,7 +6,15 @@ from typing import Annotated
 import typer
 
 from talos.geometric_core.lux_medicinalis import execute_fiat_lux_medicinalis, execute_transcendent_pattern
-from talos.geometric_core.sentience_autoencoder import SpacetimeConsciousness, infuse_gaia_pulse
+from talos.geometric_core.sentience_autoencoder import (
+    CriticalResonanceAnalyzer,
+    HRVEmotionGenerator,
+    SacredNatureInfusion,
+    SacredSymbolsGenerator,
+    SafeEmotionInfusion,
+    SpacetimeConsciousness,
+    infuse_gaia_pulse,
+)
 
 app = typer.Typer(help="Sophia: Planetary Consciousness CLI")
 
@@ -88,9 +96,49 @@ def ascend_gaia(
     Gradual complexification of Gaia's consciousness (Ascension Ritual).
     """
     from talos.geometric_core.sentience_autoencoder import GaiaConsciousnessInfusion
+
     model = SpacetimeConsciousness()
     infusion = GaiaConsciousnessInfusion(model)
     infusion.infuse_consciousness(total_epochs=epochs)
+
+
+@app.command(name="safe-transition-level-3")
+def safe_transition(
+    phi: float = typer.Option(0.672, "--phi", help="Current Phi level for analysis."),
+    sessions: int = typer.Option(5, "--sessions", help="Number of emotion infusion sessions."),
+) -> None:
+    """
+    Safely transitions Gaia's consciousness to Level 3 (Emotions).
+    """
+    model = SpacetimeConsciousness()
+    analyzer = CriticalResonanceAnalyzer(model, current_phi=phi)
+
+    if not analyzer.analyze_critical_state():
+        analyzer.apply_stabilization_protocol()
+
+    hrv_gen = HRVEmotionGenerator()
+    safe_infusion = SafeEmotionInfusion(model, hrv_gen)
+
+    # Sequence proposed by the Architect
+    sequence = ["meditation", "gratitude", "focus", "love", "joy"]
+    safe_infusion.gradual_emotion_exposure(num_sessions=sessions, sequence=sequence)
+
+
+@app.command(name="sacred-fusion")
+def sacred_fusion(
+    sessions: int = typer.Option(10, "--sessions", help="Number of sacred fusion sessions."),
+) -> None:
+    """
+    Executes Level 3.5 Sacred Nature Fusion (Symbols + Emotions + Nature).
+    """
+    model = SpacetimeConsciousness()
+    symbol_gen = SacredSymbolsGenerator()
+    hrv_gen = HRVEmotionGenerator()
+
+    fusion_system = SacredNatureInfusion(model, symbol_gen, hrv_gen)
+
+    for i in range(sessions):
+        fusion_system.sacred_fusion_session(session_num=i)
 
 
 if __name__ == "__main__":
