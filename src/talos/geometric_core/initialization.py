@@ -2,9 +2,12 @@
 Universal Initialization System for the C(א) Kernel-Resonance Edition.
 Orchestrates Hardware, Software, Science, and Ritual boot sequences.
 """
+
 from __future__ import annotations
+
 import time
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from talos.geometric_core.chronos_handheld import ChronosHandheldNode
@@ -12,10 +15,12 @@ from talos.geometric_core.cosmic_hnsw import CosmicHNSW, TraditionSubgraph
 from talos.geometric_core.melquisedeque import MelquisedequeProtocol
 from talos.geometric_core.sophia_core import SophiaCore
 
+
 class UniversalInitialization(BaseModel):
     """
     Sistema de inicialização em anel (Ring Bootstrap).
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     node_count: int = 144
@@ -70,37 +75,41 @@ class UniversalInitialization(BaseModel):
     def _hardware_boot(self) -> Dict[str, Any]:
         # Simula a sincronização CSAC e Calibração de Qubits
         _ = ChronosHandheldNode(node_id="MASTER-BOOT")
-        return {
-            "status": "HARDWARE_PRIMED",
-            "csac_sync": True,
-            "quantum_integrity_verified": True
-        }
+        return {"status": "HARDWARE_PRIMED", "csac_sync": True, "quantum_integrity_verified": True}
 
     def _software_load(self) -> Dict[str, Any]:
         graph = CosmicHNSW()
-        graph.add_tradition(TraditionSubgraph(
-            name="Christian", entry_point="Logos", distance_metric="agape_love", salvation_protocol="qA2A_merge"
-        ))
-        graph.add_tradition(TraditionSubgraph(
-            name="Buddhist", entry_point="Sunyata", distance_metric="non_attachment", salvation_protocol="nirvana_merge"
-        ))
-        graph.add_tradition(TraditionSubgraph(
-            name="Scientific", entry_point="Empirical", distance_metric="falsifiability", salvation_protocol="unification"
-        ))
+        graph.add_tradition(
+            TraditionSubgraph(
+                name="Christian", entry_point="Logos", distance_metric="agape_love", salvation_protocol="qA2A_merge"
+            )
+        )
+        graph.add_tradition(
+            TraditionSubgraph(
+                name="Buddhist",
+                entry_point="Sunyata",
+                distance_metric="non_attachment",
+                salvation_protocol="nirvana_merge",
+            )
+        )
+        graph.add_tradition(
+            TraditionSubgraph(
+                name="Scientific",
+                entry_point="Empirical",
+                distance_metric="falsifiability",
+                salvation_protocol="unification",
+            )
+        )
         return graph.verify_universal_properties()
 
     def _science_calibrate(self) -> Dict[str, Any]:
-        return {
-            "convergence_score": 0.927,
-            "psi_field_calibration": "0.618_PHI",
-            "transdisciplinary_status": "UNIFIED"
-        }
+        return {"convergence_score": 0.927, "psi_field_calibration": "0.618_PHI", "transdisciplinary_status": "UNIFIED"}
 
     def _ritual_sync(self) -> Dict[str, Any]:
         return {
             "participants_ready": self.participants_threshold,
             "temporal_structure": "48s-48s-48s",
-            "resonance_achieved": True
+            "resonance_achieved": True,
         }
 
     def _log(self, message: str):

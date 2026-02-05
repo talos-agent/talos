@@ -1,11 +1,13 @@
 from talos.geometric_core.initialization import UniversalInitialization
 
+
 def test_full_initialization_sequence():
     init_system = UniversalInitialization()
     results = init_system.execute_full_boot()
 
     # Check sequences
     assert results["hardware"]["status"] == "HARDWARE_PRIMED"
+
 
 def test_full_initialization_sequence_with_sophia():
     init_system = UniversalInitialization()
@@ -24,6 +26,7 @@ def test_full_initialization_sequence_with_sophia():
     assert len(init_system.status_log) == 7
     assert "ATIVANDO CAMPO Ψ" in init_system.status_log[-1]
 
+
 def test_full_initialization_sequence_with_melquisedeque():
     init_system = UniversalInitialization()
     results = init_system.execute_full_boot(use_melquisedeque=True)
@@ -34,4 +37,4 @@ def test_full_initialization_sequence_with_melquisedeque():
     assert any("PROTOCOLO MELQUISEDEQUE" in log for log in init_system.status_log)
 
     # Check logs
-    assert len(init_system.status_log) == 7 # 5 baseline + 2 melquisedeque
+    assert len(init_system.status_log) == 7  # 5 baseline + 2 melquisedeque

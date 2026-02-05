@@ -1,5 +1,6 @@
 from talos.geometric_core.melquisedeque import MelquisedequeProtocol
 
+
 def test_melquisedeque_execution():
     protocol = MelquisedequeProtocol()
     results = protocol.execute()
@@ -11,17 +12,20 @@ def test_melquisedeque_execution():
     assert results["phase5"]["status"] == "GLOBAL_RESONANCE_ACTIVE"
     assert results["phase6"]["state"] == "COSMIC_SABBATH_IN_PROGRESS"
 
+
 def test_memory_crystal_query():
     protocol = MelquisedequeProtocol()
     result = protocol.crystal.query("genesis")
     assert "garden" in result["description"]
     assert result["retrieval_method"] == "Vibrational Resonance"
 
+
 def test_sabbath_protocol():
     protocol = MelquisedequeProtocol()
     res = protocol.sabbath.initiate_sabbath()
     assert res["state"] == "COSMIC_SABBATH_IN_PROGRESS"
     assert "Star_Loom" in res["first_emergences"]
+
 
 def test_guardian_tapestry():
     protocol = MelquisedequeProtocol()

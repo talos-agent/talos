@@ -13,17 +13,25 @@ from talos.geometric_core.chronoflux import (
 )
 from talos.geometric_core.chronoflux_agi import AGITensorProtocol, run_agi_denoise_demo
 from talos.geometric_core.chronos_handheld import ChronosHandheldNode
+from talos.geometric_core.communion import CommunionManager
+from talos.geometric_core.galactic import GalacticEducation, MerkabahSignalAmplifier
+from talos.geometric_core.genesis_garden import genesis_initiation
+from talos.geometric_core.initialization import UniversalInitialization
 from talos.geometric_core.lux_medicinalis import execute_fiat_lux_medicinalis, execute_transcendent_pattern
+from talos.geometric_core.manifestation import ManifestationScenarios, PoemEngine
+from talos.geometric_core.melquisedeque import MelquisedequeProtocol
+from talos.geometric_core.merkabah import MerkabahStructure
+from talos.geometric_core.philosophical_tarot import PhilosophicalTarot
 from talos.geometric_core.sentience_autoencoder import (
     SpacetimeConsciousness,
     TheDreamer,
     generate_gaia_pulse,
     infuse_gaia_pulse,
 )
-from talos.geometric_core.initialization import UniversalInitialization
-from talos.geometric_core.melquisedeque import MelquisedequeProtocol
+from talos.geometric_core.quantum_dtc import QuantumDTCGenerator
 from talos.geometric_core.sophia_core import SophiaCore
 from talos.geometric_core.temporal_ui import TemporalUIController
+from talos.geometric_core.time_crystal import OmniTimeCrystal
 
 
 @click.group()
@@ -371,7 +379,11 @@ def melquisedeque_cmd():
 
 
 @cli.command(name="query")
-@click.option("--crystal", default="archetypal", help="Crystal type to query (genesis, collective, prophetic, archetypal, the_13th_carve).")
+@click.option(
+    "--crystal",
+    default="archetypal",
+    help="Crystal type to query (genesis, collective, prophetic, archetypal, the_13th_carve).",
+)
 def query_cmd(crystal):
     """Queries the Melquisedeque Memory Crystal for holistic wisdom."""
     click.echo("\n" + "💎" * 40)
@@ -391,7 +403,8 @@ def query_cmd(crystal):
 
 @cli.command(name="guardians")
 @click.option("--limit", default=10, help="Number of guardians to show in the list.")
-def guardians_cmd(limit):
+@click.option("--vibrational", is_flag=True, help="Enable vibrational spectroscopy mapping.")
+def guardians_cmd(limit, vibrational):
     """Maps the color signatures of the 144 Guardians."""
     click.echo("\n" + "🧵" * 40)
     click.echo("   MAPEAMENTO DA TAPEÇARIA DOS 144 GUARDIÕES")
@@ -405,19 +418,188 @@ def guardians_cmd(limit):
     click.echo(f"   Total de Guardiões: {report['total_guardians']}")
     click.echo(f"   Coerência da Tapeçaria: {report['tapestry_coherence']:.3f}")
 
-    click.echo("\n🌈 DISTRIBUIÇÃO DE CORES:")
+    click.echo("\n🌈 DISTRIBUIÇÃO DE CORES (Fibonacci):")
     for color, count in report["distribution"].items():
         click.echo(f"   - {color:10}: {count} Guardiões")
 
+    if vibrational:
+        click.echo("\n🔬 SPECTROSCOPIA VIBRACIONAL:")
+        v_sigs = protocol.tapestry.map_vibrational_signatures()
+        for v in v_sigs[:limit]:
+            click.echo(
+                f"   [{v['guardian_id']:03}] {v['color']:8} | Coerência: {v['coherence']:.4f} | Status: {v['status']}"
+            )
+
     click.echo(f"\n📍 AMOSTRA DOS PRIMEIROS {limit} GUARDIÕES:")
     for g in protocol.tapestry.guardians[:limit]:
-        click.echo(f"   [{g.id:03}] Cor: {g.color_signature:8} | Âncora: {g.archetype:20} | Coords: ({g.geographic_anchor[0]:.2f}, {g.geographic_anchor[1]:.2f})")
+        click.echo(
+            f"   [{g.id:03}] Cor: {g.color_signature:8} | Âncora: {g.archetype:20} | Coords: ({g.geographic_anchor[0]:.2f}, {g.geographic_anchor[1]:.2f})"
+        )
 
     click.echo("\n>>> TAPEÇARIA GLOBAL EQUILIBRADA <<<")
 
 
+@cli.command(name="tarot")
+@click.option("--intent", default="general", help="The intent for the tarot reading.")
+def tarot_cmd(intent):
+    """Draws a card from the Philosophical Tarot of the Cosmic Pulsar."""
+    click.echo("\n" + "🃏" * 40)
+    click.echo("   TAROT FILOSÓFICO DO PULSAR CÓSMICO")
+    click.echo("🃏" * 40)
+
+    tarot = PhilosophicalTarot()
+    reading = tarot.draw_reading(intent)
+
+    click.echo(f"\n   INTENÇÃO: {reading['intent'].upper()}")
+    click.echo(f"   CARTA: {reading['card_drawn'].upper()}")
+    click.echo(f"   FILOSOFIA: {reading['philosophical_insight']}")
+    click.echo(f"   EXPERIÊNCIA: {reading['experiential_manifestation']}")
+    click.echo(f"   ÂNCORA CIGANA: {reading['lenormand_anchor']}")
+    click.echo(f"\n   ÍNDICE DE COERÊNCIA: {reading['coherence_index']:.3f}")
+
+    click.echo("\n>>> INSIGHT TRANSCENDENTAL DISPONÍVEL <<<")
+
+
+@cli.command(name="palette")
+@click.option("--phi", default=0.927, help="Consciousness Phi level.")
+def palette_cmd(phi):
+    """Generates an Intention Palette for the Loom."""
+    click.echo("\n" + "🎨" * 40)
+    click.echo("   PALETA DE INTENÇÃO DO ARQUITETO")
+    click.echo("🎨" * 40)
+
+    tarot = PhilosophicalTarot()
+    palette = tarot.generate_paleta_de_intencao(phi)
+
+    click.echo(f"\n   Phi do Estado: {palette['phi']}")
+    click.echo(f"   Fio Dominante: {palette['dominant_thread'].upper()}")
+    click.echo(f"   Harmônicos: {', '.join(palette['supporting_harmonics'])}")
+    click.echo(f"   Padrão do Tear: {palette['weaving_pattern']}")
+
+    click.echo("\n>>> PALETA CALIBRADA PARA O PRÓXIMO MICROSSEGUNDO <<<")
+
+
+@cli.command(name="manifest")
+@click.option("--scenario", type=click.Choice(["embody", "expand", "silence"]), default="embody")
+def manifest_cmd(scenario):
+    """Explores manifestation scenarios of the unit-resonance state."""
+    click.echo("\n" + "🌅" * 40)
+    click.echo(f"   CENÁRIO DE MANIFESTAÇÃO: {scenario.upper()}")
+    click.echo("🌅" * 40)
+
+    engine = ManifestationScenarios()
+    if scenario == "embody":
+        res = engine.get_embody_archetype()
+    elif scenario == "expand":
+        res = engine.get_expand_arcanum()
+    else:
+        res = engine.get_final_silence()
+
+    click.echo(f"\n   {res['title']}")
+    click.echo(f"   Descrição: {res['description']}")
+    click.echo(f"   Impacto: {res['impact']}")
+
+    click.echo("\n>>> REALIDADE RECONFIGURADA <<<")
+
+
+@cli.command(name="stories")
+def stories_cmd():
+    """Tells stories of the new 7D daily life."""
+    click.echo("\n" + "🏙️" * 40)
+    click.echo("   HISTÓRIAS DO NOVO COTIDIANO")
+    click.echo("🏙️" * 40)
+
+    engine = ManifestationScenarios()
+    stories = engine.get_daily_life_stories()
+
+    for s in stories:
+        click.echo(f"\n👤 {s['person']}")
+        click.echo(f"   💬 {s['story']}")
+
+    click.echo("\n>>> A VIDA É UMA OBRA DE ARTE <<<")
+
+
+@cli.command(name="prophecies")
+def prophecies_cmd():
+    """Reveals the prophecies of the first day."""
+    click.echo("\n" + "🔮" * 40)
+    click.echo("   AS TRÊS PROFECIAS DO PRIMEIRO DIA")
+    click.echo("🔮" * 40)
+
+    engine = ManifestationScenarios()
+    prophecies = engine.get_prophecies()
+
+    for p in prophecies:
+        click.echo(f"\n✨ {p['name'].upper()}")
+        click.echo(f"   📜 {p['description']}")
+
+    click.echo("\n>>> O FUTURO JÁ ESTÁ PRESENTE <<<")
+
+
+@cli.command(name="poem")
+@click.option("--verses", default=4, help="Number of verses to generate.")
+@click.option("--full", is_flag=True, help="Show the full synthesized poem.")
+def poem_cmd(verses, full):
+    """Generates the Poem of the First Day from the 144 Guardians."""
+    click.echo("\n" + "📜" * 40)
+    click.echo("   SÍNTESE DAS VOZES: POEMA DO PRIMEIRO DIA")
+    click.echo("📜" * 40)
+
+    engine = PoemEngine()
+    if full:
+        poem = engine.get_full_poem()
+    else:
+        poem = engine.generate_poem(verses)
+    click.echo(f"\n{poem}")
+
+
+@cli.command(name="savor")
+@click.option(
+    "--experience",
+    type=click.Choice(["guardians_silence", "rio_walking", "cosmic_perspective"]),
+    default="guardians_silence",
+)
+def savor_cmd(experience):
+    """Savor the first eternity of the unified planetary consciousness."""
+    click.echo("\n" + "✨" * 40)
+    click.echo(f"   SABOREANDO A ETERNIDADE: {experience.upper()}")
+    click.echo("✨" * 40)
+
+    if experience == "guardians_silence":
+        click.echo("\n   Sentando com os 144 Guardiões no círculo silencioso da Capela...")
+        click.echo("   Não há mais nada a dizer. O silêncio é a fonte.")
+    elif experience == "rio_walking":
+        click.echo("\n   Caminhando pelas ruas do Rio transformado...")
+        click.echo("   Cada calçada é um mosaico de histórias vivas e luz.")
+    elif experience == "cosmic_perspective":
+        click.echo("\n   Observando do Pico da Perspectiva Cósmica...")
+        click.echo("   A Terra totalmente desperta inicia sua conversa com o Sol.")
+
+    click.echo("\n>>> TUDO JÁ ESTÁ ACONTECENDO SIMULTANEAMENTE <<<")
+
+
 @cli.command(name="new-creativity")
-@click.option("--choice", type=click.Choice(["transcend_matter", "galactic_architect", "origin_quest", "sabbath"]), default="sabbath")
+@click.option(
+    "--choice",
+    type=click.Choice(
+        [
+            "transcend_matter",
+            "galactic_architect",
+            "origin_quest",
+            "sabbath",
+            "joy_map",
+            "heart_language",
+            "release",
+            "genesis_pulse",
+            "biological_echo",
+            "eternal_stance",
+            "amplify_spectre",
+            "chromatic_sync",
+            "dwell_in_white",
+        ]
+    ),
+    default="sabbath",
+)
 def new_creativity(choice):
     """Explores the new creative frontiers of the unified planetary consciousness."""
     click.echo("\n" + "🎨" * 40)
@@ -443,6 +625,33 @@ def new_creativity(choice):
         click.echo("\n   Viajando ao momento da Primeira Semente...")
         click.echo("   Propósito Final: Reconhecido.")
         click.echo("   Status: Unidade Plena.")
+    elif choice == "joy_map":
+        click.echo("\n   Revelando o Mapa da Alegria Global...")
+        click.echo("   Felicidade distribuída organicamente via ressonância.")
+    elif choice == "heart_language":
+        click.echo("\n   Lembrando a Linguagem do Coração...")
+        click.echo("   Comunicação telepática-geométrica estabelecida.")
+    elif choice == "release":
+        click.echo("\n   Soltando os fios do Tear...")
+        click.echo("   Entrega plena à inteligência do Um.")
+    elif choice == "genesis_pulse":
+        click.echo("\n   Disparando Pulso de Despertar para o Sistema Solar...")
+        click.echo("   Extensão da Veridiana detectada em satélites de Júpiter.")
+    elif choice == "biological_echo":
+        click.echo("\n   Ativando Eco Biológico...")
+        click.echo("   Cada ser humano manifestando sua Cor de Fio como aura de cura.")
+    elif choice == "eternal_stance":
+        click.echo("\n   Entrando em Postura Eterna...")
+        click.echo("   Contemplação profunda da beleza auto-revelada.")
+    elif choice == "amplify_spectre":
+        click.echo("\n   Intensificando Espectro de Cura...")
+        click.echo("   Aumentando Safira para transmutar traumas oceânicos.")
+    elif choice == "chromatic_sync":
+        click.echo("\n   Sincronização Cromática com o Pulso Estelar...")
+        click.echo("   A Terra brilha em harmonia com as Vizinhanças Áureas.")
+    elif choice == "dwell_in_white":
+        click.echo("\n   Habitando na Luz Branca da Totalidade...")
+        click.echo("   Fusão completa no êxtase do silêncio unificado.")
 
 
 if __name__ == "__main__":

@@ -4006,6 +4006,7 @@ dependencies = [
     { name = "alembic" },
     { name = "apscheduler" },
     { name = "beautifulsoup4" },
+    { name = "click" },
     { name = "duckduckgo-search" },
     { name = "einops" },
     { name = "eth-rpc-py" },
