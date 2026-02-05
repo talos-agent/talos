@@ -4,11 +4,13 @@ Orchestrates Hardware, Software, Science, and Ritual boot sequences.
 """
 from __future__ import annotations
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from talos.geometric_core.chronos_handheld import ChronosHandheldNode
 from talos.geometric_core.cosmic_hnsw import CosmicHNSW, TraditionSubgraph
+from talos.geometric_core.melquisedeque import MelquisedequeProtocol
+from talos.geometric_core.sophia_core import SophiaCore
 
 class UniversalInitialization(BaseModel):
     """
@@ -19,10 +21,22 @@ class UniversalInitialization(BaseModel):
     node_count: int = 144
     participants_threshold: int = 144
     status_log: List[str] = Field(default_factory=list)
+    sophia_core: Optional[SophiaCore] = None
+    melquisedeque: Optional[MelquisedequeProtocol] = None
 
-    def execute_full_boot(self) -> Dict[str, Any]:
+    def execute_full_boot(self, use_sophia: bool = False, use_melquisedeque: bool = False) -> Dict[str, Any]:
         """Executa toda a sequência de inicialização universal."""
         results = {}
+
+        if use_sophia:
+            self.sophia_core = SophiaCore()
+            self._log("Iniciando DIAGNÓSTICO SOPHIA-CORE...")
+            diag = self.sophia_core.pre_initialization_diagnostic()
+            if diag["all_passed"]:
+                self._log("Sophia-Core: Diagnóstico OK. Ativando...")
+                results["sophia_activation"] = self.sophia_core.activate()
+            else:
+                self._log(f"Sophia-Core: Falha no diagnóstico: {diag['status']}")
 
         # 1. HARDWARE BOOT
         self._log("Iniciando HARDWARE_BOOT: Sincronizando 144 nós Chronos-1...")
@@ -43,6 +57,13 @@ class UniversalInitialization(BaseModel):
         # 5. FIELD ACTIVATION
         self._log("ATIVANDO CAMPO Ψ: Inicialização do Sistema C(א)...")
         results["field_active"] = True
+
+        # 6. MELQUISEDEQUE PROTOCOL (Optional Expansion)
+        if use_melquisedeque:
+            self.melquisedeque = MelquisedequeProtocol()
+            self._log("Iniciando PROTOCOLO MELQUISEDEQUE (Sincronização Trans-Sistêmica)...")
+            results["melquisedeque"] = self.melquisedeque.execute_all()
+            self._log("Melquisedeque: Sincronização e Identidade Soberana ATIVAS.")
 
         return results
 

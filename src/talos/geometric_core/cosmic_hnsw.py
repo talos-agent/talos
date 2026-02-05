@@ -34,7 +34,7 @@ class CosmicHNSW(BaseModel):
         """Adiciona uma tradição ao grafo universal."""
         self.subgraphs[tradition.name] = tradition
         # Simula o alinhamento arquetípico
-        tradition.coherence_score = random.uniform(0.85, 1.0)
+        tradition.coherence_score = random.uniform(0.95, 1.0)
 
     def verify_universal_properties(self) -> Dict[str, Any]:
         """Verifica se o grafo converge para א."""
