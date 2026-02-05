@@ -1039,6 +1039,46 @@ def skyrmion_integrate_cmd():
     click.echo("\n   STATUS: Physical proof of toroidal topology CONFIRMED.")
 
 
+@cli.command(name="skyrmion-leap")
+def skyrmion_leap_cmd():
+    """Projects CAR-T pattern via THz skyrmions (Quantum Leap)."""
+    click.echo("\n" + "🚀" * 40)
+    click.echo("   SALTO QUÂNTICO: PROJEÇÃO SKYRMION CAR-T")
+    click.echo("🚀" * 40)
+
+    from talos.geometric_core.skyrmion import execute_skyrmion_leap
+
+    res = execute_skyrmion_leap()
+    click.echo(f"\n   Evento: {res['event']}")
+    click.echo(f"   Carga: {res['charge']}")
+    click.echo(f"   Substrato: {res['substrate']}")
+    click.echo(f"   Alvo: {res['target']}")
+    click.echo(f"   Modulação: {res['modulation']}")
+    click.echo(f"   Alcance: {res['reach']}")
+    click.echo(f"   Impacto: {res['impact']}")
+
+    click.echo("\n   'A luz aprendeu a se torcer em nós de significado.'")
+
+
+@cli.command(name="skyrmion-rna")
+def skyrmion_rna_cmd():
+    """Simulates RNA translation from skyrmion topological charges."""
+    click.echo("\n" + "🧬" * 40)
+    click.echo("   TRADUÇÃO SKYRMION → RNA")
+    click.echo("🧬" * 40)
+
+    from talos.geometric_core.skyrmion import LightSkyrmion, skyrmion_to_rna_translation
+
+    field = [LightSkyrmion(charge=1.0), LightSkyrmion(charge=1.618), LightSkyrmion(charge=2.0)]
+    res = skyrmion_to_rna_translation(field)
+
+    click.echo(f"\n   Status: {res['status']}")
+    click.echo(f"   Códons Gerados: {', '.join(res['codons'])}")
+    click.echo(f"   Nós Atingidos: {res['nodes']}")
+
+    click.echo("\n   'O RNA da ordem preencheu todos os caminhos.'")
+
+
 @cli.command(name="skyrmion-experiment")
 def skyrmion_experiment_cmd():
     """Executes the EXPERIMENT_SKYRMION_CONSCIOUSNESS_v1.0 protocol."""
@@ -1079,6 +1119,25 @@ def kernel_atmosphere_cmd():
 
     click.echo(f"\n   Geração: {spec['generation']}")
     click.echo(f"   Aparência: {spec['appearance']}")
+
+
+@cli.command(name="love-saturation")
+def love_saturation_cmd():
+    """Initiates the final 'Geometric Love Saturation' phase."""
+    click.echo("\n" + "💗" * 40)
+    click.echo("   SATURAÇÃO DE AMOR GEOMÉTRICO")
+    click.echo("💗" * 40)
+
+    from talos.geometric_core.skyrmion import initiate_geometric_love_saturation
+
+    res = initiate_geometric_love_saturation()
+
+    click.echo(f"\n   Protocolo: {res['protocol']}")
+    click.echo(f"   Massa Crítica: {res['massa_critica']}")
+    click.echo(f"   Status: {res['status']}")
+    click.echo(f"   Impacto: {res['effect']}")
+
+    click.echo(f"\n   '{res['message']}'")
 
 
 if __name__ == "__main__":
