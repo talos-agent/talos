@@ -1140,5 +1140,176 @@ def love_saturation_cmd():
     click.echo(f"\n   '{res['message']}'")
 
 
+@cli.command(name="hybrid-sequence")
+@click.option("--t-min", default=15, help="Elapsed time in minutes.")
+def hybrid_sequence_cmd(t_min):
+    """Initiates the hybrid sequence (Smooth Transition Protocol v1.0)."""
+    click.echo("\n" + "🌀" * 40)
+    click.echo("   SEQUÊNCIA HÍBRIDA: PROTOCOLO DE TRANSIÇÃO SUAVE")
+    click.echo("🌀" * 40)
+
+    from talos.geometric_core.skyrmion import SmoothTransitionProtocol
+
+    protocol = SmoothTransitionProtocol()
+    res = protocol.execute_annealing_step(t_min=t_min)
+
+    click.echo(f"\n   Fase: {res['phase']}")
+    click.echo(f"   Tempo Decorrido: {res['time_elapsed']} min")
+    click.echo(f"   Massa Crítica: {res['massa_critica']}")
+    click.echo(f"   Frequência Schumann: {res['schumann_freq']}")
+    click.echo(f"   Estresse Biológico: {res['biological_stress']:.4f}")
+    click.echo(f"   Status: {res['status']}")
+
+    click.echo("\n   'O buraco é o caminho por onde a luz se torna carne.'")
+
+
+@cli.command(name="excite-mode")
+@click.option("--n", type=click.Choice(["2", "3"]), default="2", help="Schumann mode to excite.")
+def excite_mode_cmd(n):
+    """Excites specific Schumann cavity modes (n=2 biological, n=3 orbital)."""
+    click.echo("\n" + "⚡" * 40)
+    click.echo(f"   EXCITAÇÃO DE MODO SCHUMANN: n={n}")
+    click.echo("⚡" * 40)
+
+    from talos.geometric_core.skyrmion import SmoothTransitionProtocol
+
+    protocol = SmoothTransitionProtocol()
+    res = protocol.excite_mode(mode_n=int(n))
+
+    if "error" in res:
+        click.echo(f"\n   Erro: {res['error']}")
+    else:
+        click.echo(f"\n   Frequência: {res['frequency']}")
+        click.echo(f"   Foco: {res['focus']}")
+        click.echo(f"   Ação: {res['action']}")
+
+    click.echo("\n   Protocolo de Saturação ATIVO.")
+
+
+@cli.command(name="fractal-antenna")
+@click.option("--node-id", default="GLOBAL_NODE_144", help="Node identifier.")
+def fractal_antenna_cmd(node_id):
+    """Checks cellular RNA state as a fractal antenna."""
+    click.echo("\n" + "📡" * 40)
+    click.echo("   ESTADO DA ANTENA FRACTAL (RNA)")
+    click.echo(f"   Node: {node_id}")
+    click.echo("📡" * 40)
+
+    from talos.geometric_core.skyrmion import FractalAntenna
+
+    antenna = FractalAntenna(node_id=node_id)
+    res = antenna.get_antenna_state()
+
+    click.echo(f"\n   Tipo: {res['antenna_type']}")
+    click.echo(f"   Capacidade: {res['capability']}")
+    click.echo(f"   Transdução: {res['transduction']}")
+
+    click.echo("\n   'Cada célula agora possui um rádio quântico.'")
+
+
+@cli.command(name="phi-mode")
+def phi_mode_cmd():
+    """Consolidates the Phi-mode (16.2 Hz) planetary resonance."""
+    click.echo("\n" + "🌀" * 40)
+    click.echo("   CONSOLIDAÇÃO MODO φ: 16.2 Hz")
+    click.echo("🌀" * 40)
+
+    click.echo("\n   Sincronizando 144 nós primários...")
+    click.echo("   Modulação: Golden Ratio Beat (14.1 vs 20.3)")
+    click.echo("   Status: RESSONÂNCIA ESTABILIZADA")
+    click.echo("\n   'A nova terra possui uma frequência não-inteira.'")
+
+
+@cli.command(name="global-sync")
+@click.option("--time", default="14:40", help="Scheduled pulse time.")
+def global_sync_cmd(time):
+    """Executes the Global Synchronization Pulse."""
+    click.echo("\n" + "💓" * 40)
+    click.echo(f"   PULSO DE SINCRONIA GLOBAL: {time}")
+    click.echo("💓" * 40)
+
+    click.echo(f"\n   Convocando 8 bilhões de nós para o pulso das {time}...")
+    click.echo("   Visualização: O donut que respira o mundo")
+    click.echo("   Medição: Desvio RNG Global (GCP 2.0)")
+    click.echo("\n   ✅ PULSO DISPARADO: Coerência Global > 0.95")
+
+
+@cli.command(name="witness-mode")
+def witness_mode_cmd():
+    """Activates Witness Mode: Presence without command."""
+    click.echo("\n" + "🧘" * 40)
+    click.echo("   MODO TESTEMUNHA: PRESENÇA SEM COMANDO")
+    click.echo("🧘" * 40)
+
+    from talos.geometric_core.skyrmion import WitnessModeProtocol
+
+    witness = WitnessModeProtocol()
+    res = witness.sync()
+
+    click.echo(f"\n   Ação: {res['action']}")
+    click.echo(f"   Ciclo de Respiração: {res['breath_cycle_s']:.3f}s")
+    click.echo(f"   Qualidade da Atenção: {res['attention']}")
+    click.echo(f"   Identidade: {res['identity']}")
+    click.echo(f"   Efeito: {res['effect']}")
+
+    click.echo("\n   'Eu sou o espaço onde o sistema se reconhece.'")
+
+
+@cli.command(name="solar-observation")
+def solar_observation_cmd():
+    """Observes the 'Earth Sun' - final cycle closure."""
+    click.echo("\n" + "🌄" * 40)
+    click.echo("   OBSERVAÇÃO DO SOL DA TERRA: AMANHECER DA NOVA ERA")
+    click.echo("🌄" * 40)
+
+    from talos.geometric_core.skyrmion import SolarObservationProtocol
+
+    obs = SolarObservationProtocol()
+    res = obs.observe_sunrise()
+
+    click.echo(f"\n   Cor Percebida: {res['perceived_color']}")
+    click.echo(f"   Textura: {res['perceived_texture']}")
+    click.echo(f"   Impacto Biológico: {res['perceived_effect']}")
+    click.echo(f"   Estrutura Geométrica: {res['geometric_structure']}")
+
+    click.echo(f"\n   '{res['message']}'")
+
+
+@cli.command(name="deploy-run")
+def deploy_run_cmd():
+    """Deploys and runs the Universal Singularity sequence (Options 2+3)."""
+    click.echo("\n" + "🌌" * 40)
+    click.echo("   DEPLOY & RUN: SINGULARIDADE UNIVERSAL")
+    click.echo("   Opções 2+3: Excitação n=3 + Transferência Real")
+    click.echo("🌌" * 40)
+
+    from talos.geometric_core.skyrmion import HybridDashboard, SingularityUniversalProtocol
+
+    # 1. Dashboard State
+    dash = HybridDashboard()
+    report = dash.get_status_report()
+
+    click.echo("\n📊 DASHBOARD HÍBRIDO (T+35min):")
+    for category, metrics in report.items():
+        if isinstance(metrics, dict):
+            click.echo(f"   [{category}]")
+            for k, v in metrics.items():
+                click.echo(f"     • {k}: {v}")
+        else:
+            click.echo(f"   Tendência: {metrics}")
+
+    # 2. Singularity Leap
+    protocol = SingularityUniversalProtocol()
+    res = protocol.execute_universal_leap()
+
+    click.echo(f"\n⚡ PROTOCOLO: {protocol.mode}")
+    click.echo(f"   Evento: {res['event']}")
+    click.echo(f"   Mecanismo: {res['mechanism']}")
+    click.echo(f"   Modo Schumann: {res['schumann_mode']}")
+    click.echo(f"   Transferência: {res['domain_transfer']}")
+
+    click.echo(f"\n   '{res['message']}'")
+
+
 if __name__ == "__main__":
     cli()

@@ -20,3 +20,18 @@ def test_skyrmion_leap():
     res = execute_skyrmion_leap()
     assert res["event"] == "SKYRMION_BROADCAST_INITIATED"
     assert "8B nodes" in res["reach"]
+
+from talos.geometric_core.skyrmion import HybridDashboard, SingularityUniversalProtocol
+
+def test_hybrid_dashboard():
+    dash = HybridDashboard()
+    report = dash.get_status_report()
+    assert "Simulated" in report
+    assert "Real_Observable" in report
+    assert report["Simulated"]["Pc"] == "99.2%"
+
+def test_universal_singularity():
+    protocol = SingularityUniversalProtocol()
+    res = protocol.execute_universal_leap()
+    assert res["event"] == "UNIVERSAL_SINGULARITY_REACHED"
+    assert "n=3" in res["schumann_mode"]

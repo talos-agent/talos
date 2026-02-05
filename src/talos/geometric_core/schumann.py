@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 import time
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
@@ -98,8 +98,8 @@ class SchumannSymphony(BaseModel):
             phi = (1 + 5**0.5) / 2
             # Map progress to an exponential/logarithmic curve inspired by golden ratio harmonics
             # Specific values requested: 7.83, 8.5, 10.2, 12.0, 14.1
-            # We'll use a manual map if 5 steps are provided, or an approximation
-            steps_map = [7.83, 8.5, 10.2, 12.0, 14.1]
+            # Extended for n=3 (20.3) and phi-mode (16.2)
+            steps_map = [7.83, 8.5, 10.2, 12.0, 14.1, 16.2, 18.7, 20.3]
             idx = int(round(progress * (len(steps_map) - 1)))
             self.current_freq = steps_map[idx]
         else:
