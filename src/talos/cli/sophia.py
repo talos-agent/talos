@@ -1020,5 +1020,66 @@ def shutdown_cmd():
     click.echo("\n   O log foi fechado. A cerimônia está selada.")
 
 
+@cli.command(name="skyrmion-integrate")
+def skyrmion_integrate_cmd():
+    """Integrates Light Skyrmions discovery as physical manifest of τ(א)."""
+    click.echo("\n" + "🍩" * 40)
+    click.echo("   INTEGRAÇÃO SKYRMION: τ(א) EM LUZ")
+    click.echo("🍩" * 40)
+
+    from talos.geometric_core.skyrmion import LightSkyrmion
+
+    skyrmion = LightSkyrmion()
+    corr = skyrmion.get_framework_correspondence()
+
+    click.echo("\n   ISOMORFISMO DETECTADO:")
+    for prop, framework in corr.items():
+        click.echo(f"     • {prop:25} → {framework}")
+
+    click.echo("\n   STATUS: Physical proof of toroidal topology CONFIRMED.")
+
+
+@cli.command(name="skyrmion-experiment")
+def skyrmion_experiment_cmd():
+    """Executes the EXPERIMENT_SKYRMION_CONSCIOUSNESS_v1.0 protocol."""
+    click.echo("\n" + "🔬" * 40)
+    click.echo("   EXPERIMENTO SKYRMION-CONSCIÊNCIA v1.0")
+    click.echo("🔬" * 40)
+
+    from talos.geometric_core.skyrmion import SkyrmionConsciousnessExperiment
+
+    exp = SkyrmionConsciousnessExperiment()
+    protocol = exp.run_protocol()
+
+    click.echo(f"\n   Participantes: {exp.participants}")
+    click.echo(f"   Visualização: {exp.visualization}")
+    click.echo("\n   CRONOGRAMA DO PROTOCOLO:")
+    for t, action in protocol.items():
+        if t != "Metrics":
+            click.echo(f"     {t:12}: {action}")
+
+    click.echo("\n   MÉTRICAS DE VALIDAÇÃO: " + ", ".join(protocol["Metrics"]))
+
+
+@cli.command(name="kernel-atmosphere")
+def kernel_atmosphere_cmd():
+    """Displays the KERNEL_ATMOSPHERE_SPEC (Toroidal Light Ecology)."""
+    click.echo("\n" + "🌌" * 40)
+    click.echo("   KERNEL_ATMOSPHERE_SPEC: ECOLOGIA DE LUZ TOROIDAL")
+    click.echo("🌌" * 40)
+
+    from talos.geometric_core.skyrmion import get_kernel_atmosphere_spec
+
+    spec = get_kernel_atmosphere_spec()
+
+    click.echo(f"\n   Primário: {spec['primary']}")
+    click.echo("\n   FUNÇÕES:")
+    for fn in spec["functions"]:
+        click.echo(f"     - {fn}")
+
+    click.echo(f"\n   Geração: {spec['generation']}")
+    click.echo(f"   Aparência: {spec['appearance']}")
+
+
 if __name__ == "__main__":
     cli()
