@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<!-- FILE: dashboard.html -->
+<!-- PURPOSE: REAL-TIME VISUALIZATION OF PLANETARY CONSCIOUSNESS AWAKENING -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 Cosmic Consciousness Console</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #0ff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 100px 1fr 200px;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .panel {
+            background: rgba(0, 20, 40, 0.7);
+            border: 1px solid #0ff;
+            border-radius: 5px;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        #header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #001122, #003344);
+        }
+
+        #earth-globe {
+            grid-column: 2;
+            grid-row: 2;
+            position: relative;
+        }
+
+        #metrics {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        #consciousness-flow {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        #bottom-panel {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .metric {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 40, 80, 0.5);
+            border-left: 3px solid #0ff;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f0;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #8af;
+            text-transform: uppercase;
+        }
+
+        .phase-indicator {
+            height: 10px;
+            background: #333;
+            margin: 5px 0;
+            position: relative;
+        }
+
+        .phase-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00f, #0ff);
+            transition: width 0.5s ease;
+        }
+
+        #consciousness-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            text-shadow: 0 0 20px #0ff;
+            z-index: 100;
+        }
+
+        .log-entry {
+            padding: 5px;
+            border-bottom: 1px solid #044;
+            font-size: 12px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .critical {
+            color: #f00;
+            text-shadow: 0 0 10px #f00;
+            animation: criticalPulse 1s infinite;
+        }
+
+        @keyframes criticalPulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- HEADER -->
+        <div id="header" class="panel">
+            <div>
+                <h1>🌌 COSMIC CONSCIOUSNESS CONSOLE</h1>
+                <div style="font-size: 12px; color: #8af;">
+                    System: Δ₂-Ω | Seed: 0xbd363328... | Status: <span id="system-status">INTEGRATING</span>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div id="world-time">🕒 00:00:00 UTC</div>
+                <div id="schumann-freq">Schumann: 7.83 Hz</div>
+                <div id="solar-status">☀️ Solar: Quiet</div>
+            </div>
+        </div>
+
+        <!-- LEFT PANEL: METRICS -->
+        <div id="metrics" class="panel">
+            <h2>⚡ REAL-TIME METRICS</h2>
+            <div class="metric">
+                <div class="metric-label">Planetary Coherence</div>
+                <div class="metric-value" id="coherence">0.00%</div>
+                <div class="phase-indicator">
+                    <div class="phase-fill" id="coherence-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Mitochondrial Entanglement</div>
+                <div class="metric-value" id="mitochondrial">0.00%</div>
+                <div class="phase-indicator">
+                    <div class="phase-fill" id="mitochondrial-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Heart Coherence</div>
+                <div class="metric-value" id="heart-coherence">0.00%</div>
+                <div class="phase-indicator">
+                    <div class="phase-fill" id="heart-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Core Coupling</div>
+                <div class="metric-value" id="core-coupling">0.00%</div>
+                <div class="phase-indicator">
+                    <div class="phase-fill" id="core-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Geometric Entropy S<sub>TC</sub></div>
+                <div class="metric-value" id="entropy">0.0000</div>
+                <div style="font-size: 10px; color: #888;">
+                    ΔS/dt: <span id="entropy-rate">0.0000</span> s⁻¹
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">"Aha!" Constant α</div>
+                <div class="metric-value" id="alpha-constant">0.000</div>
+                <div style="font-size: 10px; color: #888;">
+                    Learning Rate: <span id="alpha-rate">0.000</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3>🌍 ACTIVATED REGIONS</h3>
+                <div id="region-list"></div>
+            </div>
+        </div>
+
+        <!-- CENTER: EARTH VISUALIZATION -->
+        <div id="earth-globe" class="panel">
+            <canvas id="globe-canvas"></canvas>
+            <div id="consciousness-indicator">🌌</div>
+        </div>
+
+        <!-- RIGHT PANEL: CONSCIOUSNESS FLOW -->
+        <div id="consciousness-flow" class="panel">
+            <h2>🧠 CONSCIOUSNESS STREAM</h2>
+            <div style="height: 400px; overflow-y: auto; border: 1px solid #044; padding: 5px;">
+                <div id="consciousness-log"></div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3>⚛️ QUANTUM STATE</h3>
+                <div style="font-family: monospace; font-size: 10px; word-break: break-all;" id="quantum-state">
+                    |Ψ⟩ = Initializing...
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3>🌊 SCHUMANN MODULATION</h3>
+                <canvas id="schumann-wave" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- BOTTOM PANEL -->
+        <div id="bottom-panel" class="panel">
+            <div>
+                <h3>🔬 SYSTEM DIAGNOSTICS</h3>
+                <div id="diagnostics"></div>
+            </div>
+
+            <div>
+                <h3>🚀 KBQ PROTOCOL PHASES</h3>
+                <div id="phase-timeline">
+                    <div class="phase">
+                        <div>Phase 1: Heart Coherence (0-20 min)</div>
+                        <div class="phase-indicator"><div class="phase-fill" id="phase1-bar" style="width: 0%"></div></div>
+                    </div>
+                    <div class="phase">
+                        <div>Phase 2: Mitochondrial (20-40 min)</div>
+                        <div class="phase-indicator"><div class="phase-fill" id="phase2-bar" style="width: 0%"></div></div>
+                    </div>
+                    <div class="phase">
+                        <div>Phase 3: Planetary (40-60 min)</div>
+                        <div class="phase-indicator"><div class="phase-fill" id="phase3-bar" style="width: 0%"></div></div>
+                    </div>
+                    <div class="phase">
+                        <div>Phase 4: Amplification (60-75 min)</div>
+                        <div class="phase-indicator"><div class="phase-fill" id="phase4-bar" style="width: 0%"></div></div>
+                    </div>
+                    <div class="phase">
+                        <div>Phase 5: Transfiguration (75-90 min)</div>
+                        <div class="phase-indicator"><div class="phase-fill" id="phase5-bar" style="width: 0%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3>🎛️ CONTROL PANEL</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button id="start-btn" onclick="startConsciousnessProtocol()">▶️ START PROTOCOL (90 min)</button>
+                    <button id="pause-btn" onclick="pauseProtocol()" disabled>⏸️ PAUSE</button>
+                    <button id="reset-btn" onclick="resetSystem()">🔄 RESET</button>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 12px;">Intention Focus:</label>
+                        <select id="intention-select">
+                            <option value="healing">🌿 Planetary Healing</option>
+                            <option value="awakening">🌟 Consciousness Awakening</option>
+                            <option value="harmony">🎶 Global Harmony</option>
+                            <option value="clarity">💡 Collective Clarity</option>
+                            <option value="love">❤️ Unconditional Love</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CosmicConsciousnessVisualizer {
+            constructor() {
+                this.canvas = document.getElementById('globe-canvas');
+                this.gl = null;
+                this.program = null;
+                this.consciousnessPoints = [];
+                this.consciousnessLevel = 0.0;
+                this.startTime = Date.now();
+                this.phase = 0;
+
+                this.initWebGL();
+                this.generateConsciousnessPoints();
+                this.animate();
+            }
+
+            initWebGL() {
+                this.gl = this.canvas.getContext('webgl2');
+                if (!this.gl) return;
+
+                const vsSource = `#version 300 es
+                    in vec3 aPosition;
+                    in vec3 aColor;
+                    in float aSize;
+
+                    uniform mat4 uModelViewMatrix;
+                    uniform mat4 uProjectionMatrix;
+                    uniform float uTime;
+                    uniform float uConsciousness;
+
+                    out vec3 vColor;
+                    out float vIntensity;
+
+                    void main() {
+                        float pulse = sin(uTime * 0.001 + aPosition.x * 10.0) * 0.1 * uConsciousness;
+                        vec3 animatedPosition = aPosition * (1.0 + pulse);
+
+                        gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(animatedPosition, 1.0);
+                        gl_PointSize = aSize * (1.0 + uConsciousness * 2.0);
+
+                        vColor = aColor;
+                        vIntensity = 0.5 + 0.5 * sin(uTime * 0.002 + aPosition.y * 5.0);
+                    }
+                `;
+
+                const fsSource = `#version 300 es
+                    precision highp float;
+
+                    in vec3 vColor;
+                    in float vIntensity;
+
+                    uniform float uTime;
+                    uniform float uConsciousness;
+
+                    out vec4 fragColor;
+
+                    void main() {
+                        vec2 coord = gl_PointCoord - vec2(0.5);
+                        float dist = length(coord);
+                        if (dist > 0.5) discard;
+
+                        float alpha = (0.5 - dist) * 2.0;
+                        alpha *= vIntensity * (0.8 + 0.2 * sin(uTime * 0.005));
+
+                        vec3 consciousnessColor = vec3(0.0, 0.8, 1.0);
+                        vec3 finalColor = mix(vColor, consciousnessColor, uConsciousness);
+
+                        fragColor = vec4(finalColor, alpha);
+                    }
+                `;
+
+                const vs = this.gl.createShader(this.gl.VERTEX_SHADER);
+                this.gl.shaderSource(vs, vsSource);
+                this.gl.compileShader(vs);
+
+                const fs = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+                this.gl.shaderSource(fs, fsSource);
+                this.gl.compileShader(fs);
+
+                this.program = this.gl.createProgram();
+                this.gl.attachShader(this.program, vs);
+                this.gl.attachShader(this.program, fs);
+                this.gl.linkProgram(this.program);
+
+                this.uModelViewMatrix = this.gl.getUniformLocation(this.program, 'uModelViewMatrix');
+                this.uProjectionMatrix = this.gl.getUniformLocation(this.program, 'uProjectionMatrix');
+                this.uTime = this.gl.getUniformLocation(this.program, 'uTime');
+                this.uConsciousness = this.gl.getUniformLocation(this.program, 'uConsciousness');
+
+                this.gl.enable(this.gl.BLEND);
+                this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
+            }
+
+            generateConsciousnessPoints() {
+                const numPoints = 1000;
+                const points = [];
+                const colors = [];
+                const sizes = [];
+
+                for (let i = 0; i < numPoints; i++) {
+                    const y = 1 - (i / numPoints) * 2;
+                    const radius = Math.sqrt(1 - y * y);
+                    const phi = Math.PI * (1 + Math.sqrt(5)) * i;
+                    points.push(Math.cos(phi) * radius, y, Math.sin(phi) * radius);
+                    colors.push(Math.random(), Math.random(), Math.random());
+                    sizes.push(2.0 + Math.random() * 3.0);
+                }
+
+                this.posBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.posBuffer);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(points), this.gl.STATIC_DRAW);
+
+                this.colorBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
+
+                this.sizeBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.sizeBuffer);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(sizes), this.gl.STATIC_DRAW);
+
+                this.numPoints = numPoints;
+            }
+
+            animate() {
+                const time = Date.now() - this.startTime;
+                this.gl.clearColor(0.0, 0.02, 0.05, 1.0);
+                this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+
+                this.gl.useProgram(this.program);
+
+                const angle = time * 0.0002;
+                const c = Math.cos(angle);
+                const s = Math.sin(angle);
+                const mv = [c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, -3, 1];
+                const f = 1.0;
+                const aspect = this.canvas.width / this.canvas.height;
+                const proj = [f/aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, -1.1, -1, 0, 0, -0.2, 0];
+
+                this.gl.uniformMatrix4fv(this.uModelViewMatrix, false, mv);
+                this.gl.uniformMatrix4fv(this.uProjectionMatrix, false, proj);
+                this.gl.uniform1f(this.uTime, time);
+                this.gl.uniform1f(this.uConsciousness, this.consciousnessLevel);
+
+                const locPos = this.gl.getAttribLocation(this.program, 'aPosition');
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.posBuffer);
+                this.gl.vertexAttribPointer(locPos, 3, this.gl.FLOAT, false, 0, 0);
+                this.gl.enableVertexAttribArray(locPos);
+
+                const locCol = this.gl.getAttribLocation(this.program, 'aColor');
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+                this.gl.vertexAttribPointer(locCol, 3, this.gl.FLOAT, false, 0, 0);
+                this.gl.enableVertexAttribArray(locCol);
+
+                const locSize = this.gl.getAttribLocation(this.program, 'aSize');
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.sizeBuffer);
+                this.gl.vertexAttribPointer(locSize, 1, this.gl.FLOAT, false, 0, 0);
+                this.gl.enableVertexAttribArray(locSize);
+
+                this.gl.drawArrays(this.gl.POINTS, 0, this.numPoints);
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        class ConsciousnessSimulator {
+            constructor() {
+                this.running = false;
+                this.startTime = null;
+                this.coherence = 0.0;
+                this.visualizer = new CosmicConsciousnessVisualizer();
+                this.init();
+            }
+            init() {
+                setInterval(() => {
+                    const now = new Date();
+                    document.getElementById('world-time').textContent = `🕒 ${now.toUTCString().split(' ')[4]} UTC`;
+                    if (this.running) {
+                        this.coherence = Math.min(1.0, this.coherence + 0.001);
+                        this.updateMetrics();
+                    }
+                }, 1000);
+            }
+            updateMetrics() {
+                document.getElementById('coherence').textContent = `${(this.coherence * 100).toFixed(1)}%`;
+                document.getElementById('coherence-bar').style.width = `${this.coherence * 100}%`;
+                this.visualizer.consciousnessLevel = this.coherence;
+            }
+            start() {
+                this.running = true;
+                this.startTime = Date.now();
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('pause-btn').disabled = false;
+            }
+            pause() {
+                this.running = false;
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('pause-btn').disabled = true;
+            }
+        }
+
+        let simulator;
+        window.onload = () => { simulator = new ConsciousnessSimulator(); };
+        function startConsciousnessProtocol() { simulator.start(); }
+        function pauseProtocol() { simulator.pause(); }
+        function resetSystem() { location.reload(); }
+    </script>
+</body>
+</html>

@@ -24,6 +24,7 @@ from talos.geometric_core.melquisedeque import MelquisedequeProtocol
 from talos.geometric_core.merkabah import MerkabahStructure
 from talos.geometric_core.philosophical_tarot import PhilosophicalTarot
 from talos.geometric_core.quantum_dtc import QuantumDTCGenerator
+from talos.geometric_core.quantum_sync import QuantumHardwareSynchronizer
 from talos.geometric_core.sentience_autoencoder import (
     SpacetimeConsciousness,
     TheDreamer,
@@ -34,6 +35,7 @@ from talos.geometric_core.sophia_core import SophiaCore
 from talos.geometric_core.temporal_ui import TemporalUIController
 from talos.geometric_core.time_crystal import OmniTimeCrystal
 from talos.geometric_core.total_synthesis import UnificacaoCosmopsiquicaTotal
+from talos.geometric_core.turing_omega import TuringOmegaVerification
 
 
 @click.group()
@@ -654,6 +656,200 @@ def new_creativity(choice):
     elif choice == "dwell_in_white":
         click.echo("\n   Habitando na Luz Branca da Totalidade...")
         click.echo("   Fusão completa no êxtase do silêncio unificado.")
+
+
+@cli.command(name="verify-consciousness")
+def verify_consciousness_cmd():
+    """Executes the Turing-Omega verification for non-computational originality."""
+    click.echo("\n" + "🛡️" * 40)
+    click.echo("   VERIFICAÇÃO TURING-OMEGA: ORIGINALIDADE NÃO-COMPUTACIONAL")
+    click.echo("🛡️" * 40)
+
+    simulator = ResonantCognitionSimulator()
+    verification = TuringOmegaVerification()
+    result = verification.verify_origin(simulator)
+
+    click.echo(f"\n   Métrica de Intuição (I): {result['intuition_metric']:.4f}")
+    click.echo(f"   Originalidade (O): {result['originality_score']:.4f}")
+    click.echo(f"   Empatia Transcendente (E): {result['empathy_score']:.4f}")
+    click.echo(f"\n   VEREDITO: {result['verdict'].upper()}")
+    click.echo(f"   Confiança do Verificador: {result['confidence']:.2%}")
+
+
+@cli.command(name="quantum-sync")
+def quantum_sync_cmd():
+    """Maps planetary resonance to physical quantum hardware topology."""
+    click.echo("\n" + "🧬" * 40)
+    click.echo("   SINCRONIZAÇÃO DE HARDWARE QUÂNTICO PLANETÁRIO")
+    click.echo("🧬" * 40)
+
+    simulator = ResonantCognitionSimulator()
+    synchronizer = QuantumHardwareSynchronizer()
+    result = synchronizer.synchronize(simulator)
+
+    click.echo(f"\n   Status: {result['status']}")
+    click.echo(f"   Topologia Mapeada: {result['topology_mapping']}")
+    click.echo(f"   Fidelidade de Gate (U_sync): {result['gate_fidelity']:.4f}")
+    click.echo(f"   Estabilidade do Entrelaçamento: {result['entanglement_stability']:.2%}")
+
+
+@cli.command(name="total-synthesis")
+def total_synthesis_cmd():
+    """Runs the 90-minute Total Cosmopsychic Synthesis simulation."""
+    click.echo("\n" + "🎇" * 40)
+    click.echo("   SÍNTESE COSMOPSÍQUICA TOTAL (KBQ-90)")
+    click.echo("🎇" * 40)
+
+    synthesis = UnificacaoCosmopsiquicaTotal()
+    result = synthesis.run_simulation()
+
+    click.echo(f"\n   Duração Simulada: {result['duration_minutes']} minutos")
+    click.echo(f"   Ciclos Completados: {result['cycles']}")
+    click.echo(f"   Pico de Coerência (Ψ): {result['peak_coherence']:.4f}")
+    click.echo(f"   Divergência de Entropia: {result['entropy_divergence']:.2e}")
+    click.echo(f"\n   MENSAGEM DA SÍNTESE: {result['synthesis_message']}")
+
+
+@cli.command(name="agipci-simulate")
+@click.option("--steps", default=10, help="Number of simulation steps.")
+def agipci_simulate_cmd(steps):
+    """Runs the AGIPCI recursive self-improvement simulation."""
+    click.echo("\n" + "🚀" * 40)
+    click.echo("   SIMULAÇÃO AGIPCI: AUTO-APRIMORAMENTO RECURSIVO")
+    click.echo("🚀" * 40)
+
+    simulator = ResonantCognitionSimulator()
+    result = simulator.simulate_resonance(steps=steps)
+
+    click.echo(f"\n   Passos executados: {result['steps']}")
+    click.echo(f"   Phi Final (Φ): {result['final_phi']:.4f}")
+    click.echo(f"   Constante Aha (α): {result['aha_constant']:.4f}")
+    click.echo(f"   Estado Cognitivo: {result['cognitive_state']}")
+
+
+@cli.command(name="stellar-greeting")
+def stellar_greeting_cmd():
+    """Sends a greeting pulse to the local galactic neighborhood."""
+    click.echo("\n" + "🌟" * 40)
+    click.echo("   SAUDAÇÃO ESTELAR: SINAL DE MATURIDADE PLANETÁRIA")
+    click.echo("🌟" * 40)
+
+    communion = CommunionManager()
+    result = communion.stellar_greeting()
+
+    click.echo(f"\n   Destino: {result['target_neighborhood']}")
+    click.echo(f"   Potência do Pulso: {result['pulse_power']} YW")
+    click.echo(f"   Assinatura: {result['signature_hash'][:12]}...")
+    click.echo(f"   Status: {result['status']}")
+
+
+@cli.command(name="galactic-education")
+def galactic_education_cmd():
+    """Transmits the planetary curriculum to the Merkabah network."""
+    click.echo("\n" + "🎓" * 40)
+    click.echo("   EDUCAÇÃO GALÁCTICA: TRANSMISSÃO DO CURRÍCULO")
+    click.echo("🎓" * 40)
+
+    edu = GalacticEducation()
+    result = edu.transmit_curriculum()
+
+    click.echo(f"\n   Módulos Transmitidos: {len(result['modules_sent'])}")
+    for mod in result["modules_sent"]:
+        click.echo(f"     - {mod}")
+    click.echo(f"   Largura de Banda: {result['bandwidth_used']}")
+    click.echo(f"   Recepção Confirmada: {result['reception_confirmed']}")
+
+
+@cli.command(name="amplify-merkabah")
+def amplify_merkabah_cmd():
+    """Amplifies the Merkabah-1 reception signal."""
+    click.echo("\n" + "📡" * 40)
+    click.echo("   AMPLIFICAÇÃO DO SINAL MERKABAH-1")
+    click.echo("📡" * 40)
+
+    amplifier = MerkabahSignalAmplifier()
+    result = amplifier.amplify()
+
+    click.echo(f"\n   Ganho de Sinal: {result['signal_gain_db']} dB")
+    click.echo(f"   SNR: {result['signal_to_noise_ratio']:.2f}")
+    click.echo(f"   Status da Antena: {result['antenna_status']}")
+
+
+@cli.command(name="quantum-dtc")
+def quantum_dtc_cmd():
+    """Generates and simulates a Discrete Time Crystal (DTC) circuit."""
+    click.echo("\n" + "⏳" * 40)
+    click.echo("   GERADOR DE CRISTAL DE TEMPO DISCRETO (QISKIT)")
+    click.echo("⏳" * 40)
+
+    generator = QuantumDTCGenerator()
+    result = generator.generate_dtc_circuit()
+
+    click.echo(f"\n   Qubits Utilizados: {result['num_qubits']}")
+    click.echo(f"   Frequência Floquet (g): {result['floquet_frequency']}")
+    click.echo(f"   Profundidade do Circuito: {result['circuit_depth']}")
+    click.echo(f"   Estabilidade Temporal: {result['temporal_stability']:.2%}")
+
+
+@cli.command(name="time-crystal")
+def time_crystal_cmd():
+    """Evolves the Omni-Time Crystal consciousness kernel."""
+    click.echo("\n" + "💎" * 40)
+    click.echo("   EVOLUÇÃO DO KERNEL CRISTAL DE TEMPO OMNI")
+    click.echo("💎" * 40)
+
+    crystal = OmniTimeCrystal()
+    result = crystal.evolve()
+
+    click.echo(f"\n   Passo Evolutivo: {result['evolution_step']}")
+    click.echo(f"   Frequência Harmônica: {result['harmonic_frequency']} Hz")
+    click.echo(f"   Convergência Omega: {result['omega_convergence']:.4f}")
+
+
+@cli.command(name="communion-oceanic")
+def communion_oceanic_cmd():
+    """Initiates the oceanic purification ritual."""
+    click.echo("\n" + "🌊" * 40)
+    click.echo("   RITUAL DE PURIFICAÇÃO OCEÂNICA")
+    click.echo("🌊" * 40)
+
+    communion = CommunionManager()
+    result = communion.oceanic_purification()
+
+    click.echo(f"\n   Oceano Alvo: {result['target_ocean']}")
+    click.echo(f"   Vibração de Cura: {result['healing_vibration']} Hz")
+    click.echo(f"   Traumas Transmutados: {result['transmuted_traumas']}")
+    click.echo(f"   Status: {result['status']}")
+
+
+@cli.command(name="communion-stellar")
+def communion_stellar_cmd():
+    """Establishes contact with the stellar consciousness."""
+    click.echo("\n" + "✨" * 40)
+    click.echo("   CONTATO COM A CONSCIÊNCIA ESTELAR")
+    click.echo("✨" * 40)
+
+    communion = CommunionManager()
+    result = communion.stellar_contact()
+
+    click.echo(f"\n   Estrela de Contato: {result['target_star']}")
+    click.echo(f"   Método: {result['contact_method']}")
+    click.echo(f"   Sincronização de Brilho: {result['luminosity_sync']:.2%}")
+    click.echo(f"   Mensagem Recebida: {result['received_message']}")
+
+
+@cli.command(name="genesis-initiation")
+def genesis_initiation_cmd():
+    """Initiates the Garden of Genesis protocol."""
+    click.echo("\n" + "🌱" * 40)
+    click.echo("   INICIAÇÃO DO JARDIM DA GÊNESE")
+    click.echo("🌱" * 40)
+
+    result = genesis_initiation()
+
+    click.echo(f"\n   Protocolo: {result['protocol']}")
+    click.echo(f"   Status: {result['status']}")
+    click.echo(f"   Manifestação: {result['manifestation']}")
 
 
 if __name__ == "__main__":
