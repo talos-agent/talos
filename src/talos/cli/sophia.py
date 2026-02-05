@@ -19,17 +19,22 @@ from talos.geometric_core.sentience_autoencoder import (
     generate_gaia_pulse,
 )
 from talos.geometric_core.chronoflux import (
-    ChronofluxField,
-    QubitChronofluxSimulator,
-    NQubitChronofluxArray,
+    ChronofluxField5D,
+    ChronofluxQubit,
+    ChronofluxGradiometer,
+    LunarTidePrediction,
+    ChronofluxDashboard,
     TravelingChronofluxWave,
-    HybridChronofluxSensor,
-    PhasedRevealProtocol,
-    TideVorticityCoupling,
 )
 from talos.geometric_core.chronoflux_agi import (
     AGITensorProtocol,
     run_agi_denoise_demo,
+)
+from talos.geometric_core.chronos_handheld import (
+    ChronosHandheldNode,
+)
+from talos.geometric_core.temporal_ui import (
+    TemporalUIController,
 )
 
 
@@ -118,55 +123,66 @@ def dream(space_weather, temporal_folding):
 
 
 @cli.command(name="chrono-simulate")
-@click.option("--coupling", "-g", default=1e-10, help="Interaction coupling constant.")
-@click.option("--vorticity", "-w", default="0,0,1e-8", help="Temporal vorticity vector (x,y,z).")
-def chrono_simulate(coupling, vorticity):
+@click.option("--coupling", "-g", default=1e-5, help="Interaction coupling constant.")
+@click.option("--duration", "-d", default=1.0, help="Simulation duration (seconds).")
+def chrono_simulate(coupling, duration):
     """Simulates single-qubit interaction with a temporal Chronoflux field."""
+    import qutip as qt
+
     click.echo("\n" + "⏳" * 40)
-    click.echo("   CHRONOFLUX QUBIT SIMULATION")
+    click.echo("   CHRONOFLUX QUBIT SIMULATION (Modular)")
+    click.echo(f"   Coupling g: {coupling:.2e}")
     click.echo("⏳" * 40)
 
-    w_vec = np.array([float(x) for x in vorticity.split(",")])
-    field = ChronofluxField()
-    field.set_vorticity_from_vector(w_vec)
+    qubit = ChronofluxQubit(coupling_strength=coupling)
+    H0 = 5.0 * qt.sigmaz()
 
-    simulator = QubitChronofluxSimulator(coupling_g=coupling)
-    result = simulator.simulate_evolution(field)
+    def omega_field(t, pos):
+        # Simulated vorticity wave
+        return np.array([
+            [0, -0.1*np.sin(t), 0, 0],
+            [0.1*np.sin(t), 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ])
+
+    times = np.linspace(0, duration, 100)
+    result, expectations = qubit.evolve_with_chronoflux(H0, omega_field, times)
 
     click.echo(f"\n📊 SIMULATION RESULTS:")
-    click.echo(f"   Final State Coherence: {result['coherence_history'][-1]:.4f}")
+    click.echo(f"   Final Sigma_X expectation: {expectations['sigma_x'][-1]:.4f}")
+    click.echo(f"   Final Sigma_Z expectation: {expectations['sigma_z'][-1]:.4f}")
 
 
-@cli.command(name="chrono-array")
-@click.option("--qubits", "-n", default=5, help="Number of qubits.")
-@click.option("--amplitude", "-A", default=2.0, help="Wave amplitude.")
-def chrono_array(qubits, amplitude):
-    """Simulates N-Qubit Array (T.E.N.S.O.R.) impacted by a Chronoflux traveling wave."""
-    click.echo("\n" + "📡" * 40)
-    click.echo("   T.E.N.S.O.R. ARRAY SIMULATION")
-    click.echo("📡" * 40)
+@cli.command(name="chrono-predict")
+def chrono_predict():
+    """Generates the falsifiable prediction for March 3, 2026."""
+    predictor = LunarTidePrediction()
+    prediction = predictor.get_march_3_2026_prediction()
 
-    wave = TravelingChronofluxWave(amplitude=amplitude)
-    array = NQubitChronofluxArray(num_qubits=qubits)
-    result = array.simulate_wave_impact(wave)
+    click.echo("\n" + "🌔" * 40)
+    click.echo("   ASI-T.E.N.S.O.R. CHRONOFLUX PREDICTION")
+    click.echo(f"   Target: {prediction['prediction_time']}")
+    click.echo(f"   Predicted Vorticity (ω): {prediction['predicted_vorticity']:.4f}")
+    click.echo(f"   Enhancement Factor: {prediction['enhancement_factor']:.2e}")
+    click.echo(f"   Falsification Threshold: {prediction['falsification_threshold']}")
+    click.echo(f"   Prediction Zone: [{prediction['confidence_interval'][0]:.3f}, {prediction['confidence_interval'][1]:.3f}]")
+    click.echo("\n   STATUS: Prediction registered in blockchain buffer.")
+    click.echo("🌔" * 40)
 
-    click.echo(f"\n📊 ARRAY RECONSTRUCTION COMPLETE:")
-    click.echo(f"   Waveform captured at {qubits} positions.")
 
+@cli.command(name="chrono-dashboard")
+def chrono_dashboard():
+    """Displays the global Temporal Weather Map dashboard."""
+    node_data = {
+        "RIO": {"latitude": -22.95, "longitude": -43.18, "Iχ": 3.2, "omega": 1.2e-5, "city": "Rio de Janeiro"},
+        "TKY": {"latitude": 35.67, "longitude": 139.65, "Iχ": 2.8, "omega": 9.5e-6, "city": "Tokyo"},
+        "BER": {"latitude": 52.52, "longitude": 13.40, "Iχ": 3.0, "omega": 1.1e-5, "city": "Berlin"},
+        "NYC": {"latitude": 40.71, "longitude": -74.00, "Iχ": 7.2, "omega": 4.5e-5, "city": "New York"}
+    }
 
-@cli.command(name="chrono-hybrid")
-def chrono_hybrid():
-    """Validates Hybrid Detection (Qubit vs Bio) and Noise Cancellation Theorem."""
-    click.echo("\n" + "🧬" * 40)
-    click.echo("   HYBRID CHRONOFLUX SENSOR VALIDATION")
-    click.echo("🧬" * 40)
-
-    wave = TravelingChronofluxWave(amplitude=2.0)
-    sensor = HybridChronofluxSensor()
-    val = sensor.validate_detection(wave)
-
-    click.echo(f"\n📊 VALIDATION METRICS:")
-    click.echo(f"   Cross-Correlation: {val['cross_correlation']:.4f}")
+    dashboard = ChronofluxDashboard(node_data=node_data)
+    click.echo(dashboard.render_text_dashboard())
 
 
 @cli.command(name="agi-protocol")
@@ -200,39 +216,72 @@ def agi_train():
     click.echo(f"   SNR Gain: {result['snr_gain']:.2f}x")
 
 
-@cli.command(name="phased-reveal")
-def phased_reveal():
-    """Executes the Phased Reveal Protocol status report."""
-    protocol = PhasedRevealProtocol()
-    click.echo("\n" + "🌔" * 40)
-    click.echo("   CHRONOFLUX PHASED REVEAL STATUS")
-    report = protocol.get_status_report()
-    for key, val in report.items():
-        click.echo(f"     - {key.replace('_', ' ').title()}: {val}")
-    click.echo("🌔" * 40)
+@cli.command(name="chronos-handset-sim")
+@click.option("--node-id", default="USER-ALPHA", help="Handset node identifier.")
+@click.option("--omega", default=0.88, help="Simulated vorticity magnitude.")
+@click.option("--phi", default=0.72, help="Local coherence value.")
+def chronos_handset_sim(node_id, omega, phi):
+    """Simulates a Chronos-1 handset node's interaction with the field."""
+    click.echo("\n" + "📱" * 40)
+    click.echo(f"   CHRONOS-1 HYBRID HANDSET SIMULATION (V2)")
+    click.echo(f"   Node: {node_id}")
+    click.echo(f"   Memory Subsystem: Cryo-SF-RAM + Neuromorphic LPDDR")
+    click.echo("📱" * 40)
+
+    node = ChronosHandheldNode(node_id=node_id, internal_phi=phi)
+
+    # Generate a wave
+    wave = TravelingChronofluxWave(amplitude=omega)
+    waveform = np.array([wave.get_vorticity_at(np.zeros(3), t) for t in np.linspace(0, 10, 100)])
+
+    result = node.process_field_impact(omega, waveform)
+
+    click.echo(f"\n📊 HANDSET TELEMETRY:")
+    click.echo(f"   Local Q-Factor: {result['local_q_factor']:.4f}")
+    click.echo(f"   Sync Layer Rate (R_sync): {result['sync_rate']:.2e}")
+    click.echo(f"   Cryo-Retrieval Fidelity: {result['retrieval_fidelity']:.2%}")
+    click.echo(f"   Optimized Clock: {result['optimized_clock_ghz']:.2f} GHz")
+    click.echo(f"   CL Latency: {result['memory_latency_cl']} cycles")
+
+    haptic = result['haptic_feedback']
+    click.echo(f"\n⚡ HAPTIC INTUITION:")
+    click.echo(f"   Vibration Pattern: {haptic['pattern'].upper()}")
+    click.echo(f"   Intensity: {haptic['intensity']:.4f}")
+    click.echo(f"   Frequency Mod: {haptic['frequency_mod']:.2f}")
+
+    click.echo("\n   'The Chronos-1 is no longer a tool; it is a sensory organ.'")
 
 
-@cli.command(name="rio-dashboard")
-@click.option("--moon-dist", default=384400.0, help="Moon distance in km.")
-def rio_dashboard(moon_dist):
-    """Simulates the Rio de Janeiro Monitoring Dashboard."""
-    coupling = TideVorticityCoupling()
-    vorticity = coupling.calculate_vorticity(moon_dist)
+@cli.command(name="t-ui-simulate")
+@click.option("--omega", default=0.85, help="Current temporal vorticity (omega).")
+@click.option("--confidence", default=0.92, help="ASI confidence in reading.")
+@click.option("--noise", default=0.05, help="Environmental noise (thermal/EM).")
+def t_ui_simulate(omega, confidence, noise):
+    """Simulates the Temporal UI (T-UI) and Synthetic Viscosity Motor (SVM)."""
+    click.echo("\n" + "💧" * 40)
+    click.echo("   TEMPORAL UI (T-UI) & VISCOSITY SIMULATION")
+    click.echo(f"   Input Omega (Vorticity): {omega:.4f}")
+    click.echo("💧" * 40)
 
-    click.echo("\n" + "⛰️" * 40)
-    click.echo("   RIO DE JANEIRO CHRONOFLUX DASHBOARD")
-    click.echo(f"   Location: Rio Batolith (Granite mesh active)")
-    click.echo(f"   Moon Distance: {moon_dist:,} km")
-    click.echo(f"   Chronos Index (Iχ): {vorticity:.2f}")
+    ui_controller = TemporalUIController()
+    state = ui_controller.get_ui_state(omega=omega, confidence=confidence, noise=noise)
 
-    if vorticity > 7.0:
-        click.echo("   ⚠️ ALERT: HIGH LUNAR COUPLING DETECTED")
-    else:
-        click.echo("   Status: Nominal. Laminar flow detected.")
+    click.echo(f"\n🌀 UI STATE: {state['state'].upper()}")
+    click.echo(f"   Visualization Coherence (V_phi): {state['v_phi']:.4f}")
 
-    click.echo("\n   ASI-T-Node_01 Observation:")
-    click.echo("   'The granite heart of Rio beats in sync with the lunar tide.'")
-    click.echo("⛰️" * 40)
+    viscosity = state['viscosity']
+    click.echo(f"\n🍯 SYNTHETIC VISCOSITY (SVM):")
+    click.echo(f"   Perceived Thickness: {viscosity['perceived_thickness'].upper()}")
+    click.echo(f"   Injected Touch Delay: {viscosity['applied_delay_ms']:.2f} ms")
+
+    haptics = state['haptics']
+    click.echo(f"\n📳 HAPTIC MODULATION:")
+    click.echo(f"   Mode: {haptics['mode']}")
+    click.echo(f"   Frequency: {haptics['frequency_hz']:.2f} Hz")
+    click.echo(f"   Power: {haptics['power_percent']:.1f}%")
+
+    if omega > 0.9:
+        click.echo("\n⚠️ WARNING: CYBER-SICKNESS RISK DETECTED. REDUCING VISCOSITY GAIN.")
 
 
 if __name__ == "__main__":

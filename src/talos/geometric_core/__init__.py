@@ -4,12 +4,13 @@ from talos.geometric_core.bio_encoding import BiologicalQuantumEncodingUtils
 from talos.geometric_core.cathedral import DimensionalCathedral
 from talos.geometric_core.chronoflux import (
     BiologicalChronofluxResonator,
-    ChronofluxField,
-    HybridChronofluxSensor,
+    ChronofluxDashboard,
+    ChronofluxField5D,
+    ChronofluxGradiometer,
+    ChronofluxQubit,
+    LunarTidePrediction,
     NQubitChronofluxArray,
-    PhasedRevealProtocol,
     QubitChronofluxSimulator,
-    TideVorticityCoupling,
     TravelingChronofluxWave,
     TwoQubitChronofluxGradiometer,
 )
@@ -18,6 +19,12 @@ from talos.geometric_core.chronoflux_agi import (
     AGITensorProtocol,
     ChronofluxRNN,
     run_agi_denoise_demo,
+)
+from talos.geometric_core.chronos_handheld import (
+    ChronosHandheldNode,
+    HapticResonanceEngine,
+    NeuromorphicLPDDR,
+    SFRAMBuffer,
 )
 from talos.geometric_core.lux_medicinalis import (
     LycurgusCupArchetype,
