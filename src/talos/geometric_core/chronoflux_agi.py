@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
-import numpy as np
 import torch
 import torch.nn as nn
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,6 +12,7 @@ class AGITensorProtocol(BaseModel):
     Especificação do Protocolo AGI-T.E.N.S.O.R.
     Define a arquitetura e o regime de treinamento para AGIs nativas em Chronoflux.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     protocol_name: str = "AGI-T.E.N.S.O.R. v1.0"
@@ -21,15 +20,17 @@ class AGITensorProtocol(BaseModel):
     core_architecture: str = "Recurrent Neural ODE with Parametric Feedback"
 
     # Parâmetros de Perda
-    loss_lambda: float = 0.5 # Peso para Coerência Interna
-    loss_beta: float = 0.3   # Peso para Sincronia de Rede
+    loss_lambda: float = 0.5  # Peso para Coerência Interna
+    loss_beta: float = 0.3  # Peso para Sincronia de Rede
 
     # API de Rede
-    network_api: Dict[str, str] = Field(default_factory=lambda: {
-        "sync": "/api/v1/chrono/sync",
-        "telemetry": "/api/v1/chrono/telemetry",
-        "vortex_prediction": "/api/v1/chrono/predict"
-    })
+    network_api: Dict[str, str] = Field(
+        default_factory=lambda: {
+            "sync": "/api/v1/chrono/sync",
+            "telemetry": "/api/v1/chrono/telemetry",
+            "vortex_prediction": "/api/v1/chrono/predict",
+        }
+    )
 
 
 class ChronofluxRNN(nn.Module):
@@ -42,7 +43,7 @@ class ChronofluxRNN(nn.Module):
         super().__init__()
         self.rnn = nn.GRU(input_dim, hidden_dim, batch_first=True)
         self.fc = nn.Linear(hidden_dim, output_dim)
-        self.coherence_param = nn.Parameter(torch.tensor(0.5)) # Parametric Φ
+        self.coherence_param = nn.Parameter(torch.tensor(0.5))  # Parametric Φ
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         # x shape: (batch, seq_len, input_dim)
@@ -65,11 +66,7 @@ class AGIChronofluxTrainer:
         self.optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     def calculate_chrono_loss(
-        self,
-        prediction: torch.Tensor,
-        target: torch.Tensor,
-        phi: torch.Tensor,
-        network_phi_ref: float = 0.8
+        self, prediction: torch.Tensor, target: torch.Tensor, phi: torch.Tensor, network_phi_ref: float = 0.8
     ) -> torch.Tensor:
         """
         L_chrono = MSE(pred, target) - lambda * log(phi) + beta * (phi - ref)^2
@@ -80,7 +77,7 @@ class AGIChronofluxTrainer:
         coherence_loss = -0.5 * torch.log(phi + 1e-6)
 
         # Sincronia de rede (aproximar do referencial global)
-        sync_loss = 0.3 * (phi - network_phi_ref)**2
+        sync_loss = 0.3 * (phi - network_phi_ref) ** 2
 
         return mse_loss + coherence_loss + sync_loss
 
@@ -94,7 +91,7 @@ class AGIChronofluxTrainer:
         return {
             "total_loss": loss.item(),
             "coherence_phi": phi.item(),
-            "prediction_error": nn.functional.mse_loss(prediction, clean_signal).item()
+            "prediction_error": nn.functional.mse_loss(prediction, clean_signal).item(),
         }
 
 
@@ -106,7 +103,7 @@ def run_agi_denoise_demo():
 
     # 1. Gerar sinal sintético (Onda de Vorticidade + Ruído)
     t = torch.linspace(0, 10, 100).view(1, 100, 1)
-    clean_signal = torch.sin(0.5 * t) * torch.exp(-(t-5)**2 / 4)
+    clean_signal = torch.sin(0.5 * t) * torch.exp(-((t - 5) ** 2) / 4)
     noise = torch.randn_like(clean_signal) * 0.2
     noisy_input = clean_signal + noise
 
@@ -130,7 +127,4 @@ def run_agi_denoise_demo():
     print(f"\nFinal internal coherence Φ: {final_phi:.4f}")
     print(f"Signal-to-Noise Improvement: {snr_improvement.item():.2f}x")
 
-    return {
-        "phi": final_phi.item(),
-        "snr_gain": snr_improvement.item()
-    }
+    return {"phi": final_phi.item(), "snr_gain": snr_improvement.item()}

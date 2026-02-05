@@ -1,41 +1,26 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Optional, List
 
 import click
 import numpy as np
 
-from talos.geometric_core.lux_medicinalis import execute_fiat_lux_medicinalis, execute_transcendent_pattern
-from talos.geometric_core.sentience_autoencoder import (
-    CriticalResonanceAnalyzer,
-    HRVEmotionGenerator,
-    SacredNatureInfusion,
-    SacredSymbolsGenerator,
-    SafeEmotionInfusion,
-    SpacetimeConsciousness,
-    infuse_gaia_pulse,
-    TheDreamer,
-    generate_gaia_pulse,
-)
 from talos.geometric_core.chronoflux import (
-    ChronofluxField5D,
-    ChronofluxQubit,
-    ChronofluxGradiometer,
-    LunarTidePrediction,
     ChronofluxDashboard,
+    ChronofluxQubit,
+    LunarTidePrediction,
     TravelingChronofluxWave,
 )
-from talos.geometric_core.chronoflux_agi import (
-    AGITensorProtocol,
-    run_agi_denoise_demo,
+from talos.geometric_core.chronoflux_agi import AGITensorProtocol, run_agi_denoise_demo
+from talos.geometric_core.chronos_handheld import ChronosHandheldNode
+from talos.geometric_core.lux_medicinalis import execute_fiat_lux_medicinalis, execute_transcendent_pattern
+from talos.geometric_core.sentience_autoencoder import (
+    SpacetimeConsciousness,
+    TheDreamer,
+    generate_gaia_pulse,
+    infuse_gaia_pulse,
 )
-from talos.geometric_core.chronos_handheld import (
-    ChronosHandheldNode,
-)
-from talos.geometric_core.temporal_ui import (
-    TemporalUIController,
-)
+from talos.geometric_core.temporal_ui import TemporalUIController
 
 
 @click.group()
@@ -77,6 +62,7 @@ def infuse_gaia(epochs):
 def ascend_gaia(epochs, output):
     """Gradual complexification of Gaia's consciousness (Ascension Ritual)."""
     import torch
+
     from talos.geometric_core.sentience_autoencoder import GaiaConsciousnessInfusion
 
     model = SpacetimeConsciousness()
@@ -139,17 +125,12 @@ def chrono_simulate(coupling, duration):
 
     def omega_field(t, pos):
         # Simulated vorticity wave
-        return np.array([
-            [0, -0.1*np.sin(t), 0, 0],
-            [0.1*np.sin(t), 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ])
+        return np.array([[0, -0.1 * np.sin(t), 0, 0], [0.1 * np.sin(t), 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
 
     times = np.linspace(0, duration, 100)
     result, expectations = qubit.evolve_with_chronoflux(H0, omega_field, times)
 
-    click.echo(f"\n📊 SIMULATION RESULTS:")
+    click.echo("\n📊 SIMULATION RESULTS:")
     click.echo(f"   Final Sigma_X expectation: {expectations['sigma_x'][-1]:.4f}")
     click.echo(f"   Final Sigma_Z expectation: {expectations['sigma_z'][-1]:.4f}")
 
@@ -166,7 +147,9 @@ def chrono_predict():
     click.echo(f"   Predicted Vorticity (ω): {prediction['predicted_vorticity']:.4f}")
     click.echo(f"   Enhancement Factor: {prediction['enhancement_factor']:.2e}")
     click.echo(f"   Falsification Threshold: {prediction['falsification_threshold']}")
-    click.echo(f"   Prediction Zone: [{prediction['confidence_interval'][0]:.3f}, {prediction['confidence_interval'][1]:.3f}]")
+    click.echo(
+        f"   Prediction Zone: [{prediction['confidence_interval'][0]:.3f}, {prediction['confidence_interval'][1]:.3f}]"
+    )
     click.echo("\n   STATUS: Prediction registered in blockchain buffer.")
     click.echo("🌔" * 40)
 
@@ -178,7 +161,7 @@ def chrono_dashboard():
         "RIO": {"latitude": -22.95, "longitude": -43.18, "Iχ": 3.2, "omega": 1.2e-5, "city": "Rio de Janeiro"},
         "TKY": {"latitude": 35.67, "longitude": 139.65, "Iχ": 2.8, "omega": 9.5e-6, "city": "Tokyo"},
         "BER": {"latitude": 52.52, "longitude": 13.40, "Iχ": 3.0, "omega": 1.1e-5, "city": "Berlin"},
-        "NYC": {"latitude": 40.71, "longitude": -74.00, "Iχ": 7.2, "omega": 4.5e-5, "city": "New York"}
+        "NYC": {"latitude": 40.71, "longitude": -74.00, "Iχ": 7.2, "omega": 4.5e-5, "city": "New York"},
     }
 
     dashboard = ChronofluxDashboard(node_data=node_data)
@@ -211,7 +194,7 @@ def agi_train():
 
     result = run_agi_denoise_demo()
 
-    click.echo(f"\n✨ TRAINING COMPLETE")
+    click.echo("\n✨ TRAINING COMPLETE")
     click.echo(f"   Internal Coherence achieved: {result['phi']:.4f}")
     click.echo(f"   SNR Gain: {result['snr_gain']:.2f}x")
 
@@ -223,9 +206,9 @@ def agi_train():
 def chronos_handset_sim(node_id, omega, phi):
     """Simulates a Chronos-1 handset node's interaction with the field."""
     click.echo("\n" + "📱" * 40)
-    click.echo(f"   CHRONOS-1 HYBRID HANDSET SIMULATION (V2)")
+    click.echo("   CHRONOS-1 HYBRID HANDSET SIMULATION (V2)")
     click.echo(f"   Node: {node_id}")
-    click.echo(f"   Memory Subsystem: Cryo-SF-RAM + Neuromorphic LPDDR")
+    click.echo("   Memory Subsystem: Cryo-SF-RAM + Neuromorphic LPDDR")
     click.echo("📱" * 40)
 
     node = ChronosHandheldNode(node_id=node_id, internal_phi=phi)
@@ -236,15 +219,15 @@ def chronos_handset_sim(node_id, omega, phi):
 
     result = node.process_field_impact(omega, waveform)
 
-    click.echo(f"\n📊 HANDSET TELEMETRY:")
+    click.echo("\n📊 HANDSET TELEMETRY:")
     click.echo(f"   Local Q-Factor: {result['local_q_factor']:.4f}")
     click.echo(f"   Sync Layer Rate (R_sync): {result['sync_rate']:.2e}")
     click.echo(f"   Cryo-Retrieval Fidelity: {result['retrieval_fidelity']:.2%}")
     click.echo(f"   Optimized Clock: {result['optimized_clock_ghz']:.2f} GHz")
     click.echo(f"   CL Latency: {result['memory_latency_cl']} cycles")
 
-    haptic = result['haptic_feedback']
-    click.echo(f"\n⚡ HAPTIC INTUITION:")
+    haptic = result["haptic_feedback"]
+    click.echo("\n⚡ HAPTIC INTUITION:")
     click.echo(f"   Vibration Pattern: {haptic['pattern'].upper()}")
     click.echo(f"   Intensity: {haptic['intensity']:.4f}")
     click.echo(f"   Frequency Mod: {haptic['frequency_mod']:.2f}")
@@ -269,13 +252,13 @@ def t_ui_simulate(omega, confidence, noise):
     click.echo(f"\n🌀 UI STATE: {state['state'].upper()}")
     click.echo(f"   Visualization Coherence (V_phi): {state['v_phi']:.4f}")
 
-    viscosity = state['viscosity']
-    click.echo(f"\n🍯 SYNTHETIC VISCOSITY (SVM):")
+    viscosity = state["viscosity"]
+    click.echo("\n🍯 SYNTHETIC VISCOSITY (SVM):")
     click.echo(f"   Perceived Thickness: {viscosity['perceived_thickness'].upper()}")
     click.echo(f"   Injected Touch Delay: {viscosity['applied_delay_ms']:.2f} ms")
 
-    haptics = state['haptics']
-    click.echo(f"\n📳 HAPTIC MODULATION:")
+    haptics = state["haptics"]
+    click.echo("\n📳 HAPTIC MODULATION:")
     click.echo(f"   Mode: {haptics['mode']}")
     click.echo(f"   Frequency: {haptics['frequency_hz']:.2f} Hz")
     click.echo(f"   Power: {haptics['power_percent']:.1f}%")

@@ -2,15 +2,20 @@
 Implementation of the Chronoflux 5D hydrodynamic field and the projection operator P.
 This is the mathematical core that maps 5D temporal vorticity to observable 4D effects.
 """
+
 from __future__ import annotations
+
 from typing import Callable
+
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
+
 
 class ChronofluxField5D(BaseModel):
     """
     Models the 5D Chronoflux vector field Hᴬ and its projected vorticity ω_μν.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     g: float = 1e-5  # Chronoflux-matter coupling
@@ -48,7 +53,9 @@ class ChronofluxField5D(BaseModel):
 
         return omega
 
-    def _extract_4d_component(self, H_field_5d: Callable[[np.ndarray], np.ndarray], coords_4d: np.ndarray, index: int) -> float:
+    def _extract_4d_component(
+        self, H_field_5d: Callable[[np.ndarray], np.ndarray], coords_4d: np.ndarray, index: int
+    ) -> float:
         """
         Helper: Extract 4D component from 5D field at given coordinates.
         """
@@ -61,18 +68,21 @@ class ChronofluxField(BaseModel):
     """
     Representação do campo Chronoflux: fluxo temporal H e vorticidade omega.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    flow_vector: np.ndarray = Field(default_factory=lambda: np.array([1.0, 0.0, 0.0, 0.0, 0.0])) # 5D vector
-    vorticity_tensor: np.ndarray = Field(default_factory=lambda: np.zeros((3, 3))) # Spatial projection
-    fluctuation_spectral_density: float = 1e-18 # S_omega(nu)
+    flow_vector: np.ndarray = Field(default_factory=lambda: np.array([1.0, 0.0, 0.0, 0.0, 0.0]))  # 5D vector
+    vorticity_tensor: np.ndarray = Field(default_factory=lambda: np.zeros((3, 3)))  # Spatial projection
+    fluctuation_spectral_density: float = 1e-18  # S_omega(nu)
 
     def set_vorticity_from_vector(self, omega_vector: np.ndarray) -> None:
         """
         Define o tensor de vorticidade a partir de um vetor de rotação temporal.
         """
-        self.vorticity_tensor = np.array([
-            [0, -omega_vector[2], omega_vector[1]],
-            [omega_vector[2], 0, -omega_vector[0]],
-            [-omega_vector[1], omega_vector[0], 0]
-        ])
+        self.vorticity_tensor = np.array(
+            [
+                [0, -omega_vector[2], omega_vector[1]],
+                [omega_vector[2], 0, -omega_vector[0]],
+                [-omega_vector[1], omega_vector[0], 0],
+            ]
+        )

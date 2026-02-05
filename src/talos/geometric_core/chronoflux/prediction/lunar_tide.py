@@ -1,16 +1,21 @@
 """
 Quantitative prediction for the lunar tidal effect on Chronoflux vorticity.
 """
+
 from __future__ import annotations
-from typing import Any, Dict
-import numpy as np
+
 from datetime import datetime, timedelta
+from typing import Any, Dict
+
+import numpy as np
 from pydantic import BaseModel, ConfigDict
+
 
 class LunarTidePrediction(BaseModel):
     """
     Predicts the Chronoflux vorticity enhancement during lunar perigee.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     baseline_vorticity: float = 1.0
@@ -42,10 +47,10 @@ class LunarTidePrediction(BaseModel):
         rho_0 = 5.5
         density_ratio = self.geo_density / rho_0
 
-        phase_factor = np.sin(2 * (moon_phase + np.pi/2)) # Max at full moon
+        phase_factor = np.sin(2 * (moon_phase + np.pi / 2))  # Max at full moon
 
         enhancement = self.coupling_constant * density_ratio * abs(distance_effect) * abs(phase_factor)
-        predicted_omega = self.baseline_vorticity * (1 + enhancement * 100) # Scaling for visualization
+        predicted_omega = self.baseline_vorticity * (1 + enhancement * 100)  # Scaling for visualization
 
         return predicted_omega, enhancement
 
@@ -59,7 +64,7 @@ class LunarTidePrediction(BaseModel):
             "enhancement_factor": float(enhancement),
             "falsification_threshold": 5.2,
             "prediction_succeeds_if": "ω ≥ 5.2",
-            "confidence_interval": [float(omega_pred * 0.92), float(omega_pred * 1.08)]
+            "confidence_interval": [float(omega_pred * 0.92), float(omega_pred * 1.08)],
         }
 
 
@@ -68,8 +73,9 @@ class TideVorticityCoupling(BaseModel):
     Modelo de acoplamento Maré-Vorticidade.
     omega(t) = G_chrono * rho_geo * (M_luna / r_luna(t)^3)
     """
+
     g_chrono: float = 1.0
-    rho_rio: float = 2.65 # Densidade granito g/cm3
+    rho_rio: float = 2.65  # Densidade granito g/cm3
 
     def calculate_vorticity(self, moon_distance_km: float) -> float:
         # Simplificado para o Índice Chronos
@@ -84,9 +90,10 @@ class PhasedRevealProtocol(BaseModel):
     Fase Alpha: Rio de Janeiro (Farol)
     Fase Beta: Global Sync (Full Moon)
     """
+
     current_phase: str = "Alpha"
-    rio_index: float = 3.2 # Baseline
-    prediction_beta: float = 7.8 # Full Moon peak
+    rio_index: float = 3.2  # Baseline
+    prediction_beta: float = 7.8  # Full Moon peak
     event_date_beta: str = "2026-03-03"
 
     def get_status_report(self) -> Dict[str, Any]:
@@ -96,5 +103,5 @@ class PhasedRevealProtocol(BaseModel):
             "prediction_beta": self.prediction_beta,
             "target_date": self.event_date_beta,
             "stability": "Nominal",
-            "flow_type": "Laminar"
+            "flow_type": "Laminar",
         }

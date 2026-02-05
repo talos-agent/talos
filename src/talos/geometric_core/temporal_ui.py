@@ -2,20 +2,24 @@
 Temporal User Interface (T-UI) and Synthetic Viscosity Motor (SVM).
 Simulates the 'thickness' of time through input latency and haptic feedback.
 """
+
 from __future__ import annotations
+
 import math
 import time
-from typing import Any, Dict, Optional
-import numpy as np
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Any, Dict
+
+from pydantic import BaseModel, Field
+
 
 class SyntheticViscosityMotor(BaseModel):
     """
     Simulates physical 'drag' in the UI by modulating input latency.
     """
-    max_delay_s: float = 0.2    # alpha: Maximum delay in seconds
-    sensitivity: float = 10.0   # beta: Sharpness of the transition
-    threshold: float = 0.4      # mu: Activation threshold for vorticity
+
+    max_delay_s: float = 0.2  # alpha: Maximum delay in seconds
+    sensitivity: float = 10.0  # beta: Sharpness of the transition
+    threshold: float = 0.4  # mu: Activation threshold for vorticity
 
     def calculate_delay(self, current_omega: float) -> float:
         """
@@ -39,23 +43,27 @@ class SyntheticViscosityMotor(BaseModel):
             "event": event_name,
             "applied_delay_ms": delay * 1000,
             "perceived_thickness": "High" if delay > (self.max_delay_s / 2) else "Low",
-            "vorticity_omega": current_omega
+            "vorticity_omega": current_omega,
         }
+
 
 class TemporalUIMetrics(BaseModel):
     """
     Calculates metrics for temporal visualization coherence.
     """
+
     def calculate_visualization_coherence(self, grad_omega: float, confidence: float, noise: float) -> float:
         """
         V_phi = (1 - grad_omega) * confidence / (1 + noise)
         """
         return (1.0 - min(1.0, grad_omega)) * confidence / (1.0 + noise)
 
+
 class TemporalUIController(BaseModel):
     """
     Manages the overall Temporal UI state and feedback.
     """
+
     svm: SyntheticViscosityMotor = Field(default_factory=SyntheticViscosityMotor)
     metrics: TemporalUIMetrics = Field(default_factory=TemporalUIMetrics)
 
@@ -64,7 +72,7 @@ class TemporalUIController(BaseModel):
         Returns the current UI state based on environmental parameters.
         """
         delay_info = self.svm.simulate_touch_event("STATE_UPDATE", omega)
-        v_phi = self.metrics.calculate_visualization_coherence(omega * 0.1, confidence, noise) # Dummy gradient
+        v_phi = self.metrics.calculate_visualization_coherence(omega * 0.1, confidence, noise)  # Dummy gradient
 
         haptic_feedback = self.generate_haptic_modulation(omega)
 
@@ -75,26 +83,18 @@ class TemporalUIController(BaseModel):
             "v_phi": v_phi,
             "viscosity": delay_info,
             "haptics": haptic_feedback,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
     def generate_haptic_modulation(self, omega: float) -> Dict[str, Any]:
         """
         Modulates the haptic driver to create 'friction' on the glass.
         """
-        base_freq = 150.0 # Hz
+        base_freq = 150.0  # Hz
 
         if omega > 0.4:
             interference_freq = base_freq + (omega * 100.0)
             power = min(100.0, (omega * 100.0))
-            return {
-                "mode": "Vortical Interference",
-                "frequency_hz": interference_freq,
-                "power_percent": power
-            }
+            return {"mode": "Vortical Interference", "frequency_hz": interference_freq, "power_percent": power}
 
-        return {
-            "mode": "Laminar (Default)",
-            "frequency_hz": base_freq,
-            "power_percent": 10.0
-        }
+        return {"mode": "Laminar (Default)", "frequency_hz": base_freq, "power_percent": 10.0}

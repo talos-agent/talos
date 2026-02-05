@@ -164,7 +164,7 @@ class HolographicPhysicsEngine(nn.Module):
         self.qi_layer = QuantizedInertiaLayer(global_horizon_scale=horizon)
 
     def forward(self, features: torch.Tensor) -> torch.Tensor:
-        #features: (B, C, T, H, W)
+        # features: (B, C, T, H, W)
         B, C, T, H, W = features.shape
         if T < 2:
             return features
@@ -843,7 +843,9 @@ class SpaceWeatherIntegration:
         Calcula a modulação artística baseada no clima espacial.
         """
         # 1. Intensidade da aurora baseada na polaridade Bz
-        aurora_intensity = self.current_conditions["bt_total"] / 5.0 if self.current_conditions["bz_polarity"] == "negative" else 1.0
+        aurora_intensity = (
+            self.current_conditions["bt_total"] / 5.0 if self.current_conditions["bz_polarity"] == "negative" else 1.0
+        )
 
         # 2. Ritmo da animação baseado na velocidade do vento solar
         # Vento solar mais rápido = padrões mais energéticos
@@ -937,6 +939,8 @@ class TheDreamer(nn.Module):
         print(f"   Chromatic Resonance: {vision_metrics['chromatic_resonance']:.3f}")
 
         if use_space_weather:
-            print(f"   Space Weather: {vision_metrics['predicted_activity']} (Intensity: {vision_metrics['aurora_intensity']:.1f}x)")
+            print(
+                f"   Space Weather: {vision_metrics['predicted_activity']} (Intensity: {vision_metrics['aurora_intensity']:.1f}x)"
+            )
 
         return {"vision_metrics": vision_metrics, "perception_report": report}

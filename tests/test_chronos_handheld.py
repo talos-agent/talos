@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import numpy as np
+
 from talos.geometric_core.chronos_handheld import (
-    SFRAMBuffer,
-    NeuromorphicLPDDR,
+    ChronosHandheldNode,
     HapticResonanceEngine,
-    ChronosHandheldNode
+    NeuromorphicLPDDR,
+    SFRAMBuffer,
 )
 
 

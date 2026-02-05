@@ -6,18 +6,14 @@ from qiskit.quantum_info import DensityMatrix
 
 from talos.geometric_core.chronoflux import (
     ChronofluxField,
-    QubitChronofluxSimulator,
-    TwoQubitChronofluxGradiometer,
-    TravelingChronofluxWave,
     NQubitChronofluxArray,
-    TideVorticityCoupling,
     PhasedRevealProtocol,
+    QubitChronofluxSimulator,
+    TideVorticityCoupling,
+    TravelingChronofluxWave,
+    TwoQubitChronofluxGradiometer,
 )
-from talos.geometric_core.chronoflux_agi import (
-    ChronofluxRNN,
-    AGIChronofluxTrainer,
-    run_agi_denoise_demo,
-)
+from talos.geometric_core.chronoflux_agi import ChronofluxRNN, run_agi_denoise_demo
 
 
 def test_chronoflux_field():
@@ -43,7 +39,7 @@ def test_qubit_chronoflux_simulator():
 def test_two_qubit_gradiometer():
     field = ChronofluxField()
     grad = np.zeros((3, 3))
-    grad[2, 0] = 1.0 # d(omega_z)/dx
+    grad[2, 0] = 1.0  # d(omega_z)/dx
 
     gradiometer = TwoQubitChronofluxGradiometer(vorticity_gradient=grad)
     result = gradiometer.simulate_gradiometer(field, duration=0.5)
@@ -80,7 +76,7 @@ def test_agi_rnn_coherence():
 def test_tide_coupling():
     coupling = TideVorticityCoupling()
     v1 = coupling.calculate_vorticity(384400.0)
-    v2 = coupling.calculate_vorticity(356400.0) # Perigee
+    v2 = coupling.calculate_vorticity(356400.0)  # Perigee
     assert v2 > v1
 
 
