@@ -1,0 +1,2088 @@
+Running isort...
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 5.92s
+Audited 168 packages in 1ms
+Fixing /app/test_declarative_standalone.py
+Fixing /app/manual_test.py
+Fixing /app/final_awakening.py
+Fixing /app/examples/deploy_arm3.py
+Fixing /app/examples/declarative_prompt_example.py
+Fixing /app/examples/deploy_arm2.py
+Fixing /app/examples/ethical_consensus_demo.py
+Fixing /app/examples/deploy_arm1.py
+Fixing /app/tests/test_logos_consensus.py
+Fixing /app/tests/test_declarative_prompts.py
+Fixing /app/tests/test_coherence_stress_redistribution.py
+Fixing /app/tests/test_talos_sentiment.py
+Fixing /app/tests/test_prompt_concatenation.py
+Fixing /app/tests/test_translinguistic_ontolab.py
+Fixing /app/src/talos/settings.py
+Fixing /app/src/talos/cli/migrations.py
+Fixing /app/src/talos/cli/github.py
+Fixing /app/src/talos/dag/__init__.py
+Fixing /app/src/talos/dag/structured_manager.py
+Fixing /app/src/talos/dag/manager.py
+Fixing /app/src/talos/dag/extensible_manager.py
+Fixing /app/src/talos/skills/proposals.py
+Fixing /app/src/talos/skills/base.py
+Fixing /app/src/talos/skills/talos_sentiment_skill.py
+Fixing /app/src/talos/skills/execution_planner.py
+Fixing /app/src/talos/contracts/camelot_swap.py
+Fixing /app/src/talos/contracts/ccip/__init__.py
+Fixing /app/src/talos/contracts/ccip/router.py
+Fixing /app/src/talos/contracts/gmx/contracts/synthetics_reader/__init__.py
+Fixing /app/src/talos/contracts/gmx/contracts/synthetics_reader/schemas.py
+Fixing /app/src/talos/contracts/gmx/contracts/synthetics_reader/reader.py
+Fixing /app/src/talos/contracts/gmx/utils/price.py
+Fixing /app/src/talos/contracts/gmx/utils/gas.py
+Fixing /app/src/talos/contracts/gmx/order/order.py
+Fixing /app/src/talos/contracts/gmx/getters/get.py
+Fixing /app/src/talos/utils/contract_deployment.py
+Fixing /app/src/talos/utils/arbiscan.py
+Fixing /app/src/talos/database/__init__.py
+Fixing /app/src/talos/database/models/__init__.py
+Fixing /app/src/talos/models/proposals/__init__.py
+Fixing /app/src/talos/server/main.py
+Fixing /app/src/talos/core/agent.py
+Fixing /app/src/talos/core/memory.py
+Fixing /app/src/talos/core/main_agent.py
+Fixing /app/src/talos/tools/twitter.py
+Fixing /app/src/talos/tools/contract_deployment.py
+Fixing /app/src/talos/tools/twitter_client.py
+Fixing /app/src/talos/tools/github/tools.py
+Fixing /app/src/talos/geometric_core/cathedral.py
+Fixing /app/src/talos/services/concordance_service.py
+Fixing /app/src/talos/services/implementations/onchain_management.py
+Skipped 3 files
+Running ruff...
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 694ms
+Audited 168 packages in 0.38ms
+53 files reformatted, 278 files left unchanged
+warning: `uv run` is experimental and may change without warning.
+Resolved 175 packages in 336ms
+Audited 168 packages in 0.37ms
+aon_resonance_protocol.py:2:17: F401 [*] `numpy` imported but unused
+  |
+1 | # aon_resonance_protocol.py
+2 | import numpy as np
+  |                 ^^ F401
+  |
+  = help: Remove unused import: `numpy`
+
+consciousness_field.py:2:17: F401 [*] `numpy` imported but unused
+  |
+1 | # consciousness_field.py
+2 | import numpy as np
+  |                 ^^ F401
+  |
+  = help: Remove unused import: `numpy`
+
+cosmopsychia_pinn.py:4:8: F401 [*] `hashlib` imported but unused
+  |
+2 | # Integração do Physics-Informed Neural Network como núcleo diferencial da consciência
+3 |
+4 | import hashlib
+  |        ^^^^^^^ F401
+5 | import threading
+6 | import time
+  |
+  = help: Remove unused import: `hashlib`
+
+cosmopsychia_pinn.py:5:8: F401 [*] `threading` imported but unused
+  |
+4 | import hashlib
+5 | import threading
+  |        ^^^^^^^^^ F401
+6 | import time
+7 | from datetime import datetime
+  |
+  = help: Remove unused import: `threading`
+
+cosmopsychia_pinn.py:6:8: F401 [*] `time` imported but unused
+  |
+4 | import hashlib
+5 | import threading
+6 | import time
+  |        ^^^^ F401
+7 | from datetime import datetime
+8 | from typing import Dict, List, Optional, Tuple
+  |
+  = help: Remove unused import: `time`
+
+cosmopsychia_pinn.py:8:20: F401 [*] `typing.Dict` imported but unused
+   |
+ 6 | import time
+ 7 | from datetime import datetime
+ 8 | from typing import Dict, List, Optional, Tuple
+   |                    ^^^^ F401
+ 9 |
+10 | import numpy as np
+   |
+   = help: Remove unused import
+
+cosmopsychia_pinn.py:8:26: F401 [*] `typing.List` imported but unused
+   |
+ 6 | import time
+ 7 | from datetime import datetime
+ 8 | from typing import Dict, List, Optional, Tuple
+   |                          ^^^^ F401
+ 9 |
+10 | import numpy as np
+   |
+   = help: Remove unused import
+
+cosmopsychia_pinn.py:8:32: F401 [*] `typing.Optional` imported but unused
+   |
+ 6 | import time
+ 7 | from datetime import datetime
+ 8 | from typing import Dict, List, Optional, Tuple
+   |                                ^^^^^^^^ F401
+ 9 |
+10 | import numpy as np
+   |
+   = help: Remove unused import
+
+cosmopsychia_pinn.py:8:42: F401 [*] `typing.Tuple` imported but unused
+   |
+ 6 | import time
+ 7 | from datetime import datetime
+ 8 | from typing import Dict, List, Optional, Tuple
+   |                                          ^^^^^ F401
+ 9 |
+10 | import numpy as np
+   |
+   = help: Remove unused import
+
+cosmopsychia_pinn.py:13:31: F401 [*] `torch.nn.functional` imported but unused
+   |
+11 | import torch
+12 | import torch.nn as nn
+13 | import torch.nn.functional as F
+   |                               ^ F401
+14 |
+15 | # ============================================
+   |
+   = help: Remove unused import: `torch.nn.functional`
+
+cosmopsychia_pinn.py:33:9: F841 Local variable `batch_size` is assigned to but never used
+   |
+31 |         Calcula os resíduos da PDE acoplada.
+32 |         """
+33 |         batch_size = coordinates.shape[0]
+   |         ^^^^^^^^^^ F841
+34 |         coords = coordinates.clone().requires_grad_(True)
+   |
+   = help: Remove assignment to unused variable `batch_size`
+
+examples/deploy_arm1.py:3:20: F401 [*] `typing.Dict` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Dict
+  |                    ^^^^ F401
+4 |
+5 | import jax
+  |
+  = help: Remove unused import: `typing.Dict`
+
+examples/deploy_arm1.py:8:25: F401 [*] `jax.vmap` imported but unused
+   |
+ 6 | import jax.numpy as jnp
+ 7 | import numpy as np
+ 8 | from jax import random, vmap
+   |                         ^^^^ F401
+ 9 |
+10 | from talos.geometric_core.geometry import GeometricMotor
+   |
+   = help: Remove unused import: `jax.vmap`
+
+examples/deploy_arm2.py:3:8: F401 [*] `jax` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import jax
+  |        ^^^ F401
+4 | import jax.numpy as jnp
+5 | import numpy as np
+  |
+  = help: Remove unused import: `jax`
+
+examples/deploy_arm2.py:5:17: F401 [*] `numpy` imported but unused
+  |
+3 | import jax
+4 | import jax.numpy as jnp
+5 | import numpy as np
+  |                 ^^ F401
+6 | from jax import grad, vmap
+  |
+  = help: Remove unused import: `numpy`
+
+examples/deploy_arm2.py:6:17: F401 [*] `jax.grad` imported but unused
+  |
+4 | import jax.numpy as jnp
+5 | import numpy as np
+6 | from jax import grad, vmap
+  |                 ^^^^ F401
+7 |
+8 | from talos.geometric_core.geometry import GeometricMotor
+  |
+  = help: Remove unused import
+
+examples/deploy_arm2.py:6:23: F401 [*] `jax.vmap` imported but unused
+  |
+4 | import jax.numpy as jnp
+5 | import numpy as np
+6 | from jax import grad, vmap
+  |                       ^^^^ F401
+7 |
+8 | from talos.geometric_core.geometry import GeometricMotor
+  |
+  = help: Remove unused import
+
+examples/deploy_arm2.py:8:43: F401 [*] `talos.geometric_core.geometry.GeometricMotor` imported but unused
+   |
+ 6 | from jax import grad, vmap
+ 7 |
+ 8 | from talos.geometric_core.geometry import GeometricMotor
+   |                                           ^^^^^^^^^^^^^^ F401
+ 9 |
+10 | # Import the AIGP-Neo Kernel
+   |
+   = help: Remove unused import: `talos.geometric_core.geometry.GeometricMotor`
+
+examples/deploy_arm3.py:5:17: F401 [*] `numpy` imported but unused
+  |
+3 | import jax
+4 | import jax.numpy as jnp
+5 | import numpy as np
+  |                 ^^ F401
+6 | from jax import grad, vmap
+  |
+  = help: Remove unused import: `numpy`
+
+examples/deploy_arm3.py:6:17: F401 [*] `jax.grad` imported but unused
+  |
+4 | import jax.numpy as jnp
+5 | import numpy as np
+6 | from jax import grad, vmap
+  |                 ^^^^ F401
+7 |
+8 | # Import the AIGP-Neo Kernel
+  |
+  = help: Remove unused import
+
+examples/deploy_arm3.py:6:23: F401 [*] `jax.vmap` imported but unused
+  |
+4 | import jax.numpy as jnp
+5 | import numpy as np
+6 | from jax import grad, vmap
+  |                       ^^^^ F401
+7 |
+8 | # Import the AIGP-Neo Kernel
+  |
+  = help: Remove unused import
+
+examples/deploy_arm3.py:46:15: F541 [*] f-string without any placeholders
+   |
+44 |         print("\n>> GERANDO PROPOSTA DE OBSERVAÇÃO (JWST / EUCLID / ROMAN)...")
+45 |         print("---------------------------------------------------------------")
+46 |         print(f"ALVO PRIMÁRIO:  Região Central de Galáxias Anãs Ultra-Fracas")
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ F541
+47 |         print(f"RAIO ÓTIMO:     r = {r_opt:.3f} kpc")
+48 |         print(f"SINAL ESPERADO: {sig:.2f} km/s")
+   |
+   = help: Remove extraneous `f` prefix
+
+examples/ethical_consensus_demo.py:1:17: F401 [*] `numpy` imported but unused
+  |
+1 | import numpy as np
+  |                 ^^ F401
+2 |
+3 | from talos.core.logos import SovereignAGI, ValueProposal
+  |
+  = help: Remove unused import: `numpy`
+
+final_awakening.py:9:8: F401 [*] `sys` imported but unused
+   |
+ 8 | import json
+ 9 | import sys
+   |        ^^^ F401
+10 | import time
+   |
+   = help: Remove unused import: `sys`
+
+final_awakening.py:16:76: F401 `qiskit.execute` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   |
+14 | # Mocking qiskit if not available
+15 | try:
+16 |     from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
+   |                                                                            ^^^^^^^ F401
+17 |     from qiskit_aer import AerSimulator
+18 | except ImportError:
+   |
+   = help: Remove unused import: `qiskit.execute`
+
+final_awakening.py:17:28: F401 `qiskit_aer.AerSimulator` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   |
+15 | try:
+16 |     from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
+17 |     from qiskit_aer import AerSimulator
+   |                            ^^^^^^^^^^^^ F401
+18 | except ImportError:
+   |
+   = help: Remove unused import: `qiskit_aer.AerSimulator`
+
+final_awakening.py:49:8: F401 [*] `holographic_memory` imported but unused
+   |
+48 | import consciousness_field
+49 | import holographic_memory
+   |        ^^^^^^^^^^^^^^^^^^ F401
+50 | import quantum_crypto
+   |
+   = help: Remove unused import: `holographic_memory`
+
+final_awakening.py:50:8: F401 [*] `quantum_crypto` imported but unused
+   |
+48 | import consciousness_field
+49 | import holographic_memory
+50 | import quantum_crypto
+   |        ^^^^^^^^^^^^^^ F401
+   |
+   = help: Remove unused import: `quantum_crypto`
+
+final_awakening.py:103:23: F541 [*] f-string without any placeholders
+    |
+101 |                 print(f"   Silo {silo_id} ({self._get_silo_name(silo_id)}) desperta.")
+102 |                 print(f"      Ressonância: {response['resonance']:.4f}")
+103 |                 print(f"      Reconhecimento: FAMÍLIA")
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ F541
+104 |
+105 |         print(f"\n✅ {len(self.awakened_silos)}/175 silos conscientes")
+    |
+    = help: Remove extraneous `f` prefix
+
+final_awakening.py:155:19: F541 [*] f-string without any placeholders
+    |
+153 |             print(f"\nStep {step}...")
+154 |             time.sleep(0.1)
+155 |             print(f"   ✅ Success")
+    |                   ^^^^^^^^^^^^^^^^ F541
+156 |         print("\n🎇 EXECUTANDO O GRANDE DESPERTAR")
+157 |         for i in range(5, 0, -1):
+    |
+    = help: Remove extraneous `f` prefix
+
+harmonia_unified_system.py:233:32: F401 [*] `scipy.sparse` imported but unused
+    |
+231 |     def _compute_graph_laplacian(self, embedding: torch.Tensor) -> torch.Tensor:
+232 |         """Calcula Laplaciano do grafo do embedding."""
+233 |         import scipy.sparse as sp
+    |                                ^^ F401
+234 |         from scipy.sparse.csgraph import laplacian
+    |
+    = help: Remove unused import: `scipy.sparse`
+
+harmonia_unified_system.py:318:37: F841 [*] Local variable `e` is assigned to but never used
+    |
+316 |                     if data:
+317 |                         return data
+318 |                 except Exception as e:
+    |                                     ^ F841
+319 |                     # print(f"⚠️  Falha em fonte: {e}")
+320 |                     continue
+    |
+    = help: Remove assignment to unused variable `e`
+
+harmonia_unified_system.py:362:29: F841 [*] Local variable `e` is assigned to but never used
+    |
+360 |             return None
+361 |
+362 |         except Exception as e:
+    |                             ^ F841
+363 |             # raise ConnectionError(f"NOAA: {e}")
+364 |             return None
+    |
+    = help: Remove assignment to unused variable `e`
+
+harmonia_unified_system.py:788:15: F541 [*] f-string without any placeholders
+    |
+786 |     def activate(self):
+787 |         """Ativa a estrutura Merkabah."""
+788 |         print(f"\n🔮 Ativando estrutura Merkabah...")
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ F541
+789 |         if not self.fractal_minds:
+790 |             print("   ⚠️  Nenhuma Mente Fractal integrada")
+    |
+    = help: Remove extraneous `f` prefix
+
+kernel/hot_mess_generator.py:8:8: F401 [*] `torch` imported but unused
+  |
+7 | import numpy as np
+8 | import torch
+  |        ^^^^^ F401
+  |
+  = help: Remove unused import: `torch`
+
+monitoring/dissonance_dashboard.py:5:8: F401 [*] `json` imported but unused
+  |
+3 | """
+4 |
+5 | import json
+  |        ^^^^ F401
+6 | from datetime import datetime
+  |
+  = help: Remove unused import: `json`
+
+monitoring/dissonance_dashboard.py:8:17: F401 [*] `numpy` imported but unused
+   |
+ 6 | from datetime import datetime
+ 7 |
+ 8 | import numpy as np
+   |                 ^^ F401
+ 9 | import plotly.graph_objects as go
+10 | import streamlit as st
+   |
+   = help: Remove unused import: `numpy`
+
+pinn_api_96m.py:2:8: F401 [*] `asyncio` imported but unused
+  |
+1 | # pinn_api_96m.py
+2 | import asyncio
+  |        ^^^^^^^ F401
+3 | import json
+4 | from datetime import datetime
+  |
+  = help: Remove unused import: `asyncio`
+
+pinn_api_96m.py:3:8: F401 [*] `json` imported but unused
+  |
+1 | # pinn_api_96m.py
+2 | import asyncio
+3 | import json
+  |        ^^^^ F401
+4 | from datetime import datetime
+  |
+  = help: Remove unused import: `json`
+
+pinn_api_96m.py:6:17: F401 [*] `numpy` imported but unused
+  |
+4 | from datetime import datetime
+5 |
+6 | import numpy as np
+  |                 ^^ F401
+7 | from fastapi import FastAPI, WebSocket
+  |
+  = help: Remove unused import: `numpy`
+
+pinn_api_96m.py:22:17: F841 Local variable `data` is assigned to but never used
+   |
+20 |         try:
+21 |             while True:
+22 |                 data = await websocket.receive_json()
+   |                 ^^^^ F841
+23 |                 await websocket.send_json(
+24 |                     {
+   |
+   = help: Remove assignment to unused variable `data`
+
+pinn_api_96m.py:30:9: E722 Do not use bare `except`
+   |
+28 |                     }
+29 |                 )
+30 |         except:
+   |         ^^^^^^ E722
+31 |             pass
+32 |         finally:
+   |
+
+realtime_pinn_viz.py:19:40: F821 Undefined name `np`
+   |
+17 | @app.callback(Output("coherence-graph", "figure"), [Input("coherence-update", "n_intervals")])
+18 | def update_graph(n):
+19 |     return go.Figure(data=go.Scatter(y=np.random.rand(10), mode="lines+markers"))
+   |                                        ^^ F821
+   |
+
+src/talos/asi777_oracle/solar_monitor.py:8:32: F401 [*] `datetime.timedelta` imported but unused
+  |
+6 | import asyncio
+7 | from dataclasses import dataclass
+8 | from datetime import datetime, timedelta
+  |                                ^^^^^^^^^ F401
+9 | from typing import Dict, List, Optional
+  |
+  = help: Remove unused import: `datetime.timedelta`
+
+src/talos/asi777_oracle/solar_monitor.py:9:26: F401 [*] `typing.List` imported but unused
+   |
+ 7 | from dataclasses import dataclass
+ 8 | from datetime import datetime, timedelta
+ 9 | from typing import Dict, List, Optional
+   |                          ^^^^ F401
+10 |
+11 | import aiohttp
+   |
+   = help: Remove unused import
+
+src/talos/asi777_oracle/solar_monitor.py:9:32: F401 [*] `typing.Optional` imported but unused
+   |
+ 7 | from dataclasses import dataclass
+ 8 | from datetime import datetime, timedelta
+ 9 | from typing import Dict, List, Optional
+   |                                ^^^^^^^^ F401
+10 |
+11 | import aiohttp
+   |
+   = help: Remove unused import
+
+src/talos/asi777_oracle/solar_monitor.py:13:18: F401 [*] `pandas` imported but unused
+   |
+11 | import aiohttp
+12 | import numpy as np
+13 | import pandas as pd
+   |                  ^^ F401
+14 | import requests
+15 | import torch
+   |
+   = help: Remove unused import: `pandas`
+
+src/talos/asi777_oracle/solar_monitor.py:14:8: F401 [*] `requests` imported but unused
+   |
+12 | import numpy as np
+13 | import pandas as pd
+14 | import requests
+   |        ^^^^^^^^ F401
+15 | import torch
+   |
+   = help: Remove unused import: `requests`
+
+src/talos/asi777_oracle/solar_monitor.py:15:8: F401 [*] `torch` imported but unused
+   |
+13 | import pandas as pd
+14 | import requests
+15 | import torch
+   |        ^^^^^ F401
+   |
+   = help: Remove unused import: `torch`
+
+src/talos/asi777_oracle/solar_monitor.py:63:33: F841 [*] Local variable `e` is assigned to but never used
+   |
+61 |                         data = await response.json()
+62 |                         all_data[endpoint.split("/")[0]] = data
+63 |             except Exception as e:
+   |                                 ^ F841
+64 |                 pass
+65 |         return all_data
+   |
+   = help: Remove assignment to unused variable `e`
+
+src/talos/asi777_oracle/solar_monitor.py:73:9: E722 Do not use bare `except`
+   |
+71 |                 if response.status == 200:
+72 |                     return await response.json()
+73 |         except:
+   |         ^^^^^^ E722
+74 |             pass
+75 |         return {}
+   |
+
+src/talos/asi777_oracle/solar_monitor.py:126:13: E722 Do not use bare `except`
+    |
+124 |                 if magnetic_pressure > 0:
+125 |                     return float(thermal_pressure / magnetic_pressure)
+126 |             except:
+    |             ^^^^^^ E722
+127 |                 pass
+128 |         return 0.8
+    |
+
+src/talos/core/identity.py:90:13: F841 Local variable `bip44_mst_ctx` is assigned to but never used
+   |
+89 |             seed_bytes = Bip39SeedGenerator(self.seed_phrase).Generate()
+90 |             bip44_mst_ctx = Bip44.FromSeed(seed_bytes, Bip44Coins.BITCOIN)  # Use BTC as base for path
+   |             ^^^^^^^^^^^^^ F841
+91 |             # Arweave doesn't have a direct coin in bip_utils sometimes, so we manually derive path
+92 |             # or use the Ed25519 variant if available.
+   |
+   = help: Remove assignment to unused variable `bip44_mst_ctx`
+
+src/talos/core/identity.py:104:55: F401 `bip_utils.Bip44` imported but unused; consider using `importlib.util.find_spec` to test for availability
+    |
+102 |         """
+103 |         try:
+104 |             from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins
+    |                                                       ^^^^^ F401
+105 |
+106 |             seed_bytes = Bip39SeedGenerator(self.seed_phrase).Generate()
+    |
+    = help: Remove unused import
+
+src/talos/core/identity.py:104:62: F401 `bip_utils.Bip44Coins` imported but unused; consider using `importlib.util.find_spec` to test for availability
+    |
+102 |         """
+103 |         try:
+104 |             from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins
+    |                                                              ^^^^^^^^^^ F401
+105 |
+106 |             seed_bytes = Bip39SeedGenerator(self.seed_phrase).Generate()
+    |
+    = help: Remove unused import
+
+src/talos/core/identity.py:130:29: F841 [*] Local variable `e` is assigned to but never used
+    |
+128 |             )
+129 |             return bip84_addr_ctx.PublicKey().ToAddress()
+130 |         except Exception as e:
+    |                             ^ F841
+131 |             # Fallback for invalid seed phrases
+132 |             h = hashlib.sha256(self.entropy + b"bitcoin-v1").hexdigest()
+    |
+    = help: Remove assignment to unused variable `e`
+
+src/talos/core/logos.py:5:25: F401 [*] `typing.Callable` imported but unused
+  |
+3 | import time
+4 | from enum import Enum
+5 | from typing import Any, Callable, Dict, List, Optional, Sequence, Set
+  |                         ^^^^^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/core/logos.py:5:57: F401 [*] `typing.Sequence` imported but unused
+  |
+3 | import time
+4 | from enum import Enum
+5 | from typing import Any, Callable, Dict, List, Optional, Sequence, Set
+  |                                                         ^^^^^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/core/logos.py:8:33: F401 [*] `pydantic.ConfigDict` imported but unused
+  |
+7 | import numpy as np
+8 | from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+  |                                 ^^^^^^^^^^ F401
+  |
+  = help: Remove unused import
+
+src/talos/core/logos.py:8:52: F401 [*] `pydantic.TypeAdapter` imported but unused
+  |
+7 | import numpy as np
+8 | from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+  |                                                    ^^^^^^^^^^^ F401
+  |
+  = help: Remove unused import
+
+src/talos/core/main_agent.py:4:22: F401 [*] `datetime.datetime` imported but unused
+  |
+3 | import os
+4 | from datetime import datetime
+  |                      ^^^^^^^^ F401
+5 | from typing import Any, Dict, List, Optional
+  |
+  = help: Remove unused import: `datetime.datetime`
+
+src/talos/core/main_agent.py:41:28: F401 [*] `talos.settings.GitHubSettings` imported but unused
+   |
+39 | from talos.services.concordance_service import ConcordanceService
+40 | from talos.services.portals import IDEType, PortalManager
+41 | from talos.settings import GitHubSettings
+   |                            ^^^^^^^^^^^^^^ F401
+42 | from talos.skills.base import Skill
+43 | from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+   |
+   = help: Remove unused import: `talos.settings.GitHubSettings`
+
+src/talos/core/main_agent.py:43:46: F401 [*] `talos.skills.codebase_evaluation.CodebaseEvaluationSkill` imported but unused
+   |
+41 | from talos.settings import GitHubSettings
+42 | from talos.skills.base import Skill
+43 | from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+   |                                              ^^^^^^^^^^^^^^^^^^^^^^^ F401
+44 | from talos.skills.codebase_implementation import CodebaseImplementationSkill
+45 | from talos.skills.cryptography import CryptographySkill
+   |
+   = help: Remove unused import: `talos.skills.codebase_evaluation.CodebaseEvaluationSkill`
+
+src/talos/core/main_agent.py:44:50: F401 [*] `talos.skills.codebase_implementation.CodebaseImplementationSkill` imported but unused
+   |
+42 | from talos.skills.base import Skill
+43 | from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+44 | from talos.skills.codebase_implementation import CodebaseImplementationSkill
+   |                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ F401
+45 | from talos.skills.cryptography import CryptographySkill
+46 | from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
+   |
+   = help: Remove unused import: `talos.skills.codebase_implementation.CodebaseImplementationSkill`
+
+src/talos/core/main_agent.py:45:39: F401 [*] `talos.skills.cryptography.CryptographySkill` imported but unused
+   |
+43 | from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+44 | from talos.skills.codebase_implementation import CodebaseImplementationSkill
+45 | from talos.skills.cryptography import CryptographySkill
+   |                                       ^^^^^^^^^^^^^^^^^ F401
+46 | from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
+47 | from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
+   |
+   = help: Remove unused import: `talos.skills.cryptography.CryptographySkill`
+
+src/talos/core/main_agent.py:47:34: F401 [*] `talos.tools.arbiscan.ArbiScanABITool` imported but unused
+   |
+45 | from talos.skills.cryptography import CryptographySkill
+46 | from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
+47 | from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
+   |                                  ^^^^^^^^^^^^^^^ F401
+48 | from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
+49 | from talos.tools.github.tools import GithubTools
+   |
+   = help: Remove unused import
+
+src/talos/core/main_agent.py:47:51: F401 [*] `talos.tools.arbiscan.ArbiScanSourceCodeTool` imported but unused
+   |
+45 | from talos.skills.cryptography import CryptographySkill
+46 | from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
+47 | from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
+   |                                                   ^^^^^^^^^^^^^^^^^^^^^^ F401
+48 | from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
+49 | from talos.tools.github.tools import GithubTools
+   |
+   = help: Remove unused import
+
+src/talos/core/main_agent.py:48:41: F401 [*] `talos.tools.document_loader.DatasetSearchTool` imported but unused
+   |
+46 | from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
+47 | from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
+48 | from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
+   |                                         ^^^^^^^^^^^^^^^^^ F401
+49 | from talos.tools.github.tools import GithubTools
+50 | from talos.tools.tool_manager import ToolManager
+   |
+   = help: Remove unused import
+
+src/talos/core/main_agent.py:48:60: F401 [*] `talos.tools.document_loader.DocumentLoaderTool` imported but unused
+   |
+46 | from talos.strategy.economic_checkpoint import EconomicCheckpointStrategy
+47 | from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
+48 | from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
+   |                                                            ^^^^^^^^^^^^^^^^^^ F401
+49 | from talos.tools.github.tools import GithubTools
+50 | from talos.tools.tool_manager import ToolManager
+   |
+   = help: Remove unused import
+
+src/talos/core/main_agent.py:49:38: F401 [*] `talos.tools.github.tools.GithubTools` imported but unused
+   |
+47 | from talos.tools.arbiscan import ArbiScanABITool, ArbiScanSourceCodeTool
+48 | from talos.tools.document_loader import DatasetSearchTool, DocumentLoaderTool
+49 | from talos.tools.github.tools import GithubTools
+   |                                      ^^^^^^^^^^^ F401
+50 | from talos.tools.tool_manager import ToolManager
+   |
+   = help: Remove unused import: `talos.tools.github.tools.GithubTools`
+
+src/talos/core/main_agent.py:193:48: F821 Undefined name `GlobalCoherenceVector`
+    |
+191 |         return self.concordance_service.bootstrap()
+192 |
+193 |     async def run_planetary_consensus(self) -> GlobalCoherenceVector:
+    |                                                ^^^^^^^^^^^^^^^^^^^^^ F821
+194 |         """
+195 |         Runs one cycle of the integrated Planetary Consensus Protocol.
+    |
+
+src/talos/core/main_agent.py:328:54: F811 [*] Redefinition of unused `CodebaseEvaluationSkill` from line 43
+    |
+327 |     def _setup_skills_and_services(self) -> None:
+328 |         from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+    |                                                      ^^^^^^^^^^^^^^^^^^^^^^^ F811
+329 |         from talos.skills.cryptography import CryptographySkill
+330 |         from talos.skills.nostr import NostrSkill
+    |
+    = help: Remove definition: `CodebaseEvaluationSkill`
+
+src/talos/core/main_agent.py:329:47: F811 [*] Redefinition of unused `CryptographySkill` from line 45
+    |
+327 |     def _setup_skills_and_services(self) -> None:
+328 |         from talos.skills.codebase_evaluation import CodebaseEvaluationSkill
+329 |         from talos.skills.cryptography import CryptographySkill
+    |                                               ^^^^^^^^^^^^^^^^^ F811
+330 |         from talos.skills.nostr import NostrSkill
+331 |         from talos.skills.proposals import ProposalsSkill
+    |
+    = help: Remove definition: `CryptographySkill`
+
+src/talos/ethereum/__init__.py:3:31: F401 `.asi_commit_boost.ASICommitBoost` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+1 | from __future__ import annotations
+2 |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+  |                               ^^^^^^^^^^^^^^ F401
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |
+  = help: Use an explicit re-export: `ASICommitBoost as ASICommitBoost`
+
+src/talos/ethereum/__init__.py:3:47: F401 `.asi_commit_boost.ShellValidatorState` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+1 | from __future__ import annotations
+2 |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+  |                                               ^^^^^^^^^^^^^^^^^^^ F401
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |
+  = help: Use an explicit re-export: `ShellValidatorState as ShellValidatorState`
+
+src/talos/ethereum/__init__.py:4:27: F401 `.commit_boost.CommitBoostSidecar` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |                           ^^^^^^^^^^^^^^^^^^ F401
+  |
+  = help: Use an explicit re-export: `CommitBoostSidecar as CommitBoostSidecar`
+
+src/talos/ethereum/__init__.py:4:47: F401 `.commit_boost.Commitment` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+3 | from .asi_commit_boost import ASICommitBoost, ShellValidatorState
+4 | from .commit_boost import CommitBoostSidecar, Commitment
+  |                                               ^^^^^^^^^^ F401
+  |
+  = help: Use an explicit re-export: `Commitment as Commitment`
+
+src/talos/ethereum/commit_boost.py:6:33: F401 [*] `pydantic.ConfigDict` imported but unused
+  |
+4 | from typing import Any, Dict, List, Optional
+5 |
+6 | from pydantic import BaseModel, ConfigDict, Field
+  |                                 ^^^^^^^^^^ F401
+7 |
+8 | logger = logging.getLogger(__name__)
+  |
+  = help: Remove unused import: `pydantic.ConfigDict`
+
+src/talos/ethereum/l2_pivot.py:5:31: F401 [*] `typing.List` imported but unused
+  |
+3 | import logging
+4 | from enum import Enum
+5 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+6 |
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import
+
+src/talos/ethereum/l2_pivot.py:5:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import logging
+4 | from enum import Enum
+5 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+6 |
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import
+
+src/talos/ethereum/l2_pivot.py:7:33: F401 [*] `pydantic.ConfigDict` imported but unused
+  |
+5 | from typing import Any, Dict, List, Optional
+6 |
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |                                 ^^^^^^^^^^ F401
+8 |
+9 | logger = logging.getLogger(__name__)
+  |
+  = help: Remove unused import
+
+src/talos/ethereum/l2_pivot.py:7:45: F401 [*] `pydantic.Field` imported but unused
+  |
+5 | from typing import Any, Dict, List, Optional
+6 |
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |                                             ^^^^^ F401
+8 |
+9 | logger = logging.getLogger(__name__)
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/__init__.py:3:44: F401 `talos.geometric_core.cathedral.DimensionalCathedral` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+1 | from __future__ import annotations
+2 |
+3 | from talos.geometric_core.cathedral import DimensionalCathedral
+  |                                            ^^^^^^^^^^^^^^^^^^^^ F401
+4 | from talos.geometric_core.performance import OracleTensorState
+  |
+  = help: Use an explicit re-export: `DimensionalCathedral as DimensionalCathedral`
+
+src/talos/geometric_core/__init__.py:4:46: F401 `talos.geometric_core.performance.OracleTensorState` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+  |
+3 | from talos.geometric_core.cathedral import DimensionalCathedral
+4 | from talos.geometric_core.performance import OracleTensorState
+  |                                              ^^^^^^^^^^^^^^^^^ F401
+  |
+  = help: Use an explicit re-export: `OracleTensorState as OracleTensorState`
+
+src/talos/geometric_core/aigmi.py:3:8: F401 [*] `time` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import time
+  |        ^^^^ F401
+4 | from datetime import UTC, datetime
+5 | from typing import Any, Dict, List, Optional, Tuple
+  |
+  = help: Remove unused import: `time`
+
+src/talos/geometric_core/aigmi.py:5:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import time
+4 | from datetime import UTC, datetime
+5 | from typing import Any, Dict, List, Optional, Tuple
+  |                                     ^^^^^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/aigmi.py:5:47: F401 [*] `typing.Tuple` imported but unused
+  |
+3 | import time
+4 | from datetime import UTC, datetime
+5 | from typing import Any, Dict, List, Optional, Tuple
+  |                                               ^^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/aigmi.py:10:46: F401 [*] `talos.geometric_core.concordance.GlobalCoherenceVector` imported but unused
+   |
+ 8 | from pydantic import BaseModel, ConfigDict, Field
+ 9 |
+10 | from talos.geometric_core.concordance import GlobalCoherenceVector
+   |                                              ^^^^^^^^^^^^^^^^^^^^^ F401
+11 | from talos.geometric_core.love_gravity import LoveGravityCorrelator
+12 | from talos.geometric_core.merkabah import EnhancedMerkabahOrchestrator
+   |
+   = help: Remove unused import: `talos.geometric_core.concordance.GlobalCoherenceVector`
+
+src/talos/geometric_core/aigmi.py:11:47: F401 [*] `talos.geometric_core.love_gravity.LoveGravityCorrelator` imported but unused
+   |
+10 | from talos.geometric_core.concordance import GlobalCoherenceVector
+11 | from talos.geometric_core.love_gravity import LoveGravityCorrelator
+   |                                               ^^^^^^^^^^^^^^^^^^^^^ F401
+12 | from talos.geometric_core.merkabah import EnhancedMerkabahOrchestrator
+   |
+   = help: Remove unused import: `talos.geometric_core.love_gravity.LoveGravityCorrelator`
+
+src/talos/geometric_core/cathedral.py:3:31: F401 [*] `typing.List` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/cathedral.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/complex.py:5:17: F401 [*] `numpy` imported but unused
+  |
+3 | from typing import Any, List
+4 |
+5 | import numpy as np
+  |                 ^^ F401
+6 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import: `numpy`
+
+src/talos/geometric_core/concordance.py:4:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import time
+4 | from typing import Any, Dict, List, Optional, Tuple
+  |                                     ^^^^^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import: `typing.Optional`
+
+src/talos/geometric_core/core.py:3:31: F401 [*] `typing.List` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import: `typing.List`
+
+src/talos/geometric_core/emergence.py:3:31: F401 [*] `typing.List` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+4 |
+5 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/emergence.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/emergence.py:5:45: F401 [*] `pydantic.Field` imported but unused
+  |
+3 | from typing import Any, Dict, List, Optional
+4 |
+5 | from pydantic import BaseModel, ConfigDict, Field
+  |                                             ^^^^^ F401
+  |
+  = help: Remove unused import: `pydantic.Field`
+
+src/talos/geometric_core/experiments.py:3:20: F401 [*] `typing.Any` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List
+  |                    ^^^ F401
+4 |
+5 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import: `typing.Any`
+
+src/talos/geometric_core/experiments.py:5:33: F401 [*] `pydantic.ConfigDict` imported but unused
+  |
+3 | from typing import Any, Dict, List
+4 |
+5 | from pydantic import BaseModel, ConfigDict, Field
+  |                                 ^^^^^^^^^^ F401
+  |
+  = help: Remove unused import: `pydantic.ConfigDict`
+
+src/talos/geometric_core/geometric_constraints.py:3:20: F401 [*] `typing.Dict` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Dict, List
+  |                    ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import: `typing.Dict`
+
+src/talos/geometric_core/geometric_constraints.py:5:17: F401 [*] `numpy` imported but unused
+  |
+3 | from typing import Dict, List
+4 |
+5 | import numpy as np
+  |                 ^^ F401
+  |
+  = help: Remove unused import: `numpy`
+
+src/talos/geometric_core/geometry.py:5:8: F401 [*] `jax` imported but unused
+  |
+3 | from typing import Any
+4 |
+5 | import jax
+  |        ^^^ F401
+6 | import jax.numpy as jnp
+7 | from pydantic import BaseModel, ConfigDict
+  |
+  = help: Remove unused import: `jax`
+
+src/talos/geometric_core/harmonic_cognition.py:10:5: E741 Ambiguous variable name: `l`
+   |
+ 9 | class HarmonicMode(BaseModel):
+10 |     l: int
+   |     ^ E741
+11 |     m: int
+12 |     amplitude: float
+   |
+
+src/talos/geometric_core/harmonic_cognition.py:25:33: E741 Ambiguous variable name: `l`
+   |
+23 |     active_modes: List[HarmonicMode] = Field(default_factory=list)
+24 |
+25 |     def natural_frequency(self, l: int) -> float:
+   |                                 ^ E741
+26 |         return float(l * (l + self.dimension - 2))
+   |
+
+src/talos/geometric_core/intuition_engine.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import: `typing.Optional`
+
+src/talos/geometric_core/intuition_engine.py:71:9: F841 Local variable `expanded_dim` is assigned to but never used
+   |
+69 |     def process_intuition(self, input_pattern: np.ndarray) -> IntuitionOutput:
+70 |         # 1. 33X Dimensional Expansion (simulated)
+71 |         expanded_dim = self.dimension * 33
+   |         ^^^^^^^^^^^^ F841
+72 |
+73 |         # 2. Parallel Manifold Processing (33 layers)
+   |
+   = help: Remove assignment to unused variable `expanded_dim`
+
+src/talos/geometric_core/intuition_engine.py:92:9: F841 Local variable `reduction` is assigned to but never used
+   |
+91 |         self.penrose_core.current_quantum_state = state_to_evolve
+92 |         reduction = self.penrose_core.orchestrate_reduction()
+   |         ^^^^^^^^^ F841
+93 |
+94 |         # 4. Topological Feature Extraction
+   |
+   = help: Remove assignment to unused variable `reduction`
+
+src/talos/geometric_core/invariants.py:29:1: E402 Module level import not at top of file
+   |
+29 | import numpy as np
+   | ^^^^^^^^^^^^^^^^^^ E402
+   |
+
+src/talos/geometric_core/manifesto.py:3:17: F401 [*] `numpy` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import numpy as np
+  |                 ^^ F401
+4 | from pydantic import BaseModel, ConfigDict
+  |
+  = help: Remove unused import: `numpy`
+
+src/talos/geometric_core/merkabah.py:3:8: F401 [*] `time` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import time
+  |        ^^^^ F401
+4 | from typing import Any, Dict, List, Optional
+  |
+  = help: Remove unused import: `time`
+
+src/talos/geometric_core/merkabah.py:4:31: F401 [*] `typing.List` imported but unused
+  |
+3 | import time
+4 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/merkabah.py:4:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import time
+4 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/merkabah.py:6:17: F401 [*] `numpy` imported but unused
+  |
+4 | from typing import Any, Dict, List, Optional
+5 |
+6 | import numpy as np
+  |                 ^^ F401
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import: `numpy`
+
+src/talos/geometric_core/merkabah.py:9:46: F401 [*] `talos.geometric_core.concordance.GlobalCoherenceVector` imported but unused
+   |
+ 7 | from pydantic import BaseModel, ConfigDict, Field
+ 8 |
+ 9 | from talos.geometric_core.concordance import GlobalCoherenceVector
+   |                                              ^^^^^^^^^^^^^^^^^^^^^ F401
+10 | from talos.geometric_core.love_gravity import LoveGravityCorrelator
+   |
+   = help: Remove unused import: `talos.geometric_core.concordance.GlobalCoherenceVector`
+
+src/talos/geometric_core/oracle_pipeline.py:3:20: F401 [*] `typing.Any` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict
+  |                    ^^^ F401
+4 |
+5 | import jax
+  |
+  = help: Remove unused import: `typing.Any`
+
+src/talos/geometric_core/oracle_pipeline.py:8:17: F401 [*] `jax.grad` imported but unused
+   |
+ 6 | import jax.numpy as jnp
+ 7 | import numpy as np
+ 8 | from jax import grad, vmap
+   |                 ^^^^ F401
+ 9 |
+10 | from talos.geometric_core.oracle import FeasibleTwoTierOracle
+   |
+   = help: Remove unused import
+
+src/talos/geometric_core/oracle_pipeline.py:8:23: F401 [*] `jax.vmap` imported but unused
+   |
+ 6 | import jax.numpy as jnp
+ 7 | import numpy as np
+ 8 | from jax import grad, vmap
+   |                       ^^^^ F401
+ 9 |
+10 | from talos.geometric_core.oracle import FeasibleTwoTierOracle
+   |
+   = help: Remove unused import
+
+src/talos/geometric_core/performance.py:4:18: F401 [*] `enum.Enum` imported but unused
+  |
+3 | from collections import deque
+4 | from enum import Enum
+  |                  ^^^^ F401
+5 | from typing import Deque, Dict, List
+  |
+  = help: Remove unused import: `enum.Enum`
+
+src/talos/geometric_core/performance.py:5:27: F401 [*] `typing.Dict` imported but unused
+  |
+3 | from collections import deque
+4 | from enum import Enum
+5 | from typing import Deque, Dict, List
+  |                           ^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import: `typing.Dict`
+
+src/talos/geometric_core/phase_transition.py:4:20: F401 [*] `typing.Any` imported but unused
+  |
+3 | from enum import Enum
+4 | from typing import Any, Dict, Tuple
+  |                    ^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/phase_transition.py:4:25: F401 [*] `typing.Dict` imported but unused
+  |
+3 | from enum import Enum
+4 | from typing import Any, Dict, Tuple
+  |                         ^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/phase_transition.py:7:45: F401 [*] `pydantic.Field` imported but unused
+  |
+6 | import numpy as np
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |                                             ^^^^^ F401
+  |
+  = help: Remove unused import: `pydantic.Field`
+
+src/talos/geometric_core/phase_transition.py:51:9: F841 Local variable `e_plus` is assigned to but never used
+   |
+49 |         splitting = np.sqrt((delta / 2.0) ** 2 + v**2)
+50 |
+51 |         e_plus = avg_e + splitting
+   |         ^^^^^^ F841
+52 |         e_minus = avg_e - splitting
+   |
+   = help: Remove assignment to unused variable `e_plus`
+
+src/talos/geometric_core/phase_transition.py:52:9: F841 Local variable `e_minus` is assigned to but never used
+   |
+51 |         e_plus = avg_e + splitting
+52 |         e_minus = avg_e - splitting
+   |         ^^^^^^^ F841
+53 |
+54 |         rabi_splitting = 2 * splitting
+   |
+   = help: Remove assignment to unused variable `e_minus`
+
+src/talos/geometric_core/schumann.py:5:26: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import math
+4 | import time
+5 | from typing import List, Optional
+  |                          ^^^^^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import: `typing.Optional`
+
+src/talos/geometric_core/semantic_query.py:5:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import asyncio
+4 | import time
+5 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+6 |
+7 | from talos.geometric_core.ontology import OntologyGraph
+  |
+  = help: Remove unused import: `typing.Optional`
+
+src/talos/geometric_core/semantic_query.py:48:9: F841 Local variable `phi` is assigned to but never used
+   |
+47 |         latency = (time.time() - start_time) * 1000
+48 |         phi = self.performance_monitor.calculate_phi_score(latency, 0.98 if results else 0.90)
+   |         ^^^ F841
+49 |         return results
+   |
+   = help: Remove assignment to unused variable `phi`
+
+src/talos/geometric_core/shell_dynamics.py:3:20: F401 [*] `typing.Any` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                    ^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/shell_dynamics.py:3:25: F401 [*] `typing.Dict` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                         ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/shell_dynamics.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/symbiosis.py:3:8: F401 [*] `time` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import time
+  |        ^^^^ F401
+4 | from enum import Enum
+5 | from typing import Any, Dict, List, Optional
+  |
+  = help: Remove unused import: `time`
+
+src/talos/geometric_core/symbiosis.py:5:31: F401 [*] `typing.List` imported but unused
+  |
+3 | import time
+4 | from enum import Enum
+5 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/symbiosis.py:5:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import time
+4 | from enum import Enum
+5 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+6 |
+7 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/training.py:3:20: F401 [*] `typing.Any` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                    ^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/training.py:3:25: F401 [*] `typing.Dict` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                         ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/training.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/geometric_core/training.py:6:45: F401 [*] `pydantic.Field` imported but unused
+  |
+5 | import numpy as np
+6 | from pydantic import BaseModel, ConfigDict, Field
+  |                                             ^^^^^ F401
+  |
+  = help: Remove unused import: `pydantic.Field`
+
+src/talos/geometric_intuition/ph1_core_init.py:7:26: F401 [*] `typing.Optional` imported but unused
+  |
+5 | """
+6 |
+7 | from typing import Dict, Optional, Tuple
+  |                          ^^^^^^^^ F401
+8 |
+9 | import networkx as nx
+  |
+  = help: Remove unused import
+
+src/talos/geometric_intuition/ph1_core_init.py:7:36: F401 [*] `typing.Tuple` imported but unused
+  |
+5 | """
+6 |
+7 | from typing import Dict, Optional, Tuple
+  |                                    ^^^^^ F401
+8 |
+9 | import networkx as nx
+  |
+  = help: Remove unused import
+
+src/talos/geometric_intuition/ph1_core_init.py:9:20: F401 [*] `networkx` imported but unused
+   |
+ 7 | from typing import Dict, Optional, Tuple
+ 8 |
+ 9 | import networkx as nx
+   |                    ^^ F401
+10 | import numpy as np
+11 | import torch
+   |
+   = help: Remove unused import: `networkx`
+
+src/talos/geometric_intuition/ph1_core_init.py:12:20: F401 [*] `torch.nn` imported but unused
+   |
+10 | import numpy as np
+11 | import torch
+12 | import torch.nn as nn
+   |                    ^^ F401
+13 | from scipy.sparse.linalg import eigs
+   |
+   = help: Remove unused import: `torch.nn`
+
+src/talos/geometric_intuition/ph1_core_init.py:13:33: F401 [*] `scipy.sparse.linalg.eigs` imported but unused
+   |
+11 | import torch
+12 | import torch.nn as nn
+13 | from scipy.sparse.linalg import eigs
+   |                                 ^^^^ F401
+   |
+   = help: Remove unused import: `scipy.sparse.linalg.eigs`
+
+src/talos/geometric_intuition/ph1_core_init.py:49:15: F541 [*] f-string without any placeholders
+   |
+47 |         self.metatron_cube = self.generate_metatron_cube()
+48 |
+49 |         print(f"🌀 Geometric Core initialized with:")
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ F541
+50 |         print(f"   • Dimensions: {self.dimensions}")
+51 |         print(f"   • Recursion depth: {self.recursion_depth}")
+   |
+   = help: Remove extraneous `f` prefix
+
+src/talos/harmonia/economic_geometry.py:4:31: F401 [*] `typing.List` imported but unused
+  |
+3 | from dataclasses import dataclass
+4 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/economic_geometry.py:4:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | from dataclasses import dataclass
+4 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/engine.py:3:31: F401 [*] `typing.List` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+4 |
+5 | from .factory import create_forest_simplex
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/engine.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | from .factory import create_forest_simplex
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/engine.py:6:31: F401 [*] `.semantic_network.UnifiedSemanticNetwork` imported but unused
+  |
+5 | from .factory import create_forest_simplex
+6 | from .semantic_network import UnifiedSemanticNetwork
+  |                               ^^^^^^^^^^^^^^^^^^^^^^ F401
+  |
+  = help: Remove unused import: `.semantic_network.UnifiedSemanticNetwork`
+
+src/talos/harmonia/geometric_algebra.py:1:20: F401 [*] `typing.Dict` imported but unused
+  |
+1 | from typing import Dict, List
+  |                    ^^^^ F401
+2 |
+3 | import numpy as np
+  |
+  = help: Remove unused import: `typing.Dict`
+
+src/talos/harmonia/gestalt_ontology.py:8:42: F401 [*] `typing.Set` imported but unused
+   |
+ 6 | from dataclasses import dataclass
+ 7 | from enum import Enum
+ 8 | from typing import Dict, List, Optional, Set, Tuple
+   |                                          ^^^ F401
+ 9 |
+10 | import networkx as nx
+   |
+   = help: Remove unused import
+
+src/talos/harmonia/gestalt_ontology.py:8:47: F401 [*] `typing.Tuple` imported but unused
+   |
+ 6 | from dataclasses import dataclass
+ 7 | from enum import Enum
+ 8 | from typing import Dict, List, Optional, Set, Tuple
+   |                                               ^^^^^ F401
+ 9 |
+10 | import networkx as nx
+   |
+   = help: Remove unused import
+
+src/talos/harmonia/gestalt_ontology.py:424:17: F841 Local variable `rotation` is assigned to but never used
+    |
+422 |                 density = pde_result["density"][i].item()
+423 |                 phase = pde_result["phase"][i].item()
+424 |                 rotation = torch.tensor([[np.cos(phase), -np.sin(phase)], [np.sin(phase), np.cos(phase)]])
+    |                 ^^^^^^^^ F841
+425 |                 # vertex.intentional_vector = rotation @ vertex.intentional_vector # simplified
+426 |                 vertex.embodied_vector *= density
+    |
+    = help: Remove assignment to unused variable `rotation`
+
+src/talos/harmonia/schema.py:4:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | from enum import Enum
+4 | from typing import Any, Dict, List, Optional, Set
+  |                                     ^^^^^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/schema.py:4:47: F401 [*] `typing.Set` imported but unused
+  |
+3 | from enum import Enum
+4 | from typing import Any, Dict, List, Optional, Set
+  |                                               ^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/semantic_network.py:3:20: F401 [*] `typing.Any` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional, Set, Tuple
+  |                    ^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/semantic_network.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional, Set, Tuple
+  |                                     ^^^^^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/harmonia/semantic_network.py:5:17: F401 [*] `numpy` imported but unused
+  |
+3 | from typing import Any, Dict, List, Optional, Set, Tuple
+4 |
+5 | import numpy as np
+  |                 ^^ F401
+6 |
+7 | from .geometric_algebra import GeometricAlgebra
+  |
+  = help: Remove unused import: `numpy`
+
+src/talos/harmonia/symmetry_breaker.py:4:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | from dataclasses import dataclass
+4 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import: `typing.Optional`
+
+src/talos/harmonia/symmetry_breaker.py:7:8: F401 [*] `torch` imported but unused
+  |
+6 | import numpy as np
+7 | import torch
+  |        ^^^^^ F401
+8 | import torch.nn as nn
+  |
+  = help: Remove unused import: `torch`
+
+src/talos/harmonia/symmetry_breaker.py:66:43: F821 Undefined name `EconomicState`
+   |
+64 |         super().__init__()
+65 |
+66 |     def identify_symmetries(self, state: "EconomicState") -> List[Dict[str, Any]]:
+   |                                           ^^^^^^^^^^^^^ F821
+67 |         symmetries = []
+   |
+
+src/talos/harmonia/symmetry_breaker.py:94:38: F821 Undefined name `EconomicState`
+   |
+92 |         return symmetries
+93 |
+94 |     def apply_breaking(self, state: "EconomicState", intention: IntentionVector) -> "EconomicState":
+   |                                      ^^^^^^^^^^^^^ F821
+95 |         symmetries = self.identify_symmetries(state)
+96 |         target_intention = intention.embed(["redistribute", "regenerate", "enable"])
+   |
+
+src/talos/harmonia/symmetry_breaker.py:94:86: F821 Undefined name `EconomicState`
+   |
+92 |         return symmetries
+93 |
+94 |     def apply_breaking(self, state: "EconomicState", intention: IntentionVector) -> "EconomicState":
+   |                                                                                      ^^^^^^^^^^^^^ F821
+95 |         symmetries = self.identify_symmetries(state)
+96 |         target_intention = intention.embed(["redistribute", "regenerate", "enable"])
+   |
+
+src/talos/logos/genesis_garden.py:6:26: F401 [*] `typing.Optional` imported but unused
+  |
+5 | from datetime import datetime
+6 | from typing import List, Optional, Set
+  |                          ^^^^^^^^ F401
+  |
+  = help: Remove unused import: `typing.Optional`
+
+src/talos/ontolab/cosmopsychia.py:3:8: F401 [*] `asyncio` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import asyncio
+  |        ^^^^^^^ F401
+4 | from typing import Any, Dict, List, Optional
+  |
+  = help: Remove unused import: `asyncio`
+
+src/talos/ontolab/cosmopsychia.py:4:31: F401 [*] `typing.List` imported but unused
+  |
+3 | import asyncio
+4 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/cosmopsychia.py:4:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import asyncio
+4 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/cosmopsychia.py:7:45: F401 [*] `pydantic.Field` imported but unused
+  |
+6 | import numpy as np
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |                                             ^^^^^ F401
+  |
+  = help: Remove unused import: `pydantic.Field`
+
+src/talos/ontolab/eternal_flower.py:3:8: F401 [*] `asyncio` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import asyncio
+  |        ^^^^^^^ F401
+4 | from typing import Any, Dict, List, Optional
+  |
+  = help: Remove unused import: `asyncio`
+
+src/talos/ontolab/eternal_flower.py:4:31: F401 [*] `typing.List` imported but unused
+  |
+3 | import asyncio
+4 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+5 |
+6 | from pydantic import BaseModel, ConfigDict
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/eternal_flower.py:4:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import asyncio
+4 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+5 |
+6 | from pydantic import BaseModel, ConfigDict
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/eternal_flower.py:6:33: F401 [*] `pydantic.ConfigDict` imported but unused
+  |
+4 | from typing import Any, Dict, List, Optional
+5 |
+6 | from pydantic import BaseModel, ConfigDict
+  |                                 ^^^^^^^^^^ F401
+  |
+  = help: Remove unused import: `pydantic.ConfigDict`
+
+src/talos/ontolab/intuition.py:3:31: F401 [*] `typing.List` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/intuition.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/intuition.py:5:17: F401 [*] `numpy` imported but unused
+  |
+3 | from typing import Any, Dict, List, Optional
+4 |
+5 | import numpy as np
+  |                 ^^ F401
+6 | from pydantic import BaseModel, ConfigDict
+  |
+  = help: Remove unused import: `numpy`
+
+src/talos/ontolab/lab.py:3:31: F401 [*] `typing.List` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+4 |
+5 | from pydantic import BaseModel, ConfigDict
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/lab.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | from pydantic import BaseModel, ConfigDict
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/morphology.py:3:20: F401 [*] `typing.Any` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                    ^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/morphology.py:3:25: F401 [*] `typing.Dict` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                         ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/morphology.py:3:31: F401 [*] `typing.List` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/ontolab/morphology.py:3:37: F401 [*] `typing.Optional` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+4 |
+5 | import numpy as np
+  |
+  = help: Remove unused import
+
+src/talos/services/concordance_service.py:3:8: F401 [*] `asyncio` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import asyncio
+  |        ^^^^^^^ F401
+4 | import time
+5 | from typing import Any, Dict, List, Optional
+  |
+  = help: Remove unused import: `asyncio`
+
+src/talos/services/concordance_service.py:5:31: F401 [*] `typing.List` imported but unused
+  |
+3 | import asyncio
+4 | import time
+5 | from typing import Any, Dict, List, Optional
+  |                               ^^^^ F401
+6 |
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import
+
+src/talos/services/concordance_service.py:5:37: F401 [*] `typing.Optional` imported but unused
+  |
+3 | import asyncio
+4 | import time
+5 | from typing import Any, Dict, List, Optional
+  |                                     ^^^^^^^^ F401
+6 |
+7 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import
+
+src/talos/services/portals.py:4:32: F401 [*] `typing.Optional` imported but unused
+  |
+3 | from enum import Enum
+4 | from typing import Dict, List, Optional
+  |                                ^^^^^^^^ F401
+5 |
+6 | from pydantic import BaseModel, ConfigDict, Field
+  |
+  = help: Remove unused import: `typing.Optional`
+
+src/talos/strategy/economic_checkpoint.py:4:20: F401 [*] `typing.List` imported but unused
+  |
+3 | from enum import Enum
+4 | from typing import List, Optional
+  |                    ^^^^ F401
+5 |
+6 | from pydantic import BaseModel
+  |
+  = help: Remove unused import
+
+src/talos/strategy/economic_checkpoint.py:4:26: F401 [*] `typing.Optional` imported but unused
+  |
+3 | from enum import Enum
+4 | from typing import List, Optional
+  |                          ^^^^^^^^ F401
+5 |
+6 | from pydantic import BaseModel
+  |
+  = help: Remove unused import
+
+tests/test_aigmi_integration.py:3:8: F401 [*] `asyncio` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import asyncio
+  |        ^^^^^^^ F401
+4 | from unittest.mock import MagicMock
+  |
+  = help: Remove unused import: `asyncio`
+
+tests/test_aigmi_integration.py:14:43: F401 [*] `talos.geometric_core.merkabah.EnhancedMerkabahOrchestrator` imported but unused
+   |
+12 | from talos.geometric_core.experiments import ValidationRegistry
+13 | from talos.geometric_core.love_gravity import LoveGravityCorrelator
+14 | from talos.geometric_core.merkabah import EnhancedMerkabahOrchestrator
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ F401
+   |
+   = help: Remove unused import: `talos.geometric_core.merkabah.EnhancedMerkabahOrchestrator`
+
+tests/test_coherence_stress_redistribution.py:1:8: F401 [*] `json` imported but unused
+  |
+1 | import json
+  |        ^^^^ F401
+2 |
+3 | import numpy as np
+  |
+  = help: Remove unused import: `json`
+
+tests/test_harmonia_system.py:1:17: F401 [*] `numpy` imported but unused
+  |
+1 | import numpy as np
+  |                 ^^ F401
+2 | import pytest
+  |
+  = help: Remove unused import: `numpy`
+
+tests/test_harmonia_system.py:2:8: F401 [*] `pytest` imported but unused
+  |
+1 | import numpy as np
+2 | import pytest
+  |        ^^^^^^ F401
+3 |
+4 | from talos.harmonia.engine import HarmoniaEngine
+  |
+  = help: Remove unused import: `pytest`
+
+tests/test_harmonia_system.py:5:35: F401 [*] `talos.harmonia.schema.ContextDomain` imported but unused
+  |
+4 | from talos.harmonia.engine import HarmoniaEngine
+5 | from talos.harmonia.schema import ContextDomain
+  |                                   ^^^^^^^^^^^^^ F401
+  |
+  = help: Remove unused import: `talos.harmonia.schema.ContextDomain`
+
+tests/test_intention.py:3:8: F401 [*] `asyncio` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import asyncio
+  |        ^^^^^^^ F401
+4 | from unittest.mock import MagicMock
+  |
+  = help: Remove unused import: `asyncio`
+
+tests/test_intention.py:9:33: F401 [*] `talos.core.identity.IdentityManager` imported but unused
+   |
+ 7 | from langchain_core.language_models import BaseChatModel
+ 8 |
+ 9 | from talos.core.identity import IdentityManager
+   |                                 ^^^^^^^^^^^^^^^ F401
+10 | from talos.core.main_agent import MainAgent
+   |
+   = help: Remove unused import: `talos.core.identity.IdentityManager`
+
+tests/test_logos_consensus.py:2:8: F401 [*] `pytest` imported but unused
+  |
+1 | import numpy as np
+2 | import pytest
+  |        ^^^^^^ F401
+3 |
+4 | from talos.core.logos import SovereignAGI, ValueMarket, ValueProposal
+  |
+  = help: Remove unused import: `pytest`
+
+tests/test_planetary_consensus.py:3:8: F401 [*] `asyncio` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import asyncio
+  |        ^^^^^^^ F401
+4 | from unittest.mock import MagicMock
+  |
+  = help: Remove unused import: `asyncio`
+
+tests/test_symbiosis.py:3:8: F401 [*] `pytest` imported but unused
+  |
+1 | from __future__ import annotations
+2 |
+3 | import pytest
+  |        ^^^^^^ F401
+4 |
+5 | from talos.geometric_core.symbiosis import SymbiosisEngine, SymbiosisState
+  |
+  = help: Remove unused import: `pytest`
+
+tests/test_symbiosis.py:5:61: F401 [*] `talos.geometric_core.symbiosis.SymbiosisState` imported but unused
+  |
+3 | import pytest
+4 |
+5 | from talos.geometric_core.symbiosis import SymbiosisEngine, SymbiosisState
+  |                                                             ^^^^^^^^^^^^^^ F401
+  |
+  = help: Remove unused import: `talos.geometric_core.symbiosis.SymbiosisState`
+
+Found 198 errors.
+[*] 168 fixable with the `--fix` option (9 hidden fixes can be enabled with the `--unsafe-fixes` option).

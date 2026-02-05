@@ -1,26 +1,23 @@
 {
-    "editor.formatOnSave": true,
-    "editor.rulers": [
-        88
-    ],
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true,
-    "python.analysis.typeCheckingMode": "strict",
-    "python.linting.enabled": true,
-    "python.linting.mypyEnabled": true,
-    "python.linting.ruffEnabled": true,
-    "python.formatting.provider": "ruff",
-    "[python]": {
-        "editor.defaultFormatter": "charliermarsh.ruff",
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "explicit",
-            "source.organizeImports": "explicit"
-        }
-    },
-    "ruff.lint.ignore": [
-        "E704"
-    ]
+  "workbench.colorTheme": "Default Dark+",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#1a1a2e",
+    "statusBar.background": "#16213e",
+    "editor.background": "#0f3460"
+  },
+  "harmonia.geometric.enabled": true,
+  "harmonia.pinn.autocomplete": true,
+  "harmonia.meditation.reminders": true,
+  "harmonia.hotMess.threshold": 0.6,
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.typeCheckingMode": "basic",
+  "editor.fontSize": 14,
+  "editor.fontFamily": "'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace",
+  "editor.formatOnSave": true,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.py": "${capture}.py, ${capture}_test.py, ${capture}_pinn.py",
+    "cosmopsychia_pinn.py": "pinn_api_*.py, *resonance*.py"
+  }
 }

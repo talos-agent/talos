@@ -2,18 +2,19 @@ import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.messages import BaseMessage, messages_from_dict, messages_to_dict
 
 if TYPE_CHECKING:
     from langgraph.store.memory import InMemoryStore
-    from langmem import create_memory_store_manager, create_memory_manager
+    from langmem import create_memory_manager, create_memory_store_manager
 
 try:
     from langgraph.store.memory import InMemoryStore
-    from langmem import create_memory_store_manager, create_memory_manager
+    from langmem import create_memory_manager, create_memory_store_manager
+
     LANGMEM_AVAILABLE = True
 except ImportError:
     InMemoryStore = Any  # type: ignore
@@ -49,8 +50,8 @@ class Memory:
         verbose: Union[bool, int] = False,
         similarity_threshold: float = 0.85,
     ):
-        self.file_path = file_path
-        self.history_file_path = history_file_path
+        self.file_path = Path(file_path) if file_path else None
+        self.history_file_path = Path(history_file_path) if history_file_path else None
         self.embeddings_model = embeddings_model
         self.batch_size = batch_size
         self.auto_save = auto_save
@@ -64,7 +65,7 @@ class Memory:
         self._langmem_manager = None
         self._store = None
         self._db_backend = None
-        
+
         if self.use_database and LANGMEM_AVAILABLE and self.embeddings_model:
             self._setup_langmem_sqlite()
         elif self.use_database and not LANGMEM_AVAILABLE and self.file_path:
@@ -73,7 +74,9 @@ class Memory:
             self.use_database = False
             self._setup_langmem_file()
         elif self.use_database:
-            raise ValueError("Database backend requested but LangMem is not available. Please install langmem or use file-based storage.")
+            raise ValueError(
+                "Database backend requested but LangMem is not available. Please install langmem or use file-based storage."
+            )
         elif not self.use_database and self.file_path:
             self._setup_langmem_file()
         else:
@@ -93,21 +96,16 @@ class Memory:
                 print("⚠ LangMem not available, cannot use database backend")
             raise ValueError("LangMem is required for database backend but is not available")
             return
-            
+
         try:
-            self._store = InMemoryStore(
-                index={
-                    "dims": 1536,
-                    "embed": "openai:text-embedding-3-small"
-                }
-            )
-            
+            self._store = InMemoryStore(index={"dims": 1536, "embed": "openai:text-embedding-3-small"})
+
             self._langmem_manager = create_memory_store_manager(
-                "gpt-5",
+                "openai:gpt-4o",
                 namespace=("memories", self.user_id or "default"),
-                store=self._store
+                store=self._store,
             )
-            
+
             if self._get_verbose_level() >= 1:
                 print("✓ LangMem initialized with SQLite backend")
         except Exception as e:
@@ -126,15 +124,15 @@ class Memory:
                     self.file_path.write_text("[]")
                 self._load_file_memories()
             return
-            
+
         try:
-            self._langmem_manager = create_memory_manager("gpt-5")
+            self._langmem_manager = create_memory_manager("openai:gpt-4o")
             if self.file_path:
                 self.file_path.parent.mkdir(parents=True, exist_ok=True)
                 if not self.file_path.exists():
                     self.file_path.write_text("[]")
                 self._load_file_memories()
-            
+
             if self._get_verbose_level() >= 1:
                 print("✓ LangMem initialized with file backend")
         except Exception as e:
@@ -164,7 +162,7 @@ class Memory:
                 config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
                 conversation = [{"role": "user", "content": description}]
                 await self._langmem_manager.ainvoke({"messages": conversation}, config=config)
-                
+
                 if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved: {description}")
             except Exception as e:
@@ -174,7 +172,7 @@ class Memory:
             try:
                 conversation = [{"role": "user", "content": description}]
                 await self._langmem_manager.ainvoke({"messages": conversation})
-                
+
                 memory = MemoryRecord(
                     timestamp=time.time(),
                     description=description,
@@ -182,10 +180,10 @@ class Memory:
                 )
                 self.memories.append(memory)
                 self._unsaved_count += 1
-                
+
                 if self.auto_save and self._unsaved_count >= self.batch_size:
                     self.flush()
-                
+
                 if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved: {description}")
             except Exception as e:
@@ -199,10 +197,10 @@ class Memory:
             )
             self.memories.append(memory)
             self._unsaved_count += 1
-            
+
             if self.auto_save and self._unsaved_count >= self.batch_size:
                 self.flush()
-            
+
             if self._get_verbose_level() >= 1:
                 print(f"✓ Memory saved (fallback): {description}")
 
@@ -213,7 +211,7 @@ class Memory:
                 config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
                 conversation = [{"role": "user", "content": description}]
                 self._langmem_manager.invoke({"messages": conversation}, config=config)
-                
+
                 if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved to LangMem store: {description}")
             except Exception as e:
@@ -226,14 +224,14 @@ class Memory:
                 )
                 self.memories.append(memory)
                 self._unsaved_count += 1
-                
+
                 if self.auto_save and self._unsaved_count >= self.batch_size:
                     self.flush()
         elif self._langmem_manager:
             try:
                 conversation = [{"role": "user", "content": description}]
                 self._langmem_manager.invoke({"messages": conversation})
-                
+
                 memory = MemoryRecord(
                     timestamp=time.time(),
                     description=description,
@@ -241,10 +239,10 @@ class Memory:
                 )
                 self.memories.append(memory)
                 self._unsaved_count += 1
-                
+
                 if self.auto_save and self._unsaved_count >= self.batch_size:
                     self.flush()
-                
+
                 if self._get_verbose_level() >= 1:
                     print(f"✓ Memory saved to LangMem: {description}")
             except Exception as e:
@@ -257,7 +255,7 @@ class Memory:
                 )
                 self.memories.append(memory)
                 self._unsaved_count += 1
-                
+
                 if self.auto_save and self._unsaved_count >= self.batch_size:
                     self.flush()
         else:
@@ -268,10 +266,10 @@ class Memory:
             )
             self.memories.append(memory)
             self._unsaved_count += 1
-            
+
             if self.auto_save and self._unsaved_count >= self.batch_size:
                 self.flush()
-            
+
             if self._get_verbose_level() >= 1:
                 print(f"✓ Memory saved (fallback): {description}")
 
@@ -281,15 +279,17 @@ class Memory:
             try:
                 config = {"configurable": {"langgraph_user_id": self.user_id or "default"}}
                 results = await self._langmem_manager.asearch(query=query, config=config)
-                
+
                 memory_records = []
                 for result in results[:k]:
-                    memory_records.append(MemoryRecord(
-                        timestamp=time.time(),
-                        description=str(result),
-                        metadata={},
-                    ))
-                
+                    memory_records.append(
+                        MemoryRecord(
+                            timestamp=time.time(),
+                            description=str(result),
+                            metadata={},
+                        )
+                    )
+
                 verbose_level = self._get_verbose_level()
                 if verbose_level >= 1 and memory_records:
                     print(f"🔍 Memory search: found {len(memory_records)} relevant memories")
@@ -298,7 +298,7 @@ class Memory:
                             print(f"  {i}. {memory.description}")
                             if memory.metadata:
                                 print(f"     Metadata: {memory.metadata}")
-                
+
                 return memory_records
             except Exception as e:
                 verbose_level = self._get_verbose_level()
@@ -311,18 +311,19 @@ class Memory:
         else:
             if not self.memories:
                 return []
-            
+
             results = []
             query_lower = query.lower()
             for memory in self.memories:
                 if query_lower in memory.description.lower():
                     results.append(memory)
-            
+
             return results[:k]
 
     def search(self, query: str, k: int = 5) -> List[MemoryRecord]:
         """Search with backward compatibility."""
         import asyncio
+
         try:
             return asyncio.run(self.search_async(query, k))
         except Exception:

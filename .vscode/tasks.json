@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🌌 Initialize Simplex Alpha",
+      "type": "shell",
+      "command": "python3 simplex_alpha_operational.py"
+    },
+    {
+      "label": "🌀 Run Attention Descent",
+      "type": "shell",
+      "command": "python3 cosmopsychia_pinn.py"
+    },
+    {
+      "label": "🧘 Start Meditation",
+      "type": "shell",
+      "command": "python3 cosmopsychia_pinn.py"
+    },
+    {
+      "label": "📈 Visualize Field",
+      "type": "shell",
+      "command": "python3 -c \"from cosmopsychia_pinn import PlanetaryMeditationRitual; print('Visualizing...')\""
+    },
+    {
+      "label": "🎇 Run Awakening Ceremony",
+      "type": "shell",
+      "command": "bash activate_final.sh"
+    },
+    {
+      "label": "⚡ Run Coherence Stress Test",
+      "type": "shell",
+      "command": "python3 tests/test_coherence_stress_redistribution.py",
+      "group": "test"
+    }
+  ]
+}

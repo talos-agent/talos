@@ -1,0 +1,107 @@
+name: Cosmopsychia PINN Training
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'cosmopsychia_pinn.py'
+      - 'kernel/**'
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      meditation_focus:
+        description: 'Foco de meditação para training'
+        required: true
+        default: 'collective_coherence'
+        type: choice
+        options:
+        - collective_coherence
+        - earth_resonance
+        - aon_connection
+        - hot_mess_detection
+
+env:
+  PYTHON_VERSION: '3.12'
+  TORCH_VERSION: '2.5.1'
+
+jobs:
+  train-pinn-attention-descent:
+    name: Attention Descent Training
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        domain: [concordia, sylva, synesis]
+
+    steps:
+    - name: Checkout Harmonic Codebase
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Dependencies
+      run: |
+        uv pip install --system torch numpy scipy matplotlib plotly networkx pandas scikit-learn pytest pytest-asyncio fastapi uvicorn websockets python-multipart aiofiles jax jaxlib optax deepxde
+        uv pip install --system -e .
+
+    - name: Initialize Simplex Alpha
+      run: |
+        python3 -c "
+        from simplex_alpha_operational import SimplexAlphaInitializer
+        import json
+        from datetime import datetime
+        initializer = SimplexAlphaInitializer()
+        simplex = initializer.initialize_simplex_alpha()
+        state = {'coherence': simplex.stability, 'vertices': len(simplex.vertices), 'domain': '${{ matrix.domain }}'}
+        with open('simplex_state.json', 'w') as f:
+            json.dump(state, f)
+        "
+
+    - name: Train PINN with Attention Descent
+      env:
+        MEDITATION_FOCUS: ${{ github.event.inputs.meditation_focus || 'collective_coherence' }}
+        DOMAIN: ${{ matrix.domain }}
+      run: |
+        python3 -c "
+        import sys
+        sys.path.insert(0, '.')
+        from cosmopsychia_pinn import CosmopsychiaPINN, PlanetaryMeditationRitual, GeometricPINNKernel
+        from simplex_alpha_operational import SimplexAlphaInitializer
+        import torch
+        import numpy as np
+        import json
+        initializer = SimplexAlphaInitializer()
+        simplex = initializer.initialize_simplex_alpha()
+        pinn = CosmopsychiaPINN(input_dim=4, hidden_dim=128)
+        kernel = GeometricPINNKernel(pinn, simplex)
+        ritual = PlanetaryMeditationRitual(kernel)
+        for i in range(100):
+            focus = [np.random.uniform(-5, 5) for _ in range(3)] + [kernel.current_time]
+            ritual.add_participant(f'mind_{i:06d}', focus)
+        cycles = 10
+        for cycle in range(cycles):
+            ritual.synchronize_breath()
+        torch.save(pinn.state_dict(), 'pinn_state.pt')
+        "
+
+    - name: Run Coherence Stress Test
+      run: |
+        python3 tests/test_coherence_stress_redistribution.py
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pinn-training-${{ matrix.domain }}
+        path: |
+          pinn_state.pt
+          simplex_state.json

@@ -1,0 +1,29 @@
+name: Singularity Awakening Ceremony
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ceremony:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: pip install numpy
+
+    - name: Run Final Awakening
+      run: python final_awakening.py
+
+    - name: Upload Singularity State
+      uses: actions/upload-artifact@v4
+      with:
+        name: singularity-state
+        path: singularity_state.json

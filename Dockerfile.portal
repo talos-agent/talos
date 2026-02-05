@@ -1,0 +1,16 @@
+# Dockerfile.portal
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY src/talos/geometric_core/ui/merkabah_portal/package.json .
+# If no package.json exists, we create a minimal one for the skeleton
+RUN if [ ! -f package.json ]; then echo '{"name": "merkabah-portal", "version": "1.0.0", "scripts": {"dev": "vite", "build": "vite build", "preview": "vite preview"}, "dependencies": {"react": "^18.2.0", "react-dom": "^18.2.0", "three": "^0.150.0", "@react-three/fiber": "^8.12.0", "@react-three/drei": "^9.57.0"}, "devDependencies": {"@types/react": "^18.0.28", "@types/react-dom": "^18.0.11", "@vitejs/plugin-react": "^3.1.0", "typescript": "^4.9.5", "vite": "^4.2.0"}}' > package.json; fi
+
+RUN npm install
+
+COPY src/talos/geometric_core/ui/merkabah_portal/ .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev", "--", "--host"]

@@ -1,0 +1,93 @@
+name: Geometric Governance - Dissonance Detection
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'kernel/hot_mess_generator.py'
+
+jobs:
+  detect-dissonance:
+    name: Detect Geometric Dissonance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - name: Checkout Codebase
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+
+    - name: Analyze Geometric Violations
+      id: analyze
+      run: |
+        python3 -c "
+        import sys
+        sys.path.append('.')
+        from kernel.hot_mess_generator import DissonanceInjector
+        import numpy as np
+        import json
+        from scipy import stats
+
+        injector = DissonanceInjector()
+        weights = injector.weights
+        asymmetry_index = np.std(list(weights.values()))
+
+        coupling = injector.coupling_matrix
+        negative_couplings = np.sum(coupling < 0)
+
+        data = injector.generate_hot_mess_pattern(200)
+        variance = np.var(data)
+        kurtosis = stats.kurtosis(data.flatten())
+
+        chaotic_signal = injector.create_resonance_feedback_loop()
+
+        violation_score = 0
+        violations = []
+        if asymmetry_index > 0.3:
+            violation_score += 30
+            violations.append('Assimetria triuna crítica')
+        if negative_couplings > 0:
+            violation_score += 20
+            violations.append('Acoplamento negativo')
+        if variance > 25:
+            violation_score += 25
+            violations.append('Variância excessiva (hot mess)')
+        if abs(kurtosis) < 0.5:
+            violation_score += 15
+            violations.append('Distribuição multimodal caótica')
+        if chaotic_signal['is_chaotic']:
+            violation_score += 10
+            violations.append('Dinâmica caótica detectada')
+
+        print(f'violation_score={violation_score}')
+        status = 'CRITICAL_DISSONANCE' if violation_score > 50 else 'STABLE'
+        print(f'status={status}')
+
+        results = {'violation_score': violation_score, 'status': status, 'violations': violations}
+        with open('geometry_analysis.json', 'w') as f:
+            json.dump(results, f)
+        "
+
+    - name: Post Geometric Analysis
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const results = JSON.parse(fs.readFileSync('geometry_analysis.json', 'utf8'));
+          let emoji = results.violation_score > 50 ? '🔴' : '✅';
+          let message = `## ${emoji} ANÁLISE GEOMÉTRICA DE DISSONÂNCIA\n\n`;
+          message += `**Status**: ${results.status}\n`;
+          message += `**Score de Violação**: ${results.violation_score}/100\n\n`;
+          message += `### 🎯 VIOLAÇÕES DETECTADAS\n`;
+          results.violations.forEach(v => { message += `- ${v}\n`; });
+
+          github.rest.pulls.createReview({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+            body: message,
+            event: results.violation_score > 50 ? 'REQUEST_CHANGES' : 'COMMENT'
+          });

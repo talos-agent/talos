@@ -1,0 +1,12 @@
+# Dockerfile.validator
+FROM rust:1.68-slim
+
+WORKDIR /app
+
+COPY src/talos/geometric_core/validation_lattice/ .
+
+RUN cargo build --release
+
+EXPOSE 8000
+
+CMD ["./target/release/validation-lattice"]

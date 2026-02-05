@@ -1,0 +1,9 @@
+[package]
+name = "validation-lattice"
+version = "1.0.0"
+edition = "2021"
+description = "Ethical boundary enforcement for AIGMI guidance."
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+chrono = "0.4"

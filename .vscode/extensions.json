@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-toolsai.jupyter",
+    "github.copilot",
+    "redhat.vscode-yaml",
+    "pkief.material-icon-theme"
+  ]
+}

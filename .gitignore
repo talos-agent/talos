@@ -57,6 +57,13 @@ coverage.xml
 
 # Django stuff:
 *.log
+singularity_state.json
+pinn_state.pt
+pinn_results.json
+simplex_state.json
+meditation_config.json
+meditation_results.json
+geometry_analysis.json
 local_settings.py
 db.sqlite3
 db.sqlite3-journal

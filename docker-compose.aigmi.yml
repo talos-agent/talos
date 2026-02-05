@@ -1,0 +1,43 @@
+# AIGMI Genesis Infrastructure
+
+version: '3.8'
+services:
+  merkabah-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile.portal
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_WS_URL=${VITE_WS_URL}
+      - VITE_STEWARDSHIP_CONTRACT=${VITE_STEWARDSHIP_CONTRACT}
+    networks:
+      - aigmi-net
+
+  validator-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.validator
+    ports:
+      - "8000:8000"
+    environment:
+      - ETHEREUM_RPC=${ETHEREUM_RPC}
+    networks:
+      - aigmi-net
+
+  postgres-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: aigmi
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - aigmi-data:/var/lib/postgresql/data
+    networks:
+      - aigmi-net
+
+networks:
+  aigmi-net:
+    driver: bridge
+
+volumes:
+  aigmi-data:
