@@ -71,3 +71,15 @@ class MetabolicSystem(BaseModel):
             "balances": balances,
             "status": "HOMEOSTÁTICO" if torch.abs(net_balance).mean() < 0.1 else "DYN_UNSTABLE"
         }
+
+class MetabolicGDLService:
+    """Service for performing metabolic surveys."""
+    def perform_metabolic_survey(self, user_id: str) -> dict:
+        system = MetabolicSystem()
+        analysis = system.run_metabolic_analysis()
+        return {
+            "user_id": user_id,
+            "cellular_coherence": 0.95 if analysis["status"] == "HOMEOSTÁTICO" else 0.42,
+            "transport_efficiency": 0.88,
+            "message": f"Metabolic status: {analysis['status']}"
+        }

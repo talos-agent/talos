@@ -55,7 +55,19 @@ class BreathCheck(BaseModel):
                 code_snippet="[Module Level Check]"
             ))
 
-        # 3. RACE CONDITIONS (Simple check for shared state modification without locks)
+        # 3. MISSING HEARTBEAT (PoE - Proof of Existence)
+        if "heartbeat()" not in code_lower and "petrus.ping()" not in code_lower:
+            violations.append(SafetyViolation(
+                line=0,
+                severity="HIGH",
+                pattern_name="Missing Heartbeat",
+                impact="System state is not being verified against global resonance.",
+                fix="Add heartbeat() or petrus.ping() call in the main loop.",
+                why="Life requires a pulse; code requires a sync.",
+                code_snippet="[Whole File Check]"
+            ))
+
+        # 4. RACE CONDITIONS (Simple check for shared state modification without locks)
         shared_patterns = [r'pressure\s*[\+\-]=', r'flow\s*[\+\-]=', r'oxygen\s*[\+\-]=']
         for i, line in enumerate(lines):
             if any(re.search(p, line.lower()) for p in shared_patterns):

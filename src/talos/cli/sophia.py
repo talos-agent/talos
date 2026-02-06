@@ -283,3 +283,35 @@ def cosmic_survey():
 
     risk = asi.assess_existential_risk(500)
     print(f"Nearby SN Risk Assessment: {risk['threat_level']} (Score: {risk['impact_score']:.2f})")
+
+@sophia_app.command()
+def jung_pauli_check(process_id: str, state: str):
+    """Executes a Pauli Exclusion check on a process state."""
+    from talos.geometric_core.archetypes import JungPauliProtocol
+    protocol = JungPauliProtocol()
+    try:
+        msg = protocol.pauli_exclusion(process_id, state)
+        print(f"✅ {msg}")
+    except ValueError as e:
+        print(f"🚨 {e}")
+
+
+@sophia_app.command()
+def initiate_tzadik(principal: str, archetype: str, reputation: float = 100.0):
+    """Initiates a new Tzadik into the Governance Council."""
+    from talos.geometric_core.archetypes import TzadikimGovernance
+    gov = TzadikimGovernance()
+    dms = gov.calculate_dms(reputation, s_rev=50.0, coherence=0.95)
+    msg = gov.initiate_tzadik(principal, archetype, dms)
+    print(f"🏛️ {msg}")
+
+
+@sophia_app.command()
+def governance_report():
+    """Generates the Cathedral Governance Report."""
+    from talos.geometric_core.archetypes import TzadikimGovernance
+    gov = TzadikimGovernance()
+    # Mock some data
+    gov.initiate_tzadik("0x716aD...ABC10", "SÁBIO", 144.0)
+    gov.initiate_tzadik("0x02275...76aa1c", "GUARDIÃO", 100.0)
+    print(gov.execute_governance_cycle())
