@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-8.4.1, pluggy-1.6.0 -- /app/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: langsmith-0.6.8, mock-3.14.1, anyio-4.12.1
+collecting ... collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+___________ ERROR collecting tests/test_resilient_geometric_agent.py ___________
+ImportError while importing test module '/app/tests/test_resilient_geometric_agent.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/jules/.pyenv/versions/3.12.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_resilient_geometric_agent.py:9: in <module>
+    from talos.core.identity import IdentityManager
+src/talos/core/__init__.py:2: in <module>
+    from talos.core.main_agent import MainAgent
+src/talos/core/main_agent.py:13: in <module>
+    from talos.core.identity import IdentityManager
+E   ModuleNotFoundError: No module named 'talos.core.identity'
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/trustcall/_base.py:46
+  /app/.venv/lib/python3.12/site-packages/trustcall/_base.py:46: LangGraphDeprecatedSinceV10: Importing Send from langgraph.constants is deprecated. Please use 'from langgraph.types import Send' instead. Deprecated in LangGraph V1.0 to be removed in V2.0.
+    from langgraph.constants import Send
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/test_resilient_geometric_agent.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+========================= 1 warning, 1 error in 3.47s ==========================

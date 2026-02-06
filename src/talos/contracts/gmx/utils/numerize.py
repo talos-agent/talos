@@ -2,7 +2,7 @@ from decimal import Decimal
 
 
 def round_num(n, decimals):
-    '''
+    """
     Params:
     n - number to round
     decimals - number of decimal places to round to
@@ -10,22 +10,22 @@ def round_num(n, decimals):
     For example:
     10.0 -> 10
     10.222 -> 10.22
-    '''
+    """
     return n.to_integral() if n == n.to_integral() else round(n.normalize(), decimals)
 
 
 def drop_zero(n):
-    '''
+    """
     Drop trailing 0s
     For example:
     10.100 -> 10.1
-    '''
+    """
     n = str(n)
-    return n.rstrip('0').rstrip('.') if '.' in n else n
+    return n.rstrip("0").rstrip(".") if "." in n else n
 
 
 def numerize(n, decimals=2):  # noqa: C901
-    '''
+    """
     Params:
     n - number to be numerized
     decimals - number of decimal places to round to
@@ -34,7 +34,7 @@ def numerize(n, decimals=2):  # noqa: C901
     1,000,000 -> 1M
     1,000,000,000 -> 1B
     1,000,000,000,000 -> 1T
-    '''
+    """
     is_negative_string = ""
     if n < 0:
         is_negative_string = "-"

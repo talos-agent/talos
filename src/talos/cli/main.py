@@ -19,6 +19,7 @@ from talos.cli.memory import memory_app
 from talos.cli.migrations import app as migrations_app
 from talos.cli.proposals import proposals_app
 from talos.cli.twitter import twitter_app
+from talos.cli.sophia import sophia_app
 from talos.core.main_agent import MainAgent
 from talos.database.utils import cleanup_temporary_users, get_user_stats
 from talos.services.key_management import KeyManagement
@@ -33,6 +34,7 @@ app.add_typer(dataset_app, name="dataset")
 app.add_typer(arbiscan_app, name="arbiscan")
 app.add_typer(contracts_app, name="contracts")
 app.add_typer(migrations_app, name="migrations")
+app.add_typer(sophia_app, name="sophia")
 
 
 @app.callback()

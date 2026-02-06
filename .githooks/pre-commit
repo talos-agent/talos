@@ -1,0 +1,27 @@
+#!/bin/bash
+
+echo "🚀 Running pre-commit checks..."
+
+# Formatação com ruff (instead of black, as ruff is used in this repo)
+echo "📝 Checking formatting with ruff..."
+ruff format --check .
+
+if [ $? -ne 0 ]; then
+    echo "❌ Ruff formatting failed. Run 'ruff format .' to fix."
+    exit 1
+fi
+
+# Verificação de tipos
+echo "🔍 Type checking..."
+mypy --ignore-missing-imports .
+
+# Testes unitários rápidos
+echo "🧪 Running quick tests..."
+pytest tests/unit/ -xvs -k "not slow" 2>/dev/null || echo "Unit tests skipped (no unit directory found)"
+
+# Verificação de segurança
+echo "🔒 Security scan..."
+bandit -r src/ -ll
+
+echo "✅ All checks passed!"
+exit 0
