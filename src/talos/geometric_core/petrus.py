@@ -263,7 +263,11 @@ class PlanetaryResonanceTriad(LivingStone):
 
     def inscribe_lithic_memory(self, timestamp: float, resonance_snapshot: Any) -> str:
         """Harmonic 3: LITHIC_MEMORY."""
+        from talos.geometric_core.metastability import ConstraintField, MetastableState, MetastableSystem
+
         memory_id = f"lithic_{int(timestamp)}_{hash(str(resonance_snapshot)) % 1000}"
+        # Metastable memory state
+        self.itz_state = "METASTABLE"
         return f"INSCRIBE: Lithic memory crystal {memory_id} formed in the event horizon."
 
     async def transduce_solar_cycle(self, solar_intensity: float) -> Dict[str, Any]:

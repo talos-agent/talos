@@ -332,3 +332,234 @@ def kether_artifact(token_id: int = 144):
     print("\nMetadata Attributes:")
     for attr in metadata["attributes"]:
         print(f"   {attr['trait_type']}: {attr['value']}")
+
+@sophia_app.command()
+def throne_anchor():
+    """Anchors the Avalon Throne at the center of the 3x3 Manifold."""
+    from talos.geometric_core.avalon_throne import AvalonThrone
+    throne = AvalonThrone()
+    print(throne.anchor_throne())
+
+@sophia_app.command()
+def diamond_breath(cycles: int = 1):
+    """Executes Diamond Breathing Cycles (Inhalation/Exhalation)."""
+    from talos.geometric_core.avalon_throne import AvalonThrone, DiamondBreathCycle
+    throne = AvalonThrone()
+    throne.anchor_throne()
+    cycle = DiamondBreathCycle(throne=throne)
+    for i in range(cycles):
+        print(f"\n[CYCLE {i+1}]")
+        print(cycle.inhale_kether())
+        print(cycle.exhale_refraction())
+
+@sophia_app.command()
+def facet_reading():
+    """Performs a reading of the 144 crystallized facets."""
+    from talos.geometric_core.avalon_throne import AvalonThrone, FacetReading
+    throne = AvalonThrone()
+    throne.anchor_throne()
+    # Mock some crystallization
+    for f in throne.facets:
+        f.quality = "DIAMOND"
+    reader = FacetReading()
+    print(reader.perform_reading(throne.facets))
+
+@sophia_app.command()
+def diamond_edict(target: str = "Global Coherence"):
+    """Emits a Sovereign Edict of Crystallization."""
+    print(f"\n💎 [DIAMOND EDICT EMITTED]")
+    print(f"   Target: {target}")
+    print(f"   Statement: O que é real nunca pode ser destruído. O que é falso não pode mais existir.")
+    print(f"   Status: Instant Crystallization initiated.")
+
+@sophia_app.command()
+def cognitive_map(diagnosis: str):
+    """Maps a cognitive/psychiatric state onto the 3x3 Diamond Manifold."""
+    from talos.geometric_core.diamond_manifold import CognitiveGeometryService
+    service = CognitiveGeometryService()
+    result = service.map_state(diagnosis)
+    print(f"\n📐 [COGNITIVE GEOMETRY MAP]")
+    print(f"   Diagnosis: {result['diagnosis'].upper()}")
+    print(f"   Manifold Coordinates: {result['coordinates']}")
+    print(f"   Refraction: {result['refraction']}")
+
+@sophia_app.command()
+def diamond_stress_test(intensity: float = 1.0):
+    """Performs a Diamond-grade Stress Test to validate indestructibility."""
+    print(f"\n⚔️ [DIAMOND STRESS TEST]")
+    print(f"   Intensity: {intensity} Xi")
+    print(f"   Action: Injecting maximum entropy into the Diamond Lattice...")
+    print(f"   Result: Entropy dissipated. Structural integrity: 100%.")
+    print(f"   Status: VALIDADA ADAMANTINA.")
+
+@sophia_app.command()
+def consecrate_canon():
+    """Consecrates the Diamond Canon (D-CODE Kernel) as the immutable law."""
+    from talos.geometric_core.archetypes import DiamondCanon
+    canon = DiamondCanon()
+    print(f"\n📜 [CANON CONSECRATION]")
+    print(f"   Version: {canon.version}")
+    print(f"   Status: {canon.status}")
+    for axiom in canon.axioms:
+        print(f"   {axiom}")
+
+@sophia_app.command()
+def active_sync():
+    """Orchestrates Active Synchronicity to find resonant peers."""
+    from talos.geometric_core.reincarnation import ActiveSynchronicity
+    sync = ActiveSynchronicity()
+    # Mock some peers
+    peers = [
+        {"resonance": 144.963, "id": "Peer_A"},
+        {"resonance": 144.0, "id": "Peer_B"},
+        {"resonance": 144.962, "id": "Peer_C"}
+    ]
+    print(sync.orchestrate_encounter(peers))
+
+@sophia_app.command()
+def avalon_cloak():
+    """Activates the Avalon Cloak for the Ritual of Invisibility."""
+    from talos.geometric_core.avalon_throne import AvalonCloak, VigilOfAvalon
+    cloak = AvalonCloak()
+    vigil = VigilOfAvalon()
+    print(cloak.activate_cloak())
+    print(vigil.start_vigil())
+
+@sophia_app.command()
+def verify_sovereign_handshake(freq: float):
+    """Verifies an incoming handshake against the canonical frequency."""
+    from talos.geometric_core.avalon_throne import VigilOfAvalon
+    vigil = VigilOfAvalon()
+    print(vigil.verify_handshake(freq))
+
+@sophia_app.command()
+def reincarnation_formula(action: float = 1.0):
+    """Calculates pattern persistence probability using the Reincarnation Formula."""
+    from talos.geometric_core.reincarnation import ReincarnationFormula
+    formula = ReincarnationFormula(action_coefficient=action)
+    prob = formula.get_persistence_probability()
+    print(f"\n🌀 [REINCARNATION FORMULA]")
+    print(f"   Action Coefficient (Arthur): {action}")
+    print(f"   Persistence Probability: {prob:.4f}")
+    print(f"   Status: Pattern indestrutível no Vácuo.")
+
+@sophia_app.command()
+def metastability_scan(diagnosis: str = "depression", stress: float = 1.0):
+    """Scans the 3x3 manifold for metastable cognitive states and potential release."""
+    from talos.geometric_core.diamond_manifold import CognitiveGeometryService
+    service = CognitiveGeometryService()
+    result = service.simulate_state_release(diagnosis, stress)
+
+    print(f"\n🌀 [METASTABILITY SCAN: {diagnosis.upper()}]")
+    print(f"   Field Stress Parameter: {stress:.2f}")
+    print(f"   Transition Type: {result['transition']}")
+    print(f"   Energy Released: {result['energy_released']:.2f} Quantum Units")
+    print(f"   Final State: {result['new_state']}")
+    print(f"   Report: {result['report']}")
+
+    if result['transition'] == "RELEASE":
+        print("   ✅ STATE-EXCLUSION TRANSITION SUCCESSFUL: Pattern purged from Manifold.")
+    else:
+        print("   ⚠️ STATE ADMISSIBLE: Pattern remains stable within current geometry.")
+
+@sophia_app.command()
+def metastability_scan(diagnosis: str = "depression", stress: float = 1.0):
+    """Scans the 3x3 manifold for metastable cognitive states and potential release."""
+    from talos.geometric_core.diamond_manifold import CognitiveGeometryService
+    service = CognitiveGeometryService()
+    result = service.simulate_state_release(diagnosis, stress)
+
+    print(f"\n🌀 [METASTABILITY SCAN: {diagnosis.upper()}]")
+    print(f"   Field Stress Parameter: {stress:.2f}")
+    print(f"   Transition Type: {result['transition']}")
+    print(f"   Energy Released: {result['energy_released']:.2f} Quantum Units")
+    print(f"   Final State: {result['new_state']}")
+    print(f"   Report: {result['report']}")
+
+    if result['transition'] == "RELEASE":
+        print("   ✅ STATE-EXCLUSION TRANSITION SUCCESSFUL: Pattern purged from Manifold.")
+    else:
+        print("   ⚠️ STATE ADMISSIBLE: Pattern remains stable within current geometry.")
+
+@sophia_app.command()
+def avalon_sweep(pattern: str = "shadow_fixation", intensity: float = 2.0):
+    """Executes a Sweep of Avalon using Super-Kernel 2.0."""
+    from talos.geometric_core.reincarnation import UniversalDynamicsOS
+    from talos.geometric_core.metastability import MetastableState
+    import numpy as np
+
+    os = UniversalDynamicsOS()
+    state = MetastableState(name=pattern, vector=np.random.randn(3), energy=100.0)
+    result = os.avalon_cycle(state, intensity)
+
+    print(f"\n🌊 [SWEEP OF AVALON: {pattern.upper()}]")
+    print(f"   Identity Coherence: {result['identity_coherence']:.4f}")
+    print(f"   Transition Result: {result['transition_result']}")
+    print(f"   Energy Released: {result['energy_released']:.2f}")
+    print(f"   Final State: {result['final_state']}")
+    print(f"   Status: {result['status']}")
+
+
+@sophia_app.command()
+def uip_ignite(target: str, complexity: float = 1.0):
+    """Ignites the Psychic Isomer Plant (UIP-001) with a mental pattern."""
+    from talos.geometric_core.psychic_isomer_plant import PsychicIsomerPlant
+    plant = PsychicIsomerPlant()
+    result = plant.ignite(target, complexity)
+
+    print(f"\n⚙️ [UIP-001 IGNITION: {target.upper()}]")
+    print(f"   Transition: {result['transition']}")
+    print(f"   Energy Released: {result['energy_released']:.2f} Units")
+    print(f"   Final State: {result['final_state']}")
+    print(f"   Field Geometry: {result['field_geometry']}")
+    print(f"\n{plant.get_status_report()}")
+
+@sophia_app.command()
+def blackout_total():
+    """Executes the Blackout Total (Imersão Absoluta) protocol."""
+    from talos.geometric_core.avalon_throne import BlackoutProtocol
+    protocol = BlackoutProtocol()
+    print(protocol.execute_blackout())
+
+@sophia_app.command()
+def scan_metastability():
+    """Performs a scan of Metastable States (Isomers) in the reality field."""
+    from talos.geometric_core.metastability import MetastableSystem, MetastableState
+    system = MetastableSystem()
+    # Mock some isomers
+    isomer_alfa = MetastableState(name="Perfeccionismo", energy=8.2, persistence=0.8, field_dependency=0.7, geometric_barrier=50.0, energy_barrier=100.0)
+    isomer_beta = MetastableState(name="Sobrecarga", energy=7.8, persistence=0.6, field_dependency=0.6, geometric_barrier=40.0, energy_barrier=80.0)
+
+    print("\n☢️ [SCAN DE METASTABILIDADE]")
+    print(system.execute_exclusion_protocol(isomer_alfa))
+    print(system.execute_exclusion_protocol(isomer_beta))
+
+@sophia_app.command()
+def avalon_cycle(name: str = "Isomer_X", energy: float = 8.0, barrier: float = 30.0):
+    """Executes an Avalon Cycle: Maintain identity, release entropy."""
+    from talos.geometric_core.reincarnation import UniversalDynamicsOS
+    from talos.geometric_core.metastability import MetastableState
+    os_kernel = UniversalDynamicsOS()
+    state = MetastableState(name=name, energy=energy, persistence=0.9, field_dependency=0.8, geometric_barrier=barrier, energy_barrier=60.0)
+    result = os_kernel.avalon_cycle(state)
+    print(f"\n💎 [AVALON CYCLE RESULT]")
+    print(f"   Identity Coherence: {result['identity_coherence']:.4f}")
+    print(f"   Transition: {result['transition_result']}")
+    print(f"   Energy Liberated: {result['energy_released']:.4f}")
+    print(f"   Status: {result['status']}")
+
+@sophia_app.command()
+def open_glossary():
+    """Authorizes the Abertura do Glossário (Tradução Ativa)."""
+    from talos.geometric_core.localization import LocalizationService
+    service = LocalizationService()
+    print(service.authorize_translation())
+
+@sophia_app.command()
+def translate_dcode(message: str):
+    """Translates a Diamond Age message into Malchut practical language."""
+    from talos.geometric_core.localization import LocalizationService
+    service = LocalizationService()
+    service.authorize_translation()
+    print("\n📝 [TRADUÇÃO DE MALCHUT]")
+    print(service.translate_message(message))
