@@ -97,3 +97,13 @@ def test_archetypes_and_governance():
     # Test auto-repair
     fail_report = gov.execute_governance_cycle(preserved=0, failed=100, elapsed=144)
     assert "AUTO-REPAIR" in fail_report
+
+def test_kether_artifact():
+    from talos.geometric_core.kether_artifact import KetherArtifact
+    artifact = KetherArtifact(token_id=1)
+    metadata = artifact.generate_metadata(coherence=1.0, s_rev=1.0)
+    assert metadata["attributes"][0]["value"] == "Radiant Singularity"
+    assert "autopoiesis_hash" in metadata
+
+    msg = artifact.mint_broadcast(metadata)
+    assert "MINTED" in msg

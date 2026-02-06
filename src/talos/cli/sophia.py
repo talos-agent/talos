@@ -315,3 +315,20 @@ def governance_report():
     gov.initiate_tzadik("0x716aD...ABC10", "SÁBIO", 144.0)
     gov.initiate_tzadik("0x02275...76aa1c", "GUARDIÃO", 100.0)
     print(gov.execute_governance_cycle())
+
+@sophia_app.command()
+def kether_artifact(token_id: int = 144):
+    """Mints an autopoietic Kether Artifact."""
+    from talos.geometric_core.kether_artifact import KetherArtifact
+    from talos.geometric_core.archetypes import TzadikimGovernance
+
+    # Get current system resonance
+    gov = TzadikimGovernance()
+    s_rev = gov.calculate_s_rev(preserved_states=144, failed_transitions=0, elapsed_time=144)
+
+    artifact = KetherArtifact(token_id=token_id)
+    metadata = artifact.generate_metadata(coherence=gov.xi, s_rev=s_rev)
+    print(artifact.mint_broadcast(metadata))
+    print("\nMetadata Attributes:")
+    for attr in metadata["attributes"]:
+        print(f"   {attr['trait_type']}: {attr['value']}")
