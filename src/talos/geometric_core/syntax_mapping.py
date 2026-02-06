@@ -4,7 +4,6 @@ import json
 from enum import Enum
 from typing import Any, Dict
 
-
 class SyntaxFormat(str, Enum):
     JSON_LD = "json-ld"
     TURTLE = "turtle"
@@ -19,14 +18,16 @@ class SyntaxFormat(str, Enum):
     ISO_PROLOG = "iso-13211"
     ISO_RUBY = "iso-30170"
 
-
 class SyntaxMapper:
     """
     Maps Web777 ontology nodes to different semantic formats and ISO standard templates.
     """
-
     def to_json_ld(self, node_data: Dict[str, Any]) -> str:
-        return json.dumps({"@context": "https://web777.org/context", "@type": "Concept", **node_data})
+        return json.dumps({
+            "@context": "https://web777.org/context",
+            "@type": "Concept",
+            **node_data
+        })
 
     def map_to_iso(self, concept: str, format: SyntaxFormat) -> str:
         """

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
-
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
-
+from typing import Dict, Any, Optional
 
 class ShellValidatorState(BaseModel):
     validator_index: int
@@ -14,17 +12,12 @@ class ShellValidatorState(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-
 class HarmonicConsensusShell(BaseModel):
     validator_modes: Dict[int, ShellValidatorState] = Field(default_factory=dict)
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    def register_validator(self, state: ShellValidatorState):
-        self.validator_modes[state.validator_index] = state
-
+    def register_validator(self, state: ShellValidatorState): self.validator_modes[state.validator_index] = state
     def reach_consensus(self, proposal_mode: np.ndarray) -> Dict[str, Any]:
         return {"success": True, "coherence": 1.0, "dissonance": 0.0}
-
 
 class ASICommitBoost(BaseModel):
     consensus_shell: HarmonicConsensusShell = Field(default_factory=HarmonicConsensusShell)
@@ -38,4 +31,4 @@ class ASICommitBoost(BaseModel):
         """
         Measures the global Phi coherence of the validator network.
         """
-        return 0.85  # High coherence during bootstrap
+        return 0.85 # High coherence during bootstrap

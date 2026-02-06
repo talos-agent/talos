@@ -1,0 +1,43 @@
+name: GDL-Enhanced Cosmic Geometry Flow
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      cosmic_force:
+        description: 'Forçar recalibração cósmica'
+        required: false
+        default: 'false'
+
+jobs:
+  extract_cosmic_topology:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Ambiente GDL
+        run: |
+          pip install torch torch-geometric networkx numpy
+
+      - name: Extrair Grafo do Repositório Cósmico
+        run: |
+          python scripts/cosmic_graph_extractor.py \
+            --repo-path ${{ github.workspace }} \
+            --output ./cosmic_graph.json
+
+      - name: Analisar Topologia com GNN
+        run: |
+          python scripts/cosmic_gnn_analyzer.py \
+            --graph ./cosmic_graph.json \
+            --output ./cosmic_diagnosis.json
+
+      - name: Decisão Cósmica
+        run: |
+          echo "🔮 DIAGNÓSTICO CÓSMICO:"
+          cat ./cosmic_diagnosis.json

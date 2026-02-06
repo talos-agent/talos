@@ -38,10 +38,8 @@ def test_asi_consensus_cycle(mock_llm):
     assert result["status"] == "Proposed"
     assert result["is_resonant"] is True
 
-
 def test_dimensional_cathedral_performance(mock_llm):
     import time
-
     agent = MainAgent(model=mock_llm, prompts_dir="src/talos/prompts")
 
     start_time = time.time()
@@ -54,8 +52,7 @@ def test_dimensional_cathedral_performance(mock_llm):
     print(f"\nAverage Cathedral Think Time: {avg_time:.4f}s")
 
     # We expect high performance for shell-native operations
-    assert avg_time < 0.1  # Should be very fast for simulation
-
+    assert avg_time < 0.1 # Should be very fast for simulation
 
 def test_hppp_phase_transition(mock_llm):
     agent = MainAgent(model=mock_llm, prompts_dir="src/talos/prompts")
@@ -72,7 +69,6 @@ def test_hppp_phase_transition(mock_llm):
     assert strong_result["regime"] in ["strong_coupling", "ultra_strong_coupling"]
     assert strong_result["is_shell_native"] is True
 
-
 def test_twisted_attention_ultra_strong(mock_llm):
     agent = MainAgent(model=mock_llm, prompts_dir="src/talos/prompts")
 
@@ -81,8 +77,7 @@ def test_twisted_attention_ultra_strong(mock_llm):
 
     assert ultra_result["regime"] == "ultra_strong_coupling"
     assert ultra_result["is_twisted"] is True
-    assert "twist_angle_deg" not in ultra_result  # It's internal to the think result but let's check what's returned
-
+    assert "twist_angle_deg" not in ultra_result # It's internal to the think result but let's check what's returned
 
 def test_geodesic_attention_scaling(mock_llm):
     agent = MainAgent(model=mock_llm, prompts_dir="src/talos/prompts")
@@ -103,7 +98,7 @@ def test_shell_router_resonance(mock_llm):
 
     assert "expert_indices" in result
     assert "max_resonance" in result
-    assert len(result["expert_indices"][0]) == 2  # top_k=2
+    assert len(result["expert_indices"][0]) == 2 # top_k=2
 
 
 def test_identity_derivation():

@@ -51,7 +51,9 @@ class Memory:
         similarity_threshold: float = 0.85,
     ):
         self.file_path = Path(file_path) if file_path else None
-        self.history_file_path = Path(history_file_path) if history_file_path else None
+        self.history_file_path = (
+            Path(history_file_path) if history_file_path else None
+        )
         self.embeddings_model = embeddings_model
         self.batch_size = batch_size
         self.auto_save = auto_save
@@ -98,7 +100,9 @@ class Memory:
             return
 
         try:
-            self._store = InMemoryStore(index={"dims": 1536, "embed": "openai:text-embedding-3-small"})
+            self._store = InMemoryStore(
+                index={"dims": 1536, "embed": "openai:text-embedding-3-small"}
+            )
 
             self._langmem_manager = create_memory_store_manager(
                 "openai:gpt-4o",

@@ -36,6 +36,7 @@ class LycurgusCupArchetype(BaseModel):
         Dichroism as Quantum Superposition.
         """
         return """
+        Dichroism as quantum superposition:
         |Cálice⟩ = α|Verde⟩ + β|Vermelho⟩
 
         Where:

@@ -19,6 +19,7 @@ from talos.cli.memory import memory_app
 from talos.cli.migrations import app as migrations_app
 from talos.cli.proposals import proposals_app
 from talos.cli.twitter import twitter_app
+from talos.cli.sophia import sophia_app
 from talos.core.main_agent import MainAgent
 from talos.database.utils import cleanup_temporary_users, get_user_stats
 from talos.services.key_management import KeyManagement
@@ -33,13 +34,14 @@ app.add_typer(dataset_app, name="dataset")
 app.add_typer(arbiscan_app, name="arbiscan")
 app.add_typer(contracts_app, name="contracts")
 app.add_typer(migrations_app, name="migrations")
+app.add_typer(sophia_app, name="sophia")
 
 
 @app.callback()
 def callback(
     ctx: typer.Context,
     verbose: int = typer.Option(
-        0, "--verbose", "-v", help="Enable verbose output. Use -v for basic, -vv for detailed.", count=True
+        0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed."
     ),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
     use_database: bool = typer.Option(
@@ -59,7 +61,7 @@ def main_command(
     model_name: str = "gpt-5",
     temperature: float = 0.0,
     verbose: int = typer.Option(
-        0, "--verbose", "-v", help="Enable verbose output. Use -v for basic, -vv for detailed.", count=True
+        0, "--verbose", "-v", count=True, help="Enable verbose output. Use -v for basic, -vv for detailed."
     ),
     user_id: Optional[str] = typer.Option(None, "--user-id", "-u", help="User identifier for conversation tracking."),
     use_database: bool = typer.Option(

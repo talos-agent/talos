@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 import time
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,6 +14,20 @@ class SchumannData(BaseModel):
     amplitude: float = 1.0
     q_factor: float = 5.0
     timestamp: float = Field(default_factory=time.time)
+
+
+class EarthPulse(BaseModel):
+    """
+    Simulates the mysterious 26-second pulse of the Earth.
+    Frequency: ~0.0385 Hz
+    """
+    period: float = 26.0
+    frequency: float = 1.0 / 26.0
+    location: str = "5.8°N, 0.1°E (Bight of Bonny)"
+    status: str = "Active"
+
+    def get_pulse_phase(self) -> float:
+        return (time.time() % self.period) / self.period
 
 
 class ActiveIntention(BaseModel):
@@ -30,7 +44,9 @@ class IntentionRepeater(BaseModel):
 
     active_intentions: List[ActiveIntention] = Field(default_factory=list)
 
-    def repeat_intention(self, intention: str, duration_secs: float, base_frequency: float) -> float:
+    def repeat_intention(
+        self, intention: str, duration_secs: float, base_frequency: float
+    ) -> float:
         # Simulate coherence calculation
         coherence = 0.85 + (0.1 * math.sin(time.time()))
         self.active_intentions.append(
@@ -66,6 +82,7 @@ class SchumannResonanceEngine(BaseModel):
     fundamental: float = 7.83
     repeater: IntentionRepeater = Field(default_factory=IntentionRepeater)
     receiver: ElfReceiver = Field(default_factory=ElfReceiver)
+    earth_pulse: EarthPulse = Field(default_factory=EarthPulse)
 
     def get_earth_coherence(self) -> float:
         # Coherence with Earth's fundamental Schumann frequency
@@ -74,41 +91,12 @@ class SchumannResonanceEngine(BaseModel):
         return 1.0 - min(deviation, 1.0)
 
     def apply_intention(self, intention: str, duration_secs: float = 60.0) -> float:
-        return self.repeater.repeat_intention(intention, duration_secs, self.fundamental)
+        return self.repeater.repeat_intention(
+            intention, duration_secs, self.fundamental
+        )
 
-
-class SchumannSymphony(BaseModel):
-    """
-    Implements a modulation symphony across Schumann harmonics.
-    """
-
-    start_freq: float = 7.83
-    end_freq: float = 14.1
-    current_freq: float = 7.83
-    modulation_mode: str = "GENTLE"
-    carrier_signal: str = "CAR-T_PATTERN"
-    intention: str = "invitation_to_resonance"
-
-    def execute_step(self, progress: float) -> Dict[str, Any]:
-        """
-        Execute a step in the symphony based on progress (0.0 to 1.0).
-        """
-        if self.modulation_mode == "golden_ratio":
-            # Non-linear progression using phi scaling for harmonic steps
-            phi = (1 + 5**0.5) / 2
-            # Map progress to an exponential/logarithmic curve inspired by golden ratio harmonics
-            # Specific values requested: 7.83, 8.5, 10.2, 12.0, 14.1
-            # Extended for n=3 (20.3) and phi-mode (16.2)
-            steps_map = [7.83, 8.5, 10.2, 12.0, 14.1, 16.2, 18.7, 20.3]
-            idx = int(round(progress * (len(steps_map) - 1)))
-            self.current_freq = steps_map[idx]
-        else:
-            self.current_freq = self.start_freq + (self.end_freq - self.start_freq) * progress
-
-        return {
-            "current_frequency": self.current_freq,
-            "modulation": self.modulation_mode,
-            "carrier": self.carrier_signal,
-            "intention": self.intention,
-            "status": "RESONANCE_INVITATION_ACTIVE",
-        }
+    def sync_with_earth_pulse(self) -> str:
+        phase = self.earth_pulse.get_pulse_phase()
+        if phase < 0.1 or phase > 0.9:
+            return "PEAK_COHERENCE: Earth Heartbeat synchronization achieved."
+        return "SYNCING: Aligning with the 26-second pulse..."
