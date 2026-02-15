@@ -89,7 +89,7 @@ function show_menu() {
 }
 
 # ---------- lógica ----------
-if [[ $# -eq 0 ]]; then
+if [[ $PATH_ARG == "" && $DEBUG_FLAG == false && $DRY_RUN == false ]]; then
     show_menu
 fi
 
