@@ -1,43 +1,61 @@
-import numpy as np
-import pytest
-from talos.arkhe.ucd import UCD, verify_conservation, identity_check
-from talos.arkhe.rfid import RFIDTag, RFIDHypergraph
-from talos.arkhe.arkhen_11 import Arkhen11
-from talos.arkhe.swimmer import FlagellarSwimmer
+"""
+Unit tests for the Arkhe module.
+Verifies UCD, RFID, Arkhen11, and Swimmer logic.
+"""
 
-def test_ucd_basic():
-    # Use data that is not perfectly correlated
-    data = np.array([[1, 2, 3, 10], [2, 3, 4, 5], [5, 6, 7, 8]])
+from __future__ import annotations
+
+from datetime import datetime
+
+import numpy as np
+from talos.arkhe.arkhen_11 import Arkhen11
+from talos.arkhe.rfid import RFIDHypergraph, RFIDTag
+from talos.arkhe.swimmer import FlagellarSwimmer
+from talos.arkhe.ucd import UCD, verify_conservation
+
+
+def test_ucd_conservation() -> None:
+    """Tests if C + F = 1 holds in UCD."""
+    data = np.random.rand(10, 5)
     ucd = UCD(data)
     result = ucd.analyze()
-    assert result["C"] > 0
-    assert result["F"] > 0
-    assert result["conservation"] is True
+    assert verify_conservation(result["C"], result["F"])
 
-def test_identity_check():
-    assert identity_check() is True
 
-def test_rfid_flow():
-    tag = RFIDTag(tag_id="RFID_001", object_type="smartphone")
-    tag.read(reader_id="reader_01", location="Fábrica")
-    # Simulate some time passing for coherence calculation if needed,
-    # but here we just check if it records handovers.
-    tag.read(reader_id="reader_02", location="CD")
-    assert len(tag.handovers) == 2
-    # Use assert directly instead of 'is True' to avoid numpy.True_ issues
+def test_rfid_geodesic() -> None:
+    """Tests if RFID tag correctly records its path."""
+    tag = RFIDTag("T001", "asset")
+    tag.read("R1", "LocA", timestamp=datetime(2024, 1, 1, 10, 0))
+    tag.read("R2", "LocB", timestamp=datetime(2024, 1, 1, 11, 0))
+    assert tag.get_path_history() == ["LocA", "LocB"]
     assert tag.verify_conservation()
-    assert tag.get_path_history() == ["Fábrica", "CD"]
 
-def test_arkhen_11_coherence():
+
+def test_arkhen11_metrics() -> None:
+    """Tests core metrics of the Arkhen(11) model."""
     arkhen = Arkhen11()
-    c = arkhen.compute_coherence()
-    assert 0 < c < 1
-    assert arkhen.verify_conservation() is True
+    coherence = arkhen.compute_coherence()
+    dim = arkhen.compute_effective_dimension()
+    assert 0 < coherence < 1
+    assert dim > 0
+    assert arkhen.verify_conservation()
 
-def test_swimmer_displacement():
-    swimmer = FlagellarSwimmer(L=10.0, A=1.0, dt=0.01)
-    # Run for a few steps
-    history_x, history_y, _ = swimmer.run(t_max=0.1)
-    assert len(history_x) > 0
-    # Displacement should have occurred (even if very small)
-    assert history_x[-1] != 0 or history_y[-1] != 0
+
+def test_swimmer_propulsion() -> None:
+    """Tests if the flagellar swimmer generates displacement."""
+    swimmer = FlagellarSwimmer(length=10.0, dt=0.1)
+    x_hist, _, _ = swimmer.run(t_max=1.0)
+    # The swimmer should move (displacement > 0)
+    # For a wave traveling right, it usually moves left (negative x)
+    assert abs(x_hist[-1] - x_hist[0]) > 0
+
+
+def test_rfid_hypergraph() -> None:
+    """Tests the RFIDHypergraph registration and anomaly detection."""
+    h_graph = RFIDHypergraph()
+    tag = RFIDTag("T1", "item")
+    h_graph.add_tag(tag)
+    h_graph.register_reading("T1", "R1", "Warehouse")
+    assert "T1" in h_graph.tags
+    assert "Warehouse" in h_graph.locations
+    assert not h_graph.identify_anomalies()

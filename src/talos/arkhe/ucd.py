@@ -1,7 +1,12 @@
+"""
+Universal Coherence Detection (UCD) framework.
+Implements Arkhe(n) core principles.
+"""
+
 from __future__ import annotations
 
-import numpy as np
 from typing import Any
+import numpy as np
 
 
 def verify_conservation(c: float, f: float, tol: float = 1e-10) -> bool:
@@ -18,7 +23,7 @@ def identity_check(phi: float = 1.618033988749895) -> bool:
     return abs(phi**2 - (phi + 1.0)) < 1e-10
 
 
-def is_toroidal(graph: Any) -> str:
+def is_toroidal(_graph: Any) -> str:
     """
     Simple heuristic for toroidal topology.
     """
@@ -89,3 +94,7 @@ class UCD:
             "scaling": "self-similar" if self.c_value > 0.7 else "linear",
             "optimization": self.f_value * 0.5,
         }
+
+    def get_values(self) -> tuple[float | None, float | None]:
+        """Returns the calculated C and F values."""
+        return self.c_value, self.f_value

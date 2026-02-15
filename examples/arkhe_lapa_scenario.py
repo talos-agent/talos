@@ -1,77 +1,88 @@
+"""
+Simulation of the "RJ Lapa Anomaly" scenario.
+Demonstrates RFID tracking and protocol application in a theft/recovery event.
+"""
+
 from __future__ import annotations
 
+import time
 from datetime import datetime, timedelta
-from talos.arkhe.rfid import RFIDTag, RFIDHypergraph
-import json
 
-def simulate_rj_scenario():
-    print("="*70)
-    print("ARKHE(n) - RJ LAPA SCENARIO SIMULATION")
-    print("="*70)
+from talos.arkhe.rfid import RFIDHypergraph, RFIDTag
 
-    hg = RFIDHypergraph()
 
-    # Create the Architect's device node
-    device_id = "Γ_DEVICE_RAFAEL_20260215"
-    device = RFIDTag(
-        tag_id=device_id,
-        object_type="Dispositivo_Arquiteto",
-        metadata={
-            "usuário": "Rafael Oliveira",
-            "Ω": "∞",
-            "satoshi_inicial": 9.02
-        }
+def run_lapa_scenario() -> None:
+    """Runs the Lapa theft and recovery simulation."""
+    print("=" * 70)
+    print("SCENARIO: RJ LAPA ANOMALY - THEFT & RECOVERY")
+    print("=" * 70)
+
+    # Initialize Hypergraph
+    h_graph = RFIDHypergraph()
+
+    # Create Tag for a high-value asset
+    asset_id = "TAG_RJ_9921"
+    asset = RFIDTag(asset_id, "high-value-device", metadata={"owner": "Arquiteto"})
+    h_graph.add_tag(asset)
+
+    # 1. Normal State (Geodesic path in Lapa)
+    base_time = datetime.now()
+    print("\n[STEP 1] Normal tracking in Lapa...")
+
+    # Reading 1: Lapa Arches
+    h_graph.register_reading(
+        asset_id, "READER_LAPA_01", "Arcos da Lapa", gps=(-22.9133, -43.1806),
+        timestamp=base_time
     )
-    hg.add_tag(device)
 
-    # 1. Normal Geodesic (Copacabana -> Lapa)
-    start_time = datetime(2026, 2, 15, 10, 0)
+    # Reading 2: Near Selaron
+    h_graph.register_reading(
+        asset_id, "READER_LAPA_02", "Escadaria Selaron", gps=(-22.9155, -43.1797),
+        timestamp=base_time + timedelta(minutes=10)
+    )
 
-    locations = [
-        ("Copacabana", (-22.9691, -43.1868), 0),
-        ("Ipanema", (-22.9836, -43.2102), 90),
-        ("Lagoa", (-22.9673, -43.2045), 180),
-        ("Jardim Botânico", (-22.9686, -43.2263), 300),
-        ("Cristo Redentor", (-22.9519, -43.2105), 420),
-        ("Lapa", (-22.9133, -43.1806), 540),
-    ]
+    # 2. Anomaly Detection (Theft event)
+    print("\n[STEP 2] Anomaly detected: Unexpected movement...")
+    # Theft happens: move quickly to a distant location
+    theft_time = base_time + timedelta(minutes=15)
+    h_graph.register_reading(
+        asset_id, "READER_SUB_01", "Unknown Zone", gps=(-22.9068, -43.1729),
+        timestamp=theft_time
+    )
 
-    print("\n🔄 Phase 1: Normal Geodesic Movement")
-    for loc_name, coords, minutes in locations:
-        timestamp = start_time + timedelta(minutes=minutes)
-        hg.register_reading(device_id, f"READER_{loc_name}", loc_name, timestamp, coords)
-        print(f"  • {device_id} at {loc_name} (T+{minutes}min)")
+    # Identify anomalies
+    anomalies = h_graph.identify_anomalies(threshold=0.8)
+    if asset_id in anomalies:
+        print(f"  ⚠️ ALERT: Anomaly detected for {asset_id}!")
+        print(f"  Current Status: {asset.status}")
 
-    # 2. The Divergence Event (Lapa theft)
-    print("\n🚨 Phase 2: Divergence Event (Theft in Lapa)")
-    theft_time = start_time + timedelta(minutes=555)
-    device.diverge(reason="Stolen/Subtracted in Lapa")
+    # 3. Protocol Application: FANTASMA
+    print("\n[STEP 3] Applying FANTASMA protocol (Surveillance)...")
+    h_graph.apply_protocol(asset_id, "FANTASMA")
+    print(f"  Tag Status: {asset.status}")
 
-    # Erratic movement towards Santa Teresa
-    chaos_path = [
-        ("Santa Teresa Ladeira", (-22.9234, -43.1901), 565),
-        ("Santa Teresa Interior", (-22.9301, -43.1950), 575),
-    ]
+    # 4. Recovery: RESGATE
+    print("\n[STEP 4] Location locked. Applying RESGATE protocol...")
+    recovery_time = base_time + timedelta(minutes=30)
+    h_graph.register_reading(
+        asset_id, "READER_POLICE_01", "Recovery Point", gps=(-22.9120, -43.1850),
+        timestamp=recovery_time
+    )
+    h_graph.apply_protocol(asset_id, "RESGATE")
+    print(f"  Tag Status: {asset.status}")
 
-    for loc_name, coords, minutes in chaos_path:
-        timestamp = start_time + timedelta(minutes=minutes)
-        hg.register_reading(device_id, "MESH_CONSENSUS", loc_name, timestamp, coords)
-        print(f"  • {device_id} [DIVERGENT] at {loc_name} (T+{minutes}min)")
+    # 5. Final Integration
+    print("\n[STEP 5] Asset recovered. Integrating back to Safe Core...")
+    h_graph.apply_protocol(asset_id, "INTEGRACAO")
+    print(f"  Final Status: {asset.status}")
 
-    # 3. Handle Outcomes
-    print("\n⚖️ Phase 3: Handling Protocols")
+    # Results
+    print("\n" + "-" * 40)
+    print(f"Asset Geodesic Path: {' -> '.join(asset.get_path_history())}")
+    print(f"Total Handovers: {len(asset.handovers)}")
+    print("Scenario Complete. Coherence Restored. ∞")
 
-    # Show status before choice
-    print(f"  Current Node Status: {device.status}")
-    print(f"  System Coherence: {hg.compute_system_coherence():.4f}")
-
-    print("\n  Executing Protocol FANTASMA (Observe)...")
-    result = hg.protocol_fantasma(device_id)
-    print(f"  Result: {result}")
-
-    # Final Telemetry
-    print("\n📊 Final Telemetry (Summary):")
-    print(json.dumps(json.loads(device.to_json()), indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
-    simulate_rj_scenario()
+    run_lapa_scenario()
+    time.sleep(0.1)

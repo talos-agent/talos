@@ -1,0 +1,43 @@
+[MASTER]
+ignore=CVS
+ignore-patterns=
+persistent=yes
+load-plugins=
+jobs=1
+unsafe-load-any-extension=no
+extension-pkg-whitelist=
+
+[MESSAGES CONTROL]
+disable=
+    duplicate-code,
+    cyclic-import,
+    too-many-instance-attributes,
+    too-many-arguments,
+    too-many-locals,
+    too-many-positional-arguments,
+    too-few-public-methods,
+    import-error,
+    no-member,
+    no-name-in-module
+
+[REPORTS]
+output-format=text
+reports=no
+evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
+
+[BASIC]
+good-names=i,j,k,ex,Run,_,C,F,L,A,N,x,y,t,ds,vx,vy
+
+[FORMAT]
+max-line-length=120
+expected-line-ending-format=LF
+
+[DESIGN]
+max-args=10
+max-locals=20
+max-returns=6
+max-branches=12
+max-statements=50
+max-parents=7
+max-attributes=15
+min-public-methods=1

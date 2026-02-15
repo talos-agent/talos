@@ -1,6 +1,9 @@
+"""
+CLI commands for Perplexity service.
+"""
+
 from __future__ import annotations
 
-import os
 import typer
 
 from talos.services.implementations.perplexity import PerplexityService
@@ -14,7 +17,9 @@ def search(query: str, api_key: str = typer.Option(..., envvar="PERPLEXITY_API_K
     Searches Perplexity with the given query.
     """
     if not api_key:
-        raise typer.BadParameter("Perplexity API key not found. Please set the PERPLEXITY_API_KEY environment variable.")
+        msg = ("Perplexity API key not found. "
+               "Please set the PERPLEXITY_API_KEY environment variable.")
+        raise typer.BadParameter(msg)
 
     service = PerplexityService(token=api_key)
     response = service.search(query)

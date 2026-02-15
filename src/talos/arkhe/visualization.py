@@ -1,3 +1,8 @@
+"""
+Polyglot Hypergraph visualization for UCD.
+Displays implementation network across syntactic universes.
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -53,10 +58,12 @@ class PolyglotUCDNetwork:
             for lang, _, _ in self.languages:
                 self.graph.add_edge(lang, principle, relation="checks")
 
+    # pylint: disable=too-many-locals
     def visualize(self, output_path: str = "polyglot_ucd_hypergraph.png") -> None:
         """Visualize the polyglot hypergraph"""
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8))
+        _, axes = plt.subplots(1, 2, figsize=(18, 8))
+        ax1, ax2 = axes
 
         # Left: Network graph
         pos = nx.spring_layout(self.graph, k=2, iterations=50, seed=42)
@@ -74,45 +81,24 @@ class PolyglotUCDNetwork:
 
         # UCD Core (center)
         nx.draw_networkx_nodes(
-            self.graph,
-            pos,
-            nodelist=concept_nodes,
-            node_color="gold",
-            node_size=3000,
-            node_shape="h",
-            ax=ax1,
-            alpha=0.9,
-            edgecolors="black",
-            linewidths=3,
+            self.graph, pos, nodelist=concept_nodes,
+            node_color="gold", node_size=3000, node_shape="h",
+            ax=ax1, alpha=0.9, edgecolors="black", linewidths=3,
         )
 
         # Language implementations
         impl_colors = [self.graph.nodes[n].get("color", "gray") for n in impl_nodes]
         nx.draw_networkx_nodes(
-            self.graph,
-            pos,
-            nodelist=impl_nodes,
-            node_color=impl_colors,
-            node_size=1500,
-            node_shape="o",
-            ax=ax1,
-            alpha=0.8,
-            edgecolors="black",
-            linewidths=2,
+            self.graph, pos, nodelist=impl_nodes,
+            node_color=impl_colors, node_size=1500, node_shape="o",
+            ax=ax1, alpha=0.8, edgecolors="black", linewidths=2,
         )
 
         # Principles
         nx.draw_networkx_nodes(
-            self.graph,
-            pos,
-            nodelist=principle_nodes,
-            node_color="lightgreen",
-            node_size=1200,
-            node_shape="s",
-            ax=ax1,
-            alpha=0.7,
-            edgecolors="black",
-            linewidths=2,
+            self.graph, pos, nodelist=principle_nodes,
+            node_color="lightgreen", node_size=1200, node_shape="s",
+            ax=ax1, alpha=0.7, edgecolors="black", linewidths=2,
         )
 
         # Draw edges
@@ -121,12 +107,11 @@ class PolyglotUCDNetwork:
         )
 
         # Labels
-        labels = {}
-        for node in self.graph.nodes():
-            if self.graph.nodes[node].get("type") == "concept":
-                labels[node] = self.graph.nodes[node].get("label", node)
-            else:
-                labels[node] = str(node)
+        labels = {
+            n: (self.graph.nodes[n].get("label", n)
+                if self.graph.nodes[n].get("type") == "concept" else str(n))
+            for n in self.graph.nodes()
+        }
 
         nx.draw_networkx_labels(
             self.graph, pos, labels, ax=ax1, font_size=9, font_weight="bold"
@@ -134,44 +119,31 @@ class PolyglotUCDNetwork:
 
         ax1.set_title(
             "Polyglot UCD Hypergraph\n(8 Languages × 4 Principles = 32 Verifications)",
-            fontsize=14,
-            weight="bold",
+            fontsize=14, weight="bold",
         )
         ax1.axis("off")
 
         # Right: Implementation matrix
         principles = ["x²=x+1", "C+F=1", "Toroidal", "Self-Similar"]
-        n_langs = len(self.languages)
-        n_principles = len(principles)
-
-        # All cells are 1
+        n_langs, n_principles = len(self.languages), len(principles)
         matrix = np.ones((n_langs, n_principles))
 
         ax2.imshow(matrix, cmap="Greens", aspect="auto", vmin=0, vmax=1)
-
         ax2.set_xticks(range(n_principles))
         ax2.set_xticklabels(principles, rotation=45, ha="right")
         ax2.set_yticks(range(n_langs))
         ax2.set_yticklabels([lang for lang, _, _ in self.languages])
 
-        # Add checkmarks
         for i in range(n_langs):
             for j in range(n_principles):
                 ax2.text(
-                    j,
-                    i,
-                    "✓",
-                    ha="center",
-                    va="center",
-                    fontsize=20,
-                    color="darkgreen",
-                    weight="bold",
+                    j, i, "✓", ha="center", va="center",
+                    fontsize=20, color="darkgreen", weight="bold",
                 )
 
         ax2.set_title(
-            "Implementation Verification Matrix\n(All Languages Verify All Principles)",
-            fontsize=14,
-            weight="bold",
+            "Implementation Verification Matrix",
+            fontsize=14, weight="bold",
         )
 
         plt.tight_layout()
