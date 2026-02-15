@@ -8,6 +8,7 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
+from matplotlib.lines import Line2D
 
 
 class FlagellarSwimmer:
@@ -139,13 +140,13 @@ class FlagellarSwimmer:
         (head,) = ax.plot([], [], "ro", markersize=8)
         (tail,) = ax.plot([], [], "ko", markersize=3)
 
-        def init() -> tuple[plt.Line2D, ...]:
+        def init() -> tuple[Line2D, ...]:
             line.set_data([], [])
             head.set_data([], [])
             tail.set_data([], [])
             return line, head, tail
 
-        def update(i: int) -> tuple[plt.Line2D, ...]:
+        def update(i: int) -> tuple[Line2D, ...]:
             xf, yf = frames[i]
             line.set_data(xf, yf)
             head.set_data([xf[0]], [yf[0]])
