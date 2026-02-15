@@ -20,10 +20,16 @@ class RFIDTag:
         self.coherence_history: list[dict] = []
         self.metadata = metadata or {}
         self._current_location: str | None = None
+        self._current_coords: tuple[float, float] | None = None
         self._last_seen: datetime | None = None
+        self.status = "active"  # active, divergent, quarantined, sacrificed
 
     def read(
-        self, reader_id: str, location: str, timestamp: Optional[datetime] = None
+        self,
+        reader_id: str,
+        location: str,
+        timestamp: Optional[datetime] = None,
+        coords: Optional[tuple[float, float]] = None,
     ) -> dict:
         """
         Registra uma leitura (handover) da tag.
@@ -40,18 +46,32 @@ class RFIDTag:
             "timestamp": timestamp.isoformat(),
             "reader_id": reader_id,
             "location": location,
+            "coords": coords,
             "delta_seconds": delta,
             "handover_number": len(self.handovers) + 1,
+            "status_at_reading": self.status,
         }
 
         self.handovers.append(handover)
         self._current_location = location
+        self._current_coords = coords
         self._last_seen = timestamp
 
         # Atualizar coerência (C) baseada na regularidade das leituras
         self._update_coherence()
 
         return handover
+
+    def diverge(self, reason: str = "anomaly") -> None:
+        """
+        Marca o nó como divergente.
+        """
+        self.status = "divergent"
+        if "divergence_reasons" not in self.metadata:
+            self.metadata["divergence_reasons"] = []
+        self.metadata["divergence_reasons"].append(
+            {"timestamp": datetime.now().isoformat(), "reason": reason}
+        )
 
     def _update_coherence(self) -> tuple[float, float]:
         """
@@ -130,7 +150,9 @@ class RFIDTag:
             "coherence_history": self.coherence_history,
             "metadata": self.metadata,
             "current_location": self._current_location,
+            "current_coords": self._current_coords,
             "last_seen": self._last_seen.isoformat() if self._last_seen else None,
+            "status": self.status,
             "satoshi": len(self.handovers),
         }
         return json.dumps(data, indent=2, ensure_ascii=False)
@@ -156,6 +178,7 @@ class RFIDHypergraph:
         reader_id: str,
         location: str,
         timestamp: Optional[datetime] = None,
+        coords: Optional[tuple[float, float]] = None,
     ) -> dict:
         """
         Registra uma leitura, atualizando todos os índices.
@@ -164,7 +187,7 @@ class RFIDHypergraph:
             raise ValueError(f"Tag {tag_id} não encontrada")
 
         tag = self.tags[tag_id]
-        handover = tag.read(reader_id, location, timestamp)
+        handover = tag.read(reader_id, location, timestamp, coords)
 
         # Atualizar índices
         if reader_id not in self.readers:
@@ -176,6 +199,41 @@ class RFIDHypergraph:
         self.locations[location].append(tag_id)
 
         return handover
+
+    def protocol_resgate(self, tag_id: str) -> str:
+        """Protocolo RESGATE (Converge): Força descarte/recuperação."""
+        if tag_id not in self.tags:
+            return "Tag not found"
+        tag = self.tags[tag_id]
+        tag.status = "quarantined"
+        return f"Protocol RESGATE activated for {tag_id}. Node quarantined."
+
+    def protocol_fantasma(self, tag_id: str) -> str:
+        """Protocolo FANTASMA (Observe): Vigilância silenciosa."""
+        if tag_id not in self.tags:
+            return "Tag not found"
+        tag = self.tags[tag_id]
+        # Status remains divergent or active but we flag it for observation in metadata
+        tag.metadata["observation_mode"] = True
+        return f"Protocol FANTASMA activated for {tag_id}. Silent observation active."
+
+    def protocol_sacrificio(self, tag_id: str) -> str:
+        """Protocolo SACRIFÍCIO (Wipe): Autodestruição lógica."""
+        if tag_id not in self.tags:
+            return "Tag not found"
+        tag = self.tags[tag_id]
+        tag.status = "sacrificed"
+        tag.metadata = {"death_timestamp": datetime.now().isoformat()}
+        return f"Protocol SACRIFÍCIO activated for {tag_id}. Node logically destroyed."
+
+    def protocol_integracao(self, tag_id: str) -> str:
+        """Protocolo INTEGRAÇÃO (Accept): Aceita entropia como parte do sistema."""
+        if tag_id not in self.tags:
+            return "Tag not found"
+        tag = self.tags[tag_id]
+        tag.status = "active"
+        tag.metadata["integrated_entropy"] = True
+        return f"Protocol INTEGRAÇÃO activated for {tag_id}. Entropy accepted as identity."
 
     def query_tags_at_location(self, location: str) -> List[RFIDTag]:
         """Retorna todas as tags atualmente em uma localização."""
