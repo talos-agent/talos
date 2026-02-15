@@ -36,6 +36,8 @@ dependencies = [
     "pandas>=2.3.2",
     "numpy>=2.3.3",
     "numerize>=0.12",
+    "networkx>=3.4.2",
+    "matplotlib>=3.10.0",
 ]
 
 [build-system]

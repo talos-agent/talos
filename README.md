@@ -1,8 +1,8 @@
 <div align="center">
 
-![Talos Header](./assets/talos-header.jpeg)
+![AGI Header](./assets/talos-header.jpeg)
 
-# Talos: An AI Protocol Owner
+# AGI: An AI Protocol Owner
 
 [![Documentation](https://img.shields.io/badge/docs-talos.is-blue?style=for-the-badge&logo=gitbook)](https://docs.talos.is/)
 [![Version](https://img.shields.io/badge/version-0.1.0-green?style=for-the-badge)](https://github.com/talos-agent/talos/releases)
@@ -232,3 +232,4 @@ To run the test suite, lint, and type-check the code, run the following command:
 ```bash
 ./scripts/run_checks.sh
 ```
+Talos = AGI
