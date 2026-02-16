@@ -1,0 +1,61 @@
+name: Testes de Sanidade com Playwright
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Iniciar Next.js app em background
+        run: |
+          npm run dev &
+          sleep 30  # Tempo para inicialização do app
+
+      - name: Rodar testes Playwright
+        run: npx playwright test
+
+  test-on-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Iniciar Next.js app em background
+        shell: bash
+        run: |
+          npm run dev &
+          sleep 30  # Tempo para inicialização do app
+
+      - name: Rodar testes Playwright
+        run: npx playwright test

@@ -1,0 +1,38 @@
+name: Test Build Sanity
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run AGI Launcher on Ubuntu
+        run: ./agi-launcher-universal-v3.sh --dry-run
+        # O --dry-run aqui apenas valida o build, sem abri-lo de fato.
+        # Em um teste real, você rodaria sem o --dry-run para iniciar o app.
+
+  test-on-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run AGI Launcher on macOS
+        run: ./agi-launcher-universal-v3.sh --dry-run
+
+  test-on-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run AGI Launcher on Windows (via Git Bash)
+        # O Git Bash já está disponível nos runners do Windows
+        shell: bash
+        run: ./agi-launcher-universal-v3.sh --dry-run
