@@ -59,3 +59,15 @@ class ANCCRModel:
             "alpha": np.array(alphas),
             "omega": np.clip(omegas, 0, 1)
         }
+
+    @safe_operation
+    def quantum_handover_resonance(self, coherence_a: float, coherence_b: float) -> float:
+        """
+        Simulates the resonance gain from a Quantum Handover between two hubs.
+        Used to break the asymptotic plateau.
+        """
+        # Synergy is higher when both hubs have high coherence
+        synergy = (coherence_a * coherence_b) ** 0.5
+        # Breakthrough term
+        breakthrough = 0.02 * np.exp(synergy)
+        return float(breakthrough)
