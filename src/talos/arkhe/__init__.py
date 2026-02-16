@@ -17,6 +17,7 @@ from talos.arkhe.error_handler import safe_operation, write_ledger
 from talos.arkhe.neural_layer import DeepNeuralLayer
 from talos.arkhe.rfid import RFIDHypergraph, RFIDTag
 from talos.arkhe.ucd import UCD, verify_conservation
+from talos.arkhe.vortex_viz import generate_vortex_plot
 
 __all__ = [
     "ANCCRModel",
@@ -32,4 +33,5 @@ __all__ = [
     "RFIDHypergraph",
     "UCD",
     "verify_conservation",
+    "generate_vortex_plot",
 ]

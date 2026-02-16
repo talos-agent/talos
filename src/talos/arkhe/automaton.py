@@ -1,6 +1,7 @@
 """
 Arkhe(n) Automaton.
 Defines autonomous agents that monitor and intervene in the hypergraph.
+Now supports OAM Vortex handovers and Federated Triad orchestration.
 """
 
 from __future__ import annotations
@@ -148,7 +149,7 @@ class AdaptiveSentinelGamma(SentinelGamma):
 class FederatedSovereignTriad:
     """
     Orchestrates multiple hubs (Sentinels) into a federated cluster.
-    Breaks the asymptotic plateau via Quantum Handover.
+    Breaks the asymptotic plateau via Quantum Handover and OAM Vortexes.
     Roles:
     - 01-012: Coherence/Core (GHZ State)
     - 01-005: Memory (Bell States)
@@ -169,24 +170,30 @@ class FederatedSovereignTriad:
         print(f"[Triad] Synchronized. Global Omega: {self.omega:.4f}")
         return self.omega
 
-    def quantum_handover(self, source_id: str, target_id: str) -> float:
+    def quantum_handover(self, source_id: str, target_id: str, l_charge: int = 0) -> float:
         """
         Simulates state entanglement/transfer between hubs.
-        Returns the breakthrough gain.
+        Optionally uses an OAM vortex for increased gain.
         """
         if source_id not in self.hubs or target_id not in self.hubs:
             raise ValueError("Invalid hub IDs for handover")
 
-        print(f"[Triad] Initiating Quantum Handover: {source_id} -> {target_id}")
+        mode_str = f"OAM Vortex (l={l_charge})" if l_charge != 0 else "Linear"
+        print(f"[Triad] Initiating Quantum Handover ({mode_str}): {source_id} -> {target_id}")
 
-        # Calculate breakthrough gain via ANCCR resonance
         h_source = self.hubs[source_id]
         h_target = self.hubs[target_id]
 
         c_a = float(np.mean(h_source.get_current_state()[h_source.watched_nodes]))
         c_b = float(np.mean(h_target.get_current_state()[h_target.watched_nodes]))
 
+        # Calculate base gain via ANCCR resonance
         gain = h_source.anccr.quantum_handover_resonance(c_a, c_b)
+
+        # OAM Multiplier
+        if l_charge != 0:
+            gain *= (1.0 + 0.1 * abs(l_charge))
+
         self.omega += gain
 
         print(f"[Triad] Hubs {source_id} and {target_id} are now entangled. Plateau breached by {gain:.4f}. ∞")
